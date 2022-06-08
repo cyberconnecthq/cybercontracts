@@ -14,3 +14,16 @@ To build
 
 To test
 `forge test`
+
+# TODO
+- [ ] BaseNFT
+- [ ] Profile NFT
+- [ ] SVG generation
+- [ ] SBT NFT
+- [ ] SBT Module
+- [ ] Onchain Token URI
+- [ ] Permit with EIP712
+- [ ] Upgradeable and Proxy
+
+- [ ] Hardhat plugin, add license
+- [ ] linter
