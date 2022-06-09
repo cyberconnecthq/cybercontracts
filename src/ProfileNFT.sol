@@ -1,17 +1,26 @@
 pragma solidity 0.8.14;
 
 import "./CyberNFTBase.sol";
+import "solmate/auth/authorities/RolesAuthority.sol";
+import {Authority} from "solmate/auth/Auth.sol";
+import {Constants} from "./libraries/Constants.sol";
 
-contract ProfileNFT is CyberNFTBase {
+// TODO: Owner cannot be set with conflicting role for capacity
+contract ProfileNFT is CyberNFTBase, RolesAuthority {
+
     struct ProfileDataStruct {
         address subscribeNFT;
         string handle;
     }
+
     mapping(uint256 => ProfileDataStruct) internal _profileById;
 
-    constructor(string memory _name, string memory _symbol)
-        CyberNFTBase(_name, _symbol)
-    {}
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        address _owner
+    ) CyberNFTBase(_name, _symbol) RolesAuthority(_owner, this) {
+    }
 
     function tokenURI(uint256 _tokenId)
         public
@@ -22,6 +31,15 @@ contract ProfileNFT is CyberNFTBase {
         // TODO: onchain base64 encoded URI
         return "";
     }
+
+    function setMinterRole(address minter, bool enabled)
+        external
+        requiresAuth
+    {
+        setUserRole(minter, Constants.MINTER_ROLE, enabled);
+    }
+
+    function createProfile() public requiresAuth {}
 
     /**
      * @dev Converts a `uint256` to its ASCII `string` decimal representation.

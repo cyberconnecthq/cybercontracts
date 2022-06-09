@@ -24,6 +24,8 @@ To test
 - [ ] Onchain Token URI
 - [ ] Permit with EIP712
 - [ ] Upgradeable and Proxy
+- [ ] Emergency upgrade and pausability
+- [ ] Crosschain support (openzeppelin contract)
 
 - [ ] Hardhat plugin, add license
 - [ ] linter
