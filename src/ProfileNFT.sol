@@ -11,6 +11,7 @@ import {Base64} from "./libraries/Base64.sol";
 // TODO: Owner cannot be set with conflicting role for capacity
 contract ProfileNFT is CyberNFTBase, RolesAuthority {
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
+    mapping(bytes32 => uint256) internal _profileIdByHandleHash;
 
     constructor(
         string memory _name,
@@ -65,6 +66,9 @@ contract ProfileNFT is CyberNFTBase, RolesAuthority {
         requiresAuth
         returns (uint256)
     {
+        bytes32 handleHash = keccak256(bytes(vars.handle));
+        require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
+
         // TODO: unchecked
         uint256 profileId = ++_totalCount;
         _mint(vars.to, profileId);
@@ -73,6 +77,8 @@ contract ProfileNFT is CyberNFTBase, RolesAuthority {
             handle: vars.handle,
             imageURI: vars.imageURI
         });
+
+        _profileIdByHandleHash[handleHash] = profileId;
         return profileId;
     }
 
@@ -80,5 +86,14 @@ contract ProfileNFT is CyberNFTBase, RolesAuthority {
         // TODO: maybe remove this check
         require(_exists(profileId), "ERC721: invalid token ID");
         return _profileById[profileId].handle;
+    }
+
+    function getProfileIdByHandle(string calldata handle)
+        public
+        view
+        returns (uint256)
+    {
+        bytes32 handleHash = keccak256(bytes(handle));
+        return _profileIdByHandleHash[handleHash];
     }
 }

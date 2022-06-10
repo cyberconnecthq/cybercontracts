@@ -1,6 +1,12 @@
 # CyberConnect Contracts
 
-This hosts all contracts for CyberConnect's social graph protocol
+This hosts all contracts for CyberConnect's social graph protocol.
+
+Some opinions:
+1. Prefer require for semantic clearity. 
+2. No custom error until require supports custom error.
+3. NFTs don't support burn
+
 
 # Dependencies
 
@@ -17,11 +23,13 @@ To test
 
 # TODO
 - [ ] BaseNFT
+- [ ] Validate handle
 - [ ] Profile NFT
 - [ ] SVG generation
+- [ ] Purchase logic
 - [ ] SBT NFT
 - [ ] SBT Module
-- [ ] Onchain Token URI
+- [x] Onchain Token URI
 - [ ] Permit with EIP712
 - [ ] Upgradeable and Proxy
 - [ ] Emergency upgrade and pausability

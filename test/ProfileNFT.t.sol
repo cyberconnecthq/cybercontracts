@@ -79,4 +79,15 @@ contract ProfileNFTTest is Test {
         token.createProfile(createProfileData);
         assertEq(token.getHandle(1), "Alice");
     }
+
+    function testGetProfileIdByHandle() public {
+        token.createProfile(createProfileData);
+        assertEq(token.getProfileIdByHandle("Alice"), 1);
+    }
+
+    function testCannotCreateProfileWithHandleTaken() public {
+        token.createProfile(createProfileData);
+        vm.expectRevert("Handle taken");
+        token.createProfile(createProfileData);
+    }
 }
