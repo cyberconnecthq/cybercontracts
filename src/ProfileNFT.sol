@@ -10,8 +10,6 @@ import {Base64} from "./libraries/Base64.sol";
 
 // TODO: Owner cannot be set with conflicting role for capacity
 contract ProfileNFT is CyberNFTBase, RolesAuthority {
-
-
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
 
     constructor(
@@ -30,11 +28,15 @@ contract ProfileNFT is CyberNFTBase, RolesAuthority {
         override
         returns (string memory)
     {
+        // TODO: maybe remove this check
         require(_exists(tokenId), "ERC721: invalid token ID");
-        string memory formattedName = string(abi.encodePacked('@', _profileById[tokenId].handle));
-        return string(
-            abi.encodePacked(
-                 'data:application/json;base64,',
+        string memory formattedName = string(
+            abi.encodePacked("@", _profileById[tokenId].handle)
+        );
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
                     Base64.encode(
                         abi.encodePacked(
                             '{"name":"',
@@ -50,8 +52,8 @@ contract ProfileNFT is CyberNFTBase, RolesAuthority {
                             '"}]}'
                         )
                     )
-            )
-        );
+                )
+            );
     }
 
     function setMinterRole(address minter, bool enabled) external requiresAuth {
@@ -71,6 +73,12 @@ contract ProfileNFT is CyberNFTBase, RolesAuthority {
             handle: vars.handle,
             imageURI: vars.imageURI
         });
-        return profileId;    
+        return profileId;
+    }
+
+    function getHandle(uint256 profileId) public view returns (string memory) {
+        // TODO: maybe remove this check
+        require(_exists(profileId), "ERC721: invalid token ID");
+        return _profileById[profileId].handle;
     }
 }
