@@ -6,6 +6,7 @@ Some opinions:
 1. Prefer require for semantic clearity. 
 2. No custom error until require supports custom error.
 3. NFTs don't support burn
+4. Try to be gas efficient :)
 
 
 # Dependencies

@@ -9,15 +9,16 @@ import {LibString} from "./libraries/LibString.sol";
 import {Base64} from "./libraries/Base64.sol";
 
 // TODO: Owner cannot be set with conflicting role for capacity
-contract ProfileNFT is CyberNFTBase, RolesAuthority {
+contract ProfileNFT is CyberNFTBase, Auth {
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
 
     constructor(
         string memory _name,
         string memory _symbol,
-        address _owner
-    ) CyberNFTBase(_name, _symbol) RolesAuthority(_owner, this) {}
+        address _owner,
+        RolesAuthority _rolesAuthority
+    ) CyberNFTBase(_name, _symbol) Auth(_owner, _rolesAuthority) {}
 
     function _exists(uint256 tokenId) internal view returns (bool) {
         return _ownerOf[tokenId] != address(0);
@@ -57,9 +58,9 @@ contract ProfileNFT is CyberNFTBase, RolesAuthority {
             );
     }
 
-    function setMinterRole(address minter, bool enabled) external requiresAuth {
-        setUserRole(minter, Constants.MINTER_ROLE, enabled);
-    }
+    // function setMinterRole(address minter, bool enabled) external requiresAuth {
+    //     setUserRole(minter, Constants.MINTER_ROLE, enabled);
+    // }
 
     function createProfile(DataTypes.CreateProfileData calldata vars)
         external

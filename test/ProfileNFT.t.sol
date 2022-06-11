@@ -5,9 +5,12 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
+import "solmate/auth/authorities/RolesAuthority.sol";
+import {Authority} from "solmate/auth/Auth.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
+    RolesAuthority internal rolesAuthority;
     address constant alice = address(0xA11CE);
     DataTypes.CreateProfileData internal createProfileData =
         DataTypes.CreateProfileData(
@@ -27,8 +30,9 @@ contract ProfileNFTTest is Test {
         );
 
     function setUp() public {
-        token = new ProfileNFT("TestProfile", "TP", address(this));
-        token.setRoleCapability(
+        rolesAuthority = new RolesAuthority(address(this), Authority(address(0)));
+        token = new ProfileNFT("TestProfile", "TP", address(this), rolesAuthority);
+        rolesAuthority.setRoleCapability(
             Constants.MINTER_ROLE,
             address(token),
             Constants.CREATE_PROFILE_ID,
@@ -42,7 +46,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testAuth() public {
-        assertEq(address(token.authority()), address(token));
+        assertEq(address(token.authority()), address(rolesAuthority));
         token.createProfile(createProfileData);
     }
 
@@ -53,7 +57,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCreateProfileAsMinter() public {
-        token.setMinterRole(alice, true);
+        rolesAuthority.setUserRole(alice, Constants.MINTER_ROLE, true);
         vm.prank(alice);
         token.createProfile(createProfileData);
     }
