@@ -16,6 +16,8 @@ Some opinions:
 
 
 # Usage
+To enable husky pre-commit
+`yarn add --dev husky & yarn prepre`
 
 To install contract dependencies
 `forge install`
