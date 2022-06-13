@@ -24,7 +24,7 @@ To test
 
 # TODO
 - [x] BaseNFT
-- [ ] Validate handle (alphabetical, numerical, _)
+- [x] Validate handle (lower-case alphabetical, numerical, _)
 - [ ] Governance, Pausable
 - [ ] Mint with Signature
 - [ ] SVG generation
@@ -34,9 +34,9 @@ To test
 - [x] Onchain Token URI
 - [ ] Permit with EIP712
 - [ ] Upgradeable and Proxy (UUPS)
-- [ ] Emergency upgrade and pausability
 - [ ] Crosschain support (openzeppelin contract) (https://docs.openzeppelin.com/contracts/4.x/api/crosschain)
 - [ ] Events
+- [ ] BoxNFT
 
 - [ ] Hardhat plugin, add license
 - [ ] linter

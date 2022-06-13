@@ -12,10 +12,10 @@ contract ProfileNFTTest is Test {
     ProfileNFT internal token;
     RolesAuthority internal rolesAuthority;
     address constant alice = address(0xA11CE);
+    string constant imageUri = "https://example.com/image.png";
     DataTypes.ProfileStruct internal createProfileData =
         DataTypes.ProfileStruct(
-            address(0),
-            "Alice",
+            "alice",
             "https://example.com/alice.jpg"
         );
     string aliceMetadata =
@@ -23,7 +23,7 @@ contract ProfileNFTTest is Test {
             abi.encodePacked(
                 "data:application/json;base64,",
                 Base64.encode(
-                    '{"name":"@Alice","description":"@Alice - CyberConnect profile","attributes":[{"trait_type":"id","value":"#1"},{"trait_type":"owner","value":"0xb4c79dab8f259c7aee6e5b2aa729821864227e84"},{"trait_type":"handle","value":"@Alice"}]}'
+                    '{"name":"@alice","description":"@alice - CyberConnect profile","attributes":[{"trait_type":"id","value":"#1"},{"trait_type":"owner","value":"0xb4c79dab8f259c7aee6e5b2aa729821864227e84"},{"trait_type":"handle","value":"@alice"}]}'
                 )
             )
         );
@@ -32,7 +32,7 @@ contract ProfileNFTTest is Test {
         rolesAuthority = new RolesAuthority(address(this), Authority(address(0)));
         token = new ProfileNFT("TestProfile", "TP", address(this), rolesAuthority);
         rolesAuthority.setRoleCapability(
-            Constants.MINTER_ROLE,
+            Constants.PROFILE_MINTER_ROLE,
             address(token),
             Constants.CREATE_PROFILE_ID,
             true
@@ -56,7 +56,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCreateProfileAsMinter() public {
-        rolesAuthority.setUserRole(alice, Constants.MINTER_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants.PROFILE_MINTER_ROLE, true);
         vm.prank(alice);
         token.createProfile(alice, createProfileData);
     }
@@ -80,17 +80,46 @@ contract ProfileNFTTest is Test {
 
     function testGetHandle() public {
         token.createProfile(alice, createProfileData);
-        assertEq(token.getHandle(1), "Alice");
+        assertEq(token.getHandle(1), "alice");
     }
 
     function testGetProfileIdByHandle() public {
         token.createProfile(alice, createProfileData);
-        assertEq(token.getProfileIdByHandle("Alice"), 1);
+        assertEq(token.getProfileIdByHandle("alice"), 1);
     }
 
     function testCannotCreateProfileWithHandleTaken() public {
         token.createProfile(alice, createProfileData);
         vm.expectRevert("Handle taken");
         token.createProfile(alice, createProfileData);
+    }
+
+    function testCannotCreateProfileLongerThanMaxHandleLength() public {
+        vm.expectRevert("Handle has invalid length");
+        token.createProfile(alice, DataTypes.ProfileStruct(
+            "aliceandbobisareallylongname",
+            "https://example.com/alice.jpg"
+        ));
+    }
+
+    function testCannotCreateProfileWithAnInvalidCharacter() public {
+        vm.expectRevert("Handle contains invalid character");
+        token.createProfile(alice, DataTypes.ProfileStruct(
+            "alice&bob",
+            imageUri
+        ));
+    }
+
+    function testCannotCreateProfileWith0LenthHandle() public {
+        vm.expectRevert("Handle has invalid length");
+        token.createProfile(alice, DataTypes.ProfileStruct(
+            "",
+            imageUri
+        ));
+    }
+
+    function testConnotCreateProfileWithACapitalLetter() public {
+        vm.expectRevert("Handle contains invalid character");
+        token.createProfile(alice, DataTypes.ProfileStruct("Test", imageUri));
     }
 }

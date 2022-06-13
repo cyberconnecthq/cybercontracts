@@ -63,6 +63,8 @@ contract ProfileNFT is CyberNFTBase, Auth {
         requiresAuth
         returns (uint256)
     {
+        _validateHandle(vars.handle);
+
         bytes32 handleHash = keccak256(bytes(vars.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
@@ -70,7 +72,6 @@ contract ProfileNFT is CyberNFTBase, Auth {
         uint256 profileId = ++_totalCount;
         _mint(to, profileId);
         _profileById[profileId] = DataTypes.ProfileStruct({
-            subscribeNFT: vars.subscribeNFT,
             handle: vars.handle,
             imageURI: vars.imageURI
         });
@@ -92,5 +93,28 @@ contract ProfileNFT is CyberNFTBase, Auth {
     {
         bytes32 handleHash = keccak256(bytes(handle));
         return _profileIdByHandleHash[handleHash];
+    }
+
+    function _validateHandle(string memory handle) internal pure {
+        bytes memory byteHandle = bytes(handle);
+        require(
+            byteHandle.length <= Constants.MAX_HANDLE_LENGTH && byteHandle.length > 0,
+            "Handle has invalid length"
+        );
+
+        uint256 byteHandleLength = byteHandle.length;
+        for (uint256 i = 0; i < byteHandleLength; ) {
+            bytes1 b = byteHandle[i];
+            require(
+                (b >= "0" && b <= "9") ||
+                    (b >= "a" && b <= "z") ||
+                    b == "_",
+                "Handle contains invalid character"
+            );
+            // optimation
+            unchecked {
+                ++i;
+            }
+        }
     }
 }
