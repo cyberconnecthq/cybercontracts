@@ -6,7 +6,3 @@ library DataTypes {
         string imageURI;
     }
 }
-
-
-
-
