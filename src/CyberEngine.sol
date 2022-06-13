@@ -40,17 +40,5 @@ contract CyberEngine is Auth {
   {
       boxAddress = _boxAddress;
   }
-
-  function getSigner() public view returns (address) {
-      return signer;
-  }
-
-  function getProfileAddress() public view returns (address) {
-      return profileAddress;
-  }
-
-  function getBoxAddress() public view returns (address) {
-      return boxAddress;
-  }
 }
 
