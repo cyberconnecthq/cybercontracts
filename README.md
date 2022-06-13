@@ -26,6 +26,8 @@ To test
 - [ ] BaseNFT
 - [ ] Validate handle
 - [ ] Profile NFT
+- [ ] Governance, Pausable
+- [ ] Mint with Signature
 - [ ] SVG generation
 - [ ] Purchase logic
 - [ ] SBT NFT

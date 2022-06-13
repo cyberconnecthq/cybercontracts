@@ -58,11 +58,7 @@ contract ProfileNFT is CyberNFTBase, Auth {
             );
     }
 
-    // function setMinterRole(address minter, bool enabled) external requiresAuth {
-    //     setUserRole(minter, Constants.MINTER_ROLE, enabled);
-    // }
-
-    function createProfile(DataTypes.CreateProfileData calldata vars)
+    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
         external
         requiresAuth
         returns (uint256)
@@ -72,7 +68,7 @@ contract ProfileNFT is CyberNFTBase, Auth {
 
         // TODO: unchecked
         uint256 profileId = ++_totalCount;
-        _mint(vars.to, profileId);
+        _mint(to, profileId);
         _profileById[profileId] = DataTypes.ProfileStruct({
             subscribeNFT: vars.subscribeNFT,
             handle: vars.handle,

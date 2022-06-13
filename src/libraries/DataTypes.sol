@@ -6,11 +6,4 @@ library DataTypes {
         string handle;
         string imageURI;
     }
-
-    struct CreateProfileData {
-        address to;
-        address subscribeNFT;
-        string handle;
-        string imageURI;
-    }
 }

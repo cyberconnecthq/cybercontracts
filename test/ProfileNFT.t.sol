@@ -12,9 +12,8 @@ contract ProfileNFTTest is Test {
     ProfileNFT internal token;
     RolesAuthority internal rolesAuthority;
     address constant alice = address(0xA11CE);
-    DataTypes.CreateProfileData internal createProfileData =
-        DataTypes.CreateProfileData(
-            alice,
+    DataTypes.ProfileStruct internal createProfileData =
+        DataTypes.ProfileStruct(
             address(0),
             "Alice",
             "https://example.com/alice.jpg"
@@ -47,24 +46,24 @@ contract ProfileNFTTest is Test {
 
     function testAuth() public {
         assertEq(address(token.authority()), address(rolesAuthority));
-        token.createProfile(createProfileData);
+        token.createProfile(alice, createProfileData);
     }
 
     function testCannotCreateProfileAsNonMinter() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(address(0));
-        token.createProfile(createProfileData);
+        token.createProfile(alice, createProfileData);
     }
 
     function testCreateProfileAsMinter() public {
         rolesAuthority.setUserRole(alice, Constants.MINTER_ROLE, true);
         vm.prank(alice);
-        token.createProfile(createProfileData);
+        token.createProfile(alice, createProfileData);
     }
 
     function testCreateProfile() public {
         assertEq(token.totalSupply(), 0);
-        token.createProfile(createProfileData);
+        token.createProfile(alice, createProfileData);
         assertEq(token.totalSupply(), 1);
         assertEq(token.balanceOf(alice), 1);
     }
@@ -75,23 +74,23 @@ contract ProfileNFTTest is Test {
     }
 
     function testTokenURI() public {
-        token.createProfile(createProfileData);
+        token.createProfile(alice, createProfileData);
         assertEq(token.tokenURI(1), aliceMetadata);
     }
 
     function testGetHandle() public {
-        token.createProfile(createProfileData);
+        token.createProfile(alice, createProfileData);
         assertEq(token.getHandle(1), "Alice");
     }
 
     function testGetProfileIdByHandle() public {
-        token.createProfile(createProfileData);
+        token.createProfile(alice, createProfileData);
         assertEq(token.getProfileIdByHandle("Alice"), 1);
     }
 
     function testCannotCreateProfileWithHandleTaken() public {
-        token.createProfile(createProfileData);
+        token.createProfile(alice, createProfileData);
         vm.expectRevert("Handle taken");
-        token.createProfile(createProfileData);
+        token.createProfile(alice, createProfileData);
     }
 }
