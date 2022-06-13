@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/libraries/Constants.sol";
 import "solmate/auth/authorities/RolesAuthority.sol";
-import {Authority} from "solmate/auth/Auth.sol";
+import { Authority } from "solmate/auth/Auth.sol";
 
 contract CyberEngineTest is Test {
     CyberEngine internal engine;
@@ -15,8 +15,16 @@ contract CyberEngineTest is Test {
     address constant boxAddr = address(0xC11CE);
 
     function setUp() public {
-        rolesAuthority = new RolesAuthority(address(this), Authority(address(0)));
-        engine = new CyberEngine(address(this), profileAddr, boxAddr, rolesAuthority);
+        rolesAuthority = new RolesAuthority(
+            address(this),
+            Authority(address(0))
+        );
+        engine = new CyberEngine(
+            address(this),
+            profileAddr,
+            boxAddr,
+            rolesAuthority
+        );
         rolesAuthority.setRoleCapability(
             Constants.ENGINE_GOV_ROLE,
             address(engine),

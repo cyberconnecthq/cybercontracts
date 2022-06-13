@@ -1,7 +1,6 @@
 pragma solidity 0.8.14;
 
 library Constants {
-
     // Access Control for ProfileNFT
     uint8 internal constant PROFILE_MINTER_ROLE = 0;
     bytes4 internal constant CREATE_PROFILE_ID =
