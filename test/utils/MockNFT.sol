@@ -1,6 +1,6 @@
 pragma solidity 0.8.14;
 
-import {CyberNFTBase} from "../../src/CyberNFTBase.sol";
+import { CyberNFTBase } from "../../src/CyberNFTBase.sol";
 
 contract MockNFT is CyberNFTBase {
     constructor(string memory _name, string memory _symbol)

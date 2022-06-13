@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.14;
 
-import {ERC721} from "solmate/tokens/ERC721.sol";
+import { ERC721 } from "solmate/tokens/ERC721.sol";
 
 // Sequential mint ERC721
 // TODO: Put EIP712 permit logic here

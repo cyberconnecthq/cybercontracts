@@ -4,7 +4,7 @@ pragma solidity 0.8.14;
 // import {DSTestPlus} from "./utils/DSTestPlus.sol";
 
 import "forge-std/Test.sol";
-import {LibString} from "../src/libraries/LibString.sol";
+import { LibString } from "../src/libraries/LibString.sol";
 
 contract LibStringTest is Test {
     function testToStringZero() public {
