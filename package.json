@@ -7,8 +7,7 @@
   "license": "MIT",
   "scripts": {
     "lint:check": "prettier --check **.sol && npx solhint --config ./config/.solhint.json --ignore-path ./config/.solhintignore 'src/**/*.sol'",
-    "lint:fix": "prettier --write **.sol && prettier --write **.js && prettier --write **.ts",
-    "lint": "prettier --write **.sol"
+    "lint:fix": "prettier --write **.sol"
   },
   "devDependencies": {
     "prettier": "^2.6.2",

@@ -46,5 +46,6 @@ To run static analysis
 - [ ] BoxNFT
 
 - [ ] Hardhat plugin, add license
-- [ ] linter
+- [x] linter
 - [ ] fix slither
+- [ ] fix solhint
