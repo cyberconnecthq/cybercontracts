@@ -23,9 +23,8 @@ To test
 `forge test`
 
 # TODO
-- [ ] BaseNFT
-- [ ] Validate handle
-- [ ] Profile NFT
+- [x] BaseNFT
+- [ ] Validate handle (alphabetical, numerical, _)
 - [ ] Governance, Pausable
 - [ ] Mint with Signature
 - [ ] SVG generation
@@ -34,9 +33,10 @@ To test
 - [ ] SBT Module
 - [x] Onchain Token URI
 - [ ] Permit with EIP712
-- [ ] Upgradeable and Proxy
+- [ ] Upgradeable and Proxy (UUPS)
 - [ ] Emergency upgrade and pausability
-- [ ] Crosschain support (openzeppelin contract)
+- [ ] Crosschain support (openzeppelin contract) (https://docs.openzeppelin.com/contracts/4.x/api/crosschain)
+- [ ] Events
 
 - [ ] Hardhat plugin, add license
 - [ ] linter
