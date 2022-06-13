@@ -12,6 +12,7 @@ Some opinions:
 # Dependencies
 
 [Foundry](https://github.com/foundry-rs/foundry) ([book](https://book.getfoundry.sh/))
+[slither](https://github.com/crytic/slither)
 
 
 # Usage
@@ -21,6 +22,9 @@ To build
 
 To test
 `forge test`
+
+To run static analysis
+`slither .`
 
 # TODO
 - [x] BaseNFT
@@ -40,3 +44,4 @@ To test
 
 - [ ] Hardhat plugin, add license
 - [ ] linter
+- [ ] fix slither
