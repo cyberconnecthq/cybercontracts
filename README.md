@@ -17,6 +17,9 @@ Some opinions:
 
 # Usage
 
+To install contract dependencies
+`forge install`
+
 To build
 `forge build`
 
