@@ -1,6 +1,6 @@
 pragma solidity 0.8.14;
 
-import "./CyberNFTBase.sol";
+import "./base/CyberNFTBase.sol";
 import "solmate/auth/authorities/RolesAuthority.sol";
 import { Auth } from "solmate/auth/Auth.sol";
 

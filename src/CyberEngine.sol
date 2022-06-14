@@ -3,7 +3,7 @@
 pragma solidity 0.8.14;
 
 import "solmate/auth/authorities/RolesAuthority.sol";
-import "./base/EIP712.sol";
+import "./dependencies/openzeppelin/EIP712.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";

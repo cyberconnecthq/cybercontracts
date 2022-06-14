@@ -9,7 +9,7 @@ import "../src/libraries/Constants.sol";
 import "solmate/auth/authorities/RolesAuthority.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
-import { ECDSA } from "../src/libraries/oz/ECDSA.sol";
+import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 
 contract CyberEngineTest is Test {
     MockEngine internal engine;
@@ -17,7 +17,7 @@ contract CyberEngineTest is Test {
     address constant alice = address(0xA11CE);
     address constant profileAddr = address(0xB11CE);
     address constant boxAddr = address(0xC11CE);
-    address constant bob = address(0xD11CE);
+    address constant bob = address(0xB0B);
 
     function setUp() public {
         rolesAuthority = new RolesAuthority(
@@ -123,7 +123,6 @@ contract CyberEngineTest is Test {
         vm.warp(50);
         uint256 deadline = 100;
 
-        address charlie = vm.addr(1);
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(abi.encode(Constants.REGISTER, bob, handle, deadline))
@@ -143,7 +142,6 @@ contract CyberEngineTest is Test {
         vm.warp(150);
         uint256 deadline = 100;
 
-        address charlie = vm.addr(1);
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(abi.encode(Constants.REGISTER, bob, handle, deadline))
