@@ -22,4 +22,12 @@ abstract contract CyberNFTBase is ERC721 {
     function _mint(address _to) internal virtual {
         super._mint(_to, ++_totalCount);
     }
+
+    function _exists(uint256 tokenId) internal view returns (bool) {
+        return _ownerOf[tokenId] != address(0);
+    }
+
+    function _requireMinted(uint256 tokenId) internal view virtual {
+        require(_exists(tokenId), "ERC721: invalid token ID");
+    }
 }
