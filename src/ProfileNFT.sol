@@ -4,7 +4,7 @@ pragma solidity 0.8.14;
 
 import "./CyberNFTBase.sol";
 import "solmate/auth/authorities/RolesAuthority.sol";
-import { Authority } from "solmate/auth/Auth.sol";
+import { Authority, Auth } from "solmate/auth/Auth.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { LibString } from "./libraries/LibString.sol";
@@ -22,18 +22,13 @@ contract ProfileNFT is CyberNFTBase, Auth {
         RolesAuthority _rolesAuthority
     ) CyberNFTBase(_name, _symbol) Auth(_owner, _rolesAuthority) {}
 
-    function _exists(uint256 tokenId) internal view returns (bool) {
-        return _ownerOf[tokenId] != address(0);
-    }
-
     function tokenURI(uint256 tokenId)
         public
         view
         override
         returns (string memory)
     {
-        // TODO: maybe remove this check
-        require(_exists(tokenId), "ERC721: invalid token ID");
+        _requireMinted(tokenId);
         string memory formattedName = string(
             abi.encodePacked("@", _profileById[tokenId].handle)
         );

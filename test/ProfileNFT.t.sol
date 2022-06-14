@@ -39,9 +39,9 @@ contract ProfileNFTTest is Test {
             rolesAuthority
         );
         rolesAuthority.setRoleCapability(
-            Constants.PROFILE_MINTER_ROLE,
+            Constants.NFT_MINTER_ROLE,
             address(token),
-            Constants.CREATE_PROFILE_ID,
+            Constants.PROFILE_CREATE_PROFILE_ID,
             true
         );
     }
@@ -53,6 +53,9 @@ contract ProfileNFTTest is Test {
 
     function testAuth() public {
         assertEq(address(token.authority()), address(rolesAuthority));
+    }
+
+    function testCreateProfileAsOwner() public {
         token.createProfile(alice, createProfileData);
     }
 
@@ -63,7 +66,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCreateProfileAsMinter() public {
-        rolesAuthority.setUserRole(alice, Constants.PROFILE_MINTER_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants.NFT_MINTER_ROLE, true);
         vm.prank(alice);
         token.createProfile(alice, createProfileData);
     }
