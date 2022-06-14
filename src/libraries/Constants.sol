@@ -18,6 +18,8 @@ library Constants {
         bytes4(keccak256(bytes("setProfileAddress(address)")));
     bytes4 internal constant SET_BOX_ADDR =
         bytes4(keccak256(bytes("setBoxAddress(address)")));
+    bytes4 internal constant REGISTER =
+        bytes4(keccak256(bytes("register(address,string,uint256)")));
 
     // Parameters
     uint8 internal constant MAX_HANDLE_LENGTH = 27;
