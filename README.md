@@ -36,12 +36,13 @@ To run static analysis
 Set the following environment variables
 
 ```bash
-RPC_URL=<Your RPC endpoint>
+RINKEBY_RPC_URL=<Your Rinkeby RPC endpoint>
 PRIVATE_KEY=<Your wallets private key>
+ETHERSCAN_KEY=<Your Etherscan API key>
 ```
 
 to deploy
-`npm run deploy <args>`
+`npm run deploy rinkeby`
 
 # TODO
 - [x] BaseNFT

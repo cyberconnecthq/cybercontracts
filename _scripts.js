@@ -1,5 +1,4 @@
 const { spawn } = require('child_process');
-require('dotenv').config();
 
 const commandlineArgs = process.argv.slice(2);
 
@@ -20,15 +19,16 @@ function execute(command) {
 
 async function performAction(rawArgs) {
     const action = rawArgs[0];
-    const args = rawArgs.slice(1);
-    if (action === 'deploy') {
-        await execute(
-            `forge create ProfileNFT --rpc-url=${process.env['RPC_URL']} --private-key=${process.env['PRIVATE_KEY']} --constructor-args ${args.join(' ')} --force`
-        );
-    }
+    const network = rawArgs[1];
 
-    // ToDo: action to test minting on testnet
-    if (action === 'mint') {
+    if (action === 'deploy') {
+        if (network === 'rinkeby') {
+            await execute(
+                `source .env
+                forge script script/ProfileNFT.s.sol:MyScript --rpc-url $RINKEBY_RPC_URL  --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvvv`
+            );
+        }
+
     }
 }
 
