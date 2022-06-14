@@ -7,7 +7,7 @@ import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
 import "solmate/auth/authorities/RolesAuthority.sol";
 
-contract MyScript is Script {
+contract DeployScript is Script {
     function run() external {
         vm.startBroadcast();
 
