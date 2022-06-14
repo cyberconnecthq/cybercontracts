@@ -26,7 +26,7 @@ To build
 `forge build`
 
 To test
-`forge test`
+`forge test -vvv`
 
 To run static analysis
 `slither .`
@@ -47,7 +47,7 @@ To run static analysis
 - [ ] Events
 - [ ] BoxNFT
 
-- [ ] Hardhat plugin, add license
+- [x] Hardhat plugin, add license
 - [x] linter
 - [ ] fix slither
 - [ ] fix solhint

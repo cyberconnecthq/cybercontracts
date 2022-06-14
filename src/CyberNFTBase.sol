@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.14;
 
 import { ERC721 } from "solmate/tokens/ERC721.sol";
