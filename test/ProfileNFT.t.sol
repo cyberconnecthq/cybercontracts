@@ -73,10 +73,10 @@ contract ProfileNFTTest is Test {
         token.createProfile(alice, createProfileData);
         assertEq(token.totalSupply(), 1);
         assertEq(token.balanceOf(alice), 1);
+        assertEq(token.balanceOf(msg.sender), 0);
     }
 
-    function testCannotGetTokenURIOfUnmintted() public {
-        vm.expectRevert("ERC721: invalid token ID");
+    function testFailGetTokenURIOfUnmintted() public {
         token.tokenURI(0);
     }
 
@@ -95,14 +95,12 @@ contract ProfileNFTTest is Test {
         assertEq(token.getProfileIdByHandle("alice"), 1);
     }
 
-    function testCannotCreateProfileWithHandleTaken() public {
+    function testFailCreateProfileWithHandleTaken() public {
         token.createProfile(alice, createProfileData);
-        vm.expectRevert("Handle taken");
         token.createProfile(alice, createProfileData);
     }
 
-    function testCannotCreateProfileLongerThanMaxHandleLength() public {
-        vm.expectRevert("Handle has invalid length");
+    function testFailCreateProfileLongerThanMaxHandleLength() public {
         token.createProfile(
             alice,
             DataTypes.ProfileStruct(
@@ -112,21 +110,22 @@ contract ProfileNFTTest is Test {
         );
     }
 
-    function testCannotCreateProfileWithAnInvalidCharacter() public {
-        vm.expectRevert("Handle contains invalid character");
+    function testFailCreateProfileWithAnInvalidCharacter() public {
         token.createProfile(
             alice,
             DataTypes.ProfileStruct("alice&bob", imageUri)
         );
     }
 
-    function testCannotCreateProfileWith0LenthHandle() public {
-        vm.expectRevert("Handle has invalid length");
+    function testFailCreateProfileWith0LenthHandle() public {
         token.createProfile(alice, DataTypes.ProfileStruct("", imageUri));
     }
 
-    function testConnotCreateProfileWithACapitalLetter() public {
-        vm.expectRevert("Handle contains invalid character");
+    function testFailCreateProfileWithACapitalLetter() public {
         token.createProfile(alice, DataTypes.ProfileStruct("Test", imageUri));
+    }
+
+    function testFailCreateProfileWithSpace() public {
+        token.createProfile(alice, DataTypes.ProfileStruct(" ", imageUri));
     }
 }
