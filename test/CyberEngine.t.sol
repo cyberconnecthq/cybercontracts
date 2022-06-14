@@ -2,26 +2,29 @@
 
 pragma solidity 0.8.14;
 
-import "../src/CyberEngine.sol";
+import "./utils/MockEngine.sol";
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/libraries/Constants.sol";
 import "solmate/auth/authorities/RolesAuthority.sol";
 import { Authority } from "solmate/auth/Auth.sol";
+import { DataTypes } from "../src/libraries/DataTypes.sol";
+import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 
 contract CyberEngineTest is Test {
-    CyberEngine internal engine;
+    MockEngine internal engine;
     RolesAuthority internal rolesAuthority;
     address constant alice = address(0xA11CE);
     address constant profileAddr = address(0xB11CE);
     address constant boxAddr = address(0xC11CE);
+    address constant bob = address(0xB0B);
 
     function setUp() public {
         rolesAuthority = new RolesAuthority(
             address(this),
             Authority(address(0))
         );
-        engine = new CyberEngine(
+        engine = new MockEngine(
             address(this),
             profileAddr,
             boxAddr,
@@ -90,5 +93,92 @@ contract CyberEngineTest is Test {
         rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setBoxAddress(alice);
+    }
+
+    function testVerify() public {
+        // set charlie as signer
+        address charlie = vm.addr(1);
+        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setSigner(charlie);
+
+        // change block timestamp to make deadline valid
+        vm.warp(50);
+        uint256 deadline = 100;
+
+        string memory handle = "bob_handle";
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(abi.encode(Constants.REGISTER, bob, handle, deadline))
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+        engine.verify(
+            bob,
+            handle,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+    }
+
+    function testCannotVerifyAsNonSigner() public {
+        // change block timestamp to make deadline valid
+        vm.warp(50);
+        uint256 deadline = 100;
+
+        string memory handle = "bob_handle";
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(abi.encode(Constants.REGISTER, bob, handle, deadline))
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+
+        vm.expectRevert("Invalid signature");
+        engine.verify(
+            bob,
+            handle,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+    }
+
+    function testCannotVerifyDeadlinePassed() public {
+        // change block timestamp to make deadline invalid
+        vm.warp(150);
+        uint256 deadline = 100;
+
+        string memory handle = "bob_handle";
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(abi.encode(Constants.REGISTER, bob, handle, deadline))
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+
+        vm.expectRevert("Deadline expired");
+        engine.verify(
+            bob,
+            handle,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+    }
+
+    function testCannotVerifyInvalidSig() public {
+        // set charlie as signer
+        address charlie = vm.addr(1);
+        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setSigner(charlie);
+
+        // change block timestamp to make deadline valid
+        vm.warp(50);
+        uint256 deadline = 100;
+
+        string memory handle = "bob_handle";
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(abi.encode(Constants.REGISTER, bob, handle, deadline))
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+
+        // charlie signed the handle to bob, but verifies with a different address(alice).
+        vm.expectRevert("Invalid signature");
+        engine.verify(
+            alice,
+            handle,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
     }
 }

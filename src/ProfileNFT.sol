@@ -2,13 +2,13 @@
 
 pragma solidity 0.8.14;
 
-import "./CyberNFTBase.sol";
+import "./base/CyberNFTBase.sol";
 import "solmate/auth/authorities/RolesAuthority.sol";
 import { Authority, Auth } from "solmate/auth/Auth.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { LibString } from "./libraries/LibString.sol";
-import { Base64 } from "./libraries/oz/Base64.sol";
+import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 
 // TODO: Owner cannot be set with conflicting role for capacity
 contract ProfileNFT is CyberNFTBase, Auth {
@@ -92,7 +92,7 @@ contract ProfileNFT is CyberNFTBase, Auth {
         return _profileIdByHandleHash[handleHash];
     }
 
-    function _validateHandle(string memory handle) internal pure {
+    function _validateHandle(string calldata handle) internal pure {
         bytes memory byteHandle = bytes(handle);
         require(
             byteHandle.length <= Constants.MAX_HANDLE_LENGTH &&
