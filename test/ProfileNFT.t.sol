@@ -56,8 +56,7 @@ contract ProfileNFTTest is Test {
         token.createProfile(alice, createProfileData);
     }
 
-    function testCannotCreateProfileAsNonMinter() public {
-        vm.expectRevert("UNAUTHORIZED");
+    function testFailCreateProfileAsNonMinter() public {
         vm.prank(address(0));
         token.createProfile(alice, createProfileData);
     }
