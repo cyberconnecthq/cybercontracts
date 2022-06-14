@@ -31,6 +31,18 @@ To test
 To run static analysis
 `slither .`
 
+# Deployment:
+
+Set the following environment variables
+
+```bash
+RPC_URL=<Your RPC endpoint>
+PRIVATE_KEY=<Your wallets private key>
+```
+
+to deploy
+`npm run deploy <args>`
+
 # TODO
 - [x] BaseNFT
 - [x] Validate handle (lower-case alphabetical, numerical, _)
