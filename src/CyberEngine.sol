@@ -24,6 +24,18 @@ contract CyberEngine is Auth, EIP712 {
         boxAddress = _boxAddress;
     }
 
+    function setSigner(address _signer) external requiresAuth {
+        signer = _signer;
+    }
+
+    function setProfileAddress(address _profileAddress) external requiresAuth {
+        profileAddress = _profileAddress;
+    }
+
+    function setBoxAddress(address _boxAddress) external requiresAuth {
+        boxAddress = _boxAddress;
+    }
+
     function register(
         address to,
         string calldata handle,
@@ -44,17 +56,5 @@ contract CyberEngine is Auth, EIP712 {
 
         address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
         require(recoveredAddress == signer, "Invalid signature");
-    }
-
-    function setSigner(address _signer) external requiresAuth {
-        signer = _signer;
-    }
-
-    function setProfileAddress(address _profileAddress) external requiresAuth {
-        profileAddress = _profileAddress;
-    }
-
-    function setBoxAddress(address _boxAddress) external requiresAuth {
-        boxAddress = _boxAddress;
     }
 }

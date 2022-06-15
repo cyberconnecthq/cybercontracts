@@ -22,6 +22,28 @@ contract ProfileNFT is CyberNFTBase, Auth {
         RolesAuthority _rolesAuthority
     ) CyberNFTBase(_name, _symbol) Auth(_owner, _rolesAuthority) {}
 
+    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
+        external
+        requiresAuth
+        returns (uint256)
+    {
+        _validateHandle(vars.handle);
+
+        bytes32 handleHash = keccak256(bytes(vars.handle));
+        require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
+
+        // TODO: unchecked
+        uint256 profileId = ++_totalCount;
+        _mint(to, profileId);
+        _profileById[profileId] = DataTypes.ProfileStruct({
+            handle: vars.handle,
+            imageURI: vars.imageURI
+        });
+
+        _profileIdByHandleHash[handleHash] = profileId;
+        return profileId;
+    }
+
     function tokenURI(uint256 tokenId)
         public
         view
@@ -53,28 +75,6 @@ contract ProfileNFT is CyberNFTBase, Auth {
                     )
                 )
             );
-    }
-
-    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
-        external
-        requiresAuth
-        returns (uint256)
-    {
-        _validateHandle(vars.handle);
-
-        bytes32 handleHash = keccak256(bytes(vars.handle));
-        require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
-
-        // TODO: unchecked
-        uint256 profileId = ++_totalCount;
-        _mint(to, profileId);
-        _profileById[profileId] = DataTypes.ProfileStruct({
-            handle: vars.handle,
-            imageURI: vars.imageURI
-        });
-
-        _profileIdByHandleHash[handleHash] = profileId;
-        return profileId;
     }
 
     function getHandle(uint256 profileId) public view returns (string memory) {
