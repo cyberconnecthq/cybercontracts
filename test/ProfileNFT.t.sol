@@ -128,8 +128,13 @@ contract ProfileNFTTest is Test {
         token.createProfile(alice, DataTypes.ProfileStruct("", imageUri));
     }
 
-    function testConnotCreateProfileWithACapitalLetter() public {
+    function testCannotCreateProfileWithACapitalLetter() public {
         vm.expectRevert("Handle contains invalid character");
         token.createProfile(alice, DataTypes.ProfileStruct("Test", imageUri));
+    }
+
+    function testCannotCreateProfileWithBlankSpace() public {
+        vm.expectRevert("Handle contains invalid character");
+        token.createProfile(alice, DataTypes.ProfileStruct(" ", imageUri));   
     }
 }
