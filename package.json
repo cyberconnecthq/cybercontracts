@@ -9,7 +9,9 @@
     "lint:check": "prettier --check **.sol && npx solhint --config ./config/.solhint.json --ignore-path ./config/.solhintignore 'src/**/*.sol'",
     "lint:fix": "prettier --write **.sol",
     "prepare": "husky install",
-    "spdx": "hardhat prepend-spdx-license"
+    "spdx": "hardhat prepend-spdx-license",
+    "deploy": "node ./_scripts.js deploy",
+    "build": "forge build --force"
   },
   "devDependencies": {
     "hardhat": "^2.9.9",
@@ -36,5 +38,6 @@
         }
       }
     ]
-  }
+  },
+  "dependencies": {}
 }

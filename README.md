@@ -31,6 +31,19 @@ To test
 To run static analysis
 `slither .`
 
+# Deployment:
+
+Set the following environment variables
+
+```bash
+RINKEBY_RPC_URL=<Your Rinkeby RPC endpoint>
+PRIVATE_KEY=<Your wallets private key>
+ETHERSCAN_KEY=<Your Etherscan API key>
+```
+
+to deploy
+`npm run deploy rinkeby`
+
 # TODO
 - [x] BaseNFT
 - [x] Validate handle (lower-case alphabetical, numerical, _)
