@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.14;
 
-import "./base/CyberNFTBase.sol";
-import "solmate/auth/authorities/RolesAuthority.sol";
-import { Authority, Auth } from "solmate/auth/Auth.sol";
+import { CyberNFTBase } from "./base/CyberNFTBase.sol";
+import { RolesAuthority } from "./base/RolesAuthority.sol";
+import { Auth } from "./base/Auth.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { LibString } from "./libraries/LibString.sol";
@@ -15,12 +15,19 @@ contract ProfileNFT is CyberNFTBase, Auth {
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
+    // constructor() {
+    //     _disableInitializers();
+    // }
+
+    function initialize(
+        string calldata _name,
+        string calldata _symbol,
         address _owner,
         RolesAuthority _rolesAuthority
-    ) CyberNFTBase(_name, _symbol) Auth(_owner, _rolesAuthority) {}
+    ) external initializer {
+        CyberNFTBase._initialize(_name, _symbol);
+        Auth.__Auth_Init(_owner, _rolesAuthority);
+    }
 
     function createProfile(address to, DataTypes.ProfileStruct calldata vars)
         external

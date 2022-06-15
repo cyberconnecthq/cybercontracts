@@ -5,10 +5,6 @@ pragma solidity 0.8.14;
 import { CyberNFTBase } from "../../src/base/CyberNFTBase.sol";
 
 contract MockNFT is CyberNFTBase {
-    constructor(string memory _name, string memory _symbol)
-        CyberNFTBase(_name, _symbol)
-    {}
-
     function tokenURI(uint256 _tokenId)
         public
         view
@@ -20,5 +16,12 @@ contract MockNFT is CyberNFTBase {
 
     function mint(address _to) public {
         super._mint(_to);
+    }
+
+    function initialize(string calldata _name, string calldata _symbol)
+        external
+        initializer
+    {
+        super._initialize(_name, _symbol);
     }
 }

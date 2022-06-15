@@ -59,8 +59,10 @@ to deploy
 - [ ] Crosschain support (openzeppelin contract) (https://docs.openzeppelin.com/contracts/4.x/api/crosschain)
 - [ ] Events
 - [ ] BoxNFT
+- [ ] Test for Initializable (oz testcases)
 
 - [x] Hardhat plugin, add license
 - [x] linter
 - [ ] fix slither
 - [ ] fix solhint
+- [ ] documentation style

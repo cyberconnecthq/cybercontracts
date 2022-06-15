@@ -9,7 +9,8 @@ contract CyberNFTBaseTest is Test {
     MockNFT internal token;
 
     function setUp() public {
-        token = new MockNFT("TestNFT", "TNFT");
+        token = new MockNFT();
+        token.initialize("TestNFT", "TNFT");
     }
 
     function testBasic() public {
