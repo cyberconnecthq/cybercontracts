@@ -16,6 +16,7 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
 
+    // TODO: enable this, currently disabled for better testability
     // constructor() {
     //     _disableInitializers();
     // }
