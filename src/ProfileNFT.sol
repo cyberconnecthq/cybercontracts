@@ -112,7 +112,7 @@ contract ProfileNFT is CyberNFTBase, Auth {
             bytes1 b = byteHandle[i];
             require(
                 (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
-                "Invalid character in handle"
+                "Handle contains invalid character"
             );
             // optimation
             unchecked {
