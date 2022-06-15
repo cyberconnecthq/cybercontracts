@@ -2,11 +2,12 @@
 
 pragma solidity 0.8.14;
 
+import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { CyberNFTBase } from "./base/CyberNFTBase.sol";
 import { RolesAuthority } from "./base/RolesAuthority.sol";
 import { Auth } from "./base/Auth.sol";
 
-contract BoxNFT is CyberNFTBase, Auth {
+contract BoxNFT is CyberNFTBase, Auth, IBoxNFT {
     function initialize(
         string calldata _name,
         string calldata _symbol,

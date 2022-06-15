@@ -4,6 +4,8 @@ pragma solidity 0.8.14;
 
 import "solmate/auth/authorities/RolesAuthority.sol";
 import "./dependencies/openzeppelin/EIP712.sol";
+import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
+import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
@@ -58,6 +60,15 @@ contract CyberEngine is Auth, EIP712 {
     ) external payable {
         _verifySignature(to, handle, sig);
         _requireEnoughFee(handle, msg.value);
+
+        IBoxNFT(boxAddress).mint(to);
+        IProfileNFT(profileAddress).createProfile(
+          to,
+          DataTypes.ProfileStruct(
+            handle,
+            ""
+          )
+        );
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
