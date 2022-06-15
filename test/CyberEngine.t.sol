@@ -48,6 +48,18 @@ contract CyberEngineTest is Test {
             Constants._SET_BOX_ADDR,
             true
         );
+        rolesAuthority.setRoleCapability(
+            Constants.ENGINE_GOV_ROLE,
+            address(engine),
+            Constants.SET_FEE_BY_TIER,
+            true
+        );
+        rolesAuthority.setRoleCapability(
+            Constants.ENGINE_GOV_ROLE,
+            address(engine),
+            Constants.WITHDRAW,
+            true
+        );
     }
 
     function testBasic() public {
@@ -77,6 +89,12 @@ contract CyberEngineTest is Test {
         engine.setBoxAddress(alice);
     }
 
+    function testCannotSetFeeAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        vm.prank(address(0));
+        engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
+    }
+
     function testSetSignerAsGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
@@ -95,6 +113,13 @@ contract CyberEngineTest is Test {
         engine.setBoxAddress(alice);
     }
 
+    function testSetFeeGov() public {
+        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
+        assertEq(engine.getFeeByTier(CyberEngine.Tier.Tier0), 1);
+    }
+
     function testVerify() public {
         // set charlie as signer
         address charlie = vm.addr(1);
@@ -111,7 +136,7 @@ contract CyberEngineTest is Test {
             keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-        engine.verify(
+        engine.verifySignature(
             bob,
             handle,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -130,7 +155,7 @@ contract CyberEngineTest is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         vm.expectRevert("Invalid signature");
-        engine.verify(
+        engine.verifySignature(
             bob,
             handle,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -149,7 +174,7 @@ contract CyberEngineTest is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         vm.expectRevert("Deadline expired");
-        engine.verify(
+        engine.verifySignature(
             bob,
             handle,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -175,10 +200,113 @@ contract CyberEngineTest is Test {
 
         // charlie signed the handle to bob, but verifies with a different address(alice).
         vm.expectRevert("Invalid signature");
-        engine.verify(
+        engine.verifySignature(
             alice,
             handle,
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
+    }
+
+    function testInitialFees() public {
+        assertEq(
+            engine.getFeeByTier(CyberEngine.Tier.Tier0),
+            Constants.INITIAL_FEE_TIER0
+        );
+        assertEq(
+            engine.getFeeByTier(CyberEngine.Tier.Tier1),
+            Constants.INITIAL_FEE_TIER1
+        );
+        assertEq(
+            engine.getFeeByTier(CyberEngine.Tier.Tier2),
+            Constants.INITIAL_FEE_TIER2
+        );
+        assertEq(
+            engine.getFeeByTier(CyberEngine.Tier.Tier3),
+            Constants.INITIAL_FEE_TIER3
+        );
+        assertEq(
+            engine.getFeeByTier(CyberEngine.Tier.Tier4),
+            Constants.INITIAL_FEE_TIER4
+        );
+        assertEq(
+            engine.getFeeByTier(CyberEngine.Tier.Tier5),
+            Constants.INITIAL_FEE_TIER5
+        );
+    }
+
+    function testCheckFeeTier0() public view {
+        engine.checkFee("A", Constants.INITIAL_FEE_TIER0);
+    }
+
+    function testCannotCheckFeeTier0() public {
+        vm.expectRevert("Insufficient fee");
+        engine.checkFee("A", Constants.INITIAL_FEE_TIER0 - 1);
+    }
+
+    function testCheckFeeTier1() public view {
+        engine.checkFee("AB", Constants.INITIAL_FEE_TIER1);
+    }
+
+    function testCannotCheckFeeTier1() public {
+        vm.expectRevert("Insufficient fee");
+        engine.checkFee("AB", Constants.INITIAL_FEE_TIER1 - 1);
+    }
+
+    function testCheckFeeTier2() public view {
+        engine.checkFee("ABC", Constants.INITIAL_FEE_TIER2);
+    }
+
+    function testCannotCheckFeeTier2() public {
+        vm.expectRevert("Insufficient fee");
+        engine.checkFee("ABC", Constants.INITIAL_FEE_TIER2 - 1);
+    }
+
+    function testCheckFeeTier3() public view {
+        engine.checkFee("ABCD", Constants.INITIAL_FEE_TIER3);
+    }
+
+    function testCannotCheckFeeTier3() public {
+        vm.expectRevert("Insufficient fee");
+        engine.checkFee("ABCD", Constants.INITIAL_FEE_TIER3 - 1);
+    }
+
+    function testCheckFeeTier4() public view {
+        engine.checkFee("ABCDE", Constants.INITIAL_FEE_TIER4);
+    }
+
+    function testCannotCheckFeeTier4() public {
+        vm.expectRevert("Insufficient fee");
+        engine.checkFee("ABCDE", Constants.INITIAL_FEE_TIER4 - 1);
+    }
+
+    function testCheckFeeTier5() public view {
+        engine.checkFee("ABCDEFG", Constants.INITIAL_FEE_TIER5);
+    }
+
+    function testCannotCheckFeeTier5() public {
+        vm.expectRevert("Insufficient fee");
+        engine.checkFee("ABCDEFG", Constants.INITIAL_FEE_TIER5 - 1);
+    }
+
+    function testWithdraw() public {
+        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        vm.deal(address(engine), 2);
+        vm.prank(alice);
+
+        engine.withdraw(alice, 1);
+    }
+
+    function testCannotWithdrawInsufficientBal() public {
+        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+
+        vm.expectRevert("Insufficient balance");
+        engine.withdraw(alice, 1);
+    }
+
+    function testCannotWithdrawAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        vm.prank(address(0));
+        engine.withdraw(alice, 1);
     }
 }

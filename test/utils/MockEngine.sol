@@ -14,12 +14,16 @@ contract MockEngine is CyberEngine {
         RolesAuthority _rolesAuthority
     ) CyberEngine(_owner, _profileAddress, _boxAddress, _rolesAuthority) {}
 
-    function verify(
+    function verifySignature(
         address to,
         string calldata handle,
         DataTypes.EIP712Signature calldata sig
     ) public view {
-        super._verify(to, handle, sig);
+        super._verifySignature(to, handle, sig);
+    }
+
+    function checkFee(string calldata handle, uint256 amount) public view {
+        super._checkFee(handle, amount);
     }
 
     function hashTypedDataV4(bytes32 structHash)
