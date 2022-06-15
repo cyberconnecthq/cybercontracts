@@ -49,15 +49,15 @@ contract CyberEngineTest is Test {
             true
         );
         rolesAuthority.setRoleCapability(
-            Constants.ENGINE_GOV_ROLE,
+            Constants._ENGINE_GOV_ROLE,
             address(engine),
-            Constants.SET_FEE_BY_TIER,
+            Constants._SET_FEE_BY_TIER,
             true
         );
         rolesAuthority.setRoleCapability(
-            Constants.ENGINE_GOV_ROLE,
+            Constants._ENGINE_GOV_ROLE,
             address(engine),
-            Constants.WITHDRAW,
+            Constants._WITHDRAW,
             true
         );
     }
@@ -114,7 +114,7 @@ contract CyberEngineTest is Test {
     }
 
     function testSetFeeGov() public {
-        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
         assertEq(engine.getFeeByTier(CyberEngine.Tier.Tier0), 1);
@@ -210,86 +210,86 @@ contract CyberEngineTest is Test {
     function testInitialFees() public {
         assertEq(
             engine.getFeeByTier(CyberEngine.Tier.Tier0),
-            Constants.INITIAL_FEE_TIER0
+            Constants._INITIAL_FEE_TIER0
         );
         assertEq(
             engine.getFeeByTier(CyberEngine.Tier.Tier1),
-            Constants.INITIAL_FEE_TIER1
+            Constants._INITIAL_FEE_TIER1
         );
         assertEq(
             engine.getFeeByTier(CyberEngine.Tier.Tier2),
-            Constants.INITIAL_FEE_TIER2
+            Constants._INITIAL_FEE_TIER2
         );
         assertEq(
             engine.getFeeByTier(CyberEngine.Tier.Tier3),
-            Constants.INITIAL_FEE_TIER3
+            Constants._INITIAL_FEE_TIER3
         );
         assertEq(
             engine.getFeeByTier(CyberEngine.Tier.Tier4),
-            Constants.INITIAL_FEE_TIER4
+            Constants._INITIAL_FEE_TIER4
         );
         assertEq(
             engine.getFeeByTier(CyberEngine.Tier.Tier5),
-            Constants.INITIAL_FEE_TIER5
+            Constants._INITIAL_FEE_TIER5
         );
     }
 
     function testRequireEnoughFeeTier0() public view {
-        engine.requireEnoughFee("A", Constants.INITIAL_FEE_TIER0);
+        engine.requireEnoughFee("A", Constants._INITIAL_FEE_TIER0);
     }
 
     function testCannotMeetFeeRequirement0() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("A", Constants.INITIAL_FEE_TIER0 - 1);
+        engine.requireEnoughFee("A", Constants._INITIAL_FEE_TIER0 - 1);
     }
 
     function testRequireEnoughFeeTier1() public view {
-        engine.requireEnoughFee("AB", Constants.INITIAL_FEE_TIER1);
+        engine.requireEnoughFee("AB", Constants._INITIAL_FEE_TIER1);
     }
 
     function testCannotMeetFeeRequirement1() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("AB", Constants.INITIAL_FEE_TIER1 - 1);
+        engine.requireEnoughFee("AB", Constants._INITIAL_FEE_TIER1 - 1);
     }
 
     function testRequireEnoughFeeTier2() public view {
-        engine.requireEnoughFee("ABC", Constants.INITIAL_FEE_TIER2);
+        engine.requireEnoughFee("ABC", Constants._INITIAL_FEE_TIER2);
     }
 
     function testCannotMeetFeeRequirement2() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("ABC", Constants.INITIAL_FEE_TIER2 - 1);
+        engine.requireEnoughFee("ABC", Constants._INITIAL_FEE_TIER2 - 1);
     }
 
     function testRequireEnoughFeeTier3() public view {
-        engine.requireEnoughFee("ABCD", Constants.INITIAL_FEE_TIER3);
+        engine.requireEnoughFee("ABCD", Constants._INITIAL_FEE_TIER3);
     }
 
     function testCannotMeetFeeRequirement3() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("ABCD", Constants.INITIAL_FEE_TIER3 - 1);
+        engine.requireEnoughFee("ABCD", Constants._INITIAL_FEE_TIER3 - 1);
     }
 
     function testRequireEnoughFeeTier4() public view {
-        engine.requireEnoughFee("ABCDE", Constants.INITIAL_FEE_TIER4);
+        engine.requireEnoughFee("ABCDE", Constants._INITIAL_FEE_TIER4);
     }
 
     function testCannotMeetFeeRequirement4() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("ABCDE", Constants.INITIAL_FEE_TIER4 - 1);
+        engine.requireEnoughFee("ABCDE", Constants._INITIAL_FEE_TIER4 - 1);
     }
 
     function testRequireEnoughFeeTier5() public view {
-        engine.requireEnoughFee("ABCDEFG", Constants.INITIAL_FEE_TIER5);
+        engine.requireEnoughFee("ABCDEFG", Constants._INITIAL_FEE_TIER5);
     }
 
     function testCannotMeetFeeRequirement5() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("ABCDEFG", Constants.INITIAL_FEE_TIER5 - 1);
+        engine.requireEnoughFee("ABCDEFG", Constants._INITIAL_FEE_TIER5 - 1);
     }
 
     function testWithdraw() public {
-        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.deal(address(engine), 2);
         assertEq(address(engine).balance, 2);
         assertEq(alice.balance, 0);
@@ -301,7 +301,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotWithdrawInsufficientBal() public {
-        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
 
         vm.expectRevert("Insufficient balance");

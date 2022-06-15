@@ -47,6 +47,10 @@ contract CyberEngine is Auth, EIP712 {
         boxAddress = _boxAddress;
     }
 
+    function setFeeByTier(Tier tier, uint256 amount) external requiresAuth {
+        _feeMapping[tier] = amount;
+    }
+
     function register(
         address to,
         string calldata handle,
@@ -62,33 +66,17 @@ contract CyberEngine is Auth, EIP712 {
         payable(to).transfer(amount);
     }
 
-    function setFeeByTier(Tier tier, uint256 amount) external requiresAuth {
-        _feeMapping[tier] = amount;
-    }
-
-    function setSigner(address _signer) external requiresAuth {
-        signer = _signer;
-    }
-
-    function setProfileAddress(address _profileAddress) external requiresAuth {
-        profileAddress = _profileAddress;
-    }
-
-    function setBoxAddress(address _boxAddress) external requiresAuth {
-        boxAddress = _boxAddress;
-    }
-
     function getFeeByTier(Tier t) external view returns (uint256) {
         return _feeMapping[t];
     }
 
     function _setInitialFees() internal {
-        _feeMapping[Tier.Tier0] = Constants.INITIAL_FEE_TIER0;
-        _feeMapping[Tier.Tier1] = Constants.INITIAL_FEE_TIER1;
-        _feeMapping[Tier.Tier2] = Constants.INITIAL_FEE_TIER2;
-        _feeMapping[Tier.Tier3] = Constants.INITIAL_FEE_TIER3;
-        _feeMapping[Tier.Tier4] = Constants.INITIAL_FEE_TIER4;
-        _feeMapping[Tier.Tier5] = Constants.INITIAL_FEE_TIER5;
+        _feeMapping[Tier.Tier0] = Constants._INITIAL_FEE_TIER0;
+        _feeMapping[Tier.Tier1] = Constants._INITIAL_FEE_TIER1;
+        _feeMapping[Tier.Tier2] = Constants._INITIAL_FEE_TIER2;
+        _feeMapping[Tier.Tier3] = Constants._INITIAL_FEE_TIER3;
+        _feeMapping[Tier.Tier4] = Constants._INITIAL_FEE_TIER4;
+        _feeMapping[Tier.Tier5] = Constants._INITIAL_FEE_TIER5;
     }
 
     function _verifySignature(
