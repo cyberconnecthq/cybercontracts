@@ -38,6 +38,13 @@ contract BoxNFTTest is Test {
         assertEq(token.balanceOf(alice), 1);
     }
 
+    function testBalanceIncremented() public {
+        address bob = address(0xB0B);
+        token.mint(alice);
+        token.mint(bob);
+        assertEq(token.totalSupply(), 2);
+    }
+
     function testCannotMintAsNonMinter() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(address(0));
