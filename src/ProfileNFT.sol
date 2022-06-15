@@ -95,7 +95,7 @@ contract ProfileNFT is CyberNFTBase, Auth {
     function _validateHandle(string calldata handle) internal pure {
         bytes memory byteHandle = bytes(handle);
         require(
-            byteHandle.length <= Constants.MAX_HANDLE_LENGTH &&
+            byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
                 byteHandle.length > 0,
             "Handle has invalid length"
         );
