@@ -63,11 +63,8 @@ contract CyberEngine is Auth, EIP712 {
 
         IBoxNFT(boxAddress).mint(to);
         IProfileNFT(profileAddress).createProfile(
-          to,
-          DataTypes.ProfileStruct(
-            handle,
-            ""
-          )
+            to,
+            DataTypes.ProfileStruct(handle, "")
         );
     }
 

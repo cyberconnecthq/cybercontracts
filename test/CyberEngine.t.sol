@@ -13,7 +13,6 @@ import { Authority } from "solmate/auth/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 
-
 contract MockBoxNFT is IBoxNFT {
     bool public mintRan;
 
@@ -25,9 +24,9 @@ contract MockBoxNFT is IBoxNFT {
 contract MockProfileNFT is IProfileNFT {
     bool public createProfileRan;
 
-    function createProfile(address to, DataTypes.ProfileStruct calldata vars) 
+    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
         external
-        returns (uint256) 
+        returns (uint256)
     {
         createProfileRan = true;
     }
@@ -357,7 +356,7 @@ contract CyberEngineTest is Test {
         assertEq(box.mintRan(), false);
         assertEq(profile.createProfileRan(), false);
 
-        engine.register{value: Constants._INITIAL_FEE_TIER2}(
+        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
             bob,
             handle,
             DataTypes.EIP712Signature(v, r, s, deadline)
