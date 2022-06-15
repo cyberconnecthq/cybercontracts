@@ -291,9 +291,13 @@ contract CyberEngineTest is Test {
     function testWithdraw() public {
         rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
         vm.deal(address(engine), 2);
-        vm.prank(alice);
+        assertEq(address(engine).balance, 2);
+        assertEq(alice.balance, 0);
 
+        vm.prank(alice);
         engine.withdraw(alice, 1);
+        assertEq(address(engine).balance, 1);
+        assertEq(alice.balance, 1);
     }
 
     function testCannotWithdrawInsufficientBal() public {
