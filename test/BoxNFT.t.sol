@@ -17,9 +17,9 @@ contract BoxNFTTest is Test {
         );
         token = new BoxNFT("TestBox", "TB", address(this), rolesAuthority);
         rolesAuthority.setRoleCapability(
-            Constants.NFT_MINTER_ROLE,
+            Constants._NFT_MINTER_ROLE,
             address(token),
-            Constants.BOX_MINT,
+            Constants._BOX_MINT,
             true
         );
     }
@@ -52,7 +52,7 @@ contract BoxNFTTest is Test {
     }
 
     function testMintAsMinter() public {
-        rolesAuthority.setUserRole(alice, Constants.NFT_MINTER_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._NFT_MINTER_ROLE, true);
         vm.prank(alice);
         token.mint(alice);
         assertEq(token.balanceOf(alice), 1);

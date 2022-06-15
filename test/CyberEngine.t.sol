@@ -31,21 +31,21 @@ contract CyberEngineTest is Test {
             rolesAuthority
         );
         rolesAuthority.setRoleCapability(
-            Constants.ENGINE_GOV_ROLE,
+            Constants._ENGINE_GOV_ROLE,
             address(engine),
-            Constants.SET_SIGNER,
+            Constants._SET_SIGNER,
             true
         );
         rolesAuthority.setRoleCapability(
-            Constants.ENGINE_GOV_ROLE,
+            Constants._ENGINE_GOV_ROLE,
             address(engine),
-            Constants.SET_PROFILE_ADDR,
+            Constants._SET_PROFILE_ADDR,
             true
         );
         rolesAuthority.setRoleCapability(
-            Constants.ENGINE_GOV_ROLE,
+            Constants._ENGINE_GOV_ROLE,
             address(engine),
-            Constants.SET_BOX_ADDR,
+            Constants._SET_BOX_ADDR,
             true
         );
     }
@@ -78,19 +78,19 @@ contract CyberEngineTest is Test {
     }
 
     function testSetSignerAsGov() public {
-        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setSigner(alice);
     }
 
     function testSetProfileAsGov() public {
-        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setProfileAddress(alice);
     }
 
     function testSetBoxGov() public {
-        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setBoxAddress(alice);
     }
@@ -98,7 +98,7 @@ contract CyberEngineTest is Test {
     function testVerify() public {
         // set charlie as signer
         address charlie = vm.addr(1);
-        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setSigner(charlie);
 
@@ -108,7 +108,7 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants.REGISTER, bob, handle, deadline))
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
         engine.verify(
@@ -125,7 +125,7 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants.REGISTER, bob, handle, deadline))
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -144,7 +144,7 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants.REGISTER, bob, handle, deadline))
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -159,7 +159,7 @@ contract CyberEngineTest is Test {
     function testCannotVerifyInvalidSig() public {
         // set charlie as signer
         address charlie = vm.addr(1);
-        rolesAuthority.setUserRole(alice, Constants.ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setSigner(charlie);
 
@@ -169,7 +169,7 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants.REGISTER, bob, handle, deadline))
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 

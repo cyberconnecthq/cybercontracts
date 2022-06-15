@@ -12,6 +12,10 @@ contract BoxNFT is CyberNFTBase, Auth {
         RolesAuthority _rolesAuthority
     ) CyberNFTBase(_name, _symbol) Auth(_owner, _rolesAuthority) {}
 
+    function mint(address _to) public requiresAuth {
+        super._mint(_to);
+    }
+
     function tokenURI(uint256 tokenId)
         public
         view
@@ -20,9 +24,5 @@ contract BoxNFT is CyberNFTBase, Auth {
     {
         _requireMinted(tokenId);
         return "";
-    }
-
-    function mint(address _to) public requiresAuth {
-        super._mint(_to);
     }
 }

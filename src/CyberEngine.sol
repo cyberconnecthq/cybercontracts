@@ -24,6 +24,18 @@ contract CyberEngine is Auth, EIP712 {
         boxAddress = _boxAddress;
     }
 
+    function setSigner(address _signer) external requiresAuth {
+        signer = _signer;
+    }
+
+    function setProfileAddress(address _profileAddress) external requiresAuth {
+        profileAddress = _profileAddress;
+    }
+
+    function setBoxAddress(address _boxAddress) external requiresAuth {
+        boxAddress = _boxAddress;
+    }
+
     function register(
         address to,
         string calldata handle,
@@ -39,22 +51,10 @@ contract CyberEngine is Auth, EIP712 {
     ) internal view {
         require(sig.deadline >= block.timestamp, "Deadline expired");
         bytes32 digest = _hashTypedDataV4(
-            keccak256(abi.encode(Constants.REGISTER, to, handle, sig.deadline))
+            keccak256(abi.encode(Constants._REGISTER, to, handle, sig.deadline))
         );
 
         address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
         require(recoveredAddress == signer, "Invalid signature");
-    }
-
-    function setSigner(address _signer) external requiresAuth {
-        signer = _signer;
-    }
-
-    function setProfileAddress(address _profileAddress) external requiresAuth {
-        profileAddress = _profileAddress;
-    }
-
-    function setBoxAddress(address _boxAddress) external requiresAuth {
-        boxAddress = _boxAddress;
     }
 }

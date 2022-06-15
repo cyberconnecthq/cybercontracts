@@ -22,6 +22,28 @@ contract ProfileNFT is CyberNFTBase, Auth {
         RolesAuthority _rolesAuthority
     ) CyberNFTBase(_name, _symbol) Auth(_owner, _rolesAuthority) {}
 
+    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
+        external
+        requiresAuth
+        returns (uint256)
+    {
+        _validateHandle(vars.handle);
+
+        bytes32 handleHash = keccak256(bytes(vars.handle));
+        require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
+
+        // TODO: unchecked
+        uint256 profileId = ++_totalCount;
+        _mint(to, profileId);
+        _profileById[profileId] = DataTypes.ProfileStruct({
+            handle: vars.handle,
+            imageURI: vars.imageURI
+        });
+
+        _profileIdByHandleHash[handleHash] = profileId;
+        return profileId;
+    }
+
     function tokenURI(uint256 tokenId)
         public
         view
@@ -55,28 +77,6 @@ contract ProfileNFT is CyberNFTBase, Auth {
             );
     }
 
-    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
-        external
-        requiresAuth
-        returns (uint256)
-    {
-        _validateHandle(vars.handle);
-
-        bytes32 handleHash = keccak256(bytes(vars.handle));
-        require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
-
-        // TODO: unchecked
-        uint256 profileId = ++_totalCount;
-        _mint(to, profileId);
-        _profileById[profileId] = DataTypes.ProfileStruct({
-            handle: vars.handle,
-            imageURI: vars.imageURI
-        });
-
-        _profileIdByHandleHash[handleHash] = profileId;
-        return profileId;
-    }
-
     function getHandle(uint256 profileId) public view returns (string memory) {
         // TODO: maybe remove this check
         require(_exists(profileId), "ERC721: invalid token ID");
@@ -95,7 +95,7 @@ contract ProfileNFT is CyberNFTBase, Auth {
     function _validateHandle(string calldata handle) internal pure {
         bytes memory byteHandle = bytes(handle);
         require(
-            byteHandle.length <= Constants.MAX_HANDLE_LENGTH &&
+            byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
                 byteHandle.length > 0,
             "Handle has invalid length"
         );
@@ -105,7 +105,7 @@ contract ProfileNFT is CyberNFTBase, Auth {
             bytes1 b = byteHandle[i];
             require(
                 (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
-                "Handle contains invalid character"
+                "Invalid character in handle"
             );
             // optimation
             unchecked {

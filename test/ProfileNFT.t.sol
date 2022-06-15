@@ -39,9 +39,9 @@ contract ProfileNFTTest is Test {
             rolesAuthority
         );
         rolesAuthority.setRoleCapability(
-            Constants.NFT_MINTER_ROLE,
+            Constants._NFT_MINTER_ROLE,
             address(token),
-            Constants.PROFILE_CREATE_PROFILE_ID,
+            Constants._PROFILE_CREATE_PROFILE_ID,
             true
         );
     }
@@ -66,7 +66,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCreateProfileAsMinter() public {
-        rolesAuthority.setUserRole(alice, Constants.NFT_MINTER_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._NFT_MINTER_ROLE, true);
         vm.prank(alice);
         token.createProfile(alice, createProfileData);
     }
@@ -135,6 +135,6 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithBlankSpace() public {
         vm.expectRevert("Handle contains invalid character");
-        token.createProfile(alice, DataTypes.ProfileStruct(" ", imageUri));   
+        token.createProfile(alice, DataTypes.ProfileStruct(" ", imageUri));
     }
 }
