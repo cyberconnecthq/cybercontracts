@@ -1,16 +1,28 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.14;
 
-import "./base/CyberNFTBase.sol";
-import "solmate/auth/authorities/RolesAuthority.sol";
-import { Auth } from "solmate/auth/Auth.sol";
+import { CyberNFTBase } from "./base/CyberNFTBase.sol";
+import { RolesAuthority } from "./base/RolesAuthority.sol";
+import { Auth } from "./base/Auth.sol";
 
 contract BoxNFT is CyberNFTBase, Auth {
-    constructor(
-        string memory _name,
-        string memory _symbol,
+    function initialize(
+        string calldata _name,
+        string calldata _symbol,
         address _owner,
         RolesAuthority _rolesAuthority
-    ) CyberNFTBase(_name, _symbol) Auth(_owner, _rolesAuthority) {}
+    ) external initializer {
+        CyberNFTBase._initialize(_name, _symbol);
+        Auth.__Auth_Init(_owner, _rolesAuthority);
+    }
+
+    function initialize(string calldata _name, string calldata _symbol)
+        external
+        initializer
+    {
+        super._initialize(_name, _symbol);
+    }
 
     function mint(address _to) public requiresAuth {
         super._mint(_to);

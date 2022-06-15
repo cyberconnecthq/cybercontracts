@@ -7,8 +7,8 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
-import "solmate/auth/authorities/RolesAuthority.sol";
-import { Authority } from "solmate/auth/Auth.sol";
+import { RolesAuthority } from "../src/base/RolesAuthority.sol";
+import { Authority } from "../src/base/Auth.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
@@ -32,12 +32,8 @@ contract ProfileNFTTest is Test {
             address(this),
             Authority(address(0))
         );
-        token = new ProfileNFT(
-            "TestProfile",
-            "TP",
-            address(this),
-            rolesAuthority
-        );
+        token = new ProfileNFT();
+        token.initialize("TestProfile", "TP", address(this), rolesAuthority);
         rolesAuthority.setRoleCapability(
             Constants._NFT_MINTER_ROLE,
             address(token),

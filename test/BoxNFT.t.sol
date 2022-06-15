@@ -1,9 +1,12 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.14;
 
 import "../src/BoxNFT.sol";
 import "forge-std/Test.sol";
-import "solmate/auth/authorities/RolesAuthority.sol";
 import "../src/libraries/Constants.sol";
+import { RolesAuthority } from "../src/base/RolesAuthority.sol";
+import { Authority } from "../src/base/Auth.sol";
 
 contract BoxNFTTest is Test {
     BoxNFT internal token;
@@ -15,7 +18,8 @@ contract BoxNFTTest is Test {
             address(this),
             Authority(address(0))
         );
-        token = new BoxNFT("TestBox", "TB", address(this), rolesAuthority);
+        token = new BoxNFT();
+        token.initialize("TestBox", "TB", address(this), rolesAuthority);
         rolesAuthority.setRoleCapability(
             Constants._NFT_MINTER_ROLE,
             address(token),
