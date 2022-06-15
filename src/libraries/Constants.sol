@@ -29,10 +29,10 @@ library Constants {
     uint8 internal constant MAX_HANDLE_LENGTH = 27;
 
     // Initial States
-    uint256 internal constant INITIAL_FEE_TIER0 = 0.5 * 10**18;
-    uint256 internal constant INITIAL_FEE_TIER1 = 0.1 * 10**18;
-    uint256 internal constant INITIAL_FEE_TIER2 = 0.06 * 10**18;
-    uint256 internal constant INITIAL_FEE_TIER3 = 0.03 * 10**18;
-    uint256 internal constant INITIAL_FEE_TIER4 = 0.01 * 10**18;
-    uint256 internal constant INITIAL_FEE_TIER5 = 0.006 * 10**18;
+    uint256 internal constant INITIAL_FEE_TIER0 = 0.5 ether;
+    uint256 internal constant INITIAL_FEE_TIER1 = 0.1 ether;
+    uint256 internal constant INITIAL_FEE_TIER2 = 0.06 ether;
+    uint256 internal constant INITIAL_FEE_TIER3 = 0.03 ether;
+    uint256 internal constant INITIAL_FEE_TIER4 = 0.01 ether;
+    uint256 internal constant INITIAL_FEE_TIER5 = 0.006 ether;
 }

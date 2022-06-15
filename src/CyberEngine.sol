@@ -53,7 +53,7 @@ contract CyberEngine is Auth, EIP712 {
         DataTypes.EIP712Signature calldata sig
     ) external payable {
         _verifySignature(to, handle, sig);
-        _checkFee(handle, msg.value);
+        _requireEnoughFee(handle, msg.value);
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
@@ -105,7 +105,10 @@ contract CyberEngine is Auth, EIP712 {
         require(recoveredAddress == signer, "Invalid signature");
     }
 
-    function _checkFee(string calldata handle, uint256 amount) internal view {
+    function _requireEnoughFee(string calldata handle, uint256 amount)
+        internal
+        view
+    {
         bytes memory byteHandle = bytes(handle);
         uint256 fee = _feeMapping[Tier.Tier5];
 

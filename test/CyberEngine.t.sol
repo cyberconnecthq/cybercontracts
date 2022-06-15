@@ -234,58 +234,58 @@ contract CyberEngineTest is Test {
         );
     }
 
-    function testCheckFeeTier0() public view {
-        engine.checkFee("A", Constants.INITIAL_FEE_TIER0);
+    function testRequireEnoughFeeTier0() public view {
+        engine.requireEnoughFee("A", Constants.INITIAL_FEE_TIER0);
     }
 
-    function testCannotCheckFeeTier0() public {
+    function testCannotMeetFeeRequirement0() public {
         vm.expectRevert("Insufficient fee");
-        engine.checkFee("A", Constants.INITIAL_FEE_TIER0 - 1);
+        engine.requireEnoughFee("A", Constants.INITIAL_FEE_TIER0 - 1);
     }
 
-    function testCheckFeeTier1() public view {
-        engine.checkFee("AB", Constants.INITIAL_FEE_TIER1);
+    function testRequireEnoughFeeTier1() public view {
+        engine.requireEnoughFee("AB", Constants.INITIAL_FEE_TIER1);
     }
 
-    function testCannotCheckFeeTier1() public {
+    function testCannotMeetFeeRequirement1() public {
         vm.expectRevert("Insufficient fee");
-        engine.checkFee("AB", Constants.INITIAL_FEE_TIER1 - 1);
+        engine.requireEnoughFee("AB", Constants.INITIAL_FEE_TIER1 - 1);
     }
 
-    function testCheckFeeTier2() public view {
-        engine.checkFee("ABC", Constants.INITIAL_FEE_TIER2);
+    function testRequireEnoughFeeTier2() public view {
+        engine.requireEnoughFee("ABC", Constants.INITIAL_FEE_TIER2);
     }
 
-    function testCannotCheckFeeTier2() public {
+    function testCannotMeetFeeRequirement2() public {
         vm.expectRevert("Insufficient fee");
-        engine.checkFee("ABC", Constants.INITIAL_FEE_TIER2 - 1);
+        engine.requireEnoughFee("ABC", Constants.INITIAL_FEE_TIER2 - 1);
     }
 
-    function testCheckFeeTier3() public view {
-        engine.checkFee("ABCD", Constants.INITIAL_FEE_TIER3);
+    function testRequireEnoughFeeTier3() public view {
+        engine.requireEnoughFee("ABCD", Constants.INITIAL_FEE_TIER3);
     }
 
-    function testCannotCheckFeeTier3() public {
+    function testCannotMeetFeeRequirement3() public {
         vm.expectRevert("Insufficient fee");
-        engine.checkFee("ABCD", Constants.INITIAL_FEE_TIER3 - 1);
+        engine.requireEnoughFee("ABCD", Constants.INITIAL_FEE_TIER3 - 1);
     }
 
-    function testCheckFeeTier4() public view {
-        engine.checkFee("ABCDE", Constants.INITIAL_FEE_TIER4);
+    function testRequireEnoughFeeTier4() public view {
+        engine.requireEnoughFee("ABCDE", Constants.INITIAL_FEE_TIER4);
     }
 
-    function testCannotCheckFeeTier4() public {
+    function testCannotMeetFeeRequirement4() public {
         vm.expectRevert("Insufficient fee");
-        engine.checkFee("ABCDE", Constants.INITIAL_FEE_TIER4 - 1);
+        engine.requireEnoughFee("ABCDE", Constants.INITIAL_FEE_TIER4 - 1);
     }
 
-    function testCheckFeeTier5() public view {
-        engine.checkFee("ABCDEFG", Constants.INITIAL_FEE_TIER5);
+    function testRequireEnoughFeeTier5() public view {
+        engine.requireEnoughFee("ABCDEFG", Constants.INITIAL_FEE_TIER5);
     }
 
-    function testCannotCheckFeeTier5() public {
+    function testCannotMeetFeeRequirement5() public {
         vm.expectRevert("Insufficient fee");
-        engine.checkFee("ABCDEFG", Constants.INITIAL_FEE_TIER5 - 1);
+        engine.requireEnoughFee("ABCDEFG", Constants.INITIAL_FEE_TIER5 - 1);
     }
 
     function testWithdraw() public {

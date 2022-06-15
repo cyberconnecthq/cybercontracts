@@ -22,8 +22,11 @@ contract MockEngine is CyberEngine {
         super._verifySignature(to, handle, sig);
     }
 
-    function checkFee(string calldata handle, uint256 amount) public view {
-        super._checkFee(handle, amount);
+    function requireEnoughFee(string calldata handle, uint256 amount)
+        public
+        view
+    {
+        super._requireEnoughFee(handle, amount);
     }
 
     function hashTypedDataV4(bytes32 structHash)
