@@ -7,16 +7,37 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/libraries/Constants.sol";
 import "solmate/auth/authorities/RolesAuthority.sol";
+import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
+import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 
+contract MockBoxNFT is IBoxNFT {
+    bool public mintRan;
+
+    function mint(address _to) external {
+        mintRan = true;
+    }
+}
+
+contract MockProfileNFT is IProfileNFT {
+    bool public createProfileRan;
+
+    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
+        external
+        returns (uint256)
+    {
+        createProfileRan = true;
+    }
+}
+
 contract CyberEngineTest is Test {
     MockEngine internal engine;
     RolesAuthority internal rolesAuthority;
+    MockBoxNFT internal box;
+    MockProfileNFT internal profile;
     address constant alice = address(0xA11CE);
-    address constant profileAddr = address(0xB11CE);
-    address constant boxAddr = address(0xC11CE);
     address constant bob = address(0xB0B);
 
     function setUp() public {
@@ -24,10 +45,12 @@ contract CyberEngineTest is Test {
             address(this),
             Authority(address(0))
         );
+        box = new MockBoxNFT();
+        profile = new MockProfileNFT();
         engine = new MockEngine(
             address(this),
-            profileAddr,
-            boxAddr,
+            address(profile),
+            address(box),
             rolesAuthority
         );
         rolesAuthority.setRoleCapability(
@@ -63,8 +86,8 @@ contract CyberEngineTest is Test {
     }
 
     function testBasic() public {
-        assertEq(engine.profileAddress(), profileAddr);
-        assertEq(engine.boxAddress(), boxAddr);
+        assertEq(engine.profileAddress(), address(profile));
+        assertEq(engine.boxAddress(), address(box));
     }
 
     function testAuth() public {
@@ -312,5 +335,34 @@ contract CyberEngineTest is Test {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(address(0));
         engine.withdraw(alice, 1);
+    }
+
+    function testRegister() public {
+        address charlie = vm.addr(1);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setSigner(charlie);
+
+        // change block timestamp to make deadline valid
+        vm.warp(50);
+        uint256 deadline = 100;
+
+        string memory handle = "bob";
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+
+        assertEq(box.mintRan(), false);
+        assertEq(profile.createProfileRan(), false);
+
+        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+            bob,
+            handle,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+
+        assertEq(box.mintRan(), true);
+        assertEq(profile.createProfileRan(), true);
     }
 }

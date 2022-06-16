@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.14;
 
+import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { CyberNFTBase } from "./base/CyberNFTBase.sol";
 import { RolesAuthority } from "./base/RolesAuthority.sol";
 import { Auth } from "./base/Auth.sol";
@@ -11,7 +12,7 @@ import { LibString } from "./libraries/LibString.sol";
 import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 
 // TODO: Owner cannot be set with conflicting role for capacity
-contract ProfileNFT is CyberNFTBase, Auth {
+contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
 
