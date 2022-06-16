@@ -20,8 +20,10 @@ library Constants {
         bytes4(keccak256(bytes("setBoxAddress(address)")));
     bytes4 internal constant _SET_FEE_BY_TIER =
         bytes4(keccak256(bytes("setFeeByTier(uint8,uint256)")));
+    bytes4 internal constant _SET_BOX_OPENED =
+        bytes4(keccak256(bytes("setBoxOpened(bool)")));
     bytes4 internal constant _REGISTER =
-        bytes4(keccak256(bytes("register(address,string,uint256)")));
+        bytes4(keccak256(bytes("register(address,string,uint256,uint256)")));
     bytes4 internal constant _WITHDRAW =
         bytes4(keccak256(bytes("withdraw(address,uint256)")));
 
