@@ -85,14 +85,18 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
             );
     }
 
-    function getHandle(uint256 profileId) public view returns (string memory) {
+    function getHandle(uint256 profileId)
+        external
+        view
+        returns (string memory)
+    {
         // TODO: maybe remove this check
         require(_exists(profileId), "ERC721: invalid token ID");
         return _profileById[profileId].handle;
     }
 
     function getProfileIdByHandle(string calldata handle)
-        public
+        external
         view
         returns (uint256)
     {
