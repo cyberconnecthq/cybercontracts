@@ -84,9 +84,9 @@ contract ProfileNFTTest is Test {
         assertEq(token.tokenURI(1), aliceMetadata);
     }
 
-    function testGetHandle() public {
+    function test() public {
         token.createProfile(alice, createProfileData);
-        assertEq(token.getHandle(1), "alice");
+        assertEq(token.getHandleByProfileId(1), "alice");
     }
 
     function testGetProfileIdByHandle() public {

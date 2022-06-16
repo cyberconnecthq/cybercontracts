@@ -30,6 +30,14 @@ contract MockProfileNFT is IProfileNFT {
     {
         createProfileRan = true;
     }
+
+    function getHandleByProfileId(uint256 profildId)
+        external
+        view
+        returns (string memory)
+    {
+        return "";
+    }
 }
 
 contract CyberEngineTest is Test {

@@ -115,4 +115,20 @@ contract LibStringTest is Test {
             keccak256(bytes("0x0000e0ca771e21bd00057f54a68c30d400000000"))
         );
     }
+
+    function testToLowerLetterOnly() public {
+        assertEq(LibString.toLower("ALICE"), "alice");
+    }
+
+    function testToLowerLetterMixed() public {
+        assertEq(LibString.toLower("ALICE_+%12345_abc"), "alice_+%12345_abc");
+    }
+
+    function testToUpperLetterOnly() public {
+        assertEq(LibString.toUpper("alice"), "ALICE");
+    }
+
+    function testToUpperLetterMixed() public {
+        assertEq(LibString.toUpper("ALICE_+%12345_abc"), "ALICE_+%12345_ABC");
+    }
 }
