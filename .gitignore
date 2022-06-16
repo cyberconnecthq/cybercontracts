@@ -1,6 +1,8 @@
 cache/
+cache_hardhat/
 out/
 node_modules
 .env
 broadcast/
 .DS_Store
+artifacts/
