@@ -15,11 +15,10 @@ contract MockEngine is CyberEngine {
     ) CyberEngine(_owner, _profileAddress, _boxAddress, _rolesAuthority) {}
 
     function verifySignature(
-        address to,
-        string calldata handle,
+        bytes32 digest,
         DataTypes.EIP712Signature calldata sig
     ) public view {
-        super._verifySignature(to, handle, sig);
+        super._verifySignature(digest, sig);
     }
 
     function requireEnoughFee(string calldata handle, uint256 amount)
