@@ -45,4 +45,8 @@ library Constants {
     // Subscribe NFT
     string internal constant _SUBSCRIBE_NFT_NAME_SUFFIX = "_subscriber";
     string internal constant _SUBSCRIBE_NFT_SYMBOL_SUFFIX = "_SUB";
+
+    //  Essence NFT
+    string internal constant _ESSENCE_NFT_NAME_INFIX = "_essence_";
+    string internal constant _ESSENCE_NFT_SYMBOL_INFIX = "_ESS_";
 }

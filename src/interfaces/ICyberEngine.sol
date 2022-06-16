@@ -8,5 +8,10 @@ interface ICyberEngine {
         view
         returns (string memory);
 
+    function essenceNFTTokenURI(uint256 profileId, uint256 essenceId)
+        external
+        view
+        returns (string memory);
+
     function subscribeNFTImpl() external view returns (address);
 }

@@ -61,6 +61,7 @@ to deploy
 - [ ] BoxNFT
 - [ ] Test for Initializable (oz testcases)
 - [ ] non transferrable (temporily paused at least)
+- [ ] Engine subscribe, publish essence, collect essence
 
 - [x] Hardhat plugin, add license
 - [x] linter
