@@ -60,6 +60,7 @@ to deploy
 - [ ] Events
 - [ ] BoxNFT
 - [ ] Test for Initializable (oz testcases)
+- [ ] non transferrable (temporily paused at least)
 
 - [x] Hardhat plugin, add license
 - [x] linter
