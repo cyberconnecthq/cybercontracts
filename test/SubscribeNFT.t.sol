@@ -3,6 +3,7 @@
 pragma solidity 0.8.14;
 import "forge-std/Test.sol";
 import { ICyberEngine } from "../src/interfaces/ICyberEngine.sol";
+import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { SubscribeNFT } from "../src/SubscribeNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
@@ -32,8 +33,10 @@ contract SubscribeNFTTest is Test {
     SubscribeNFT internal impl;
     BeaconProxy internal proxy;
     MockEngine internal engine;
+    address internal profile = address(0xDEAD);
 
     RolesAuthority internal rolesAuthority;
+    SubscribeNFT internal c;
 
     uint256 internal profileId = 1;
     address constant alice = address(0xA11CE);
@@ -45,7 +48,7 @@ contract SubscribeNFTTest is Test {
         );
 
         engine = new MockEngine();
-        impl = new SubscribeNFT(address(engine));
+        impl = new SubscribeNFT(address(engine), profile);
         engine.setSubscribeNFTImpl(address(impl));
         beacon = new UpgradeableBeacon(
             address(impl),
@@ -64,11 +67,36 @@ contract SubscribeNFTTest is Test {
             Constants._UPGRADE_TO,
             true
         );
+
+        c = SubscribeNFT(address(proxy));
     }
 
     function testBasic() public {
-        SubscribeNFT c = SubscribeNFT(address(proxy));
         c.mint(alice);
         assertEq(c.tokenURI(1), "1");
+    }
+
+    function testName() public {
+        vm.mockCall(
+            profile,
+            abi.encodeWithSelector(
+                IProfileNFT.getHandleByProfileId.selector,
+                1
+            ),
+            abi.encode("alice")
+        );
+        assertEq(c.name(), "alice_subscriber");
+    }
+
+    function testSymbol() public {
+        vm.mockCall(
+            profile,
+            abi.encodeWithSelector(
+                IProfileNFT.getHandleByProfileId.selector,
+                1
+            ),
+            abi.encode("alice")
+        );
+        assertEq(c.symbol(), "ALICE_SUB");
     }
 }

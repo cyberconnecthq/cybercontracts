@@ -39,4 +39,8 @@ library Constants {
     // Access Control for UpgradeableBeacon
     bytes4 internal constant _UPGRADE_TO =
         bytes4(keccak256(bytes("upgradeTo(address)")));
+
+    // Subscribe NFT
+    string internal constant _SUBSCRIBE_NFT_NAME_SUFFIX = "_subscriber";
+    string internal constant _SUBSCRIBE_NFT_SYMBOL_SUFFIX = "_SUB";
 }
