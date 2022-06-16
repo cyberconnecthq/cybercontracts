@@ -76,6 +76,11 @@ contract SubscribeNFTTest is Test {
         assertEq(c.tokenURI(1), "1");
     }
 
+    function testCannotReinitialize() public {
+        vm.expectRevert("Contract already initialized");
+        c.initialize(2);
+    }
+
     function testName() public {
         vm.mockCall(
             profile,
