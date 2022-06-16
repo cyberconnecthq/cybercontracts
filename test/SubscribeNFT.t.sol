@@ -52,7 +52,7 @@ contract SubscribeNFTTest is Test {
         engine.setSubscribeNFTImpl(address(impl));
         beacon = new UpgradeableBeacon(
             address(impl),
-            address(this),
+            address(0),
             rolesAuthority
         );
         bytes memory functionData = abi.encodeWithSelector(
@@ -64,7 +64,7 @@ contract SubscribeNFTTest is Test {
         rolesAuthority.setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             address(beacon),
-            Constants._UPGRADE_TO,
+            Constants._BEACON_UPGRADE_TO,
             true
         );
 

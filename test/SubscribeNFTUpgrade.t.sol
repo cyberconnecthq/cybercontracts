@@ -53,7 +53,7 @@ contract SubscribeNFTUpgradeTest is Test {
         engine.setSubscribeNFTImpl(address(impl));
         beacon = new UpgradeableBeacon(
             address(impl),
-            address(this),
+            address(0),
             rolesAuthority
         );
         bytes memory functionData = abi.encodeWithSelector(
@@ -66,22 +66,57 @@ contract SubscribeNFTUpgradeTest is Test {
         rolesAuthority.setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             address(beacon),
-            Constants._UPGRADE_TO,
+            Constants._BEACON_UPGRADE_TO,
             true
         );
     }
 
+    function testAuth() public {
+        assertEq(
+            rolesAuthority.doesRoleHaveCapability(
+                Constants._ENGINE_GOV_ROLE,
+                address(beacon),
+                Constants._BEACON_UPGRADE_TO
+            ),
+            true
+        );
+        assertEq(
+            rolesAuthority.canCall(
+                address(beacon),
+                alice,
+                Constants._BEACON_UPGRADE_TO
+            ),
+            false
+        );
+    }
+
     function testUpgrade() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+
+        assertEq(
+            rolesAuthority.canCall(
+                alice,
+                address(beacon),
+                Constants._BEACON_UPGRADE_TO
+            ),
+            true
+        );
+
         MockSubscribeNFTV2 implB = new MockSubscribeNFTV2(
             address(engine),
             profile
         );
+
+        assertEq(SubscribeNFT(address(proxy)).version(), 1);
+        assertEq(SubscribeNFT(address(proxyB)).version(), 1);
+
+        vm.prank(alice);
         beacon.upgradeTo(address(implB));
 
         MockSubscribeNFTV2 p = MockSubscribeNFTV2(address(proxy));
         MockSubscribeNFTV2 pB = MockSubscribeNFTV2(address(proxyB));
 
-        assertEq(p.isV2(), true);
-        assertEq(pB.isV2(), true);
+        assertEq(p.version(), 2);
+        assertEq(pB.version(), 2);
     }
 }

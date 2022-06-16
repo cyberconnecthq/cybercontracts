@@ -9,7 +9,7 @@ contract MockSubscribeNFTV2 is SubscribeNFT {
         SubscribeNFT(engine, profileNFT)
     {}
 
-    function isV2() external pure returns (bool) {
-        return true;
+    function version() external pure override returns (uint256) {
+        return 2;
     }
 }

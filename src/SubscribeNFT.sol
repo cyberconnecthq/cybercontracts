@@ -61,4 +61,8 @@ contract SubscribeNFT is CyberNFTBase {
                 )
             );
     }
+
+    function version() external pure virtual returns (uint256) {
+        return 1;
+    }
 }
