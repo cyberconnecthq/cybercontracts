@@ -21,12 +21,17 @@ contract SubscribeNFT is CyberNFTBase {
         _profileId = profileId;
     }
 
+    function mint(address to) external {
+        super._mint(to);
+    }
+
     function tokenURI(uint256 tokenId)
         public
         view
         override
         returns (string memory)
     {
-        return ENGINE.getSubscribeNFTTokenURI(_profileId);
+        _requireMinted(tokenId);
+        return ENGINE.subscribeNFTTokenURI(_profileId);
     }
 }

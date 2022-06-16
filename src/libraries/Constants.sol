@@ -35,4 +35,8 @@ library Constants {
     uint256 internal constant _INITIAL_FEE_TIER3 = 0.03 ether;
     uint256 internal constant _INITIAL_FEE_TIER4 = 0.01 ether;
     uint256 internal constant _INITIAL_FEE_TIER5 = 0.006 ether;
+
+    // Access Control for UpgradeableBeacon
+    bytes4 internal constant _UPGRADE_TO =
+        bytes4(keccak256(bytes("upgradeTo(address)")));
 }
