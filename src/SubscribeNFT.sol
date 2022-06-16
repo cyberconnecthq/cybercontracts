@@ -30,6 +30,7 @@ contract SubscribeNFT is CyberNFTBase {
     }
 
     function mint(address to) external {
+        require(msg.sender == address(ENGINE), "Only Engine could mint");
         super._mint(to);
     }
 
@@ -60,5 +61,9 @@ contract SubscribeNFT is CyberNFTBase {
                     Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
                 )
             );
+    }
+
+    function version() external pure virtual returns (uint256) {
+        return 1;
     }
 }

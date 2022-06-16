@@ -11,6 +11,7 @@ import { LibString } from "../src/libraries/LibString.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { RolesAuthority } from "../src/base/RolesAuthority.sol";
 import { Auth, Authority } from "../src/base/Auth.sol";
+import { MockSubscribeNFTV2 } from "./utils/MockSubscribeNFTV2.sol";
 
 contract MockEngine is ICyberEngine {
     address public subscribeNFTImpl;
@@ -28,15 +29,15 @@ contract MockEngine is ICyberEngine {
     }
 }
 
-contract SubscribeNFTTest is Test {
+contract SubscribeNFTUpgradeTest is Test {
     UpgradeableBeacon internal beacon;
     SubscribeNFT internal impl;
     BeaconProxy internal proxy;
+    BeaconProxy internal proxyB;
     MockEngine internal engine;
     address internal profile = address(0xDEAD);
 
     RolesAuthority internal rolesAuthority;
-    SubscribeNFT internal c;
 
     uint256 internal profileId = 1;
     address constant alice = address(0xA11CE);
@@ -60,6 +61,7 @@ contract SubscribeNFTTest is Test {
             profileId
         );
         proxy = new BeaconProxy(address(beacon), functionData);
+        proxyB = new BeaconProxy(address(beacon), functionData);
 
         rolesAuthority.setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
@@ -67,47 +69,54 @@ contract SubscribeNFTTest is Test {
             Constants._BEACON_UPGRADE_TO,
             true
         );
-
-        c = SubscribeNFT(address(proxy));
     }
 
-    function testBasic() public {
-        vm.prank(address(engine));
-        c.mint(alice);
-        assertEq(c.tokenURI(1), "1");
-    }
-
-    function testCannotReinitialize() public {
-        vm.expectRevert("Contract already initialized");
-        c.initialize(2);
-    }
-
-    function testName() public {
-        vm.mockCall(
-            profile,
-            abi.encodeWithSelector(
-                IProfileNFT.getHandleByProfileId.selector,
-                1
+    function testAuth() public {
+        assertEq(
+            rolesAuthority.doesRoleHaveCapability(
+                Constants._ENGINE_GOV_ROLE,
+                address(beacon),
+                Constants._BEACON_UPGRADE_TO
             ),
-            abi.encode("alice")
+            true
         );
-        assertEq(c.name(), "alice_subscriber");
-    }
-
-    function testSymbol() public {
-        vm.mockCall(
-            profile,
-            abi.encodeWithSelector(
-                IProfileNFT.getHandleByProfileId.selector,
-                1
+        assertEq(
+            rolesAuthority.canCall(
+                address(beacon),
+                alice,
+                Constants._BEACON_UPGRADE_TO
             ),
-            abi.encode("alice")
+            false
         );
-        assertEq(c.symbol(), "ALICE_SUB");
     }
 
-    function testCannotMintFromNonEngine() public {
-        vm.expectRevert("Only Engine could mint");
-        c.mint(alice);
+    function testUpgrade() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+
+        assertEq(
+            rolesAuthority.canCall(
+                alice,
+                address(beacon),
+                Constants._BEACON_UPGRADE_TO
+            ),
+            true
+        );
+
+        MockSubscribeNFTV2 implB = new MockSubscribeNFTV2(
+            address(engine),
+            profile
+        );
+
+        assertEq(SubscribeNFT(address(proxy)).version(), 1);
+        assertEq(SubscribeNFT(address(proxyB)).version(), 1);
+
+        vm.prank(alice);
+        beacon.upgradeTo(address(implB));
+
+        MockSubscribeNFTV2 p = MockSubscribeNFTV2(address(proxy));
+        MockSubscribeNFTV2 pB = MockSubscribeNFTV2(address(proxyB));
+
+        assertEq(p.version(), 2);
+        assertEq(pB.version(), 2);
     }
 }

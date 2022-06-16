@@ -14,6 +14,7 @@ contract ProfileNFTTest is Test {
     ProfileNFT internal token;
     RolesAuthority internal rolesAuthority;
     address constant alice = address(0xA11CE);
+    address constant minter = address(0xB0B);
     string constant imageUri = "https://example.com/image.png";
     DataTypes.ProfileStruct internal createProfileData =
         DataTypes.ProfileStruct("alice", "https://example.com/alice.jpg");
@@ -22,7 +23,7 @@ contract ProfileNFTTest is Test {
             abi.encodePacked(
                 "data:application/json;base64,",
                 Base64.encode(
-                    '{"name":"@alice","description":"@alice - CyberConnect profile","attributes":[{"trait_type":"id","value":"#1"},{"trait_type":"owner","value":"0xb4c79dab8f259c7aee6e5b2aa729821864227e84"},{"trait_type":"handle","value":"@alice"}]}'
+                    '{"name":"@alice","description":"@alice - CyberConnect profile","attributes":[{"trait_type":"id","value":"#1"},{"trait_type":"owner","value":"0x00000000000000000000000000000000000a11ce"},{"trait_type":"handle","value":"@alice"}]}'
                 )
             )
         );
@@ -33,11 +34,16 @@ contract ProfileNFTTest is Test {
             Authority(address(0))
         );
         token = new ProfileNFT();
-        token.initialize("TestProfile", "TP", address(this), rolesAuthority);
+        token.initialize("TestProfile", "TP", address(0), rolesAuthority);
         rolesAuthority.setRoleCapability(
             Constants._NFT_MINTER_ROLE,
             address(token),
             Constants._PROFILE_CREATE_PROFILE_ID,
+            true
+        );
+        rolesAuthority.setUserRole(
+            address(this),
+            Constants._NFT_MINTER_ROLE,
             true
         );
     }
@@ -57,13 +63,13 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileAsNonMinter() public {
         vm.expectRevert("UNAUTHORIZED");
-        vm.prank(address(0));
+        vm.prank(address(0xDEAD));
         token.createProfile(alice, createProfileData);
     }
 
     function testCreateProfileAsMinter() public {
-        rolesAuthority.setUserRole(alice, Constants._NFT_MINTER_ROLE, true);
-        vm.prank(alice);
+        rolesAuthority.setUserRole(minter, Constants._NFT_MINTER_ROLE, true);
+        vm.prank(minter);
         token.createProfile(alice, createProfileData);
     }
 
