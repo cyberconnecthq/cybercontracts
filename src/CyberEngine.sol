@@ -31,6 +31,9 @@ contract CyberEngine is Auth, EIP712 {
         address _boxAddress,
         RolesAuthority _rolesAuthority
     ) EIP712("CyberEngine", "1.0.0") Auth(_owner, _rolesAuthority) {
+        require(_owner != address(0), "zero address owner");
+        require(_profileAddress != address(0), "zero address profile");
+        require(_boxAddress != address(0), "zero address box");
         signer = _owner;
         profileAddress = _profileAddress;
         boxAddress = _boxAddress;
@@ -38,14 +41,17 @@ contract CyberEngine is Auth, EIP712 {
     }
 
     function setSigner(address _signer) external requiresAuth {
+        require(_signer != address(0), "zero address signer");
         signer = _signer;
     }
 
     function setProfileAddress(address _profileAddress) external requiresAuth {
+        require(_profileAddress != address(0), "zero address profile");
         profileAddress = _profileAddress;
     }
 
     function setBoxAddress(address _boxAddress) external requiresAuth {
+        require(_boxAddress != address(0), "zero address box");
         boxAddress = _boxAddress;
     }
 
@@ -69,6 +75,7 @@ contract CyberEngine is Auth, EIP712 {
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
+        require(to != address(0), "withdraw to the zero address");
         uint256 balance = address(this).balance;
         require(balance >= amount, "Insufficient balance");
         payable(to).transfer(amount);
