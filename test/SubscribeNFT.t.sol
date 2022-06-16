@@ -72,6 +72,7 @@ contract SubscribeNFTTest is Test {
     }
 
     function testBasic() public {
+        vm.prank(address(engine));
         c.mint(alice);
         assertEq(c.tokenURI(1), "1");
     }
@@ -103,5 +104,10 @@ contract SubscribeNFTTest is Test {
             abi.encode("alice")
         );
         assertEq(c.symbol(), "ALICE_SUB");
+    }
+
+    function testCannotMintFromNonEngine() public {
+        vm.expectRevert("Only Engine could mint");
+        c.mint(alice);
     }
 }

@@ -30,6 +30,7 @@ contract SubscribeNFT is CyberNFTBase {
     }
 
     function mint(address to) external {
+        require(msg.sender == address(ENGINE), "Only Engine could mint");
         super._mint(to);
     }
 
