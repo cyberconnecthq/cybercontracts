@@ -2,14 +2,16 @@
 
 pragma solidity 0.8.14;
 
-import "./utils/MockEngine.sol";
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import "../src/libraries/Constants.sol";
-import "solmate/auth/authorities/RolesAuthority.sol";
+import { MockEngine } from "./utils/MockEngine.sol";
+import { CyberEngine } from "../src/CyberEngine.sol";
+import { Constants } from "../src/libraries/Constants.sol";
+import { Constants } from "../src/libraries/Constants.sol";
 import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
-import { Authority } from "solmate/auth/Auth.sol";
+import { RolesAuthority } from "../src/base/RolesAuthority.sol";
+import { Authority } from "../src/base/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 
@@ -55,8 +57,9 @@ contract CyberEngineTest is Test {
         );
         box = new MockBoxNFT();
         profile = new MockProfileNFT();
-        engine = new MockEngine(
-            address(this),
+        engine = new MockEngine();
+        engine.initialize(
+            address(0),
             address(profile),
             address(box),
             rolesAuthority
@@ -111,31 +114,31 @@ contract CyberEngineTest is Test {
 
     function testCannotSetSignerAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
-        vm.prank(address(0));
+        vm.prank(alice);
         engine.setSigner(alice);
     }
 
     function testCannotSetProfileAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
-        vm.prank(address(0));
+        vm.prank(alice);
         engine.setProfileAddress(alice);
     }
 
     function testCannotSetBoxAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
-        vm.prank(address(0));
+        vm.prank(alice);
         engine.setBoxAddress(alice);
     }
 
     function testCannotSetFeeAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
-        vm.prank(address(0));
+        vm.prank(alice);
         engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
     }
 
     function testCannotSetBoxOpenedAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
-        vm.prank(address(0));
+        vm.prank(alice);
         engine.setBoxOpened(true);
     }
 
@@ -162,6 +165,12 @@ contract CyberEngineTest is Test {
         vm.prank(alice);
         engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
         assertEq(engine.feeMapping(CyberEngine.Tier.Tier0), 1);
+    }
+
+    function testSetBoxOpenedGov() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setBoxOpened(true);
     }
 
     function testVerify() public {
@@ -325,7 +334,6 @@ contract CyberEngineTest is Test {
 
     function testCannotWithdrawAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
-        vm.prank(address(0));
         engine.withdraw(alice, 1);
     }
 
@@ -421,6 +429,8 @@ contract CyberEngineTest is Test {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setBoxOpened(true);
+
+        vm.prank(alice);
         engine.setSigner(charlie);
 
         // change block timestamp to make deadline valid

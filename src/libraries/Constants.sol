@@ -26,6 +26,8 @@ library Constants {
         bytes4(keccak256(bytes("register(address,string,uint256,uint256)")));
     bytes4 internal constant _WITHDRAW =
         bytes4(keccak256(bytes("withdraw(address,uint256)")));
+    bytes4 internal constant _AUTHORIZE_UPGRADE =
+        bytes4(keccak256(bytes("upgradeTo(address)")));
 
     // Parameters
     uint8 internal constant _MAX_HANDLE_LENGTH = 27;
