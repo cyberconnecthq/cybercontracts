@@ -2,18 +2,10 @@
 
 pragma solidity 0.8.14;
 
-import "solmate/auth/authorities/RolesAuthority.sol";
 import { CyberEngine } from "../../src/CyberEngine.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 
 contract MockEngine is CyberEngine {
-    constructor(
-        address _owner,
-        address _profileAddress,
-        address _boxAddress,
-        RolesAuthority _rolesAuthority
-    ) CyberEngine(_owner, _profileAddress, _boxAddress, _rolesAuthority) {}
-
     function verifySignature(
         bytes32 digest,
         DataTypes.EIP712Signature calldata sig
