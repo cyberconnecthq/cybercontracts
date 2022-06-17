@@ -2,3 +2,8 @@ node_modules/
 lib/
 src/dependencies/
 src/libraries/LibString.sol
+src/upgradeability/
+src/dependencies/
+src/base/Auth.sol
+src/base/ERC721.sol
+src/base/RolesAuthority.sol

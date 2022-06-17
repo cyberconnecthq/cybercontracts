@@ -34,16 +34,6 @@ contract SubscribeNFT is CyberNFTBase {
         super._mint(to);
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        _requireMinted(tokenId);
-        return ENGINE.subscribeNFTTokenURI(_profileId);
-    }
-
     function name() external view override returns (string memory) {
         string memory handle = PROFILE_NFT.getHandleByProfileId(_profileId);
         return
@@ -65,5 +55,15 @@ contract SubscribeNFT is CyberNFTBase {
 
     function version() external pure virtual returns (uint256) {
         return 1;
+    }
+
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        _requireMinted(tokenId);
+        return ENGINE.subscribeNFTTokenURI(_profileId);
     }
 }

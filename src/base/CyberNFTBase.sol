@@ -12,15 +12,15 @@ import { Initializable } from "../upgradeability/Initializable.sol";
 abstract contract CyberNFTBase is ERC721, Initializable {
     uint256 internal _totalCount = 0;
 
+    function totalSupply() external view virtual returns (uint256) {
+        return _totalCount;
+    }
+
     function _initialize(string calldata _name, string calldata _symbol)
         internal
         onlyInitializing
     {
         ERC721.__ERC721_Init(_name, _symbol);
-    }
-
-    function totalSupply() external view virtual returns (uint256) {
-        return _totalCount;
     }
 
     function _mint(address _to) internal virtual {

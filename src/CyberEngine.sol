@@ -11,12 +11,6 @@ import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
 
 contract CyberEngine is Auth, EIP712 {
-    address public profileAddress;
-    address public boxAddress;
-    address public signer;
-    bool public boxOpened;
-    mapping(address => uint256) public nonces;
-
     enum Tier {
         Tier0,
         Tier1,
@@ -25,6 +19,11 @@ contract CyberEngine is Auth, EIP712 {
         Tier4,
         Tier5
     }
+    address public profileAddress;
+    address public boxAddress;
+    address public signer;
+    bool public boxOpened;
+    mapping(address => uint256) public nonces;
     mapping(Tier => uint256) public feeMapping;
 
     constructor(
