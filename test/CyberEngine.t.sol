@@ -182,7 +182,7 @@ contract CyberEngineTest is Test {
 
         // change block timestamp to make deadline valid
         vm.warp(50);
-        uint256 deadline = 100;
+        uint64 deadline = 100;
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
@@ -198,7 +198,7 @@ contract CyberEngineTest is Test {
     function testCannotVerifyAsNonSigner() public {
         // change block timestamp to make deadline valid
         vm.warp(50);
-        uint256 deadline = 100;
+        uint64 deadline = 100;
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
@@ -216,7 +216,7 @@ contract CyberEngineTest is Test {
     function testCannotVerifyDeadlinePassed() public {
         // change block timestamp to make deadline invalid
         vm.warp(150);
-        uint256 deadline = 100;
+        uint64 deadline = 100;
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
@@ -345,7 +345,7 @@ contract CyberEngineTest is Test {
 
         // change block timestamp to make deadline valid
         vm.warp(50);
-        uint256 deadline = 100;
+        uint64 deadline = 100;
 
         string memory handle = "bob";
         bytes32 digest = engine.hashTypedDataV4(
@@ -377,7 +377,7 @@ contract CyberEngineTest is Test {
 
         // change block timestamp to make deadline valid
         vm.warp(50);
-        uint256 deadline = 100;
+        uint64 deadline = 100;
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
@@ -403,7 +403,7 @@ contract CyberEngineTest is Test {
 
         // change block timestamp to make deadline valid
         vm.warp(50);
-        uint256 deadline = 100;
+        uint64 deadline = 100;
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
@@ -435,7 +435,7 @@ contract CyberEngineTest is Test {
 
         // change block timestamp to make deadline valid
         vm.warp(50);
-        uint256 deadline = 100;
+        uint64 deadline = 100;
 
         string memory handle = "bob";
         bytes32 digest = engine.hashTypedDataV4(
