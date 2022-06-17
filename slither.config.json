@@ -1,5 +1,5 @@
 {
-  "filter_paths": "lib",
+  "filter_paths": "lib|src/base|test|src/dependencies/openzeppelin|src/upgradeability",
   "solc_remaps": [
     "ds-test/=lib/ds-test/src/",
     "forge-std/=lib/forge-std/src/",

@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "hardhat": "^2.9.9",
+    "hardhat-preprocessor": "^0.1.4",
     "hardhat-spdx-license-identifier": "^2.0.3",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.1",
@@ -38,6 +39,5 @@
         }
       }
     ]
-  },
-  "dependencies": {}
+  }
 }

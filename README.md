@@ -17,7 +17,7 @@ Some opinions:
 
 # Usage
 To enable husky pre-commit
-`yarn add --dev husky & yarn prepre`
+`yarn add --dev husky & yarn prepare`
 
 To install contract dependencies
 `forge install`
@@ -29,7 +29,7 @@ To test
 `forge test -vvv`
 
 To run static analysis
-`slither .`
+`slither src/`
 
 # Deployment:
 

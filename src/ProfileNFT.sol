@@ -53,6 +53,25 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
         return profileId;
     }
 
+    function getHandleByProfileId(uint256 profileId)
+        external
+        view
+        returns (string memory)
+    {
+        // TODO: maybe remove this check
+        require(_exists(profileId), "ERC721: invalid token ID");
+        return _profileById[profileId].handle;
+    }
+
+    function getProfileIdByHandle(string calldata handle)
+        external
+        view
+        returns (uint256)
+    {
+        bytes32 handleHash = keccak256(bytes(handle));
+        return _profileIdByHandleHash[handleHash];
+    }
+
     function tokenURI(uint256 tokenId)
         public
         view
@@ -85,25 +104,6 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
                     )
                 )
             );
-    }
-
-    function getHandleByProfileId(uint256 profileId)
-        external
-        view
-        returns (string memory)
-    {
-        // TODO: maybe remove this check
-        require(_exists(profileId), "ERC721: invalid token ID");
-        return _profileById[profileId].handle;
-    }
-
-    function getProfileIdByHandle(string calldata handle)
-        public
-        view
-        returns (uint256)
-    {
-        bytes32 handleHash = keccak256(bytes(handle));
-        return _profileIdByHandleHash[handleHash];
     }
 
     function _validateHandle(string calldata handle) internal pure {

@@ -46,14 +46,17 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     }
 
     function setSigner(address _signer) external requiresAuth {
+        require(_signer != address(0), "zero address signer");
         signer = _signer;
     }
 
     function setProfileAddress(address _profileAddress) external requiresAuth {
+        require(_profileAddress != address(0), "zero address profile");
         profileAddress = _profileAddress;
     }
 
     function setBoxAddress(address _boxAddress) external requiresAuth {
+        require(_boxAddress != address(0), "zero address box");
         boxAddress = _boxAddress;
     }
 
@@ -97,6 +100,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
+        require(to != address(0), "withdraw to the zero address");
         uint256 balance = address(this).balance;
         require(balance >= amount, "Insufficient balance");
         payable(to).transfer(amount);
