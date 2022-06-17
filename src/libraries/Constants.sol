@@ -20,8 +20,10 @@ library Constants {
         bytes4(keccak256(bytes("setBoxAddress(address)")));
     bytes4 internal constant _SET_FEE_BY_TIER =
         bytes4(keccak256(bytes("setFeeByTier(uint8,uint256)")));
+    bytes4 internal constant _SET_BOX_OPENED =
+        bytes4(keccak256(bytes("setBoxOpened(bool)")));
     bytes4 internal constant _REGISTER =
-        bytes4(keccak256(bytes("register(address,string,uint256)")));
+        bytes4(keccak256(bytes("register(address,string,uint256,uint256)")));
     bytes4 internal constant _WITHDRAW =
         bytes4(keccak256(bytes("withdraw(address,uint256)")));
 
@@ -35,4 +37,12 @@ library Constants {
     uint256 internal constant _INITIAL_FEE_TIER3 = 0.03 ether;
     uint256 internal constant _INITIAL_FEE_TIER4 = 0.01 ether;
     uint256 internal constant _INITIAL_FEE_TIER5 = 0.006 ether;
+
+    // Access Control for UpgradeableBeacon
+    bytes4 internal constant _BEACON_UPGRADE_TO =
+        bytes4(keccak256(bytes("upgradeTo(address)")));
+
+    // Subscribe NFT
+    string internal constant _SUBSCRIBE_NFT_NAME_SUFFIX = "_subscriber";
+    string internal constant _SUBSCRIBE_NFT_SYMBOL_SUFFIX = "_SUB";
 }

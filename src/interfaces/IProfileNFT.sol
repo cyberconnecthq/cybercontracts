@@ -8,4 +8,9 @@ interface IProfileNFT {
     function createProfile(address to, DataTypes.ProfileStruct calldata vars)
         external
         returns (uint256);
+
+    function getHandleByProfileId(uint256 profildId)
+        external
+        view
+        returns (string memory);
 }

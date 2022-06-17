@@ -16,6 +16,7 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
 
+    // TODO: enable this, currently disabled for better testability
     // constructor() {
     //     _disableInitializers();
     // }
@@ -75,7 +76,8 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
                             ' - CyberConnect profile","attributes":[{"trait_type":"id","value":"#',
                             LibString.toString(tokenId),
                             '"},{"trait_type":"owner","value":"',
-                            LibString.toHexString(uint160(owner)),
+                            // TODO: use uint160 will somehow remove the zero padding for 0x address
+                            LibString.toHexString(ownerOf(tokenId)),
                             '"},{"trait_type":"handle","value":"',
                             formattedName,
                             '"}]}'
@@ -85,7 +87,7 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
             );
     }
 
-    function getHandle(uint256 profileId)
+    function getHandleByProfileId(uint256 profileId)
         external
         view
         returns (string memory)

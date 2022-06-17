@@ -30,6 +30,14 @@ contract MockProfileNFT is IProfileNFT {
     {
         createProfileRan = true;
     }
+
+    function getHandleByProfileId(uint256 profildId)
+        external
+        view
+        returns (string memory)
+    {
+        return "";
+    }
 }
 
 contract CyberEngineTest is Test {
@@ -83,11 +91,18 @@ contract CyberEngineTest is Test {
             Constants._WITHDRAW,
             true
         );
+        rolesAuthority.setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            address(engine),
+            Constants._SET_BOX_OPENED,
+            true
+        );
     }
 
     function testBasic() public {
         assertEq(engine.profileAddress(), address(profile));
         assertEq(engine.boxAddress(), address(box));
+        assertEq(engine.boxOpened(), false);
     }
 
     function testAuth() public {
@@ -118,6 +133,12 @@ contract CyberEngineTest is Test {
         engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
     }
 
+    function testCannotSetBoxOpenedAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        vm.prank(address(0));
+        engine.setBoxOpened(true);
+    }
+
     function testSetSignerAsGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
@@ -140,7 +161,7 @@ contract CyberEngineTest is Test {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
-        assertEq(engine.getFeeByTier(CyberEngine.Tier.Tier0), 1);
+        assertEq(engine.feeMapping(CyberEngine.Tier.Tier0), 1);
     }
 
     function testVerify() public {
@@ -156,12 +177,11 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
         engine.verifySignature(
-            bob,
-            handle,
+            digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
     }
@@ -173,14 +193,13 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         vm.expectRevert("Invalid signature");
         engine.verifySignature(
-            bob,
-            handle,
+            digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
     }
@@ -192,67 +211,40 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         vm.expectRevert("Deadline expired");
         engine.verifySignature(
-            bob,
-            handle,
-            DataTypes.EIP712Signature(v, r, s, deadline)
-        );
-    }
-
-    function testCannotVerifyInvalidSig() public {
-        // set charlie as signer
-        address charlie = vm.addr(1);
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-        engine.setSigner(charlie);
-
-        // change block timestamp to make deadline valid
-        vm.warp(50);
-        uint256 deadline = 100;
-
-        string memory handle = "bob_handle";
-        bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-
-        // charlie signed the handle to bob, but verifies with a different address(alice).
-        vm.expectRevert("Invalid signature");
-        engine.verifySignature(
-            alice,
-            handle,
+            digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
     }
 
     function testInitialFees() public {
         assertEq(
-            engine.getFeeByTier(CyberEngine.Tier.Tier0),
+            engine.feeMapping(CyberEngine.Tier.Tier0),
             Constants._INITIAL_FEE_TIER0
         );
         assertEq(
-            engine.getFeeByTier(CyberEngine.Tier.Tier1),
+            engine.feeMapping(CyberEngine.Tier.Tier1),
             Constants._INITIAL_FEE_TIER1
         );
         assertEq(
-            engine.getFeeByTier(CyberEngine.Tier.Tier2),
+            engine.feeMapping(CyberEngine.Tier.Tier2),
             Constants._INITIAL_FEE_TIER2
         );
         assertEq(
-            engine.getFeeByTier(CyberEngine.Tier.Tier3),
+            engine.feeMapping(CyberEngine.Tier.Tier3),
             Constants._INITIAL_FEE_TIER3
         );
         assertEq(
-            engine.getFeeByTier(CyberEngine.Tier.Tier4),
+            engine.feeMapping(CyberEngine.Tier.Tier4),
             Constants._INITIAL_FEE_TIER4
         );
         assertEq(
-            engine.getFeeByTier(CyberEngine.Tier.Tier5),
+            engine.feeMapping(CyberEngine.Tier.Tier5),
             Constants._INITIAL_FEE_TIER5
         );
     }
@@ -349,12 +341,13 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, deadline))
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         assertEq(box.mintRan(), false);
         assertEq(profile.createProfileRan(), false);
+        assertEq(engine.nonces(bob), 0);
 
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
             bob,
@@ -364,5 +357,94 @@ contract CyberEngineTest is Test {
 
         assertEq(box.mintRan(), true);
         assertEq(profile.createProfileRan(), true);
+        assertEq(engine.nonces(bob), 1);
+    }
+
+    function testCannotRegisterInvalidSig() public {
+        // set charlie as signer
+        address charlie = vm.addr(1);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setSigner(charlie);
+
+        // change block timestamp to make deadline valid
+        vm.warp(50);
+        uint256 deadline = 100;
+
+        string memory handle = "bob_handle";
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+
+        // charlie signed the handle to bob, but register with a different address(alice).
+        vm.expectRevert("Invalid signature");
+        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+            alice,
+            handle,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+    }
+
+    function testCannotRegisterReplay() public {
+        // set charlie as signer
+        address charlie = vm.addr(1);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setSigner(charlie);
+
+        // change block timestamp to make deadline valid
+        vm.warp(50);
+        uint256 deadline = 100;
+
+        string memory handle = "bob_handle";
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+            bob,
+            handle,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+
+        vm.expectRevert("Invalid signature");
+        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+            bob,
+            handle,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+    }
+
+    function testRegisterAfterBoxOpened() public {
+        address charlie = vm.addr(1);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setBoxOpened(true);
+        engine.setSigner(charlie);
+
+        // change block timestamp to make deadline valid
+        vm.warp(50);
+        uint256 deadline = 100;
+
+        string memory handle = "bob";
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+
+        assertEq(box.mintRan(), false);
+        assertEq(profile.createProfileRan(), false);
+        assertEq(engine.nonces(bob), 0);
+
+        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+            bob,
+            handle,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+
+        assertEq(box.mintRan(), false);
+        assertEq(profile.createProfileRan(), true);
+        assertEq(engine.nonces(bob), 1);
     }
 }

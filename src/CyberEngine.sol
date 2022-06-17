@@ -14,6 +14,8 @@ contract CyberEngine is Auth, EIP712 {
     address public profileAddress;
     address public boxAddress;
     address public signer;
+    bool public boxOpened;
+    mapping(address => uint256) public nonces;
 
     enum Tier {
         Tier0,
@@ -23,7 +25,7 @@ contract CyberEngine is Auth, EIP712 {
         Tier4,
         Tier5
     }
-    mapping(Tier => uint256) internal _feeMapping;
+    mapping(Tier => uint256) public feeMapping;
 
     constructor(
         address _owner,
@@ -37,6 +39,7 @@ contract CyberEngine is Auth, EIP712 {
         signer = _owner;
         profileAddress = _profileAddress;
         boxAddress = _boxAddress;
+        boxOpened = false;
         _setInitialFees();
     }
 
@@ -56,7 +59,11 @@ contract CyberEngine is Auth, EIP712 {
     }
 
     function setFeeByTier(Tier tier, uint256 amount) external requiresAuth {
-        _feeMapping[tier] = amount;
+        feeMapping[tier] = amount;
+    }
+
+    function setBoxOpened(bool opened) external requiresAuth {
+        boxOpened = opened;
     }
 
     function register(
@@ -64,10 +71,26 @@ contract CyberEngine is Auth, EIP712 {
         string calldata handle,
         DataTypes.EIP712Signature calldata sig
     ) external payable {
-        _verifySignature(to, handle, sig);
+        _verifySignature(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._REGISTER,
+                        to,
+                        handle,
+                        nonces[to]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            sig
+        );
+
         _requireEnoughFee(handle, msg.value);
 
-        IBoxNFT(boxAddress).mint(to);
+        if (!boxOpened) {
+            IBoxNFT(boxAddress).mint(to);
+        }
         IProfileNFT(profileAddress).createProfile(
             to,
             DataTypes.ProfileStruct(handle, "")
@@ -81,29 +104,20 @@ contract CyberEngine is Auth, EIP712 {
         payable(to).transfer(amount);
     }
 
-    function getFeeByTier(Tier t) external view returns (uint256) {
-        return _feeMapping[t];
-    }
-
     function _setInitialFees() internal {
-        _feeMapping[Tier.Tier0] = Constants._INITIAL_FEE_TIER0;
-        _feeMapping[Tier.Tier1] = Constants._INITIAL_FEE_TIER1;
-        _feeMapping[Tier.Tier2] = Constants._INITIAL_FEE_TIER2;
-        _feeMapping[Tier.Tier3] = Constants._INITIAL_FEE_TIER3;
-        _feeMapping[Tier.Tier4] = Constants._INITIAL_FEE_TIER4;
-        _feeMapping[Tier.Tier5] = Constants._INITIAL_FEE_TIER5;
+        feeMapping[Tier.Tier0] = Constants._INITIAL_FEE_TIER0;
+        feeMapping[Tier.Tier1] = Constants._INITIAL_FEE_TIER1;
+        feeMapping[Tier.Tier2] = Constants._INITIAL_FEE_TIER2;
+        feeMapping[Tier.Tier3] = Constants._INITIAL_FEE_TIER3;
+        feeMapping[Tier.Tier4] = Constants._INITIAL_FEE_TIER4;
+        feeMapping[Tier.Tier5] = Constants._INITIAL_FEE_TIER5;
     }
 
     function _verifySignature(
-        address to,
-        string calldata handle,
+        bytes32 digest,
         DataTypes.EIP712Signature calldata sig
     ) internal view {
         require(sig.deadline >= block.timestamp, "Deadline expired");
-        bytes32 digest = _hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, to, handle, sig.deadline))
-        );
-
         address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
         require(recoveredAddress == signer, "Invalid signature");
     }
@@ -113,11 +127,11 @@ contract CyberEngine is Auth, EIP712 {
         view
     {
         bytes memory byteHandle = bytes(handle);
-        uint256 fee = _feeMapping[Tier.Tier5];
+        uint256 fee = feeMapping[Tier.Tier5];
 
         require(byteHandle.length >= 1, "Invalid handle length");
         if (byteHandle.length < 6) {
-            fee = _feeMapping[Tier(byteHandle.length - 1)];
+            fee = feeMapping[Tier(byteHandle.length - 1)];
         }
         require(amount >= fee, "Insufficient fee");
     }

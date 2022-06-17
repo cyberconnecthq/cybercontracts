@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 /// @notice Adapted from Solmate's ERC721.sol with initializer replacing the constructor.
+// Also used getter function for name and symbol for downstream customization
 
 /// @notice Modern, minimalist, and gas efficient ERC-721 implementation.
 /// @author Solmate (https://github.com/Rari-Capital/solmate/blob/main/src/tokens/ERC721.sol)
@@ -32,11 +33,19 @@ abstract contract ERC721 {
                          METADATA STORAGE/LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    string public name;
+    string internal _name;
 
-    string public symbol;
+    string internal _symbol;
 
     function tokenURI(uint256 id) public view virtual returns (string memory);
+
+    function name() external view virtual returns (string memory) {
+        return _name;
+    }
+
+    function symbol() external view virtual returns (string memory) {
+        return _symbol;
+    }
 
     /*//////////////////////////////////////////////////////////////
                       ERC721 BALANCE/OWNER STORAGE
@@ -68,11 +77,11 @@ abstract contract ERC721 {
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    function __ERC721_Init(string calldata _name, string calldata _symbol)
+    function __ERC721_Init(string calldata name_, string calldata symbol_)
         internal
     {
-        name = _name;
-        symbol = _symbol;
+        _name = name_;
+        _symbol = symbol_;
     }
 
     /*//////////////////////////////////////////////////////////////

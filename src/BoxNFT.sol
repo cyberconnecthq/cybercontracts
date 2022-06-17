@@ -18,14 +18,7 @@ contract BoxNFT is CyberNFTBase, Auth, IBoxNFT {
         Auth.__Auth_Init(_owner, _rolesAuthority);
     }
 
-    function initialize(string calldata _name, string calldata _symbol)
-        external
-        initializer
-    {
-        super._initialize(_name, _symbol);
-    }
-
-    function mint(address _to) external requiresAuth {
+    function mint(address _to) public requiresAuth {
         super._mint(_to);
     }
 
