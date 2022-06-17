@@ -2,15 +2,17 @@
 
 pragma solidity 0.8.14;
 
-import "solmate/auth/authorities/RolesAuthority.sol";
 import "./dependencies/openzeppelin/EIP712.sol";
+import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { Initializable } from "./upgradeability/Initializable.sol";
 import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
-import { Authority } from "solmate/auth/Auth.sol";
+import { Auth } from "./base/Auth.sol";
+import { RolesAuthority } from "./base/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
 
-contract CyberEngine is Auth, EIP712 {
+contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     address public profileAddress;
     address public boxAddress;
     address public signer;
@@ -27,12 +29,15 @@ contract CyberEngine is Auth, EIP712 {
     }
     mapping(Tier => uint256) public feeMapping;
 
-    constructor(
+    function initialize(
         address _owner,
         address _profileAddress,
         address _boxAddress,
         RolesAuthority _rolesAuthority
-    ) EIP712("CyberEngine", "1.0.0") Auth(_owner, _rolesAuthority) {
+    ) external initializer {
+        Auth.__Auth_Init(_owner, _rolesAuthority);
+        EIP712.__EIP712_Init("CyberEngine", "1.0.0");
+
         signer = _owner;
         profileAddress = _profileAddress;
         boxAddress = _boxAddress;
@@ -128,4 +133,10 @@ contract CyberEngine is Auth, EIP712 {
         }
         require(amount >= fee, "Insufficient fee");
     }
+
+    function version() external pure virtual returns (uint256) {
+        return 1;
+    }
+
+    function _authorizeUpgrade(address) internal override requiresAuth {}
 }
