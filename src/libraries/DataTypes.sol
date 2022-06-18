@@ -12,6 +12,6 @@ library DataTypes {
         uint8 v;
         bytes32 r;
         bytes32 s;
-        uint64 deadline;
+        uint256 deadline;
     }
 }
