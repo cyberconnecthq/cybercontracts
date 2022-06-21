@@ -40,6 +40,7 @@ contract SubscribeNFTTest is Test {
 
     uint256 internal profileId = 1;
     address constant alice = address(0xA11CE);
+    address constant bob = address(0xB0B);
 
     function setUp() public {
         rolesAuthority = new RolesAuthority(
@@ -109,5 +110,16 @@ contract SubscribeNFTTest is Test {
     function testCannotMintFromNonEngine() public {
         vm.expectRevert("Only Engine could mint");
         c.mint(alice);
+    }
+
+    function testTransferIsNotAllowed() public {
+        vm.prank(address(engine));
+        c.mint(alice);
+        vm.expectRevert("Transfer is not allowed");
+        c.transferFrom(alice, bob, 1);
+        vm.expectRevert("Transfer is not allowed");
+        c.safeTransferFrom(alice, bob, 1);
+        vm.expectRevert("Transfer is not allowed");
+        c.safeTransferFrom(alice, bob, 1, "");
     }
 }

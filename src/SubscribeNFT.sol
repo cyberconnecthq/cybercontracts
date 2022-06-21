@@ -66,4 +66,13 @@ contract SubscribeNFT is CyberNFTBase {
         _requireMinted(tokenId);
         return ENGINE.subscribeNFTTokenURI(_profileId);
     }
+
+    // Subscribe NFT cannot be transferred
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) public pure override {
+        revert("Transfer is not allowed");
+    }
 }
