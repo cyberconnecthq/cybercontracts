@@ -61,6 +61,9 @@ to deploy
 - [ ] BoxNFT
 - [ ] Test for Initializable (oz testcases)
 - [ ] non transferrable (temporily paused at least)
+- [ ] Reserve slots for EssenceNFT
+- [ ] Put BoxNFT into peripheral
+- [ ] Include chainID in SubscribeNFT, EssenceNFT
 
 - [x] Hardhat plugin, add license
 - [x] linter

@@ -74,7 +74,7 @@ contract SubscribeNFTTest is Test {
 
     function testBasic() public {
         vm.prank(address(engine));
-        c.mint(alice);
+        assertEq(c.mint(alice), 1);
         assertEq(c.tokenURI(1), "1");
     }
 
