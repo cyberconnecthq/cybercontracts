@@ -42,15 +42,14 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
         // TODO: unchecked
-        uint256 profileId = ++_totalCount;
-        _mint(to, profileId);
-        _profileById[profileId] = DataTypes.ProfileStruct({
+        _mint(to);
+        _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: vars.handle,
             imageURI: vars.imageURI
         });
 
-        _profileIdByHandleHash[handleHash] = profileId;
-        return profileId;
+        _profileIdByHandleHash[handleHash] = _totalCount;
+        return _totalCount;
     }
 
     function getHandleByProfileId(uint256 profileId)
