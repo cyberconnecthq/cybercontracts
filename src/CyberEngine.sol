@@ -49,17 +49,17 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     }
 
     function setSigner(address _signer) external requiresAuth {
-        require(_signer != address(0), "zero address signer");
+        require(_signer != address(0), "Signer: zero address");
         signer = _signer;
     }
 
     function setProfileAddress(address _profileAddress) external requiresAuth {
-        require(_profileAddress != address(0), "zero address profile");
+        require(_profileAddress != address(0), "ProfileAddress: zero address");
         profileAddress = _profileAddress;
     }
 
     function setBoxAddress(address _boxAddress) external requiresAuth {
-        require(_boxAddress != address(0), "zero address box");
+        require(_boxAddress != address(0), "BoxAddress: zero address");
         boxAddress = _boxAddress;
     }
 
@@ -103,9 +103,9 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
-        require(to != address(0), "withdraw to the zero address");
+        require(to != address(0), "Withdraw: zero address");
         uint256 balance = address(this).balance;
-        require(balance >= amount, "Insufficient balance");
+        require(balance >= amount, "Withdraw: insufficient balance");
         payable(to).transfer(amount);
     }
 
@@ -122,9 +122,9 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         bytes32 digest,
         DataTypes.EIP712Signature calldata sig
     ) internal view {
-        require(sig.deadline >= block.timestamp, "Deadline expired");
+        require(sig.deadline >= block.timestamp, "VerifySig: deadline expired");
         address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
-        require(recoveredAddress == signer, "Invalid signature");
+        require(recoveredAddress == signer, "VerifySig: invalid sig");
     }
 
     function _requireEnoughFee(string calldata handle, uint256 amount)
@@ -134,11 +134,11 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         bytes memory byteHandle = bytes(handle);
         uint256 fee = feeMapping[Tier.Tier5];
 
-        require(byteHandle.length >= 1, "Invalid handle length");
+        require(byteHandle.length >= 1, "RegisterHandle: invalid length");
         if (byteHandle.length < 6) {
             fee = feeMapping[Tier(byteHandle.length - 1)];
         }
-        require(amount >= fee, "Insufficient fee");
+        require(amount >= fee, "RegisterFee: insufficient fee");
     }
 
     // UUPS upgradeability

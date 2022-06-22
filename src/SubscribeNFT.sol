@@ -17,8 +17,8 @@ contract SubscribeNFT is CyberNFTBase {
     uint256 internal _profileId;
 
     constructor(address engine, address profileNFT) {
-        require(engine != address(0), "Engine address cannot be 0");
-        require(profileNFT != address(0), "Profile NFT address cannot be 0");
+        require(engine != address(0), "EngineAddress: zero address");
+        require(profileNFT != address(0), "ProfileNft: zero address");
         ENGINE = ICyberEngine(engine);
         PROFILE_NFT = IProfileNFT(profileNFT);
         _disableInitializers();
@@ -30,7 +30,10 @@ contract SubscribeNFT is CyberNFTBase {
     }
 
     function mint(address to) external returns (uint256) {
-        require(msg.sender == address(ENGINE), "Only Engine could mint");
+        require(
+            msg.sender == address(ENGINE),
+            "SubscribeNftMint: only engine can mint"
+        );
         super._mint(to);
         return _totalCount;
     }
@@ -74,6 +77,6 @@ contract SubscribeNFT is CyberNFTBase {
         address,
         uint256
     ) public pure override {
-        revert("Transfer is not allowed");
+        revert("SubscribeNftTransfer: unallowed");
     }
 }

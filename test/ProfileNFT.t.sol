@@ -102,12 +102,12 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithHandleTaken() public {
         token.createProfile(alice, createProfileData);
-        vm.expectRevert("Handle taken");
+        vm.expectRevert("CreateProfile: handle taken");
         token.createProfile(alice, createProfileData);
     }
 
     function testCannotCreateProfileLongerThanMaxHandleLength() public {
-        vm.expectRevert("Handle has invalid length");
+        vm.expectRevert("ValidateHandle: invalid length");
         token.createProfile(
             alice,
             DataTypes.ProfileStruct(
@@ -118,7 +118,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileWithAnInvalidCharacter() public {
-        vm.expectRevert("Handle contains invalid character");
+        vm.expectRevert("ValidateHandle: invalid char");
         token.createProfile(
             alice,
             DataTypes.ProfileStruct("alice&bob", imageUri)
@@ -126,17 +126,17 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileWith0LenthHandle() public {
-        vm.expectRevert("Handle has invalid length");
+        vm.expectRevert("ValidateHandle: invalid length");
         token.createProfile(alice, DataTypes.ProfileStruct("", imageUri));
     }
 
     function testCannotCreateProfileWithACapitalLetter() public {
-        vm.expectRevert("Handle contains invalid character");
+        vm.expectRevert("ValidateHandle: invalid char");
         token.createProfile(alice, DataTypes.ProfileStruct("Test", imageUri));
     }
 
     function testCannotCreateProfileWithBlankSpace() public {
-        vm.expectRevert("Handle contains invalid character");
+        vm.expectRevert("ValidateHandle: invalid char");
         token.createProfile(alice, DataTypes.ProfileStruct(" ", imageUri));
     }
 }

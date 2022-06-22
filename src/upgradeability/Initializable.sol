@@ -33,7 +33,7 @@ abstract contract Initializable {
         bool isTopLevelCall = !_initializing;
         require(
             isTopLevelCall && _initialized < 1,
-            "Contract already initialized"
+            "Initializer: already initialized"
         );
         _initialized = 1;
         // TODO: this is dead code after we removed modifier initializer on constructor, kept for now

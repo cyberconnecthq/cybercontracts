@@ -206,7 +206,7 @@ contract CyberEngineTest is Test {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-        vm.expectRevert("Invalid signature");
+        vm.expectRevert("VerifySig: invalid sig");
         engine.verifySignature(
             digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -224,7 +224,7 @@ contract CyberEngineTest is Test {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-        vm.expectRevert("Deadline expired");
+        vm.expectRevert("VerifySig: deadline expired");
         engine.verifySignature(
             digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -263,7 +263,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement0() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("RegisterFee: insufficient fee");
         engine.requireEnoughFee("A", Constants._INITIAL_FEE_TIER0 - 1);
     }
 
@@ -272,7 +272,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement1() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("RegisterFee: insufficient fee");
         engine.requireEnoughFee("AB", Constants._INITIAL_FEE_TIER1 - 1);
     }
 
@@ -281,7 +281,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement2() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("RegisterFee: insufficient fee");
         engine.requireEnoughFee("ABC", Constants._INITIAL_FEE_TIER2 - 1);
     }
 
@@ -290,7 +290,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement3() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("RegisterFee: insufficient fee");
         engine.requireEnoughFee("ABCD", Constants._INITIAL_FEE_TIER3 - 1);
     }
 
@@ -299,7 +299,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement4() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("RegisterFee: insufficient fee");
         engine.requireEnoughFee("ABCDE", Constants._INITIAL_FEE_TIER4 - 1);
     }
 
@@ -308,7 +308,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement5() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("RegisterFee: insufficient fee");
         engine.requireEnoughFee("ABCDEFG", Constants._INITIAL_FEE_TIER5 - 1);
     }
 
@@ -328,7 +328,7 @@ contract CyberEngineTest is Test {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
 
-        vm.expectRevert("Insufficient balance");
+        vm.expectRevert("Withdraw: insufficient balance");
         engine.withdraw(alice, 1);
     }
 
@@ -386,7 +386,7 @@ contract CyberEngineTest is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         // charlie signed the handle to bob, but register with a different address(alice).
-        vm.expectRevert("Invalid signature");
+        vm.expectRevert("VerifySig: invalid sig");
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
             alice,
             handle,
@@ -416,7 +416,7 @@ contract CyberEngineTest is Test {
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
 
-        vm.expectRevert("Invalid signature");
+        vm.expectRevert("VerifySig: invalid sig");
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
             bob,
             handle,

@@ -21,7 +21,7 @@ contract MockEngine is ICyberEngine {
 
     function subscribeNFTTokenURI(uint256 profileId)
         external
-        view
+        pure
         returns (string memory)
     {
         return LibString.toString(profileId);
@@ -79,7 +79,7 @@ contract SubscribeNFTTest is Test {
     }
 
     function testCannotReinitialize() public {
-        vm.expectRevert("Contract already initialized");
+        vm.expectRevert("Initializer: already initialized");
         c.initialize(2);
     }
 
@@ -108,18 +108,18 @@ contract SubscribeNFTTest is Test {
     }
 
     function testCannotMintFromNonEngine() public {
-        vm.expectRevert("Only Engine could mint");
+        vm.expectRevert("SubscribeNftMint: only engine can mint");
         c.mint(alice);
     }
 
     function testTransferIsNotAllowed() public {
         vm.prank(address(engine));
         c.mint(alice);
-        vm.expectRevert("Transfer is not allowed");
+        vm.expectRevert("SubscribeNftTransfer: unallowed");
         c.transferFrom(alice, bob, 1);
-        vm.expectRevert("Transfer is not allowed");
+        vm.expectRevert("SubscribeNftTransfer: unallowed");
         c.safeTransferFrom(alice, bob, 1);
-        vm.expectRevert("Transfer is not allowed");
+        vm.expectRevert("SubscribeNftTransfer: unallowed");
         c.safeTransferFrom(alice, bob, 1, "");
     }
 }

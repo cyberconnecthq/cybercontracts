@@ -10,6 +10,7 @@
       "var-name-mixedcase": "off",
       "func-name-mixedcase": "off",
       "function-max-lines": "off",
-      "code-complexity": ["warn", 15]
+      "code-complexity": ["warn", 15],
+      "reason-string": ["warn",{"maxLength":32}]
     }
   }
