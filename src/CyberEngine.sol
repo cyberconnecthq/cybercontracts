@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
-import "forge-std/console.sol";
 import "./dependencies/openzeppelin/EIP712.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "./upgradeability/Initializable.sol";
@@ -181,13 +180,10 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
                 subscribeNFT = address(
                     new BeaconProxy(subscribeNFTBeacon, initData)
                 );
-                console.log(subscribeNFT);
-                console.log(profileAddress);
                 IProfileNFT(profileAddress).setSubscribeNFTAddress(
                     profileIds[i],
                     subscribeNFT
                 );
-                console.log("here");
             }
             // run middleware before subscribe
             if (subscribeMw != address(0)) {
@@ -198,7 +194,6 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
                     subDatas[i]
                 );
             }
-            console.log(subscribeNFT);
             result[i] = ISubscribeNFT(subscribeNFT).mint(sender);
             if (subscribeMw != address(0)) {
                 ISubscribeMiddleware(subscribeMw).postProcess(

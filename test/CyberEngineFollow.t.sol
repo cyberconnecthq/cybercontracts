@@ -191,6 +191,8 @@ contract CyberEngineFollowTest is Test {
             abi.encode(result)
         );
 
+        // This is not used but kept for reference. MockCall cannot set on the same address
+        // multiple times, so we used a custom contract `MockProfileGetterSetter`
         // vm.mockCall(
         //     profileAddress,
         //     abi.encodeWithSelector(
