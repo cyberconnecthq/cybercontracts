@@ -38,6 +38,8 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
         view
         returns (bool available)
     {
+        _validateHandle(handle);
+
         bytes32 handleHash = keccak256(bytes(handle));
         if (!_exists(_profileIdByHandleHash[handleHash])) return true;
         return false;
@@ -51,10 +53,10 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
             msg.sender == address(ENGINE),
             "Only Engine could create profile"
         );
-        require(checkHandleAvailability(vars.handle), "Handle taken");
         _validateHandle(vars.handle);
 
         bytes32 handleHash = keccak256(bytes(vars.handle));
+        require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
         // TODO: unchecked
         _mint(to);
