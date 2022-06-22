@@ -14,7 +14,7 @@ library Constants {
     bytes4 internal constant _SET_FEE_BY_TIER =
         bytes4(keccak256(bytes("setFeeByTier(uint8,uint256)")));
     bytes4 internal constant _SET_BOX_OPENED =
-        bytes4(keccak256(bytes("setBoxOpened(bool)")));
+        bytes4(keccak256(bytes("setBoxGiveawayEnded(bool)")));
     bytes4 internal constant _REGISTER =
         bytes4(
             keccak256(
@@ -27,6 +27,8 @@ library Constants {
         bytes4(keccak256(bytes("withdraw(address,uint256)")));
     bytes4 internal constant _AUTHORIZE_UPGRADE =
         bytes4(keccak256(bytes("upgradeTo(address)")));
+    bytes4 internal constant _SET_STATE =
+        bytes4(keccak256(bytes("setState(uint8)")));
 
     // Parameters
     uint8 internal constant _MAX_HANDLE_LENGTH = 27;

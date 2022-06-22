@@ -16,15 +16,21 @@ import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/Beaco
 
 // TODO: separate storage contract
 contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
+    enum State {
+        Operational, // green light, all running
+        EssensePaused, // cannot issue new essense, TODO: maybe remove for now
+        Paused // everything paused
+    }
     address public profileAddress;
     address public boxAddress;
     address public signer;
-    bool public boxOpened;
+    bool public boxGiveawayEnded;
     mapping(address => uint256) public nonces;
     address public subscribeNFTBeacon;
+    State private _state;
 
-    string internal constant VERSION_STRING = "1";
-    uint256 internal constant VERSION = 1;
+    string private constant VERSION_STRING = "1";
+    uint256 private constant VERSION = 1;
 
     enum Tier {
         Tier0,
@@ -50,7 +56,6 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         profileAddress = _profileAddress;
         boxAddress = _boxAddress;
         subscribeNFTBeacon = _subscribeNFTBeacon;
-        boxOpened = false;
         _setInitialFees();
     }
 
@@ -73,8 +78,8 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         feeMapping[tier] = amount;
     }
 
-    function setBoxOpened(bool opened) external requiresAuth {
-        boxOpened = opened;
+    function setBoxGiveawayEnded(bool ended) external requiresAuth {
+        boxGiveawayEnded = ended;
     }
 
     function register(
@@ -99,7 +104,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
 
         _requireEnoughFee(handle, msg.value);
 
-        if (!boxOpened) {
+        if (!boxGiveawayEnded) {
             IBoxNFT(boxAddress).mint(to);
         }
         return
@@ -151,6 +156,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
 
     function subscribe(uint256[] calldata profileIds, bytes[] calldata subDatas)
         external
+        whenNotPaused
         returns (uint256[] memory)
     {
         return _subscribe(msg.sender, profileIds, subDatas);
@@ -205,6 +211,27 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
             }
         }
         return result;
+    }
+
+    // State
+    modifier whenNotPaused() {
+        require(_state != State.Paused, "Contract is paused");
+        _;
+    }
+
+    modifier whenEssensePaused() {
+        require(_state != State.EssensePaused, "Essense is paused");
+        _;
+    }
+
+    function getState() external view returns (State) {
+        return _state;
+    }
+
+    function setState(State state) external requiresAuth {
+        State preState = _state;
+        _state = state;
+        // TODO: emit event
     }
 
     // UUPS upgradeability

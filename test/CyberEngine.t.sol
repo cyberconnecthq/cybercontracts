@@ -114,12 +114,22 @@ contract CyberEngineTest is Test {
             Constants._SET_BOX_OPENED,
             true
         );
+        rolesAuthority.setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            address(engine),
+            Constants._SET_STATE,
+            true
+        );
     }
 
     function testBasic() public {
         assertEq(engine.profileAddress(), address(profile));
         assertEq(engine.boxAddress(), address(box));
-        assertEq(engine.boxOpened(), false);
+        assertEq(engine.boxGiveawayEnded(), false);
+        assertEq(
+            uint256(engine.getState()),
+            uint256(CyberEngine.State.Operational)
+        );
     }
 
     function testAuth() public {
@@ -153,7 +163,7 @@ contract CyberEngineTest is Test {
     function testCannotSetBoxOpenedAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setBoxOpened(true);
+        engine.setBoxGiveawayEnded(true);
     }
 
     function testSetSignerAsGov() public {
@@ -184,7 +194,7 @@ contract CyberEngineTest is Test {
     function testSetBoxOpenedGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setBoxOpened(true);
+        engine.setBoxGiveawayEnded(true);
     }
 
     function testVerify() public {
@@ -445,7 +455,7 @@ contract CyberEngineTest is Test {
         address charlie = vm.addr(1);
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setBoxOpened(true);
+        engine.setBoxGiveawayEnded(true);
 
         vm.prank(alice);
         engine.setSigner(charlie);
@@ -473,5 +483,32 @@ contract CyberEngineTest is Test {
         assertEq(box.mintRan(), false);
         assertEq(profile.createProfileRan(), true);
         assertEq(engine.nonces(bob), 1);
+    }
+
+    function testSetState() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setState(CyberEngine.State.Paused);
+        assertEq(uint256(engine.getState()), uint256(CyberEngine.State.Paused));
+    }
+
+    function testCannotSetStateWithoutAuth() public {
+        vm.expectRevert("UNAUTHORIZED");
+        engine.setState(CyberEngine.State.Paused);
+        assertEq(
+            uint256(engine.getState()),
+            uint256(CyberEngine.State.Operational)
+        );
+    }
+
+    function testCannotSubscribeWhenStateIsPaused() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setState(CyberEngine.State.Paused);
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
+        bytes[] memory datas = new bytes[](1);
+        vm.expectRevert("Contract is paused");
+        engine.subscribe(ids, datas);
     }
 }
