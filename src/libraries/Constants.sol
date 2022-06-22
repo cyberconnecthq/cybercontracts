@@ -16,7 +16,13 @@ library Constants {
     bytes4 internal constant _SET_BOX_OPENED =
         bytes4(keccak256(bytes("setBoxOpened(bool)")));
     bytes4 internal constant _REGISTER =
-        bytes4(keccak256(bytes("register(address,string,uint256,uint256)")));
+        bytes4(
+            keccak256(
+                bytes(
+                    "register(address to,string handle,uint256 nonce,uint256 deadline)"
+                )
+            )
+        );
     bytes4 internal constant _WITHDRAW =
         bytes4(keccak256(bytes("withdraw(address,uint256)")));
     bytes4 internal constant _AUTHORIZE_UPGRADE =
