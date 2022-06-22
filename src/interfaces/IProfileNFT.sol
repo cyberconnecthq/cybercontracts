@@ -18,4 +18,7 @@ interface IProfileNFT {
         external
         view
         returns (address);
+
+    function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
+        external;
 }

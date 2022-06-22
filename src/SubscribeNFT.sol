@@ -4,12 +4,13 @@ pragma solidity 0.8.14;
 
 import { CyberNFTBase } from "./base/CyberNFTBase.sol";
 import { ICyberEngine } from "./interfaces/ICyberEngine.sol";
+import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { LibString } from "./libraries/LibString.sol";
 
 // This will be deployed as beacon contracts for gas efficiency
-contract SubscribeNFT is CyberNFTBase {
+contract SubscribeNFT is CyberNFTBase, ISubscribeNFT {
     // TODO: use address or ICyberEngine
     ICyberEngine public immutable ENGINE;
     IProfileNFT public immutable PROFILE_NFT;

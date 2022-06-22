@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
-
+import "forge-std/console.sol";
 import "./dependencies/openzeppelin/EIP712.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "./upgradeability/Initializable.sol";
@@ -12,13 +12,16 @@ import { Auth } from "./base/Auth.sol";
 import { RolesAuthority } from "./base/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
+import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 
+// TODO: separate storage contract
 contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     address public profileAddress;
     address public boxAddress;
     address public signer;
     bool public boxOpened;
     mapping(address => uint256) public nonces;
+    address public subscribeNFTBeacon;
 
     string internal constant VERSION_STRING = "1";
     uint256 internal constant VERSION = 1;
@@ -37,6 +40,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         address _owner,
         address _profileAddress,
         address _boxAddress,
+        address _subscribeNFTBeacon,
         RolesAuthority _rolesAuthority
     ) external initializer {
         Auth.__Auth_Init(_owner, _rolesAuthority);
@@ -45,6 +49,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         signer = _owner;
         profileAddress = _profileAddress;
         boxAddress = _boxAddress;
+        subscribeNFTBeacon = _subscribeNFTBeacon;
         boxOpened = false;
         _setInitialFees();
     }
@@ -76,7 +81,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         address to,
         string calldata handle,
         DataTypes.EIP712Signature calldata sig
-    ) external payable {
+    ) external payable returns (uint256) {
         _verifySignature(
             _hashTypedDataV4(
                 keccak256(
@@ -97,11 +102,12 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         if (!boxOpened) {
             IBoxNFT(boxAddress).mint(to);
         }
-        IProfileNFT(profileAddress).createProfile(
-            to,
-            // TODO: maybe use profile struct
-            DataTypes.ProfileStruct(handle, "", address(0))
-        );
+        return
+            IProfileNFT(profileAddress).createProfile(
+                to,
+                // TODO: maybe use profile struct
+                DataTypes.ProfileStruct(handle, "", address(0))
+            );
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
@@ -143,14 +149,14 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         require(amount >= fee, "Insufficient fee");
     }
 
-    function follow(uint256[] calldata profileIds)
+    function subscribe(uint256[] calldata profileIds)
         external
         returns (uint256[] memory)
     {
-        return _follow(msg.sender, profileIds);
+        return _subscribe(msg.sender, profileIds);
     }
 
-    function _follow(address sender, uint256[] calldata profileIds)
+    function _subscribe(address sender, uint256[] calldata profileIds)
         internal
         returns (uint256[] memory)
     {
@@ -160,8 +166,23 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
             address subscribeNFT = IProfileNFT(profileAddress)
                 .getSubscribeNFTAddressByProfileId(profileIds[i]);
             if (subscribeNFT == address(0)) {
-                // TODO: deploy subscribe NFT contract
+                bytes memory initData = abi.encodeWithSelector(
+                    ISubscribeNFT.initialize.selector,
+                    profileIds[i]
+                );
+                subscribeNFT = address(
+                    new BeaconProxy(subscribeNFTBeacon, initData)
+                );
+                console.log(subscribeNFT);
+                console.log(profileAddress);
+                IProfileNFT(profileAddress).setSubscribeNFTAddress(
+                    profileIds[i],
+                    subscribeNFT
+                );
+                console.log("here");
             }
+            // TODO: process middleware
+            console.log(subscribeNFT);
             result[i] = ISubscribeNFT(subscribeNFT).mint(sender);
         }
         return result;

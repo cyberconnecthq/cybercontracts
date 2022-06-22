@@ -48,6 +48,10 @@ contract MockProfileNFT is IProfileNFT {
     {
         return address(0);
     }
+
+    function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
+        external
+    {}
 }
 
 contract CyberEngineTest is Test {
@@ -70,6 +74,7 @@ contract CyberEngineTest is Test {
             address(0),
             address(profile),
             address(box),
+            address(0xDEAD),
             rolesAuthority
         );
         rolesAuthority.setRoleCapability(
@@ -365,10 +370,13 @@ contract CyberEngineTest is Test {
         assertEq(profile.createProfileRan(), false);
         assertEq(engine.nonces(bob), 0);
 
-        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-            bob,
-            handle,
-            DataTypes.EIP712Signature(v, r, s, deadline)
+        assertEq(
+            engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+                bob,
+                handle,
+                DataTypes.EIP712Signature(v, r, s, deadline)
+            ),
+            1
         );
 
         assertEq(box.mintRan(), true);

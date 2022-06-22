@@ -49,9 +49,17 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
         return _totalCount;
     }
 
+    function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
+        external
+        override
+    {
+        _profileById[profileId].subscribeNFT = subscribeNFT;
+    }
+
     function getSubscribeNFTAddressByProfileId(uint256 profileId)
         external
         view
+        override
         returns (address)
     {
         return _profileById[profileId].subscribeNFT;
