@@ -1,3 +1,5 @@
+[![test](https://github.com/cyberconnecthq/cybercontracts/actions/workflows/test.yml/badge.svg)](https://github.com/cyberconnecthq/cybercontracts/actions/workflows/test.yml)
+
 # CyberConnect Contracts
 
 This hosts all contracts for CyberConnect's social graph protocol.
