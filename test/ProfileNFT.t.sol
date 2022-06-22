@@ -95,6 +95,12 @@ contract ProfileNFTTest is Test {
         assertEq(token.getHandleByProfileId(1), "alice");
     }
 
+    function testCheckHandleAvailability() public {
+        token.createProfile(alice, createProfileData);
+        assertEq(token.checkHandleAvailability("alice"), false);
+        assertEq(token.checkHandleAvailability("bob"), true);
+    }
+
     function testGetProfileIdByHandle() public {
         token.createProfile(alice, createProfileData);
         assertEq(token.getProfileIdByHandle("alice"), 1);
@@ -102,7 +108,7 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithHandleTaken() public {
         token.createProfile(alice, createProfileData);
-        vm.expectRevert("Handle taken");
+        vm.expectRevert("CreateProfile: handle taken");
         token.createProfile(alice, createProfileData);
     }
 

@@ -31,15 +31,29 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
         Auth.__Auth_Init(_owner, _rolesAuthority);
     }
 
+    function checkHandleAvailability(string calldata handle)
+        public
+        view
+        returns (bool available)
+    {
+        _validateHandle(handle);
+
+        bytes32 handleHash = keccak256(bytes(handle));
+        if (!_exists(_profileIdByHandleHash[handleHash])) return true;
+        return false;
+    }
+
     function createProfile(address to, DataTypes.ProfileStruct calldata vars)
         external
         requiresAuth
         returns (uint256)
     {
-        _validateHandle(vars.handle);
+        require(
+            checkHandleAvailability(vars.handle),
+            "CreateProfile: handle taken"
+        );
 
         bytes32 handleHash = keccak256(bytes(vars.handle));
-        require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
         // TODO: unchecked
         _mint(to);
