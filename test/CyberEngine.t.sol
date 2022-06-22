@@ -53,6 +53,24 @@ contract MockProfileNFT is IProfileNFT {
     function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
         external
     {}
+
+    function setMetadata(uint256 profileId, string calldata metadata)
+        external
+    {}
+
+    function getOperatorApproval(uint256 profileId, address operator)
+        external
+        view
+        returns (bool)
+    {
+        return true;
+    }
+
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) external {}
 }
 
 contract CyberEngineTest is Test {
@@ -210,7 +228,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
         engine.verifySignature(
@@ -226,7 +252,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -244,7 +278,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -373,7 +415,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -408,7 +458,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -434,7 +492,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
@@ -466,7 +532,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
