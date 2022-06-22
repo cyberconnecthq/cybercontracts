@@ -7,7 +7,6 @@ import "forge-std/console2.sol";
 import { MockEngine } from "./utils/MockEngine.sol";
 import { CyberEngine } from "../src/CyberEngine.sol";
 import { Constants } from "../src/libraries/Constants.sol";
-import { Constants } from "../src/libraries/Constants.sol";
 import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { RolesAuthority } from "../src/base/RolesAuthority.sol";
@@ -18,8 +17,9 @@ import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 contract MockBoxNFT is IBoxNFT {
     bool public mintRan;
 
-    function mint(address _to) external {
+    function mint(address _to) external returns (uint256) {
         mintRan = true;
+        return 0;
     }
 }
 
@@ -39,6 +39,14 @@ contract MockProfileNFT is IProfileNFT {
         returns (string memory)
     {
         return "";
+    }
+
+    function getSubscribeNFTAddressByProfileId(uint256 profileId)
+        external
+        view
+        returns (address)
+    {
+        return address(0);
     }
 }
 

@@ -6,6 +6,7 @@ library DataTypes {
     struct ProfileStruct {
         string handle;
         string imageURI;
+        address subscribeNFT;
     }
 
     struct EIP712Signature {

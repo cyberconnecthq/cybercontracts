@@ -17,7 +17,11 @@ contract ProfileNFTTest is Test {
     address constant minter = address(0xB0B);
     string constant imageUri = "https://example.com/image.png";
     DataTypes.ProfileStruct internal createProfileData =
-        DataTypes.ProfileStruct("alice", "https://example.com/alice.jpg");
+        DataTypes.ProfileStruct(
+            "alice",
+            "https://example.com/alice.jpg",
+            address(0)
+        );
     string aliceMetadata =
         string(
             abi.encodePacked(
@@ -112,7 +116,8 @@ contract ProfileNFTTest is Test {
             alice,
             DataTypes.ProfileStruct(
                 "aliceandbobisareallylongname",
-                "https://example.com/alice.jpg"
+                "https://example.com/alice.jpg",
+                address(0)
             )
         );
     }
@@ -121,22 +126,31 @@ contract ProfileNFTTest is Test {
         vm.expectRevert("Handle contains invalid character");
         token.createProfile(
             alice,
-            DataTypes.ProfileStruct("alice&bob", imageUri)
+            DataTypes.ProfileStruct("alice&bob", imageUri, address(0))
         );
     }
 
     function testCannotCreateProfileWith0LenthHandle() public {
         vm.expectRevert("Handle has invalid length");
-        token.createProfile(alice, DataTypes.ProfileStruct("", imageUri));
+        token.createProfile(
+            alice,
+            DataTypes.ProfileStruct("", imageUri, address(0))
+        );
     }
 
     function testCannotCreateProfileWithACapitalLetter() public {
         vm.expectRevert("Handle contains invalid character");
-        token.createProfile(alice, DataTypes.ProfileStruct("Test", imageUri));
+        token.createProfile(
+            alice,
+            DataTypes.ProfileStruct("Test", imageUri, address(0))
+        );
     }
 
     function testCannotCreateProfileWithBlankSpace() public {
         vm.expectRevert("Handle contains invalid character");
-        token.createProfile(alice, DataTypes.ProfileStruct(" ", imageUri));
+        token.createProfile(
+            alice,
+            DataTypes.ProfileStruct(" ", imageUri, address(0))
+        );
     }
 }

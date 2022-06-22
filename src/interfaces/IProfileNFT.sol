@@ -13,4 +13,9 @@ interface IProfileNFT {
         external
         view
         returns (string memory);
+
+    function getSubscribeNFTAddressByProfileId(uint256 profileId)
+        external
+        view
+        returns (address);
 }

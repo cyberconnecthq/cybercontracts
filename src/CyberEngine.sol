@@ -7,6 +7,7 @@ import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "./upgradeability/Initializable.sol";
 import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
+import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { Auth } from "./base/Auth.sol";
 import { RolesAuthority } from "./base/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
@@ -98,7 +99,8 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         }
         IProfileNFT(profileAddress).createProfile(
             to,
-            DataTypes.ProfileStruct(handle, "")
+            // TODO: maybe use profile struct
+            DataTypes.ProfileStruct(handle, "", address(0))
         );
     }
 
@@ -139,6 +141,30 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
             fee = feeMapping[Tier(byteHandle.length - 1)];
         }
         require(amount >= fee, "Insufficient fee");
+    }
+
+    function follow(uint256[] calldata profileIds)
+        external
+        returns (uint256[] memory)
+    {
+        return _follow(msg.sender, profileIds);
+    }
+
+    function _follow(address sender, uint256[] calldata profileIds)
+        internal
+        returns (uint256[] memory)
+    {
+        require(profileIds.length > 0, "No profile ids provided");
+        uint256[] memory result = new uint256[](profileIds.length);
+        for (uint256 i = 0; i < profileIds.length; i++) {
+            address subscribeNFT = IProfileNFT(profileAddress)
+                .getSubscribeNFTAddressByProfileId(profileIds[i]);
+            if (subscribeNFT == address(0)) {
+                // TODO: deploy subscribe NFT contract
+            }
+            result[i] = ISubscribeNFT(subscribeNFT).mint(sender);
+        }
+        return result;
     }
 
     // UUPS upgradeability
