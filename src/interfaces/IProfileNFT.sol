@@ -22,4 +22,17 @@ interface IProfileNFT {
 
     function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
         external;
+
+    function setMetadata(uint256 profileId, string calldata metadata) external;
+
+    function getOperatorApproval(uint256 profileId, address operator)
+        external
+        view
+        returns (bool);
+
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) external;
 }

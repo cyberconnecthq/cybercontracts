@@ -48,7 +48,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileAsNonEngine() public {
-        vm.expectRevert("Only Engine could create profile");
+        vm.expectRevert("Only Engine");
         vm.prank(address(0xDEAD));
         token.createProfile(alice, createProfileData);
     }
@@ -148,7 +148,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotSetSubscribeNFTAddress() public {
-        vm.expectRevert("Only Engine could set SubscribeNFT address");
+        vm.expectRevert("Only Engine");
         token.setSubscribeNFTAddress(0, address(0));
     }
 
@@ -157,6 +157,7 @@ contract ProfileNFTTest is Test {
         token.setSubscribeNFTAddress(0, address(0));
     }
 
+    // operator
     function testGetOperatorApproval() public {
         vm.prank(engine);
         uint256 id = token.createProfile(alice, createProfileData);
@@ -168,45 +169,27 @@ contract ProfileNFTTest is Test {
         token.getOperatorApproval(0, address(0));
     }
 
-    function testCannotSetOperatorIfNotOwner() public {
+    function testCannotSetOperatorIfNotEngine() public {
         vm.prank(engine);
         uint256 id = token.createProfile(alice, createProfileData);
-        vm.expectRevert("Only owner can set operator");
+        vm.expectRevert("Only Engine");
         token.setOperatorApproval(id, address(0), true);
     }
 
     function testCannotSetOperatorToZeroAddress() public {
         vm.prank(engine);
         uint256 id = token.createProfile(alice, createProfileData);
-        vm.prank(alice);
+        vm.prank(engine);
         vm.expectRevert("Operator address cannot be 0");
         token.setOperatorApproval(id, address(0), true);
     }
 
-    function testSetOperatorAsOwner() public {
-        vm.prank(engine);
-        uint256 id = token.createProfile(alice, createProfileData);
-        vm.prank(alice);
-        token.setOperatorApproval(id, minter, true);
-        assertEq(token.getOperatorApproval(id, minter), true);
-    }
-
-    function testSetMetadataAsOwner() public {
+    // metadata
+    function testSetMetadataAsEngine() public {
         vm.prank(engine);
         uint256 id = token.createProfile(alice, createProfileData);
         assertEq(token.getMetadata(id), "");
-        vm.prank(alice);
-        token.setMetadata(id, "ipfs");
-        assertEq(token.getMetadata(id), "ipfs");
-    }
-
-    function testSetMetadataAsOperator() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(alice, createProfileData);
-        assertEq(token.getMetadata(id), "");
-        vm.prank(alice);
-        token.setOperatorApproval(id, minter, true);
-        vm.prank(minter);
         token.setMetadata(id, "ipfs");
         assertEq(token.getMetadata(id), "ipfs");
     }

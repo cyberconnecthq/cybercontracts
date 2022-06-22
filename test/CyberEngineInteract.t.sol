@@ -14,59 +14,30 @@ import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Auth, Authority } from "../src/base/Auth.sol";
 import { SubscribeNFT } from "../src/SubscribeNFT.sol";
+import { ProfileNFT } from "../src/ProfileNFT.sol";
+import { ERC721 } from "../src/base/ERC721.sol";
 
-contract MockProfileGetterSetter is IProfileNFT {
-    function createProfile(
-        address to,
-        DataTypes.CreateProfileParams calldata vars
-    ) external override returns (uint256) {
-        return 1;
-    }
-
-    function getHandleByProfileId(uint256 _profileId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return "";
-    }
-
-    bool public setterCalled;
-
-    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
-        external
-        view
-        returns (address, address)
-    {
-        return (address(0xC0DE), address(0));
-    }
-
-    function setSubscribeNFTAddress(uint256 profileId, address subscribeProxy)
-        external
-        override
-    {
-        setterCalled = true;
-        return;
-    }
-}
-
-contract CyberEngineFollowTest is Test {
+contract CyberEngineInteractTest is Test {
     MockEngine internal engine;
     RolesAuthority internal authority;
     address internal profileAddress = address(0xA);
     address internal boxAddress = address(0xB);
     address internal subscribeBeacon;
-    address internal gov = address(0xA11CE);
+    address internal gov = address(0xCCC);
     uint256 internal bobPk = 1;
     address internal bob = vm.addr(bobPk);
+    uint256 internal profileId;
+    address internal alice = address(0xA11CE);
 
     function setUp() public {
         authority = new TestAuthority(address(this));
         engine = new MockEngine();
         // Cannot use vm.mockCall on one address multiple times (1 for getter, 1 for setter); only used in test `testSubscribeDeployProxy`
-        profileAddress = address(new MockProfileGetterSetter());
+        // profileAddress = address(new MockProfileGetterSetter());
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
+        bytes memory code = address(new ProfileNFT(address(engine))).code;
+        vm.etch(profileAddress, code);
+
         address impl = address(
             new SubscribeNFT(address(engine), profileAddress)
         );
@@ -98,7 +69,15 @@ contract CyberEngineFollowTest is Test {
         string memory handle = "bob";
         uint256 deadline = 100;
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -119,15 +98,12 @@ contract CyberEngineFollowTest is Test {
         );
 
         assertEq(engine.nonces(bob), 0);
-
-        assertEq(
-            engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-                bob,
-                handle,
-                DataTypes.EIP712Signature(v, r, s, deadline)
-            ),
-            1
+        profileId = engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+            bob,
+            handle,
+            DataTypes.EIP712Signature(v, r, s, deadline)
         );
+        assertEq(profileId, 1);
 
         assertEq(engine.nonces(bob), 1);
     }
@@ -193,15 +169,15 @@ contract CyberEngineFollowTest is Test {
 
         // This is not used but kept for reference. MockCall cannot set on the same address
         // multiple times, so we used a custom contract `MockProfileGetterSetter`
-        // vm.mockCall(
-        //     profileAddress,
-        //     abi.encodeWithSelector(
-        //         IProfileNFT.setSubscribeNFTAddress.selector,
-        //         1,
-        //         proxy
-        //     ),
-        //     abi.encode(address(0))
-        // );
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.setSubscribeNFTAddress.selector,
+                1,
+                proxy
+            ),
+            abi.encode(address(0))
+        );
 
         uint256[] memory expected = new uint256[](1);
         expected[0] = result;
@@ -211,4 +187,98 @@ contract CyberEngineFollowTest is Test {
     }
 
     // TODO: add test for subscribe to multiple profiles
+
+    // TODO: use integration test instead of mock
+    function testCannotSetOperatorIfNotOwner() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(address(0xDEAD))
+        );
+        vm.expectRevert("Only owner can set operator");
+        engine.setOperatorApproval(profileId, address(0), true);
+    }
+
+    function testSetOperatorAsOwner() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(alice)
+        );
+        vm.prank(alice);
+        engine.setOperatorApproval(profileId, gov, true);
+    }
+
+    function testSetMetadataAsOwner() public {
+        vm.prank(bob);
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(bob)
+        );
+        engine.setMetadata(profileId, "ipfs");
+    }
+
+    function testCannotSetMetadataAsNonOwnerAndOperator() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(address(0xDEAD))
+        );
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.getOperatorApproval.selector,
+                profileId,
+                address(this)
+            ),
+            abi.encode(false)
+        );
+        assertEq(ERC721(profileAddress).ownerOf(profileId), address(0xDEAD));
+        assertEq(
+            IProfileNFT(profileAddress).getOperatorApproval(
+                profileId,
+                address(this)
+            ),
+            false
+        );
+        vm.expectRevert("Only owner or operator can set metadata");
+        engine.setMetadata(profileId, "ipfs");
+    }
+
+    function testSetMetadataAsOperator() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(address(0xDEAD))
+        );
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.getOperatorApproval.selector,
+                profileId,
+                address(this)
+            ),
+            abi.encode(true)
+        );
+        assertEq(ERC721(profileAddress).ownerOf(profileId), address(0xDEAD));
+        assertEq(
+            IProfileNFT(profileAddress).getOperatorApproval(
+                profileId,
+                address(this)
+            ),
+            true
+        );
+        string memory metadata = "ipfs";
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.setMetadata.selector,
+                profileId,
+                metadata
+            ),
+            abi.encode(0)
+        );
+        engine.setMetadata(profileId, metadata);
+    }
 }

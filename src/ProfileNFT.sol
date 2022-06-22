@@ -15,7 +15,12 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
     mapping(uint256 => string) internal _metadataById;
-    mapping(uint256 => mapping(address => bool)) internal _operatorApproval;
+    mapping(uint256 => mapping(address => bool)) internal _operatorApproval; // TODO: reconsider if useful
+
+    modifier onlyEngine() {
+        require(msg.sender == address(ENGINE), "Only Engine");
+        _;
+    }
 
     // ENGINE for createProfile, setSubscribeNFT
     constructor(address _engine) {
@@ -38,11 +43,7 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
     function createProfile(
         address to,
         DataTypes.CreateProfileParams calldata vars
-    ) external override returns (uint256) {
-        require(
-            msg.sender == address(ENGINE),
-            "Only Engine could create profile"
-        );
+    ) external override onlyEngine returns (uint256) {
         _requiresValidHandle(vars.handle);
 
         bytes32 handleHash = keccak256(bytes(vars.handle));
@@ -64,11 +65,8 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
     function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
         external
         override
+        onlyEngine
     {
-        require(
-            msg.sender == address(ENGINE),
-            "Only Engine could set SubscribeNFT address"
-        );
         _profileById[profileId].subscribeNFT = subscribeNFT;
     }
 
@@ -172,26 +170,14 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
         uint256 profileId,
         address operator,
         bool approved
-    ) external {
-        require(
-            msg.sender == _ownerOf[profileId],
-            "Only owner can set operator"
-        );
+    ) external onlyEngine {
         require(operator != address(0), "Operator address cannot be 0");
         _operatorApproval[profileId][operator] = approved;
     }
 
-    function setMetadata(uint256 profileId, string calldata metadata) external {
-        require(
-            msg.sender == _ownerOf[profileId] ||
-                _operatorApproval[profileId][msg.sender],
-            "Only owner or operator can set metadata"
-        );
-        _setMetadata(profileId, metadata);
-    }
-
-    function _setMetadata(uint256 profileId, string calldata metadata)
-        internal
+    function setMetadata(uint256 profileId, string calldata metadata)
+        external
+        onlyEngine
     {
         _metadataById[profileId] = metadata;
     }

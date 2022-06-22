@@ -13,6 +13,7 @@ import { RolesAuthority } from "./base/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
+import { ERC721 } from "./base/ERC721.sol";
 
 // TODO: separate storage contract
 contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
@@ -25,6 +26,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     address public boxAddress;
     address public signer;
     bool public boxGiveawayEnded;
+    // Shared between register and other withSig functions. Always query onchain to get the current nounce
     mapping(address => uint256) public nonces;
     address public subscribeNFTBeacon;
     State private _state;
@@ -87,11 +89,11 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         string calldata handle,
         DataTypes.EIP712Signature calldata sig
     ) external payable returns (uint256) {
-        _verifySignature(
+        _requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
-                        Constants._REGISTER,
+                        Constants._REGISTER_TYPEHASH,
                         to,
                         handle,
                         nonces[to]++,
@@ -99,6 +101,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
                     )
                 )
             ),
+            signer,
             sig
         );
 
@@ -131,13 +134,14 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         feeMapping[Tier.Tier5] = Constants._INITIAL_FEE_TIER5;
     }
 
-    function _verifySignature(
+    function _requiresExpectedSigner(
         bytes32 digest,
+        address expectedSigner,
         DataTypes.EIP712Signature calldata sig
     ) internal view {
         require(sig.deadline >= block.timestamp, "Deadline expired");
         address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
-        require(recoveredAddress == signer, "Invalid signature");
+        require(recoveredAddress == expectedSigner, "Invalid signature");
     }
 
     function _requireEnoughFee(string calldata handle, uint256 amount)
@@ -152,6 +156,30 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
             fee = feeMapping[Tier(byteHandle.length - 1)];
         }
         require(amount >= fee, "Insufficient fee");
+    }
+
+    function subscribeWithSig(
+        uint256[] calldata profileIds,
+        bytes[] calldata subDatas,
+        address sender,
+        DataTypes.EIP712Signature calldata sig
+    ) external whenNotPaused returns (uint256[] memory) {
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._SUBSCRIBE_TYPEHASH,
+                        profileIds,
+                        subDatas,
+                        nonces[sender]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            sender,
+            sig
+        );
+        return _subscribe(sender, profileIds, subDatas);
     }
 
     function subscribe(uint256[] calldata profileIds, bytes[] calldata subDatas)
@@ -232,6 +260,90 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         State preState = _state;
         _state = state;
         // TODO: emit event
+    }
+
+    // Set Metadata
+    function setMetadata(uint256 profileId, string calldata metadata) external {
+        require(
+            msg.sender == ERC721(profileAddress).ownerOf(profileId) ||
+                IProfileNFT(profileAddress).getOperatorApproval(
+                    profileId,
+                    msg.sender
+                ),
+            "Only owner or operator can set metadata"
+        );
+        IProfileNFT(profileAddress).setMetadata(profileId, metadata);
+    }
+
+    // only owner's signature works
+    function setMetadataWithSig(
+        uint256 profileId,
+        string calldata metadata,
+        DataTypes.EIP712Signature calldata sig
+    ) external {
+        address owner = ERC721(profileAddress).ownerOf(profileId);
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._SET_METADATA_TYPEHASH,
+                        profileId,
+                        metadata,
+                        nonces[owner]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            owner,
+            sig
+        );
+        IProfileNFT(profileAddress).setMetadata(profileId, metadata);
+    }
+
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) external {
+        require(
+            msg.sender == ERC721(profileAddress).ownerOf(profileId),
+            "Only owner can set operator"
+        );
+        IProfileNFT(profileAddress).setOperatorApproval(
+            profileId,
+            operator,
+            approved
+        );
+    }
+
+    function setOperatorApprovalWithSig(
+        uint256 profileId,
+        address operator,
+        bool approved,
+        DataTypes.EIP712Signature calldata sig
+    ) external {
+        address owner = ERC721(profileAddress).ownerOf(profileId);
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
+                        profileId,
+                        operator,
+                        approved,
+                        nonces[owner]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            owner,
+            sig
+        );
+        IProfileNFT(profileAddress).setOperatorApproval(
+            profileId,
+            operator,
+            approved
+        );
     }
 
     // UUPS upgradeability
