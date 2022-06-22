@@ -12,9 +12,9 @@ import { Authority } from "../src/base/Auth.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
-    RolesAuthority internal rolesAuthority;
     address constant alice = address(0xA11CE);
     address constant minter = address(0xB0B);
+    address constant engine = address(0xE);
     string constant imageUri = "https://example.com/image.png";
     DataTypes.ProfileStruct internal createProfileData =
         DataTypes.ProfileStruct(
@@ -33,23 +33,8 @@ contract ProfileNFTTest is Test {
         );
 
     function setUp() public {
-        rolesAuthority = new RolesAuthority(
-            address(this),
-            Authority(address(0))
-        );
-        token = new ProfileNFT();
-        token.initialize("TestProfile", "TP", address(0), rolesAuthority);
-        rolesAuthority.setRoleCapability(
-            Constants._NFT_MINTER_ROLE,
-            address(token),
-            Constants._PROFILE_CREATE_PROFILE_ID,
-            true
-        );
-        rolesAuthority.setUserRole(
-            address(this),
-            Constants._NFT_MINTER_ROLE,
-            true
-        );
+        token = new ProfileNFT(engine);
+        token.initialize("TestProfile", "TP");
     }
 
     function testBasic() public {
@@ -58,27 +43,23 @@ contract ProfileNFTTest is Test {
     }
 
     function testAuth() public {
-        assertEq(address(token.authority()), address(rolesAuthority));
+        assertEq(address(token.ENGINE()), engine);
     }
 
-    function testCreateProfileAsOwner() public {
-        token.createProfile(alice, createProfileData);
-    }
-
-    function testCannotCreateProfileAsNonMinter() public {
-        vm.expectRevert("UNAUTHORIZED");
+    function testCannotCreateProfileAsNonEngine() public {
+        vm.expectRevert("Only Engine could create profile");
         vm.prank(address(0xDEAD));
         token.createProfile(alice, createProfileData);
     }
 
-    function testCreateProfileAsMinter() public {
-        rolesAuthority.setUserRole(minter, Constants._NFT_MINTER_ROLE, true);
-        vm.prank(minter);
-        token.createProfile(alice, createProfileData);
+    function testCreateProfileAsEngine() public {
+        vm.prank(engine);
+        assertEq(token.createProfile(alice, createProfileData), 1);
     }
 
     function testCreateProfile() public {
         assertEq(token.totalSupply(), 0);
+        vm.prank(engine);
         token.createProfile(alice, createProfileData);
         assertEq(token.totalSupply(), 1);
         assertEq(token.balanceOf(alice), 1);
@@ -90,28 +71,34 @@ contract ProfileNFTTest is Test {
     }
 
     function testTokenURI() public {
+        vm.prank(engine);
         token.createProfile(alice, createProfileData);
         assertEq(token.tokenURI(1), aliceMetadata);
     }
 
     function test() public {
+        vm.prank(engine);
         token.createProfile(alice, createProfileData);
         assertEq(token.getHandleByProfileId(1), "alice");
     }
 
     function testGetProfileIdByHandle() public {
+        vm.prank(engine);
         token.createProfile(alice, createProfileData);
         assertEq(token.getProfileIdByHandle("alice"), 1);
     }
 
     function testCannotCreateProfileWithHandleTaken() public {
+        vm.prank(engine);
         token.createProfile(alice, createProfileData);
         vm.expectRevert("Handle taken");
+        vm.prank(engine);
         token.createProfile(alice, createProfileData);
     }
 
     function testCannotCreateProfileLongerThanMaxHandleLength() public {
         vm.expectRevert("Handle has invalid length");
+        vm.prank(engine);
         token.createProfile(
             alice,
             DataTypes.ProfileStruct(
@@ -124,6 +111,7 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithAnInvalidCharacter() public {
         vm.expectRevert("Handle contains invalid character");
+        vm.prank(engine);
         token.createProfile(
             alice,
             DataTypes.ProfileStruct("alice&bob", imageUri, address(0))
@@ -132,6 +120,7 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWith0LenthHandle() public {
         vm.expectRevert("Handle has invalid length");
+        vm.prank(engine);
         token.createProfile(
             alice,
             DataTypes.ProfileStruct("", imageUri, address(0))
@@ -140,6 +129,7 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithACapitalLetter() public {
         vm.expectRevert("Handle contains invalid character");
+        vm.prank(engine);
         token.createProfile(
             alice,
             DataTypes.ProfileStruct("Test", imageUri, address(0))
@@ -148,9 +138,20 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithBlankSpace() public {
         vm.expectRevert("Handle contains invalid character");
+        vm.prank(engine);
         token.createProfile(
             alice,
             DataTypes.ProfileStruct(" ", imageUri, address(0))
         );
+    }
+
+    function testCannotSetSubscribeNFTAddress() public {
+        vm.expectRevert("Only Engine could set SubscribeNFT address");
+        token.setSubscribeNFTAddress(0, address(0));
+    }
+
+    function testSetSubscribeNFTAddress() public {
+        vm.prank(engine);
+        token.setSubscribeNFTAddress(0, address(0));
     }
 }

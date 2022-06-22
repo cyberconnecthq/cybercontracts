@@ -31,6 +31,7 @@ contract MockProfileNFT is IProfileNFT {
         returns (uint256)
     {
         createProfileRan = true;
+        return 1890;
     }
 
     function getHandleByProfileId(uint256 profildId)
@@ -376,7 +377,7 @@ contract CyberEngineTest is Test {
                 handle,
                 DataTypes.EIP712Signature(v, r, s, deadline)
             ),
-            1
+            1890
         );
 
         assertEq(box.mintRan(), true);
