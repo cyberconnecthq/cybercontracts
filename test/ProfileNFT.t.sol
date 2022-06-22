@@ -85,16 +85,24 @@ contract ProfileNFTTest is Test {
     }
 
     function testCheckHandleAvailability() public {
-        vm.expectRevert("Handle contains invalid character");
-        vm.prank(engine);
-        token.checkHandleAvailability("al!ce");
-        vm.expectRevert("Handle has invalid length");
-        vm.prank(engine);
-        token.checkHandleAvailability("aliceandbobisareallylongname");
+        bool available;
+        string memory message;
+        (available, message) = token.checkHandleAvailability("al!ce");
+        assertEq(available, false);
+        assertEq(message, "Handle contains invalid character");
+        (available, message) = token.checkHandleAvailability(
+            "aliceandbobisareallylongname"
+        );
+        assertEq(available, false);
+        assertEq(message, "Handle has invalid length");
         vm.prank(engine);
         token.createProfile(alice, createProfileData);
-        assertEq(token.checkHandleAvailability("alice"), false);
-        assertEq(token.checkHandleAvailability("bob"), true);
+        (available, message) = token.checkHandleAvailability("alice");
+        assertEq(available, false);
+        assertEq(message, "Handle is not available");
+        (available, message) = token.checkHandleAvailability("bob");
+        assertEq(available, true);
+        assertEq(message, "Handle available");
     }
 
     function testGetProfileIdByHandle() public {

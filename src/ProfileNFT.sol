@@ -34,15 +34,20 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
     }
 
     function checkHandleAvailability(string calldata handle)
-        public
+        external
         view
-        returns (bool available)
+        returns (bool, string memory)
     {
-        _validateHandle(handle);
+        if (_validateHandleLength(handle) == false)
+            return (false, "Handle has invalid length");
+
+        if (_validateHandleCharacters(handle) == false)
+            return (false, "Handle contains invalid character");
 
         bytes32 handleHash = keccak256(bytes(handle));
-        if (!_exists(_profileIdByHandleHash[handleHash])) return true;
-        return false;
+        if (!_exists(_profileIdByHandleHash[handleHash]))
+            return (true, "Handle available");
+        return (false, "Handle is not available");
     }
 
     function createProfile(
@@ -53,7 +58,16 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
             msg.sender == address(ENGINE),
             "Only Engine could create profile"
         );
-        _validateHandle(vars.handle);
+        //_validateHandle(vars.handle);
+        require(
+            (_validateHandleLength(vars.handle) == true),
+            "Handle has invalid length"
+        );
+
+        require(
+            (_validateHandleCharacters(vars.handle) == true),
+            "Handle contains invalid character"
+        );
 
         bytes32 handleHash = keccak256(bytes(vars.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
@@ -147,25 +161,35 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
             );
     }
 
-    function _validateHandle(string calldata handle) internal pure {
+    function _validateHandleLength(string calldata handle)
+        internal
+        pure
+        returns (bool)
+    {
         bytes memory byteHandle = bytes(handle);
-        require(
+        if (
             byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
-                byteHandle.length > 0,
-            "Handle has invalid length"
-        );
+            byteHandle.length > 0
+        ) return true;
+        return false;
+    }
 
+    function _validateHandleCharacters(string calldata handle)
+        internal
+        pure
+        returns (bool)
+    {
+        bytes memory byteHandle = bytes(handle);
         uint256 byteHandleLength = byteHandle.length;
         for (uint256 i = 0; i < byteHandleLength; ) {
             bytes1 b = byteHandle[i];
-            require(
-                (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
-                "Handle contains invalid character"
-            );
-            // optimation
+            if ((b < "0" || b > "9") && (b < "a" || b > "z") && b != "_")
+                return false;
+
             unchecked {
                 ++i;
             }
         }
+        return true;
     }
 }
