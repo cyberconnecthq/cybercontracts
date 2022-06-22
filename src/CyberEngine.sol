@@ -19,8 +19,8 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     bool public boxOpened;
     mapping(address => uint256) public nonces;
 
-    string internal constant VERSION_STRING = "1";
-    uint256 internal constant VERSION = 1;
+    string internal constant _VERSION_STRING = "1";
+    uint256 internal constant _VERSION = 1;
 
     enum Tier {
         Tier0,
@@ -39,7 +39,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         RolesAuthority _rolesAuthority
     ) external initializer {
         Auth.__Auth_Init(_owner, _rolesAuthority);
-        EIP712.__EIP712_Init("CyberEngine", VERSION_STRING);
+        EIP712.__EIP712_Init("CyberEngine", _VERSION_STRING);
 
         signer = _owner;
         profileAddress = _profileAddress;
@@ -143,7 +143,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
 
     // UUPS upgradeability
     function version() external pure virtual returns (uint256) {
-        return VERSION;
+        return _VERSION;
     }
 
     // UUPS upgradeability
