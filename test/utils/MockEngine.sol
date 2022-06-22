@@ -20,6 +20,7 @@ contract MockEngine is CyberEngine {
         super._requireEnoughFee(handle, amount);
     }
 
+    // Expose for test
     function hashTypedDataV4(bytes32 structHash)
         public
         view

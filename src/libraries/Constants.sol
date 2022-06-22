@@ -3,13 +3,6 @@
 pragma solidity 0.8.14;
 
 library Constants {
-    // Access Control for ProfileNFT & BoxNFT
-    uint8 internal constant _NFT_MINTER_ROLE = 0;
-    bytes4 internal constant _PROFILE_CREATE_PROFILE_ID =
-        bytes4(keccak256(bytes("createProfile(address,(string,string))")));
-    bytes4 internal constant _BOX_MINT =
-        bytes4(keccak256(bytes("mint(address)")));
-
     // Access Control for CyebreEngine
     uint8 internal constant _ENGINE_GOV_ROLE = 1;
     bytes4 internal constant _SET_SIGNER =

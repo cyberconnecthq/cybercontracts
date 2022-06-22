@@ -3,9 +3,17 @@
 pragma solidity 0.8.14;
 
 library DataTypes {
+    struct CreateProfileParams {
+        string handle;
+        string imageURI;
+        address subscribeMw;
+    }
+
     struct ProfileStruct {
         string handle;
         string imageURI;
+        address subscribeNFT;
+        address subscribeMw;
     }
 
     struct EIP712Signature {

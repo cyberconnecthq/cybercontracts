@@ -10,22 +10,12 @@ import { Authority } from "../src/base/Auth.sol";
 
 contract BoxNFTTest is Test {
     BoxNFT internal token;
-    RolesAuthority internal rolesAuthority;
     address constant alice = address(0xA11CE);
+    address constant engine = address(0xe);
 
     function setUp() public {
-        rolesAuthority = new RolesAuthority(
-            address(this),
-            Authority(address(0))
-        );
-        token = new BoxNFT();
-        token.initialize("TestBox", "TB", address(this), rolesAuthority);
-        rolesAuthority.setRoleCapability(
-            Constants._NFT_MINTER_ROLE,
-            address(token),
-            Constants._BOX_MINT,
-            true
-        );
+        token = new BoxNFT(engine);
+        token.initialize("TestBox", "TB");
     }
 
     function testBasic() public {
@@ -34,30 +24,25 @@ contract BoxNFTTest is Test {
     }
 
     function testAuth() public {
-        assertEq(address(token.authority()), address(rolesAuthority));
-    }
-
-    function testMintAsOwner() public {
-        token.mint(alice);
-        assertEq(token.balanceOf(alice), 1);
+        assertEq(address(token.ENGINE()), engine);
     }
 
     function testBalanceIncremented() public {
+        vm.startPrank(engine);
         address bob = address(0xB0B);
         token.mint(alice);
         token.mint(bob);
         assertEq(token.totalSupply(), 2);
     }
 
-    function testCannotMintAsNonMinter() public {
-        vm.expectRevert("UNAUTHORIZED");
+    function testCannotMintAsNonEngine() public {
+        vm.expectRevert("Only Engine could mint");
         vm.prank(address(0));
         token.mint(address(0));
     }
 
-    function testMintAsMinter() public {
-        rolesAuthority.setUserRole(alice, Constants._NFT_MINTER_ROLE, true);
-        vm.prank(alice);
+    function testMintAsEngine() public {
+        vm.prank(engine);
         token.mint(alice);
         assertEq(token.balanceOf(alice), 1);
     }

@@ -7,7 +7,6 @@ import "forge-std/console2.sol";
 import { MockEngine } from "./utils/MockEngine.sol";
 import { CyberEngine } from "../src/CyberEngine.sol";
 import { Constants } from "../src/libraries/Constants.sol";
-import { Constants } from "../src/libraries/Constants.sol";
 import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { RolesAuthority } from "../src/base/RolesAuthority.sol";
@@ -18,19 +17,21 @@ import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 contract MockBoxNFT is IBoxNFT {
     bool public mintRan;
 
-    function mint(address _to) external {
+    function mint(address _to) external returns (uint256) {
         mintRan = true;
+        return 0;
     }
 }
 
 contract MockProfileNFT is IProfileNFT {
     bool public createProfileRan;
 
-    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
-        external
-        returns (uint256)
-    {
+    function createProfile(
+        address to,
+        DataTypes.CreateProfileParams calldata vars
+    ) external returns (uint256) {
         createProfileRan = true;
+        return 1890;
     }
 
     function getHandleByProfileId(uint256 profildId)
@@ -40,6 +41,18 @@ contract MockProfileNFT is IProfileNFT {
     {
         return "";
     }
+
+    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
+        external
+        view
+        returns (address, address)
+    {
+        return (address(0), address(0));
+    }
+
+    function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
+        external
+    {}
 }
 
 contract CyberEngineTest is Test {
@@ -62,6 +75,7 @@ contract CyberEngineTest is Test {
             address(0),
             address(profile),
             address(box),
+            address(0xDEAD),
             rolesAuthority
         );
         rolesAuthority.setRoleCapability(
@@ -357,10 +371,13 @@ contract CyberEngineTest is Test {
         assertEq(profile.createProfileRan(), false);
         assertEq(engine.nonces(bob), 0);
 
-        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-            bob,
-            handle,
-            DataTypes.EIP712Signature(v, r, s, deadline)
+        assertEq(
+            engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+                bob,
+                handle,
+                DataTypes.EIP712Signature(v, r, s, deadline)
+            ),
+            1890
         );
 
         assertEq(box.mintRan(), true);
