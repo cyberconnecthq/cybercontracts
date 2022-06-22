@@ -146,7 +146,7 @@ contract CyberEngineTest is Test {
         assertEq(engine.boxGiveawayEnded(), false);
         assertEq(
             uint256(engine.getState()),
-            uint256(CyberEngine.State.Operational)
+            uint256(DataTypes.State.Operational)
         );
     }
 
@@ -175,7 +175,7 @@ contract CyberEngineTest is Test {
     function testCannotSetFeeAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
+        engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
     }
 
     function testCannotSetBoxOpenedAsNonGov() public {
@@ -205,8 +205,8 @@ contract CyberEngineTest is Test {
     function testSetFeeGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
-        assertEq(engine.feeMapping(CyberEngine.Tier.Tier0), 1);
+        engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
+        assertEq(engine.feeMapping(DataTypes.Tier.Tier0), 1);
     }
 
     function testSetBoxOpenedGov() public {
@@ -299,27 +299,27 @@ contract CyberEngineTest is Test {
 
     function testInitialFees() public {
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier0),
+            engine.feeMapping(DataTypes.Tier.Tier0),
             Constants._INITIAL_FEE_TIER0
         );
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier1),
+            engine.feeMapping(DataTypes.Tier.Tier1),
             Constants._INITIAL_FEE_TIER1
         );
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier2),
+            engine.feeMapping(DataTypes.Tier.Tier2),
             Constants._INITIAL_FEE_TIER2
         );
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier3),
+            engine.feeMapping(DataTypes.Tier.Tier3),
             Constants._INITIAL_FEE_TIER3
         );
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier4),
+            engine.feeMapping(DataTypes.Tier.Tier4),
             Constants._INITIAL_FEE_TIER4
         );
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier5),
+            engine.feeMapping(DataTypes.Tier.Tier5),
             Constants._INITIAL_FEE_TIER5
         );
     }
@@ -562,23 +562,23 @@ contract CyberEngineTest is Test {
     function testSetState() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setState(CyberEngine.State.Paused);
-        assertEq(uint256(engine.getState()), uint256(CyberEngine.State.Paused));
+        engine.setState(DataTypes.State.Paused);
+        assertEq(uint256(engine.getState()), uint256(DataTypes.State.Paused));
     }
 
     function testCannotSetStateWithoutAuth() public {
         vm.expectRevert("UNAUTHORIZED");
-        engine.setState(CyberEngine.State.Paused);
+        engine.setState(DataTypes.State.Paused);
         assertEq(
             uint256(engine.getState()),
-            uint256(CyberEngine.State.Operational)
+            uint256(DataTypes.State.Operational)
         );
     }
 
     function testCannotSubscribeWhenStateIsPaused() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setState(CyberEngine.State.Paused);
+        engine.setState(DataTypes.State.Paused);
         uint256[] memory ids = new uint256[](1);
         ids[0] = 1;
         bytes[] memory datas = new bytes[](1);
