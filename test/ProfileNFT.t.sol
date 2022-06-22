@@ -68,7 +68,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotGetTokenURIOfUnmintted() public {
-        vm.expectRevert("ERC721: invalid token ID");
+        vm.expectRevert("NOT_MINTED");
         token.tokenURI(0);
     }
 
@@ -155,5 +155,64 @@ contract ProfileNFTTest is Test {
     function testSetSubscribeNFTAddress() public {
         vm.prank(engine);
         token.setSubscribeNFTAddress(0, address(0));
+    }
+
+    function testGetOperatorApproval() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(alice, createProfileData);
+        assertEq(token.getOperatorApproval(id, address(0)), false);
+    }
+
+    function testCannotGetOperatorApprovalForNonexistentProfile() public {
+        vm.expectRevert("NOT_MINTED");
+        token.getOperatorApproval(0, address(0));
+    }
+
+    function testCannotSetOperatorIfNotOwner() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(alice, createProfileData);
+        vm.expectRevert("Only owner can set operator");
+        token.setOperatorApproval(id, address(0), true);
+    }
+
+    function testCannotSetOperatorToZeroAddress() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(alice, createProfileData);
+        vm.prank(alice);
+        vm.expectRevert("Operator address cannot be 0");
+        token.setOperatorApproval(id, address(0), true);
+    }
+
+    function testSetOperatorAsOwner() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(alice, createProfileData);
+        vm.prank(alice);
+        token.setOperatorApproval(id, minter, true);
+        assertEq(token.getOperatorApproval(id, minter), true);
+    }
+
+    function testSetMetadataAsOwner() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(alice, createProfileData);
+        assertEq(token.getMetadata(id), "");
+        vm.prank(alice);
+        token.setMetadata(id, "ipfs");
+        assertEq(token.getMetadata(id), "ipfs");
+    }
+
+    function testSetMetadataAsOperator() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(alice, createProfileData);
+        assertEq(token.getMetadata(id), "");
+        vm.prank(alice);
+        token.setOperatorApproval(id, minter, true);
+        vm.prank(minter);
+        token.setMetadata(id, "ipfs");
+        assertEq(token.getMetadata(id), "ipfs");
+    }
+
+    function testCannotGetMetadataForNonexistentProfile() public {
+        vm.expectRevert("NOT_MINTED");
+        token.getMetadata(0);
     }
 }
