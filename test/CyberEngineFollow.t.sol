@@ -16,11 +16,10 @@ import { Auth, Authority } from "../src/base/Auth.sol";
 import { SubscribeNFT } from "../src/SubscribeNFT.sol";
 
 contract MockProfileGetterSetter is IProfileNFT {
-    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
-        external
-        override
-        returns (uint256)
-    {
+    function createProfile(
+        address to,
+        DataTypes.CreateProfileParams calldata vars
+    ) external override returns (uint256) {
         return 1;
     }
 
@@ -35,13 +34,12 @@ contract MockProfileGetterSetter is IProfileNFT {
 
     bool public setterCalled;
 
-    function getSubscribeNFTAddressByProfileId(uint256 profileId)
+    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
         external
         view
-        override
-        returns (address)
+        returns (address, address)
     {
-        return address(0xC0DE);
+        return (address(0xC0DE), address(0));
     }
 
     function setSubscribeNFTAddress(uint256 profileId, address subscribeProxy)
@@ -115,7 +113,7 @@ contract CyberEngineFollowTest is Test {
             abi.encodeWithSelector(
                 IProfileNFT.createProfile.selector,
                 address(bob),
-                DataTypes.ProfileStruct(handle, "", address(0))
+                DataTypes.CreateProfileParams(handle, "", address(0))
             ),
             abi.encode(1)
         );
@@ -137,20 +135,22 @@ contract CyberEngineFollowTest is Test {
     function testCannotSubscribeEmptyList() public {
         vm.expectRevert("No profile ids provided");
         uint256[] memory empty;
-        engine.subscribe(empty);
+        bytes[] memory data;
+        engine.subscribe(empty, data);
     }
 
     function testSubscribe() public {
         address subscribeProxy = address(0xC0DE);
         uint256[] memory ids = new uint256[](1);
         ids[0] = 1;
+        bytes[] memory datas = new bytes[](1);
         vm.mockCall(
             profileAddress,
             abi.encodeWithSelector(
-                IProfileNFT.getSubscribeNFTAddressByProfileId.selector,
+                IProfileNFT.getSubscribeAddrAndMwByProfileId.selector,
                 1
             ),
-            abi.encode(address(subscribeProxy))
+            abi.encode(address(subscribeProxy), address(0))
         );
 
         uint256 result = 100;
@@ -161,7 +161,7 @@ contract CyberEngineFollowTest is Test {
         );
         uint256[] memory expected = new uint256[](1);
         expected[0] = result;
-        uint256[] memory called = engine.subscribe(ids);
+        uint256[] memory called = engine.subscribe(ids, datas);
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
     }
@@ -170,13 +170,15 @@ contract CyberEngineFollowTest is Test {
         address subscribeProxy = address(0xC0DE);
         uint256[] memory ids = new uint256[](1);
         ids[0] = 1;
+        bytes[] memory datas = new bytes[](1);
+
         vm.mockCall(
             profileAddress,
             abi.encodeWithSelector(
-                IProfileNFT.getSubscribeNFTAddressByProfileId.selector,
+                IProfileNFT.getSubscribeAddrAndMwByProfileId.selector,
                 1
             ),
-            abi.encode(address(0))
+            abi.encode(address(0), address(0))
         );
 
         uint256 result = 100;
@@ -201,7 +203,7 @@ contract CyberEngineFollowTest is Test {
 
         uint256[] memory expected = new uint256[](1);
         expected[0] = result;
-        uint256[] memory called = engine.subscribe(ids);
+        uint256[] memory called = engine.subscribe(ids, datas);
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
     }

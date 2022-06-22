@@ -55,7 +55,7 @@ to deploy
 - [ ] SBT Module
 - [x] Onchain Token URI
 - [ ] Permit with EIP712
-- [ ] Upgradeable and Proxy (UUPS)
+- [x] Upgradeable and Proxy (UUPS)
 - [ ] Crosschain support (openzeppelin contract) (https://docs.openzeppelin.com/contracts/4.x/api/crosschain)
 - [ ] Events
 - [ ] BoxNFT

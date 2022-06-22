@@ -16,11 +16,12 @@ contract ProfileNFTTest is Test {
     address constant minter = address(0xB0B);
     address constant engine = address(0xE);
     string constant imageUri = "https://example.com/image.png";
-    DataTypes.ProfileStruct internal createProfileData =
-        DataTypes.ProfileStruct(
+    address constant subscribeMw = address(0xD);
+    DataTypes.CreateProfileParams internal createProfileData =
+        DataTypes.CreateProfileParams(
             "alice",
             "https://example.com/alice.jpg",
-            address(0)
+            subscribeMw
         );
     string aliceMetadata =
         string(
@@ -63,6 +64,7 @@ contract ProfileNFTTest is Test {
         token.createProfile(alice, createProfileData);
         assertEq(token.totalSupply(), 1);
         assertEq(token.balanceOf(alice), 1);
+        // TODO: subscribe middle ware should eq the correct address
     }
 
     function testCannotGetTokenURIOfUnmintted() public {
@@ -101,7 +103,7 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.ProfileStruct(
+            DataTypes.CreateProfileParams(
                 "aliceandbobisareallylongname",
                 "https://example.com/alice.jpg",
                 address(0)
@@ -114,7 +116,7 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.ProfileStruct("alice&bob", imageUri, address(0))
+            DataTypes.CreateProfileParams("alice&bob", imageUri, address(0))
         );
     }
 
@@ -123,7 +125,7 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.ProfileStruct("", imageUri, address(0))
+            DataTypes.CreateProfileParams("", imageUri, address(0))
         );
     }
 
@@ -132,7 +134,7 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.ProfileStruct("Test", imageUri, address(0))
+            DataTypes.CreateProfileParams("Test", imageUri, address(0))
         );
     }
 
@@ -141,7 +143,7 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.ProfileStruct(" ", imageUri, address(0))
+            DataTypes.CreateProfileParams(" ", imageUri, address(0))
         );
     }
 

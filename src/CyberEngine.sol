@@ -8,6 +8,7 @@ import { Initializable } from "./upgradeability/Initializable.sol";
 import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
+import { ISubscribeMiddleware } from "./interfaces/ISubscribeMiddleware.sol";
 import { Auth } from "./base/Auth.sol";
 import { RolesAuthority } from "./base/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
@@ -106,7 +107,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
             IProfileNFT(profileAddress).createProfile(
                 to,
                 // TODO: maybe use profile struct
-                DataTypes.ProfileStruct(handle, "", address(0))
+                DataTypes.CreateProfileParams(handle, "", address(0))
             );
     }
 
@@ -149,22 +150,29 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         require(amount >= fee, "Insufficient fee");
     }
 
-    function subscribe(uint256[] calldata profileIds)
+    function subscribe(uint256[] calldata profileIds, bytes[] calldata subDatas)
         external
         returns (uint256[] memory)
     {
-        return _subscribe(msg.sender, profileIds);
+        return _subscribe(msg.sender, profileIds, subDatas);
     }
 
-    function _subscribe(address sender, uint256[] calldata profileIds)
-        internal
-        returns (uint256[] memory)
-    {
+    function _subscribe(
+        address sender,
+        uint256[] calldata profileIds,
+        bytes[] calldata subDatas
+    ) internal returns (uint256[] memory) {
         require(profileIds.length > 0, "No profile ids provided");
+        require(
+            profileIds.length == subDatas.length,
+            "Lenght missmatch profile ids and sub datas"
+        );
         uint256[] memory result = new uint256[](profileIds.length);
         for (uint256 i = 0; i < profileIds.length; i++) {
-            address subscribeNFT = IProfileNFT(profileAddress)
-                .getSubscribeNFTAddressByProfileId(profileIds[i]);
+            (address subscribeNFT, address subscribeMw) = IProfileNFT(
+                profileAddress
+            ).getSubscribeAddrAndMwByProfileId(profileIds[i]);
+            // lazy deploy subscribe NFT
             if (subscribeNFT == address(0)) {
                 bytes memory initData = abi.encodeWithSelector(
                     ISubscribeNFT.initialize.selector,
@@ -181,9 +189,25 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
                 );
                 console.log("here");
             }
-            // TODO: process middleware
+            // run middleware before subscribe
+            if (subscribeMw != address(0)) {
+                ISubscribeMiddleware(subscribeMw).preProcess(
+                    profileIds[i],
+                    sender,
+                    subscribeNFT,
+                    subDatas[i]
+                );
+            }
             console.log(subscribeNFT);
             result[i] = ISubscribeNFT(subscribeNFT).mint(sender);
+            if (subscribeMw != address(0)) {
+                ISubscribeMiddleware(subscribeMw).postProcess(
+                    profileIds[i],
+                    sender,
+                    subscribeNFT,
+                    subDatas[i]
+                );
+            }
         }
         return result;
     }

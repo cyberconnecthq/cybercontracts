@@ -26,10 +26,10 @@ contract MockBoxNFT is IBoxNFT {
 contract MockProfileNFT is IProfileNFT {
     bool public createProfileRan;
 
-    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
-        external
-        returns (uint256)
-    {
+    function createProfile(
+        address to,
+        DataTypes.CreateProfileParams calldata vars
+    ) external returns (uint256) {
         createProfileRan = true;
         return 1890;
     }
@@ -42,12 +42,12 @@ contract MockProfileNFT is IProfileNFT {
         return "";
     }
 
-    function getSubscribeNFTAddressByProfileId(uint256 profileId)
+    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
         external
         view
-        returns (address)
+        returns (address, address)
     {
-        return address(0);
+        return (address(0), address(0));
     }
 
     function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)

@@ -33,10 +33,10 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
         CyberNFTBase._initialize(_name, _symbol);
     }
 
-    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
-        external
-        returns (uint256)
-    {
+    function createProfile(
+        address to,
+        DataTypes.CreateProfileParams calldata vars
+    ) external override returns (uint256) {
         require(
             msg.sender == address(ENGINE),
             "Only Engine could create profile"
@@ -48,7 +48,12 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
 
         // TODO: unchecked
         _mint(to);
-        _profileById[_totalCount] = vars;
+        _profileById[_totalCount] = DataTypes.ProfileStruct({
+            handle: vars.handle,
+            imageURI: vars.imageURI,
+            subscribeNFT: address(0),
+            subscribeMw: vars.subscribeMw
+        });
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         return _totalCount;
@@ -65,13 +70,16 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
         _profileById[profileId].subscribeNFT = subscribeNFT;
     }
 
-    function getSubscribeNFTAddressByProfileId(uint256 profileId)
+    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
         external
         view
         override
-        returns (address)
+        returns (address, address)
     {
-        return _profileById[profileId].subscribeNFT;
+        return (
+            _profileById[profileId].subscribeNFT,
+            _profileById[profileId].subscribeMw
+        );
     }
 
     function getHandleByProfileId(uint256 profileId)
