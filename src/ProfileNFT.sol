@@ -4,38 +4,43 @@ pragma solidity 0.8.14;
 
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { CyberNFTBase } from "./base/CyberNFTBase.sol";
-import { RolesAuthority } from "./base/RolesAuthority.sol";
-import { Auth } from "./base/Auth.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 
 // TODO: Owner cannot be set with conflicting role for capacity
-contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
+contract ProfileNFT is CyberNFTBase, IProfileNFT {
+    address public immutable ENGINE;
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
+
+    // ENGINE for createProfile, setSubscribeNFT
+    constructor(address _engine) {
+        require(_engine != address(0), "Engine address cannot be 0");
+        ENGINE = _engine;
+    }
 
     // TODO: enable this, currently disabled for better testability
     // constructor() {
     //     _disableInitializers();
     // }
 
-    function initialize(
-        string calldata _name,
-        string calldata _symbol,
-        address _owner,
-        RolesAuthority _rolesAuthority
-    ) external initializer {
+    function initialize(string calldata _name, string calldata _symbol)
+        external
+        initializer
+    {
         CyberNFTBase._initialize(_name, _symbol);
-        Auth.__Auth_Init(_owner, _rolesAuthority);
     }
 
-    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
-        external
-        requiresAuth
-        returns (uint256)
-    {
+    function createProfile(
+        address to,
+        DataTypes.CreateProfileParams calldata vars
+    ) external override returns (uint256) {
+        require(
+            msg.sender == address(ENGINE),
+            "Only Engine could create profile"
+        );
         _validateHandle(vars.handle);
 
         bytes32 handleHash = keccak256(bytes(vars.handle));
@@ -45,11 +50,36 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
         _mint(to);
         _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: vars.handle,
-            imageURI: vars.imageURI
+            imageURI: vars.imageURI,
+            subscribeNFT: address(0),
+            subscribeMw: vars.subscribeMw
         });
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         return _totalCount;
+    }
+
+    function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
+        external
+        override
+    {
+        require(
+            msg.sender == address(ENGINE),
+            "Only Engine could set SubscribeNFT address"
+        );
+        _profileById[profileId].subscribeNFT = subscribeNFT;
+    }
+
+    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
+        external
+        view
+        override
+        returns (address, address)
+    {
+        return (
+            _profileById[profileId].subscribeNFT,
+            _profileById[profileId].subscribeMw
+        );
     }
 
     function getHandleByProfileId(uint256 profileId)
