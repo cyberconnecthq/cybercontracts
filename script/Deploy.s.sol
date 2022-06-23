@@ -68,7 +68,7 @@ contract DeployScript is Script {
             rolesAuthority
         );
 
-        // TODO: do a health check. verify everything works
+        // TODO: do a health check. verify everything
         vm.stopBroadcast();
     }
 }

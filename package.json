@@ -10,7 +10,7 @@
     "lint:fix": "prettier --write **.sol",
     "prepare": "husky install",
     "spdx": "hardhat prepend-spdx-license",
-    "deploy": "node ./_scripts.js deploy",
+    "deploy": "node ./_scripts.js deploy rinkeby",
     "build": "forge build --force"
   },
   "devDependencies": {
