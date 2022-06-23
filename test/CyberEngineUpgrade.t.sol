@@ -30,6 +30,7 @@ contract CyberEngineUpgradeTest is Test {
             address(0),
             address(this),
             address(this),
+            address(this),
             rolesAuthority
         );
         proxy = new ERC1967Proxy(address(impl), functionData);

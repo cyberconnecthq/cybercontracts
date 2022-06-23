@@ -10,7 +10,7 @@ contract MockEngine is CyberEngine {
         bytes32 digest,
         DataTypes.EIP712Signature calldata sig
     ) public view {
-        super._verifySignature(digest, sig);
+        super._requiresExpectedSigner(digest, signer, sig);
     }
 
     function requireEnoughFee(string calldata handle, uint256 amount)
@@ -20,6 +20,7 @@ contract MockEngine is CyberEngine {
         super._requireEnoughFee(handle, amount);
     }
 
+    // Expose for test
     function hashTypedDataV4(bytes32 structHash)
         public
         view

@@ -1,24 +1,36 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
-
 import "./dependencies/openzeppelin/EIP712.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "./upgradeability/Initializable.sol";
 import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
+import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
+import { ISubscribeMiddleware } from "./interfaces/ISubscribeMiddleware.sol";
 import { Auth } from "./base/Auth.sol";
 import { RolesAuthority } from "./base/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
+import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
+import { ERC721 } from "./base/ERC721.sol";
 import { ErrorMessages } from "./libraries/ErrorMessages.sol";
 
+// TODO: separate storage contract
 contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
+    enum State {
+        Operational, // green light, all running
+        EssensePaused, // cannot issue new essense, TODO: maybe remove for now
+        Paused // everything paused
+    }
     address public profileAddress;
     address public boxAddress;
     address public signer;
-    bool public boxOpened;
+    bool public boxGiveawayEnded;
+    // Shared between register and other withSig functions. Always query onchain to get the current nounce
     mapping(address => uint256) public nonces;
+    address public subscribeNFTBeacon;
+    State private _state;
 
     string internal constant _VERSION_STRING = "1";
     uint256 internal constant _VERSION = 1;
@@ -37,6 +49,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         address _owner,
         address _profileAddress,
         address _boxAddress,
+        address _subscribeNFTBeacon,
         RolesAuthority _rolesAuthority
     ) external initializer {
         Auth.__Auth_Init(_owner, _rolesAuthority);
@@ -45,7 +58,7 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         signer = _owner;
         profileAddress = _profileAddress;
         boxAddress = _boxAddress;
-        boxOpened = false;
+        subscribeNFTBeacon = _subscribeNFTBeacon;
         _setInitialFees();
     }
 
@@ -71,20 +84,20 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         feeMapping[tier] = amount;
     }
 
-    function setBoxOpened(bool opened) external requiresAuth {
-        boxOpened = opened;
+    function setBoxGiveawayEnded(bool ended) external requiresAuth {
+        boxGiveawayEnded = ended;
     }
 
     function register(
         address to,
         string calldata handle,
         DataTypes.EIP712Signature calldata sig
-    ) external payable {
-        _verifySignature(
+    ) external payable returns (uint256) {
+        _requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
-                        Constants._REGISTER,
+                        Constants._REGISTER_TYPEHASH,
                         to,
                         handle,
                         nonces[to]++,
@@ -92,18 +105,21 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
                     )
                 )
             ),
+            signer,
             sig
         );
 
         _requireEnoughFee(handle, msg.value);
 
-        if (!boxOpened) {
+        if (!boxGiveawayEnded) {
             IBoxNFT(boxAddress).mint(to);
         }
-        IProfileNFT(profileAddress).createProfile(
-            to,
-            DataTypes.ProfileStruct(handle, "")
-        );
+        return
+            IProfileNFT(profileAddress).createProfile(
+                to,
+                // TODO: maybe use profile struct
+                DataTypes.CreateProfileParams(handle, "", address(0))
+            );
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
@@ -122,8 +138,9 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         feeMapping[Tier.Tier5] = Constants._INITIAL_FEE_TIER5;
     }
 
-    function _verifySignature(
+    function _requiresExpectedSigner(
         bytes32 digest,
+        address expectedSigner,
         DataTypes.EIP712Signature calldata sig
     ) internal view {
         require(
@@ -131,7 +148,10 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
             ErrorMessages._VERIFY_DEADLINE_EXP
         );
         address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
-        require(recoveredAddress == signer, ErrorMessages._VERIFY_INVALID_SIG);
+        require(
+            recoveredAddress == expectedSigner,
+            ErrorMessages._VERIFY_INVALID_SIG
+        );
     }
 
     function _requireEnoughFee(string calldata handle, uint256 amount)
@@ -146,6 +166,194 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
             fee = feeMapping[Tier(byteHandle.length - 1)];
         }
         require(amount >= fee, ErrorMessages._REGISTER_INSUFF_FEE);
+    }
+
+    function subscribeWithSig(
+        uint256[] calldata profileIds,
+        bytes[] calldata subDatas,
+        address sender,
+        DataTypes.EIP712Signature calldata sig
+    ) external whenNotPaused returns (uint256[] memory) {
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._SUBSCRIBE_TYPEHASH,
+                        profileIds,
+                        subDatas,
+                        nonces[sender]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            sender,
+            sig
+        );
+        return _subscribe(sender, profileIds, subDatas);
+    }
+
+    function subscribe(uint256[] calldata profileIds, bytes[] calldata subDatas)
+        external
+        whenNotPaused
+        returns (uint256[] memory)
+    {
+        return _subscribe(msg.sender, profileIds, subDatas);
+    }
+
+    function _subscribe(
+        address sender,
+        uint256[] calldata profileIds,
+        bytes[] calldata subDatas
+    ) internal returns (uint256[] memory) {
+        require(profileIds.length > 0, ErrorMessages._NO_PROFILE_IDS);
+        require(
+            profileIds.length == subDatas.length,
+            ErrorMessages._LENGTH_MISMATCH
+        );
+        uint256[] memory result = new uint256[](profileIds.length);
+        for (uint256 i = 0; i < profileIds.length; i++) {
+            (address subscribeNFT, address subscribeMw) = IProfileNFT(
+                profileAddress
+            ).getSubscribeAddrAndMwByProfileId(profileIds[i]);
+            // lazy deploy subscribe NFT
+            if (subscribeNFT == address(0)) {
+                bytes memory initData = abi.encodeWithSelector(
+                    ISubscribeNFT.initialize.selector,
+                    profileIds[i]
+                );
+                subscribeNFT = address(
+                    new BeaconProxy(subscribeNFTBeacon, initData)
+                );
+                IProfileNFT(profileAddress).setSubscribeNFTAddress(
+                    profileIds[i],
+                    subscribeNFT
+                );
+            }
+            // run middleware before subscribe
+            if (subscribeMw != address(0)) {
+                ISubscribeMiddleware(subscribeMw).preProcess(
+                    profileIds[i],
+                    sender,
+                    subscribeNFT,
+                    subDatas[i]
+                );
+            }
+            result[i] = ISubscribeNFT(subscribeNFT).mint(sender);
+            if (subscribeMw != address(0)) {
+                ISubscribeMiddleware(subscribeMw).postProcess(
+                    profileIds[i],
+                    sender,
+                    subscribeNFT,
+                    subDatas[i]
+                );
+            }
+        }
+        return result;
+    }
+
+    // State
+    modifier whenNotPaused() {
+        require(_state != State.Paused, ErrorMessages._CONTRACT_PAUSED);
+        _;
+    }
+
+    modifier whenEssensePaused() {
+        require(_state != State.EssensePaused, ErrorMessages._ESSENSE_PAUSED);
+        _;
+    }
+
+    function getState() external view returns (State) {
+        return _state;
+    }
+
+    function setState(State state) external requiresAuth {
+        State preState = _state;
+        _state = state;
+        // TODO: emit event
+    }
+
+    // Set Metadata
+    function setMetadata(uint256 profileId, string calldata metadata) external {
+        require(
+            msg.sender == ERC721(profileAddress).ownerOf(profileId) ||
+                IProfileNFT(profileAddress).getOperatorApproval(
+                    profileId,
+                    msg.sender
+                ),
+            ErrorMessages._OWNER_OPERATOR_ONLY
+        );
+        IProfileNFT(profileAddress).setMetadata(profileId, metadata);
+    }
+
+    // only owner's signature works
+    function setMetadataWithSig(
+        uint256 profileId,
+        string calldata metadata,
+        DataTypes.EIP712Signature calldata sig
+    ) external {
+        address owner = ERC721(profileAddress).ownerOf(profileId);
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._SET_METADATA_TYPEHASH,
+                        profileId,
+                        metadata,
+                        nonces[owner]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            owner,
+            sig
+        );
+        IProfileNFT(profileAddress).setMetadata(profileId, metadata);
+    }
+
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) external {
+        require(
+            msg.sender == ERC721(profileAddress).ownerOf(profileId),
+            ErrorMessages._OWNER_ONLY
+        );
+        IProfileNFT(profileAddress).setOperatorApproval(
+            profileId,
+            operator,
+            approved
+        );
+    }
+
+    function setOperatorApprovalWithSig(
+        uint256 profileId,
+        address operator,
+        bool approved,
+        DataTypes.EIP712Signature calldata sig
+    ) external {
+        address owner = ERC721(profileAddress).ownerOf(profileId);
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
+                        profileId,
+                        operator,
+                        approved,
+                        nonces[owner]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            owner,
+            sig
+        );
+        IProfileNFT(profileAddress).setOperatorApproval(
+            profileId,
+            operator,
+            approved
+        );
     }
 
     // UUPS upgradeability

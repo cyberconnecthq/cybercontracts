@@ -7,7 +7,6 @@ import "forge-std/console2.sol";
 import { MockEngine } from "./utils/MockEngine.sol";
 import { CyberEngine } from "../src/CyberEngine.sol";
 import { Constants } from "../src/libraries/Constants.sol";
-import { Constants } from "../src/libraries/Constants.sol";
 import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { RolesAuthority } from "../src/base/RolesAuthority.sol";
@@ -19,19 +18,21 @@ import { ErrorMessages } from "../src/libraries/ErrorMessages.sol";
 contract MockBoxNFT is IBoxNFT {
     bool public mintRan;
 
-    function mint(address _to) external {
+    function mint(address _to) external returns (uint256) {
         mintRan = true;
+        return 0;
     }
 }
 
 contract MockProfileNFT is IProfileNFT {
     bool public createProfileRan;
 
-    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
-        external
-        returns (uint256)
-    {
+    function createProfile(
+        address to,
+        DataTypes.CreateProfileParams calldata vars
+    ) external returns (uint256) {
         createProfileRan = true;
+        return 1890;
     }
 
     function getHandleByProfileId(uint256 profildId)
@@ -41,6 +42,36 @@ contract MockProfileNFT is IProfileNFT {
     {
         return "";
     }
+
+    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
+        external
+        view
+        returns (address, address)
+    {
+        return (address(0), address(0));
+    }
+
+    function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
+        external
+    {}
+
+    function setMetadata(uint256 profileId, string calldata metadata)
+        external
+    {}
+
+    function getOperatorApproval(uint256 profileId, address operator)
+        external
+        view
+        returns (bool)
+    {
+        return true;
+    }
+
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) external {}
 }
 
 contract CyberEngineTest is Test {
@@ -63,6 +94,7 @@ contract CyberEngineTest is Test {
             address(0),
             address(profile),
             address(box),
+            address(0xDEAD),
             rolesAuthority
         );
         rolesAuthority.setRoleCapability(
@@ -101,12 +133,22 @@ contract CyberEngineTest is Test {
             Constants._SET_BOX_OPENED,
             true
         );
+        rolesAuthority.setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            address(engine),
+            Constants._SET_STATE,
+            true
+        );
     }
 
     function testBasic() public {
         assertEq(engine.profileAddress(), address(profile));
         assertEq(engine.boxAddress(), address(box));
-        assertEq(engine.boxOpened(), false);
+        assertEq(engine.boxGiveawayEnded(), false);
+        assertEq(
+            uint256(engine.getState()),
+            uint256(CyberEngine.State.Operational)
+        );
     }
 
     function testAuth() public {
@@ -140,7 +182,7 @@ contract CyberEngineTest is Test {
     function testCannotSetBoxOpenedAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setBoxOpened(true);
+        engine.setBoxGiveawayEnded(true);
     }
 
     function testSetSignerAsGov() public {
@@ -171,7 +213,7 @@ contract CyberEngineTest is Test {
     function testSetBoxOpenedGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setBoxOpened(true);
+        engine.setBoxGiveawayEnded(true);
     }
 
     function testVerify() public {
@@ -187,7 +229,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
         engine.verifySignature(
@@ -203,7 +253,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -221,7 +279,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -350,7 +416,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -358,10 +432,13 @@ contract CyberEngineTest is Test {
         assertEq(profile.createProfileRan(), false);
         assertEq(engine.nonces(bob), 0);
 
-        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-            bob,
-            handle,
-            DataTypes.EIP712Signature(v, r, s, deadline)
+        assertEq(
+            engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+                bob,
+                handle,
+                DataTypes.EIP712Signature(v, r, s, deadline)
+            ),
+            1890
         );
 
         assertEq(box.mintRan(), true);
@@ -382,7 +459,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -408,7 +493,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
@@ -429,7 +522,7 @@ contract CyberEngineTest is Test {
         address charlie = vm.addr(1);
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setBoxOpened(true);
+        engine.setBoxGiveawayEnded(true);
 
         vm.prank(alice);
         engine.setSigner(charlie);
@@ -440,7 +533,15 @@ contract CyberEngineTest is Test {
 
         string memory handle = "bob";
         bytes32 digest = engine.hashTypedDataV4(
-            keccak256(abi.encode(Constants._REGISTER, bob, handle, 0, deadline))
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    bob,
+                    handle,
+                    0,
+                    deadline
+                )
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
@@ -457,5 +558,32 @@ contract CyberEngineTest is Test {
         assertEq(box.mintRan(), false);
         assertEq(profile.createProfileRan(), true);
         assertEq(engine.nonces(bob), 1);
+    }
+
+    function testSetState() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setState(CyberEngine.State.Paused);
+        assertEq(uint256(engine.getState()), uint256(CyberEngine.State.Paused));
+    }
+
+    function testCannotSetStateWithoutAuth() public {
+        vm.expectRevert("UNAUTHORIZED");
+        engine.setState(CyberEngine.State.Paused);
+        assertEq(
+            uint256(engine.getState()),
+            uint256(CyberEngine.State.Operational)
+        );
+    }
+
+    function testCannotSubscribeWhenStateIsPaused() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setState(CyberEngine.State.Paused);
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
+        bytes[] memory datas = new bytes[](1);
+        vm.expectRevert(bytes(ErrorMessages._CONTRACT_PAUSED));
+        engine.subscribe(ids, datas);
     }
 }

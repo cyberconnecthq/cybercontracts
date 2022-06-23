@@ -4,16 +4,17 @@ pragma solidity 0.8.14;
 
 import { CyberNFTBase } from "./base/CyberNFTBase.sol";
 import { ICyberEngine } from "./interfaces/ICyberEngine.sol";
+import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { ErrorMessages } from "./libraries/ErrorMessages.sol";
 
 // This will be deployed as beacon contracts for gas efficiency
-contract SubscribeNFT is CyberNFTBase {
+contract SubscribeNFT is CyberNFTBase, ISubscribeNFT {
     // TODO: use address or ICyberEngine
-    ICyberEngine public immutable ENGINE;
-    IProfileNFT public immutable PROFILE_NFT;
+    address public immutable ENGINE;
+    address public immutable PROFILE_NFT;
 
     uint256 internal _profileId;
 
@@ -23,8 +24,8 @@ contract SubscribeNFT is CyberNFTBase {
             profileNFT != address(0),
             ErrorMessages._ZERO_PROFILE_NFT_ADDRESS
         );
-        ENGINE = ICyberEngine(engine);
-        PROFILE_NFT = IProfileNFT(profileNFT);
+        ENGINE = engine;
+        PROFILE_NFT = profileNFT;
         _disableInitializers();
     }
 
@@ -40,7 +41,9 @@ contract SubscribeNFT is CyberNFTBase {
     }
 
     function name() external view override returns (string memory) {
-        string memory handle = PROFILE_NFT.getHandleByProfileId(_profileId);
+        string memory handle = IProfileNFT(PROFILE_NFT).getHandleByProfileId(
+            _profileId
+        );
         return
             string(
                 abi.encodePacked(handle, Constants._SUBSCRIBE_NFT_NAME_SUFFIX)
@@ -48,7 +51,9 @@ contract SubscribeNFT is CyberNFTBase {
     }
 
     function symbol() external view override returns (string memory) {
-        string memory handle = PROFILE_NFT.getHandleByProfileId(_profileId);
+        string memory handle = IProfileNFT(PROFILE_NFT).getHandleByProfileId(
+            _profileId
+        );
         return
             string(
                 abi.encodePacked(
@@ -69,7 +74,7 @@ contract SubscribeNFT is CyberNFTBase {
         returns (string memory)
     {
         _requireMinted(tokenId);
-        return ENGINE.subscribeNFTTokenURI(_profileId);
+        return ICyberEngine(ENGINE).subscribeNFTTokenURI(_profileId);
     }
 
     // Subscribe NFT cannot be transferred

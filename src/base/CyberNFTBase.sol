@@ -33,6 +33,6 @@ abstract contract CyberNFTBase is ERC721, Initializable {
     }
 
     function _requireMinted(uint256 tokenId) internal view virtual {
-        require(_exists(tokenId), ErrorMessages._TOKEN_ID_INVALID);
+        require(_exists(tokenId), ErrorMessages._TOKEN_NOT_MINTED);
     }
 }

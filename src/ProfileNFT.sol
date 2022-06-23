@@ -4,8 +4,6 @@ pragma solidity 0.8.14;
 
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { CyberNFTBase } from "./base/CyberNFTBase.sol";
-import { RolesAuthority } from "./base/RolesAuthority.sol";
-import { Auth } from "./base/Auth.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { LibString } from "./libraries/LibString.sol";
@@ -13,31 +11,44 @@ import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 import { ErrorMessages } from "./libraries/ErrorMessages.sol";
 
 // TODO: Owner cannot be set with conflicting role for capacity
-contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
+contract ProfileNFT is CyberNFTBase, IProfileNFT {
+    address public immutable ENGINE;
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
+    mapping(uint256 => string) internal _metadataById;
+    mapping(uint256 => mapping(address => bool)) internal _operatorApproval; // TODO: reconsider if useful
+
+    modifier onlyEngine() {
+        require(
+            msg.sender == address(ENGINE),
+            ErrorMessages._PROFILE_ONLY_ENGINE
+        );
+        _;
+    }
+
+    // ENGINE for createProfile, setSubscribeNFT
+    constructor(address _engine) {
+        require(_engine != address(0), ErrorMessages._ZERO_ENGINE_ADDRESS);
+        ENGINE = _engine;
+    }
 
     // TODO: enable this, currently disabled for better testability
     // constructor() {
     //     _disableInitializers();
     // }
 
-    function initialize(
-        string calldata _name,
-        string calldata _symbol,
-        address _owner,
-        RolesAuthority _rolesAuthority
-    ) external initializer {
+    function initialize(string calldata _name, string calldata _symbol)
+        external
+        initializer
+    {
         CyberNFTBase._initialize(_name, _symbol);
-        Auth.__Auth_Init(_owner, _rolesAuthority);
     }
 
-    function createProfile(address to, DataTypes.ProfileStruct calldata vars)
-        external
-        requiresAuth
-        returns (uint256)
-    {
-        _validateHandle(vars.handle);
+    function createProfile(
+        address to,
+        DataTypes.CreateProfileParams calldata vars
+    ) external override onlyEngine returns (uint256) {
+        _requiresValidHandle(vars.handle);
 
         bytes32 handleHash = keccak256(bytes(vars.handle));
         require(
@@ -49,11 +60,33 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
         _mint(to);
         _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: vars.handle,
-            imageURI: vars.imageURI
+            imageURI: vars.imageURI,
+            subscribeNFT: address(0),
+            subscribeMw: vars.subscribeMw
         });
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         return _totalCount;
+    }
+
+    function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
+        external
+        override
+        onlyEngine
+    {
+        _profileById[profileId].subscribeNFT = subscribeNFT;
+    }
+
+    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
+        external
+        view
+        override
+        returns (address, address)
+    {
+        return (
+            _profileById[profileId].subscribeNFT,
+            _profileById[profileId].subscribeMw
+        );
     }
 
     function getHandleByProfileId(uint256 profileId)
@@ -62,7 +95,7 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
         returns (string memory)
     {
         // TODO: maybe remove this check
-        require(_exists(profileId), ErrorMessages._TOKEN_ID_INVALID);
+        require(_exists(profileId), ErrorMessages._TOKEN_NOT_MINTED);
         return _profileById[profileId].handle;
     }
 
@@ -109,7 +142,7 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
             );
     }
 
-    function _validateHandle(string calldata handle) internal pure {
+    function _requiresValidHandle(string calldata handle) internal pure {
         bytes memory byteHandle = bytes(handle);
         require(
             byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
@@ -129,5 +162,39 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
                 ++i;
             }
         }
+    }
+
+    function getOperatorApproval(uint256 profileId, address operator)
+        external
+        view
+        returns (bool)
+    {
+        _requireMinted(profileId);
+        return _operatorApproval[profileId][operator];
+    }
+
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) external onlyEngine {
+        require(operator != address(0), ErrorMessages._ZERO_OPERATOR_ADDRESS);
+        _operatorApproval[profileId][operator] = approved;
+    }
+
+    function setMetadata(uint256 profileId, string calldata metadata)
+        external
+        onlyEngine
+    {
+        _metadataById[profileId] = metadata;
+    }
+
+    function getMetadata(uint256 profileId)
+        external
+        view
+        returns (string memory)
+    {
+        _requireMinted(profileId);
+        return _metadataById[profileId];
     }
 }
