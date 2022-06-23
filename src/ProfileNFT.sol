@@ -8,14 +8,16 @@ import { Constants } from "./libraries/Constants.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
+import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 // TODO: Owner cannot be set with conflicting role for capacity
-contract ProfileNFT is CyberNFTBase, IProfileNFT {
+contract ProfileNFT is CyberNFTBase, IProfileNFT, UUPSUpgradeable {
     address public immutable ENGINE;
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
     mapping(uint256 => string) internal _metadataById;
     mapping(uint256 => mapping(address => bool)) internal _operatorApproval; // TODO: reconsider if useful
+    uint256 private constant VERSION = 1;
 
     modifier onlyEngine() {
         require(msg.sender == address(ENGINE), "Only Engine");
@@ -190,4 +192,13 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
         _requireMinted(profileId);
         return _metadataById[profileId];
     }
+
+    // TODO: write a test for upgrade profile nft
+    // UUPS upgradeability
+    function version() external pure virtual returns (uint256) {
+        return VERSION;
+    }
+
+    // UUPS upgradeability
+    function _authorizeUpgrade(address) internal override onlyEngine {}
 }

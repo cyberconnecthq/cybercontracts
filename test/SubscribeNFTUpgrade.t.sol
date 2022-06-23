@@ -9,8 +9,6 @@ import { SubscribeNFT } from "../src/SubscribeNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { LibString } from "../src/libraries/LibString.sol";
 import { Constants } from "../src/libraries/Constants.sol";
-import { RolesAuthority } from "../src/base/RolesAuthority.sol";
-import { Auth, Authority } from "../src/base/Auth.sol";
 import { MockSubscribeNFTV2 } from "./utils/MockSubscribeNFTV2.sol";
 
 contract MockEngine is ICyberEngine {
@@ -37,71 +35,27 @@ contract SubscribeNFTUpgradeTest is Test {
     MockEngine internal engine;
     address internal profile = address(0xDEAD);
 
-    RolesAuthority internal rolesAuthority;
-
     uint256 internal profileId = 1;
     address constant alice = address(0xA11CE);
 
     function setUp() public {
-        rolesAuthority = new RolesAuthority(
-            address(this),
-            Authority(address(0))
-        );
-
         engine = new MockEngine();
         impl = new SubscribeNFT(address(engine), profile);
         engine.setSubscribeNFTImpl(address(impl));
-        beacon = new UpgradeableBeacon(
-            address(impl),
-            address(0),
-            rolesAuthority
-        );
+        beacon = new UpgradeableBeacon(address(impl), address(engine));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
             profileId
         );
         proxy = new BeaconProxy(address(beacon), functionData);
         proxyB = new BeaconProxy(address(beacon), functionData);
-
-        rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(beacon),
-            Constants._BEACON_UPGRADE_TO,
-            true
-        );
     }
 
     function testAuth() public {
-        assertEq(
-            rolesAuthority.doesRoleHaveCapability(
-                Constants._ENGINE_GOV_ROLE,
-                address(beacon),
-                Constants._BEACON_UPGRADE_TO
-            ),
-            true
-        );
-        assertEq(
-            rolesAuthority.canCall(
-                address(beacon),
-                alice,
-                Constants._BEACON_UPGRADE_TO
-            ),
-            false
-        );
+        assertEq(beacon.ENGINE(), address(engine));
     }
 
     function testUpgrade() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-
-        assertEq(
-            rolesAuthority.canCall(
-                alice,
-                address(beacon),
-                Constants._BEACON_UPGRADE_TO
-            ),
-            true
-        );
-
         MockSubscribeNFTV2 implB = new MockSubscribeNFTV2(
             address(engine),
             profile
@@ -110,7 +64,7 @@ contract SubscribeNFTUpgradeTest is Test {
         assertEq(SubscribeNFT(address(proxy)).version(), 1);
         assertEq(SubscribeNFT(address(proxyB)).version(), 1);
 
-        vm.prank(alice);
+        vm.prank(address(engine));
         beacon.upgradeTo(address(implB));
 
         MockSubscribeNFTV2 p = MockSubscribeNFTV2(address(proxy));

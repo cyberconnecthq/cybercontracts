@@ -51,11 +51,7 @@ contract SubscribeNFTTest is Test {
         engine = new MockEngine();
         impl = new SubscribeNFT(address(engine), profile);
         engine.setSubscribeNFTImpl(address(impl));
-        beacon = new UpgradeableBeacon(
-            address(impl),
-            address(0),
-            rolesAuthority
-        );
+        beacon = new UpgradeableBeacon(address(impl), address(engine));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
             profileId

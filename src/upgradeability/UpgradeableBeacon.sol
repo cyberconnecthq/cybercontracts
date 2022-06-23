@@ -5,19 +5,19 @@ pragma solidity ^0.8.0;
 
 import "openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol";
 import "openzeppelin-contracts/contracts/utils/Address.sol";
-import { Auth } from "../base/Auth.sol";
-import { RolesAuthority } from "../base/RolesAuthority.sol";
 
 /**
  * Adapted from Openzepelin's UpgradeableBeacon.sol with RolesAuthority auth
+ * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/83277ff916ac4f58fec072b8f28a252c1245c2f1/contracts/proxy/beacon/UpgradeableBeacon.sol
  *
  * @dev This contract is used in conjunction with one or more instances of {BeaconProxy} to determine their
  * implementation contract, which is where they will delegate all function calls.
  *
  * An owner is able to change the implementation the beacon points to, thus upgrading the proxies that use this beacon.
  */
-contract UpgradeableBeacon is IBeacon, Auth {
+contract UpgradeableBeacon is IBeacon {
     address private _implementation;
+    address public immutable ENGINE;
 
     /**
      * @dev Emitted when the implementation returned by the beacon is changed.
@@ -28,13 +28,9 @@ contract UpgradeableBeacon is IBeacon, Auth {
      * @dev Sets the address of the initial implementation, and the deployer account as the owner who can upgrade the
      * beacon.
      */
-    constructor(
-        address implementation_,
-        address owner_,
-        RolesAuthority rolesAuthority_
-    ) {
+    constructor(address implementation_, address engine) {
         _setImplementation(implementation_);
-        __Auth_Init(owner_, rolesAuthority_);
+        ENGINE = engine;
     }
 
     /**
@@ -54,7 +50,8 @@ contract UpgradeableBeacon is IBeacon, Auth {
      * - msg.sender must be the owner of the contract.
      * - `newImplementation` must be a contract.
      */
-    function upgradeTo(address newImplementation) public virtual requiresAuth {
+    function upgradeTo(address newImplementation) public virtual {
+        require(msg.sender == address(ENGINE), "Only Engine");
         _setImplementation(newImplementation);
         emit Upgraded(newImplementation);
     }

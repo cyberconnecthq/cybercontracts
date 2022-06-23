@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
-import "./dependencies/openzeppelin/EIP712.sol";
-import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { EIP712 } from "./dependencies/openzeppelin/EIP712.sol";
+import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "./upgradeability/Initializable.sol";
 import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
+import { ProfileNFT } from "./ProfileNFT.sol";
 import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { ISubscribeMiddleware } from "./interfaces/ISubscribeMiddleware.sol";
 import { Auth } from "./base/Auth.sol";
@@ -344,6 +345,11 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
             operator,
             approved
         );
+    }
+
+    // TODO: need test
+    function upgradeProfile(address newImpl) external {
+        ProfileNFT(profileAddress).upgradeTo(newImpl);
     }
 
     // UUPS upgradeability
