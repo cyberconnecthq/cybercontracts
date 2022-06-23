@@ -14,6 +14,7 @@ import { RolesAuthority } from "../src/base/RolesAuthority.sol";
 import { Authority } from "../src/base/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
+import { ErrorMessages } from "../src/libraries/ErrorMessages.sol";
 
 contract MockBoxNFT is IBoxNFT {
     bool public mintRan;
@@ -206,7 +207,7 @@ contract CyberEngineTest is Test {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-        vm.expectRevert("VerifySig: invalid sig");
+        vm.expectRevert(bytes(ErrorMessages._VERIFY_INVALID_SIG));
         engine.verifySignature(
             digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -224,7 +225,7 @@ contract CyberEngineTest is Test {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-        vm.expectRevert("VerifySig: deadline expired");
+        vm.expectRevert(bytes(ErrorMessages._VERIFY_DEADLINE_EXP));
         engine.verifySignature(
             digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -263,7 +264,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement0() public {
-        vm.expectRevert("RegisterFee: insufficient fee");
+        vm.expectRevert(bytes(ErrorMessages._REGISTER_INSUFF_FEE));
         engine.requireEnoughFee("A", Constants._INITIAL_FEE_TIER0 - 1);
     }
 
@@ -272,7 +273,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement1() public {
-        vm.expectRevert("RegisterFee: insufficient fee");
+        vm.expectRevert(bytes(ErrorMessages._REGISTER_INSUFF_FEE));
         engine.requireEnoughFee("AB", Constants._INITIAL_FEE_TIER1 - 1);
     }
 
@@ -281,7 +282,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement2() public {
-        vm.expectRevert("RegisterFee: insufficient fee");
+        vm.expectRevert(bytes(ErrorMessages._REGISTER_INSUFF_FEE));
         engine.requireEnoughFee("ABC", Constants._INITIAL_FEE_TIER2 - 1);
     }
 
@@ -290,7 +291,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement3() public {
-        vm.expectRevert("RegisterFee: insufficient fee");
+        vm.expectRevert(bytes(ErrorMessages._REGISTER_INSUFF_FEE));
         engine.requireEnoughFee("ABCD", Constants._INITIAL_FEE_TIER3 - 1);
     }
 
@@ -299,7 +300,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement4() public {
-        vm.expectRevert("RegisterFee: insufficient fee");
+        vm.expectRevert(bytes(ErrorMessages._REGISTER_INSUFF_FEE));
         engine.requireEnoughFee("ABCDE", Constants._INITIAL_FEE_TIER4 - 1);
     }
 
@@ -308,7 +309,7 @@ contract CyberEngineTest is Test {
     }
 
     function testCannotMeetFeeRequirement5() public {
-        vm.expectRevert("RegisterFee: insufficient fee");
+        vm.expectRevert(bytes(ErrorMessages._REGISTER_INSUFF_FEE));
         engine.requireEnoughFee("ABCDEFG", Constants._INITIAL_FEE_TIER5 - 1);
     }
 
@@ -328,7 +329,7 @@ contract CyberEngineTest is Test {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
 
-        vm.expectRevert("Withdraw: insufficient balance");
+        vm.expectRevert(bytes(ErrorMessages._WITHDRAW_INSUFF_BAL));
         engine.withdraw(alice, 1);
     }
 
@@ -386,7 +387,7 @@ contract CyberEngineTest is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         // charlie signed the handle to bob, but register with a different address(alice).
-        vm.expectRevert("VerifySig: invalid sig");
+        vm.expectRevert(bytes(ErrorMessages._VERIFY_INVALID_SIG));
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
             alice,
             handle,
@@ -416,7 +417,7 @@ contract CyberEngineTest is Test {
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
 
-        vm.expectRevert("VerifySig: invalid sig");
+        vm.expectRevert(bytes(ErrorMessages._VERIFY_INVALID_SIG));
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
             bob,
             handle,

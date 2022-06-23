@@ -10,6 +10,7 @@ import { Constants } from "./libraries/Constants.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
+import { ErrorMessages } from "./libraries/ErrorMessages.sol";
 
 // TODO: Owner cannot be set with conflicting role for capacity
 contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
@@ -41,7 +42,7 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
         bytes32 handleHash = keccak256(bytes(vars.handle));
         require(
             !_exists(_profileIdByHandleHash[handleHash]),
-            "CreateProfile: handle taken"
+            ErrorMessages._PROFILE_HANDLE_TAKEN
         );
 
         // TODO: unchecked
@@ -61,7 +62,7 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
         returns (string memory)
     {
         // TODO: maybe remove this check
-        require(_exists(profileId), "ERC721: invalid token ID");
+        require(_exists(profileId), ErrorMessages._TOKEN_ID_INVALID);
         return _profileById[profileId].handle;
     }
 
@@ -113,7 +114,7 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
         require(
             byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
                 byteHandle.length > 0,
-            "ValidateHandle: invalid length"
+            ErrorMessages._PROFILE_HANDLE_INVALID_LENGTH
         );
 
         uint256 byteHandleLength = byteHandle.length;
@@ -121,7 +122,7 @@ contract ProfileNFT is CyberNFTBase, Auth, IProfileNFT {
             bytes1 b = byteHandle[i];
             require(
                 (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
-                "ValidateHandle: invalid char"
+                ErrorMessages._PROFILE_HANDLE_INVALID_CHAR
             );
             // optimation
             unchecked {

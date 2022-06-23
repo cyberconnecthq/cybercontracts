@@ -9,6 +9,7 @@ import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
 import { RolesAuthority } from "../src/base/RolesAuthority.sol";
 import { Authority } from "../src/base/Auth.sol";
+import { ErrorMessages } from "../src/libraries/ErrorMessages.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
@@ -81,7 +82,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotGetTokenURIOfUnmintted() public {
-        vm.expectRevert("ERC721: invalid token ID");
+        vm.expectRevert(bytes(ErrorMessages._TOKEN_ID_INVALID));
         token.tokenURI(0);
     }
 
@@ -102,12 +103,12 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithHandleTaken() public {
         token.createProfile(alice, createProfileData);
-        vm.expectRevert("CreateProfile: handle taken");
+        vm.expectRevert(bytes(ErrorMessages._PROFILE_HANDLE_TAKEN));
         token.createProfile(alice, createProfileData);
     }
 
     function testCannotCreateProfileLongerThanMaxHandleLength() public {
-        vm.expectRevert("ValidateHandle: invalid length");
+        vm.expectRevert(bytes(ErrorMessages._PROFILE_HANDLE_INVALID_LENGTH));
         token.createProfile(
             alice,
             DataTypes.ProfileStruct(
@@ -118,7 +119,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileWithAnInvalidCharacter() public {
-        vm.expectRevert("ValidateHandle: invalid char");
+        vm.expectRevert(bytes(ErrorMessages._PROFILE_HANDLE_INVALID_CHAR));
         token.createProfile(
             alice,
             DataTypes.ProfileStruct("alice&bob", imageUri)
@@ -126,17 +127,17 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileWith0LenthHandle() public {
-        vm.expectRevert("ValidateHandle: invalid length");
+        vm.expectRevert(bytes(ErrorMessages._PROFILE_HANDLE_INVALID_LENGTH));
         token.createProfile(alice, DataTypes.ProfileStruct("", imageUri));
     }
 
     function testCannotCreateProfileWithACapitalLetter() public {
-        vm.expectRevert("ValidateHandle: invalid char");
+        vm.expectRevert(bytes(ErrorMessages._PROFILE_HANDLE_INVALID_CHAR));
         token.createProfile(alice, DataTypes.ProfileStruct("Test", imageUri));
     }
 
     function testCannotCreateProfileWithBlankSpace() public {
-        vm.expectRevert("ValidateHandle: invalid char");
+        vm.expectRevert(bytes(ErrorMessages._PROFILE_HANDLE_INVALID_CHAR));
         token.createProfile(alice, DataTypes.ProfileStruct(" ", imageUri));
     }
 }

@@ -4,6 +4,7 @@ pragma solidity 0.8.14;
 
 import { ERC721 } from "./ERC721.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
+import { ErrorMessages } from "../libraries/ErrorMessages.sol";
 
 // Sequential mint ERC721
 // TODO: Put EIP712 permit logic here
@@ -32,6 +33,6 @@ abstract contract CyberNFTBase is ERC721, Initializable {
     }
 
     function _requireMinted(uint256 tokenId) internal view virtual {
-        require(_exists(tokenId), "ERC721: invalid token ID");
+        require(_exists(tokenId), ErrorMessages._TOKEN_ID_INVALID);
     }
 }

@@ -7,6 +7,7 @@ import { ICyberEngine } from "./interfaces/ICyberEngine.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { LibString } from "./libraries/LibString.sol";
+import { ErrorMessages } from "./libraries/ErrorMessages.sol";
 
 // This will be deployed as beacon contracts for gas efficiency
 contract SubscribeNFT is CyberNFTBase {
@@ -17,8 +18,11 @@ contract SubscribeNFT is CyberNFTBase {
     uint256 internal _profileId;
 
     constructor(address engine, address profileNFT) {
-        require(engine != address(0), "EngineAddress: zero address");
-        require(profileNFT != address(0), "ProfileNft: zero address");
+        require(engine != address(0), ErrorMessages._ZERO_ENGINE_ADDRESS);
+        require(
+            profileNFT != address(0),
+            ErrorMessages._ZERO_PROFILE_NFT_ADDRESS
+        );
         ENGINE = ICyberEngine(engine);
         PROFILE_NFT = IProfileNFT(profileNFT);
         _disableInitializers();
@@ -30,10 +34,7 @@ contract SubscribeNFT is CyberNFTBase {
     }
 
     function mint(address to) external returns (uint256) {
-        require(
-            msg.sender == address(ENGINE),
-            "SubscribeNftMint: only engine can mint"
-        );
+        require(msg.sender == address(ENGINE), ErrorMessages._ENGINE_MINT);
         super._mint(to);
         return _totalCount;
     }
@@ -77,6 +78,6 @@ contract SubscribeNFT is CyberNFTBase {
         address,
         uint256
     ) public pure override {
-        revert("SubscribeNftTransfer: unallowed");
+        revert(ErrorMessages._UNALLOWED_TRANSFER);
     }
 }

@@ -11,6 +11,7 @@ import { LibString } from "../src/libraries/LibString.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { RolesAuthority } from "../src/base/RolesAuthority.sol";
 import { Auth, Authority } from "../src/base/Auth.sol";
+import { ErrorMessages } from "../src/libraries/ErrorMessages.sol";
 
 contract MockEngine is ICyberEngine {
     address public subscribeNFTImpl;
@@ -79,7 +80,7 @@ contract SubscribeNFTTest is Test {
     }
 
     function testCannotReinitialize() public {
-        vm.expectRevert("Initializer: already initialized");
+        vm.expectRevert(bytes(ErrorMessages._INITIALIZED));
         c.initialize(2);
     }
 
@@ -108,18 +109,18 @@ contract SubscribeNFTTest is Test {
     }
 
     function testCannotMintFromNonEngine() public {
-        vm.expectRevert("SubscribeNftMint: only engine can mint");
+        vm.expectRevert(bytes(ErrorMessages._ENGINE_MINT));
         c.mint(alice);
     }
 
     function testTransferIsNotAllowed() public {
         vm.prank(address(engine));
         c.mint(alice);
-        vm.expectRevert("SubscribeNftTransfer: unallowed");
+        vm.expectRevert(bytes(ErrorMessages._UNALLOWED_TRANSFER));
         c.transferFrom(alice, bob, 1);
-        vm.expectRevert("SubscribeNftTransfer: unallowed");
+        vm.expectRevert(bytes(ErrorMessages._UNALLOWED_TRANSFER));
         c.safeTransferFrom(alice, bob, 1);
-        vm.expectRevert("SubscribeNftTransfer: unallowed");
+        vm.expectRevert(bytes(ErrorMessages._UNALLOWED_TRANSFER));
         c.safeTransferFrom(alice, bob, 1, "");
     }
 }

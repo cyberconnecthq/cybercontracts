@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
+import { ErrorMessages } from "../libraries/ErrorMessages.sol";
 
 /**
  * Inspired by Openzeppelin's Initializable contract, but simplified for our use case.
@@ -31,10 +32,7 @@ abstract contract Initializable {
 
     modifier initializer() {
         bool isTopLevelCall = !_initializing;
-        require(
-            isTopLevelCall && _initialized < 1,
-            "Initializer: already initialized"
-        );
+        require(isTopLevelCall && _initialized < 1, ErrorMessages._INITIALIZED);
         _initialized = 1;
         // TODO: this is dead code after we removed modifier initializer on constructor, kept for now
         if (isTopLevelCall) {
@@ -49,13 +47,13 @@ abstract contract Initializable {
 
     // For internal base contracts' initialize function
     modifier onlyInitializing() {
-        require(_initializing, "Initializable: contract is not initializing");
+        require(_initializing, ErrorMessages._CONTRACT_NOT_INITIALIZING);
         _;
     }
 
     // For constructor
     function _disableInitializers() internal virtual {
-        require(!_initializing, "Initializable: contract is initializing");
+        require(!_initializing, ErrorMessages._CONTRACT_INITIALIZING);
         if (_initialized < type(uint8).max) {
             _initialized = type(uint8).max;
         }

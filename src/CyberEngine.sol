@@ -11,6 +11,7 @@ import { Auth } from "./base/Auth.sol";
 import { RolesAuthority } from "./base/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
+import { ErrorMessages } from "./libraries/ErrorMessages.sol";
 
 contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     address public profileAddress;
@@ -49,17 +50,20 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     }
 
     function setSigner(address _signer) external requiresAuth {
-        require(_signer != address(0), "Signer: zero address");
+        require(_signer != address(0), ErrorMessages._ZERO_SIGNER_ADDRESS);
         signer = _signer;
     }
 
     function setProfileAddress(address _profileAddress) external requiresAuth {
-        require(_profileAddress != address(0), "ProfileAddress: zero address");
+        require(
+            _profileAddress != address(0),
+            ErrorMessages._ZERO_PROFILE_ADDRESS
+        );
         profileAddress = _profileAddress;
     }
 
     function setBoxAddress(address _boxAddress) external requiresAuth {
-        require(_boxAddress != address(0), "BoxAddress: zero address");
+        require(_boxAddress != address(0), ErrorMessages._ZERO_BOX_ADDRESS);
         boxAddress = _boxAddress;
     }
 
@@ -103,9 +107,9 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
-        require(to != address(0), "Withdraw: zero address");
+        require(to != address(0), ErrorMessages._ZERO_WITHDRAW_ADDRESS);
         uint256 balance = address(this).balance;
-        require(balance >= amount, "Withdraw: insufficient balance");
+        require(balance >= amount, ErrorMessages._WITHDRAW_INSUFF_BAL);
         payable(to).transfer(amount);
     }
 
@@ -122,9 +126,12 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         bytes32 digest,
         DataTypes.EIP712Signature calldata sig
     ) internal view {
-        require(sig.deadline >= block.timestamp, "VerifySig: deadline expired");
+        require(
+            sig.deadline >= block.timestamp,
+            ErrorMessages._VERIFY_DEADLINE_EXP
+        );
         address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
-        require(recoveredAddress == signer, "VerifySig: invalid sig");
+        require(recoveredAddress == signer, ErrorMessages._VERIFY_INVALID_SIG);
     }
 
     function _requireEnoughFee(string calldata handle, uint256 amount)
@@ -134,11 +141,11 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         bytes memory byteHandle = bytes(handle);
         uint256 fee = feeMapping[Tier.Tier5];
 
-        require(byteHandle.length >= 1, "RegisterHandle: invalid length");
+        require(byteHandle.length >= 1, ErrorMessages._REGISTER_INVALID_LENGTH);
         if (byteHandle.length < 6) {
             fee = feeMapping[Tier(byteHandle.length - 1)];
         }
-        require(amount >= fee, "RegisterFee: insufficient fee");
+        require(amount >= fee, ErrorMessages._REGISTER_INSUFF_FEE);
     }
 
     // UUPS upgradeability
