@@ -5,9 +5,16 @@ pragma solidity 0.8.14;
 import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { CyberNFTBase } from "./base/CyberNFTBase.sol";
 import { RolesAuthority } from "./base/RolesAuthority.sol";
+import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-contract BoxNFT is CyberNFTBase, IBoxNFT {
+contract BoxNFT is CyberNFTBase, IBoxNFT, UUPSUpgradeable {
     address public immutable ENGINE;
+    uint256 private constant VERSION = 1;
+
+    modifier onlyEngine() {
+        require(msg.sender == address(ENGINE), "Only Engine");
+        _;
+    }
 
     // ENGINE for mint
     constructor(address _engine) {
@@ -22,8 +29,7 @@ contract BoxNFT is CyberNFTBase, IBoxNFT {
         CyberNFTBase._initialize(_name, _symbol);
     }
 
-    function mint(address _to) external returns (uint256) {
-        require(msg.sender == address(ENGINE), "Only Engine could mint");
+    function mint(address _to) external onlyEngine returns (uint256) {
         super._mint(_to);
         return _totalCount;
     }
@@ -37,4 +43,13 @@ contract BoxNFT is CyberNFTBase, IBoxNFT {
         _requireMinted(tokenId);
         return "";
     }
+
+    // TODO: write a test for upgrade box nft
+    // UUPS upgradeability
+    function version() external pure virtual returns (uint256) {
+        return VERSION;
+    }
+
+    // UUPS upgradeability
+    function _authorizeUpgrade(address) internal override onlyEngine {}
 }

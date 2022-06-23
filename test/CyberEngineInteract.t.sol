@@ -42,13 +42,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         address impl = address(
             new SubscribeNFT(address(engine), profileAddress)
         );
-        subscribeBeacon = address(
-            new UpgradeableBeacon(
-                impl,
-                address(0),
-                new RolesAuthority(address(0), Authority(address(0)))
-            )
-        );
+        subscribeBeacon = address(new UpgradeableBeacon(impl, address(engine)));
         engine.initialize(
             address(0),
             profileAddress,

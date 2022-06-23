@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
-import "./dependencies/openzeppelin/EIP712.sol";
-import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { EIP712 } from "./dependencies/openzeppelin/EIP712.sol";
+import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "./upgradeability/Initializable.sol";
 import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
@@ -377,6 +377,16 @@ contract CyberEngine is
         );
     }
 
+
+    // upgrade
+    function upgradeProfile(address newImpl) external requiresAuth {
+        UUPSUpgradeable(profileAddress).upgradeTo(newImpl);
+    }
+
+    function upgradeBox(address newImpl) external requiresAuth {
+        UUPSUpgradeable(boxAddress).upgradeTo(newImpl);
+    }
+    
     function subscribeNFTImpl() external view override returns (address) {
         // TODO
         revert();

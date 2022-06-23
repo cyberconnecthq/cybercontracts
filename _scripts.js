@@ -25,7 +25,7 @@ async function performAction(rawArgs) {
         if (network === 'rinkeby') {
             await execute(
                 `source .env
-                forge script script/ProfileNFT.s.sol:DeployScript --rpc-url $RINKEBY_RPC_URL  --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvvv`
+                forge script script/Deploy.s.sol:DeployScript --rpc-url $RINKEBY_RPC_URL  --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvvv`
             );
         }
 
