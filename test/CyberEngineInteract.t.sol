@@ -5,17 +5,17 @@ pragma solidity 0.8.14;
 import "forge-std/Test.sol";
 import { MockEngine } from "./utils/MockEngine.sol";
 import { TestAuthority } from "./utils/TestAuthority.sol";
-import { RolesAuthority } from "../src/base/RolesAuthority.sol";
+import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { ISubscribeNFT } from "../src/interfaces/ISubscribeNFT.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
-import { Auth, Authority } from "../src/base/Auth.sol";
+import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
 import { SubscribeNFT } from "../src/SubscribeNFT.sol";
 import { ProfileNFT } from "../src/ProfileNFT.sol";
-import { ERC721 } from "../src/base/ERC721.sol";
+import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
 import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 
 contract CyberEngineInteractTest is Test, ICyberEngineEvents {

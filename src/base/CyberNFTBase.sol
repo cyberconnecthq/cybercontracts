@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import { ERC721 } from "./ERC721.sol";
+import { ERC721 } from "../dependencies/solmate/ERC721.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 
 // Sequential mint ERC721

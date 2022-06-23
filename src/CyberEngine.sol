@@ -9,12 +9,12 @@ import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { ISubscribeMiddleware } from "./interfaces/ISubscribeMiddleware.sol";
 import { ICyberEngine } from "./interfaces/ICyberEngine.sol";
-import { Auth } from "./base/Auth.sol";
-import { RolesAuthority } from "./base/RolesAuthority.sol";
+import { Auth } from "./dependencies/solmate/Auth.sol";
+import { RolesAuthority } from "./dependencies/solmate/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
-import { ERC721 } from "./base/ERC721.sol";
+import { ERC721 } from "./dependencies/solmate/ERC721.sol";
 
 // TODO: separate storage contract
 contract CyberEngine is
@@ -377,7 +377,6 @@ contract CyberEngine is
         );
     }
 
-
     // upgrade
     function upgradeProfile(address newImpl) external requiresAuth {
         UUPSUpgradeable(profileAddress).upgradeTo(newImpl);
@@ -386,7 +385,7 @@ contract CyberEngine is
     function upgradeBox(address newImpl) external requiresAuth {
         UUPSUpgradeable(boxAddress).upgradeTo(newImpl);
     }
-    
+
     function subscribeNFTImpl() external view override returns (address) {
         // TODO
         revert();

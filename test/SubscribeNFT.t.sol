@@ -9,8 +9,8 @@ import { SubscribeNFT } from "../src/SubscribeNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { LibString } from "../src/libraries/LibString.sol";
 import { Constants } from "../src/libraries/Constants.sol";
-import { RolesAuthority } from "../src/base/RolesAuthority.sol";
-import { Auth, Authority } from "../src/base/Auth.sol";
+import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
+import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
 
 contract MockEngine is ICyberEngine {
     address public subscribeNFTImpl;
