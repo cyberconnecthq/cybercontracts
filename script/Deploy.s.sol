@@ -25,9 +25,9 @@ contract DeployScript is Script {
         );
         // 2. Deploy CyberEngine, pass this address to subscribebeacon and profile
         CyberEngine engine = new CyberEngine();
-        address engineAddr = address(engine);
+        // address engineAddr = address(engine);
         // 3. Deploy ProfileNFT Impl
-        ProfileNFT profileImpl = new ProfileNFT(engineAddr);
+        ProfileNFT profileImpl = new ProfileNFT(address(engine));
         // 4. Deploy Proxy for ProfileNFT
         bytes memory initData = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
@@ -39,9 +39,9 @@ contract DeployScript is Script {
             address(profileImpl),
             initData
         );
-        address profileAddr = address(profileProxy);
+        // address profileAddr = address(profileProxy);
         // 5. Deploy BoxNFT Impl
-        BoxNFT boxImpl = new BoxNFT(engineAddr);
+        BoxNFT boxImpl = new BoxNFT(address(engine));
         // 6. Deploy Proxy for BoxNFT
         bytes memory boxInitData = abi.encodeWithSelector(
             BoxNFT.initialize.selector,
@@ -49,24 +49,27 @@ contract DeployScript is Script {
             "CYBER_BOX"
         );
         ERC1967Proxy boxProxy = new ERC1967Proxy(address(boxImpl), boxInitData);
-        address boxAddr = address(boxProxy);
+        // address boxAddr = address(boxProxy);
         // 7. Deploy SubscribeNFT Impl
-        SubscribeNFT subscribeImpl = new SubscribeNFT(engineAddr, profileAddr);
+        SubscribeNFT subscribeImpl = new SubscribeNFT(
+            address(engine),
+            address(profileProxy)
+        );
         // 8. Deploy Subscribe Beacon
         UpgradeableBeacon subscribeBeacon = new UpgradeableBeacon(
             address(subscribeImpl),
-            engineAddr
+            address(engine)
         );
-        address beaconAddr = address(subscribeBeacon);
         // 9. Deploy Proxy for CyberEngine
         bytes memory data = abi.encodeWithSelector(
             CyberEngine.initialize.selector,
             emergencyAdmin,
-            profileAddr,
-            boxAddr,
-            subscribeBeacon,
-            rolesAuthority
+            address(profileProxy),
+            address(boxProxy),
+            address(subscribeBeacon),
+            address(rolesAuthority)
         );
+        ERC1967Proxy engineProxy = new ERC1967Proxy(address(engine), data);
 
         // TODO: do a health check. verify everything
         vm.stopBroadcast();
