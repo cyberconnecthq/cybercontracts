@@ -6,7 +6,6 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
 import { Initializable } from "./upgradeability/Initializable.sol";
 import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
-import { ProfileNFT } from "./ProfileNFT.sol";
 import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { ISubscribeMiddleware } from "./interfaces/ISubscribeMiddleware.sol";
 import { Auth } from "./base/Auth.sol";
@@ -347,9 +346,13 @@ contract CyberEngine is Initializable, Auth, EIP712, UUPSUpgradeable {
         );
     }
 
-    // TODO: need test
-    function upgradeProfile(address newImpl) external {
-        ProfileNFT(profileAddress).upgradeTo(newImpl);
+    // upgrade
+    function upgradeProfile(address newImpl) external requiresAuth {
+        UUPSUpgradeable(profileAddress).upgradeTo(newImpl);
+    }
+
+    function upgradeBox(address newImpl) external requiresAuth {
+        UUPSUpgradeable(boxAddress).upgradeTo(newImpl);
     }
 
     // UUPS upgradeability

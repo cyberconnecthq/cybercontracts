@@ -71,6 +71,7 @@ contract DeployScript is Script {
         );
         ERC1967Proxy engineProxy = new ERC1967Proxy(address(engine), data);
 
+        // TODO: set correct role capacity
         // TODO: do a health check. verify everything
         vm.stopBroadcast();
     }

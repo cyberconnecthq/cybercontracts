@@ -21,6 +21,10 @@ library Constants {
         bytes4(keccak256(bytes("upgradeTo(address)")));
     bytes4 internal constant _SET_STATE =
         bytes4(keccak256(bytes("setState(uint8)")));
+    bytes4 internal constant _UPGRADE_PROFILE =
+        bytes4(keccak256(bytes("upgradeProfile(address)")));
+    bytes4 internal constant _UPGRADE_BOX =
+        bytes4(keccak256(bytes("upgradeBox(address)")));
 
     // EIP712 TypeHash
     bytes4 internal constant _REGISTER_TYPEHASH =
