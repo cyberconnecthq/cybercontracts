@@ -68,7 +68,7 @@ contract DeployScript is Script {
             rolesAuthority
         );
 
-        // TODO: do a health check. subscribeNFTbeacon should have a correct ENGINE
+        // TODO: do a health check. verify everything works
         vm.stopBroadcast();
     }
 }
