@@ -8,7 +8,7 @@ import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { ISubscribeMiddleware } from "./interfaces/ISubscribeMiddleware.sol";
-import { ICyberEngineEvents } from "./interfaces/ICyberEngineEvents.sol";
+import { ICyberEngine } from "./interfaces/ICyberEngine.sol";
 import { Auth } from "./base/Auth.sol";
 import { RolesAuthority } from "./base/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
@@ -22,7 +22,7 @@ contract CyberEngine is
     Auth,
     EIP712,
     UUPSUpgradeable,
-    ICyberEngineEvents
+    ICyberEngine
 {
     address public profileAddress;
     address public boxAddress;
@@ -292,7 +292,7 @@ contract CyberEngine is
         DataTypes.State preState = _state;
         _state = state;
 
-        emit SetState(state);
+        emit SetState(preState, state);
     }
 
     // Set Metadata
@@ -377,6 +377,21 @@ contract CyberEngine is
             operator,
             approved
         );
+    }
+
+    function subscribeNFTImpl() external view override returns (address) {
+        // TODO
+        revert();
+    }
+
+    function subscribeNFTTokenURI(uint256 profileId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        // TODO
+        revert();
     }
 
     // UUPS upgradeability

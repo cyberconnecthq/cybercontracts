@@ -2,7 +2,9 @@
 
 pragma solidity 0.8.14;
 
-interface ICyberEngine {
+import { ICyberEngineEvents } from "./ICyberEngineEvents.sol";
+
+interface ICyberEngine is ICyberEngineEvents {
     function subscribeNFTTokenURI(uint256 profileId)
         external
         view

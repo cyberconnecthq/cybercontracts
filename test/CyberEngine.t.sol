@@ -13,6 +13,7 @@ import { RolesAuthority } from "../src/base/RolesAuthority.sol";
 import { Authority } from "../src/base/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
+import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 
 contract MockBoxNFT is IBoxNFT {
     bool public mintRan;
@@ -73,7 +74,7 @@ contract MockProfileNFT is IProfileNFT {
     ) external {}
 }
 
-contract CyberEngineTest is Test {
+contract CyberEngineTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
     RolesAuthority internal rolesAuthority;
     MockBoxNFT internal box;
@@ -187,24 +188,40 @@ contract CyberEngineTest is Test {
     function testSetSignerAsGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
+
+        vm.expectEmit(true, false, false, true);
+        emit SetSigner(alice);
+
         engine.setSigner(alice);
     }
 
     function testSetProfileAsGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
+
+        vm.expectEmit(true, false, false, true);
+        emit SetProfileAddress(alice);
+
         engine.setProfileAddress(alice);
     }
 
     function testSetBoxGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
+
+        vm.expectEmit(true, false, false, true);
+        emit SetBoxAddress(alice);
+
         engine.setBoxAddress(alice);
     }
 
     function testSetFeeGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetFeeByTier(DataTypes.Tier.Tier0, 1);
+
         engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
         assertEq(engine.feeMapping(DataTypes.Tier.Tier0), 1);
     }
@@ -212,6 +229,10 @@ contract CyberEngineTest is Test {
     function testSetBoxOpenedGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
+
+        vm.expectEmit(true, false, false, true);
+        emit SetBoxGiveawayEnded(true);
+
         engine.setBoxGiveawayEnded(true);
     }
 
@@ -385,6 +406,9 @@ contract CyberEngineTest is Test {
         assertEq(alice.balance, 0);
 
         vm.prank(alice);
+        vm.expectEmit(true, true, false, true);
+        emit Withdraw(alice, 1);
+
         engine.withdraw(alice, 1);
         assertEq(address(engine).balance, 1);
         assertEq(alice.balance, 1);
@@ -430,6 +454,9 @@ contract CyberEngineTest is Test {
         assertEq(box.mintRan(), false);
         assertEq(profile.createProfileRan(), false);
         assertEq(engine.nonces(bob), 0);
+
+        vm.expectEmit(true, true, false, true);
+        emit Register(bob, handle);
 
         assertEq(
             engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
@@ -562,6 +589,10 @@ contract CyberEngineTest is Test {
     function testSetState() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetState(DataTypes.State.Operational, DataTypes.State.Paused);
+
         engine.setState(DataTypes.State.Paused);
         assertEq(uint256(engine.getState()), uint256(DataTypes.State.Paused));
     }

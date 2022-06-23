@@ -20,9 +20,12 @@ interface ICyberEngineEvents {
 
     event SetFeeByTier(DataTypes.Tier indexed tier, uint256 indexed amount);
 
-    event SetBoxGiveawayEnded(bool ended);
+    event SetBoxGiveawayEnded(bool indexed ended);
 
-    event SetState(DataTypes.State state);
+    event SetState(
+        DataTypes.State indexed preState,
+        DataTypes.State indexed newState
+    );
 
     event Register(address indexed to, string indexed handle);
 

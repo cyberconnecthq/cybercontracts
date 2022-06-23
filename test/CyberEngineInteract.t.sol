@@ -16,8 +16,9 @@ import { Auth, Authority } from "../src/base/Auth.sol";
 import { SubscribeNFT } from "../src/SubscribeNFT.sol";
 import { ProfileNFT } from "../src/ProfileNFT.sol";
 import { ERC721 } from "../src/base/ERC721.sol";
+import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 
-contract CyberEngineInteractTest is Test {
+contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
     RolesAuthority internal authority;
     address internal profileAddress = address(0xA);
@@ -137,6 +138,10 @@ contract CyberEngineInteractTest is Test {
         );
         uint256[] memory expected = new uint256[](1);
         expected[0] = result;
+
+        vm.expectEmit(true, false, false, true);
+        emit Subscribe(address(this), ids, datas);
+
         uint256[] memory called = engine.subscribe(ids, datas);
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
