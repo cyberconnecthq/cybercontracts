@@ -23,6 +23,7 @@ contract MockEngine is ICyberEngine {
     function subscribeNFTTokenURI(uint256 profileId)
         external
         view
+        override
         returns (string memory)
     {
         return LibString.toString(profileId);
