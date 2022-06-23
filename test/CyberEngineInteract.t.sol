@@ -74,7 +74,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
-                    handle,
+                    keccak256(bytes(handle)),
                     0,
                     deadline
                 )

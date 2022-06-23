@@ -108,7 +108,7 @@ contract CyberEngine is
                     abi.encode(
                         Constants._REGISTER_TYPEHASH,
                         to,
-                        handle,
+                        keccak256(bytes(handle)),
                         nonces[to]++,
                         sig.deadline
                     )
