@@ -10,8 +10,8 @@ import { ProfileNFT } from "../src/ProfileNFT.sol";
 import { BoxNFT } from "../src/BoxNFT.sol";
 import { MockEngineV2 } from "./utils/MockEngineV2.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { RolesAuthority } from "../src/base/RolesAuthority.sol";
-import { Authority } from "../src/base/Auth.sol";
+import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
+import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 contract CyberEngineUpgradeTest is Test {

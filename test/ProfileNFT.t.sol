@@ -7,8 +7,8 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
-import { RolesAuthority } from "../src/base/RolesAuthority.sol";
-import { Authority } from "../src/base/Auth.sol";
+import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
+import { Authority } from "../src/dependencies/solmate/Auth.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
