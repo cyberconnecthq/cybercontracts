@@ -189,8 +189,8 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
 
-        vm.expectEmit(true, false, false, true);
-        emit SetSigner(alice);
+        vm.expectEmit(true, true, false, true);
+        emit SetSigner(address(0), alice);
 
         engine.setSigner(alice);
     }
@@ -199,8 +199,8 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
 
-        vm.expectEmit(true, false, false, true);
-        emit SetProfileAddress(alice);
+        vm.expectEmit(true, true, false, true);
+        emit SetProfileAddress(address(profile), alice);
 
         engine.setProfileAddress(alice);
     }
@@ -209,8 +209,8 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
 
-        vm.expectEmit(true, false, false, true);
-        emit SetBoxAddress(alice);
+        vm.expectEmit(true, true, false, true);
+        emit SetBoxAddress(address(box), alice);
 
         engine.setBoxAddress(alice);
     }
@@ -219,8 +219,12 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
 
-        vm.expectEmit(true, true, false, true);
-        emit SetFeeByTier(DataTypes.Tier.Tier0, 1);
+        vm.expectEmit(true, true, true, true);
+        emit SetFeeByTier(
+            DataTypes.Tier.Tier0,
+            Constants._INITIAL_FEE_TIER0,
+            1
+        );
 
         engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
         assertEq(engine.feeMapping(DataTypes.Tier.Tier0), 1);
@@ -230,8 +234,8 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
 
-        vm.expectEmit(true, false, false, true);
-        emit SetBoxGiveawayEnded(true);
+        vm.expectEmit(true, true, false, true);
+        emit SetBoxGiveawayEnded(false, true);
 
         engine.setBoxGiveawayEnded(true);
     }

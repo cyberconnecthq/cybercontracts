@@ -12,15 +12,25 @@ interface ICyberEngineEvents {
         address subscribeNFTBeacon
     );
 
-    event SetSigner(address indexed signer);
+    event SetSigner(address indexed preSigner, address indexed newSigner);
 
-    event SetProfileAddress(address indexed profileAddress);
+    event SetProfileAddress(
+        address indexed preProfileAddr,
+        address indexed newProfileAddr
+    );
 
-    event SetBoxAddress(address indexed boxAddress);
+    event SetBoxAddress(
+        address indexed preBoxAddr,
+        address indexed newBoxAddress
+    );
 
-    event SetFeeByTier(DataTypes.Tier indexed tier, uint256 indexed amount);
+    event SetFeeByTier(
+        DataTypes.Tier indexed tier,
+        uint256 indexed preAmount,
+        uint256 indexed newAmount
+    );
 
-    event SetBoxGiveawayEnded(bool indexed ended);
+    event SetBoxGiveawayEnded(bool indexed preEnded, bool indexed newEnded);
 
     event SetState(
         DataTypes.State indexed preState,

@@ -63,38 +63,40 @@ contract CyberEngine is
 
     function setSigner(address _signer) external requiresAuth {
         require(_signer != address(0), "zero address signer");
+        address preSigner = signer;
         signer = _signer;
 
-        emit SetSigner(_signer);
+        emit SetSigner(preSigner, _signer);
     }
 
     function setProfileAddress(address _profileAddress) external requiresAuth {
         require(_profileAddress != address(0), "zero address profile");
+        address preProfileAddr = profileAddress;
         profileAddress = _profileAddress;
 
-        emit SetProfileAddress(_profileAddress);
+        emit SetProfileAddress(preProfileAddr, _profileAddress);
     }
 
     function setBoxAddress(address _boxAddress) external requiresAuth {
         require(_boxAddress != address(0), "zero address box");
+        address preBoxAddr = boxAddress;
         boxAddress = _boxAddress;
 
-        emit SetBoxAddress(_boxAddress);
+        emit SetBoxAddress(preBoxAddr, _boxAddress);
     }
 
     function setFeeByTier(DataTypes.Tier tier, uint256 amount)
         external
         requiresAuth
     {
-        feeMapping[tier] = amount;
-
-        emit SetFeeByTier(tier, amount);
+        _setFeeByTier(tier, amount);
     }
 
     function setBoxGiveawayEnded(bool ended) external requiresAuth {
+        bool preEnded = boxGiveawayEnded;
         boxGiveawayEnded = ended;
 
-        emit SetBoxGiveawayEnded(ended);
+        emit SetBoxGiveawayEnded(preEnded, ended);
     }
 
     function register(
@@ -143,24 +145,20 @@ contract CyberEngine is
         emit Withdraw(to, amount);
     }
 
+    function _setFeeByTier(DataTypes.Tier tier, uint256 amount) internal {
+        uint256 preAmount = feeMapping[tier];
+        feeMapping[tier] = amount;
+
+        emit SetFeeByTier(tier, preAmount, amount);
+    }
+
     function _setInitialFees() internal {
-        feeMapping[DataTypes.Tier.Tier0] = Constants._INITIAL_FEE_TIER0;
-        emit SetFeeByTier(DataTypes.Tier.Tier0, Constants._INITIAL_FEE_TIER0);
-
-        feeMapping[DataTypes.Tier.Tier1] = Constants._INITIAL_FEE_TIER1;
-        emit SetFeeByTier(DataTypes.Tier.Tier1, Constants._INITIAL_FEE_TIER1);
-
-        feeMapping[DataTypes.Tier.Tier2] = Constants._INITIAL_FEE_TIER2;
-        emit SetFeeByTier(DataTypes.Tier.Tier2, Constants._INITIAL_FEE_TIER2);
-
-        feeMapping[DataTypes.Tier.Tier3] = Constants._INITIAL_FEE_TIER3;
-        emit SetFeeByTier(DataTypes.Tier.Tier3, Constants._INITIAL_FEE_TIER3);
-
-        feeMapping[DataTypes.Tier.Tier4] = Constants._INITIAL_FEE_TIER4;
-        emit SetFeeByTier(DataTypes.Tier.Tier4, Constants._INITIAL_FEE_TIER4);
-
-        feeMapping[DataTypes.Tier.Tier5] = Constants._INITIAL_FEE_TIER5;
-        emit SetFeeByTier(DataTypes.Tier.Tier5, Constants._INITIAL_FEE_TIER5);
+        _setFeeByTier(DataTypes.Tier.Tier0, Constants._INITIAL_FEE_TIER0);
+        _setFeeByTier(DataTypes.Tier.Tier1, Constants._INITIAL_FEE_TIER1);
+        _setFeeByTier(DataTypes.Tier.Tier2, Constants._INITIAL_FEE_TIER2);
+        _setFeeByTier(DataTypes.Tier.Tier3, Constants._INITIAL_FEE_TIER3);
+        _setFeeByTier(DataTypes.Tier.Tier4, Constants._INITIAL_FEE_TIER4);
+        _setFeeByTier(DataTypes.Tier.Tier5, Constants._INITIAL_FEE_TIER5);
     }
 
     function _requiresExpectedSigner(
