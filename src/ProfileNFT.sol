@@ -47,10 +47,10 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT, UUPSUpgradeable {
         view
         returns (bool, string memory)
     {
-        if (_validateHandleLength(handle) == false)
+        if (!_validateHandleLength(handle))
             return (false, "Handle has invalid length");
 
-        if (_validateHandleCharacters(handle) == false)
+        if (!_validateHandleCharacters(handle))
             return (false, "Handle contains invalid character");
 
         bytes32 handleHash = keccak256(bytes(handle));
@@ -69,12 +69,12 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT, UUPSUpgradeable {
         );
         //_validateHandle(vars.handle);
         require(
-            (_validateHandleLength(vars.handle) == true),
+            (_validateHandleLength(vars.handle)),
             "Handle has invalid length"
         );
 
         require(
-            (_validateHandleCharacters(vars.handle) == true),
+            (_validateHandleCharacters(vars.handle)),
             "Handle contains invalid character"
         );
 
