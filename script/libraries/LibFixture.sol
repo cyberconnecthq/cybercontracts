@@ -13,7 +13,6 @@ import "forge-std/Vm.sol";
 
 library LibFixture {
     address constant _GOV = address(0xC11);
-    // Util function
     bytes32 private constant _TYPE_HASH =
         keccak256(
             "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
@@ -23,6 +22,7 @@ library LibFixture {
         address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
     Vm public constant vm = Vm(VM_ADDRESS);
 
+    // Util function
     function _hashTypedDataV4(address engineAddr, bytes32 structHash)
         private
         view
@@ -45,11 +45,10 @@ library LibFixture {
     }
 
     // Need to be called after auth
-    function registerBobProfile(
-        CyberEngine engine,
-        address boxAddress,
-        address profileAddress
-    ) internal returns (uint256 profileId) {
+    function registerBobProfile(CyberEngine engine)
+        internal
+        returns (uint256 profileId)
+    {
         uint256 bobPk = 1;
         address bob = vm.addr(bobPk);
         string memory handle = "bob";
@@ -81,6 +80,7 @@ library LibFixture {
         require(profileId == 1);
 
         require(engine.nonces(bob) == 1);
+        // label not working :(, always show BeaconProxy in trace
         vm.label(engine.getSubscribeNFT(profileId), "bobSubscribeNFT");
     }
 }

@@ -36,11 +36,7 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
         LibFixture.auth(authority);
         vm.prank(LibFixture._GOV);
         engine.allowSubscribeMw(address(mw), true);
-        bobProfileId = LibFixture.registerBobProfile(
-            engine,
-            boxAddress,
-            profileAddress
-        );
+        bobProfileId = LibFixture.registerBobProfile(engine);
         // set module
         vm.prank(bob);
         engine.setSubscribeMw(bobProfileId, address(mw));
