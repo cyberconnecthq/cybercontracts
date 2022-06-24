@@ -15,6 +15,7 @@ import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ERC721 } from "./dependencies/solmate/ERC721.sol";
+import { DataTypes } from "./libraries/DataTypes.sol";
 
 // TODO: separate storage contract
 contract CyberEngine is
@@ -29,6 +30,8 @@ contract CyberEngine is
     address public signer;
     bool public boxGiveawayEnded;
     // Shared between register and other withSig functions. Always query onchain to get the current nounce
+    mapping(uint256 => DataTypes.SubscribeStruct)
+        internal _subscribeByProfileId;
     mapping(address => uint256) public nonces;
     address public subscribeNFTBeacon;
     DataTypes.State private _state;
@@ -132,7 +135,7 @@ contract CyberEngine is
             IProfileNFT(profileAddress).createProfile(
                 to,
                 // TODO: maybe use profile struct
-                DataTypes.CreateProfileParams(handle, "", address(0))
+                DataTypes.CreateProfileParams(handle, "")
             );
     }
 
@@ -229,9 +232,11 @@ contract CyberEngine is
         );
         uint256[] memory result = new uint256[](profileIds.length);
         for (uint256 i = 0; i < profileIds.length; i++) {
-            (address subscribeNFT, address subscribeMw) = IProfileNFT(
-                profileAddress
-            ).getSubscribeAddrAndMwByProfileId(profileIds[i]);
+            address subscribeNFT = _subscribeByProfileId[profileIds[i]]
+                .subscribeNFT;
+            address subscribeMw = _subscribeByProfileId[profileIds[i]]
+                .subscribeMw;
+
             // lazy deploy subscribe NFT
             // TODO emit SubscribeNFT deployed event
             if (subscribeNFT == address(0)) {
@@ -242,10 +247,8 @@ contract CyberEngine is
                 subscribeNFT = address(
                     new BeaconProxy(subscribeNFTBeacon, initData)
                 );
-                IProfileNFT(profileAddress).setSubscribeNFTAddress(
-                    profileIds[i],
-                    subscribeNFT
-                );
+                _subscribeByProfileId[profileIds[i]]
+                    .subscribeNFT = subscribeNFT;
             }
             // run middleware before subscribe
             if (subscribeMw != address(0)) {
@@ -386,19 +389,24 @@ contract CyberEngine is
         UUPSUpgradeable(boxAddress).upgradeTo(newImpl);
     }
 
-    function subscribeNFTImpl() external view override returns (address) {
-        // TODO
-        revert();
-    }
-
-    function subscribeNFTTokenURI(uint256 profileId)
+    function getSubscribeNFTTokenURI(uint256 profileId)
         external
         view
+        virtual
         override
         returns (string memory)
     {
-        // TODO
-        revert();
+        return _subscribeByProfileId[profileId].tokenURI;
+    }
+
+    function getSubscribeNFT(uint256 profileId)
+        external
+        view
+        virtual
+        override
+        returns (address)
+    {
+        return _subscribeByProfileId[profileId].subscribeNFT;
     }
 
     // UUPS upgradeability

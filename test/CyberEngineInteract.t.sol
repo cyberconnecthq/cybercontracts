@@ -33,8 +33,6 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     function setUp() public {
         authority = new TestAuthority(address(this));
         engine = new MockEngine();
-        // Cannot use vm.mockCall on one address multiple times (1 for getter, 1 for setter); only used in test `testSubscribeDeployProxy`
-        // profileAddress = address(new MockProfileGetterSetter());
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
         bytes memory code = address(new ProfileNFT(address(engine))).code;
         vm.etch(profileAddress, code);
@@ -87,7 +85,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             abi.encodeWithSelector(
                 IProfileNFT.createProfile.selector,
                 address(bob),
-                DataTypes.CreateProfileParams(handle, "", address(0))
+                DataTypes.CreateProfileParams(handle, "")
             ),
             abi.encode(1)
         );
@@ -115,15 +113,8 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         uint256[] memory ids = new uint256[](1);
         ids[0] = 1;
         bytes[] memory datas = new bytes[](1);
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.getSubscribeAddrAndMwByProfileId.selector,
-                1
-            ),
-            abi.encode(address(subscribeProxy), address(0))
-        );
 
+        engine.setSubscribeNFTAddress(1, subscribeProxy);
         uint256 result = 100;
         vm.mockCall(
             subscribeProxy,
@@ -147,15 +138,6 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         ids[0] = 1;
         bytes[] memory datas = new bytes[](1);
 
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.getSubscribeAddrAndMwByProfileId.selector,
-                1
-            ),
-            abi.encode(address(0), address(0))
-        );
-
         uint256 result = 100;
 
         // Assuming the newly deployed subscribe proxy is always at the same address;
@@ -166,23 +148,14 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             abi.encode(result)
         );
 
-        // This is not used but kept for reference. MockCall cannot set on the same address
-        // multiple times, so we used a custom contract `MockProfileGetterSetter`
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.setSubscribeNFTAddress.selector,
-                1,
-                proxy
-            ),
-            abi.encode(address(0))
-        );
-
         uint256[] memory expected = new uint256[](1);
         expected[0] = result;
         uint256[] memory called = engine.subscribe(ids, datas);
+
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
+
+        assertEq(engine.getSubscribeNFT(1), proxy);
     }
 
     // TODO: add test for subscribe to multiple profiles

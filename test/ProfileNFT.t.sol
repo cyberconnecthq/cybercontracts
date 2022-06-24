@@ -18,11 +18,7 @@ contract ProfileNFTTest is Test {
     string constant imageUri = "https://example.com/image.png";
     address constant subscribeMw = address(0xD);
     DataTypes.CreateProfileParams internal createProfileData =
-        DataTypes.CreateProfileParams(
-            "alice",
-            "https://example.com/alice.jpg",
-            subscribeMw
-        );
+        DataTypes.CreateProfileParams("alice", "https://example.com/alice.jpg");
     string aliceMetadata =
         string(
             abi.encodePacked(
@@ -105,8 +101,7 @@ contract ProfileNFTTest is Test {
             alice,
             DataTypes.CreateProfileParams(
                 "aliceandbobisareallylongname",
-                "https://example.com/alice.jpg",
-                address(0)
+                "https://example.com/alice.jpg"
             )
         );
     }
@@ -116,17 +111,14 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.CreateProfileParams("alice&bob", imageUri, address(0))
+            DataTypes.CreateProfileParams("alice&bob", imageUri)
         );
     }
 
     function testCannotCreateProfileWith0LenthHandle() public {
         vm.expectRevert("Handle has invalid length");
         vm.prank(engine);
-        token.createProfile(
-            alice,
-            DataTypes.CreateProfileParams("", imageUri, address(0))
-        );
+        token.createProfile(alice, DataTypes.CreateProfileParams("", imageUri));
     }
 
     function testCannotCreateProfileWithACapitalLetter() public {
@@ -134,7 +126,7 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.CreateProfileParams("Test", imageUri, address(0))
+            DataTypes.CreateProfileParams("Test", imageUri)
         );
     }
 
@@ -143,18 +135,8 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.CreateProfileParams(" ", imageUri, address(0))
+            DataTypes.CreateProfileParams(" ", imageUri)
         );
-    }
-
-    function testCannotSetSubscribeNFTAddress() public {
-        vm.expectRevert("Only Engine");
-        token.setSubscribeNFTAddress(0, address(0));
-    }
-
-    function testSetSubscribeNFTAddress() public {
-        vm.prank(engine);
-        token.setSubscribeNFTAddress(0, address(0));
     }
 
     // operator

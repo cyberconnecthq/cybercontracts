@@ -10,23 +10,7 @@ import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/Beaco
 import { LibString } from "../src/libraries/LibString.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { MockSubscribeNFTV2 } from "./utils/MockSubscribeNFTV2.sol";
-
-contract MockEngine is ICyberEngine {
-    address public subscribeNFTImpl;
-
-    function setSubscribeNFTImpl(address _subscribeNFTImpl) public {
-        subscribeNFTImpl = _subscribeNFTImpl;
-    }
-
-    function subscribeNFTTokenURI(uint256 profileId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return LibString.toString(profileId);
-    }
-}
+import { MockEngine } from "./utils/MockEngine.sol";
 
 contract SubscribeNFTUpgradeTest is Test {
     UpgradeableBeacon internal beacon;
@@ -42,7 +26,6 @@ contract SubscribeNFTUpgradeTest is Test {
     function setUp() public {
         engine = new MockEngine();
         impl = new SubscribeNFT(address(engine), profile);
-        engine.setSubscribeNFTImpl(address(impl));
         beacon = new UpgradeableBeacon(address(impl), address(engine));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
