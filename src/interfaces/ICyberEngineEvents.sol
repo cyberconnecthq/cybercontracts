@@ -41,6 +41,7 @@ interface ICyberEngineEvents {
 
     event Withdraw(address indexed to, uint256 indexed amount);
 
+    // TODO: looks weird, maybe unfold the array
     event Subscribe(
         address indexed sender,
         uint256[] profileIds,
