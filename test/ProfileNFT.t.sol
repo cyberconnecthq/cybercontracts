@@ -45,7 +45,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileAsNonEngine() public {
-        vm.expectRevert(bytes(ErrorMessages._PROFILE_ONLY_ENGINE));
+        vm.expectRevert(bytes(ErrorMessages._ENGINE_ONLY));
         vm.prank(address(0xDEAD));
         token.createProfile(alice, createProfileData);
     }
@@ -155,7 +155,7 @@ contract ProfileNFTTest is Test {
     function testCannotSetOperatorIfNotEngine() public {
         vm.prank(engine);
         uint256 id = token.createProfile(alice, createProfileData);
-        vm.expectRevert(bytes(ErrorMessages._PROFILE_ONLY_ENGINE));
+        vm.expectRevert(bytes(ErrorMessages._ENGINE_ONLY));
         token.setOperatorApproval(id, address(0), true);
     }
 

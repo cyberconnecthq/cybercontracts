@@ -21,10 +21,7 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT, UUPSUpgradeable {
     uint256 private constant VERSION = 1;
 
     modifier onlyEngine() {
-        require(
-            msg.sender == address(ENGINE),
-            ErrorMessages._PROFILE_ONLY_ENGINE
-        );
+        require(msg.sender == address(ENGINE), ErrorMessages._ENGINE_ONLY);
         _;
     }
 

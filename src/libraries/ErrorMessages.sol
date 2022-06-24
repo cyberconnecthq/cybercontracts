@@ -19,8 +19,6 @@ library ErrorMessages {
         "ValidateHandle: invalid length";
     string internal constant _PROFILE_HANDLE_INVALID_CHAR =
         "ValidateHandle: invalid char";
-    string internal constant _PROFILE_ONLY_ENGINE =
-        "CreateProfile: only engine";
     string internal constant _WITHDRAW_INSUFF_BAL =
         "Withdraw: insufficient balance";
     string internal constant _VERIFY_DEADLINE_EXP =
@@ -45,7 +43,10 @@ library ErrorMessages {
     string internal constant _CONTRACT_PAUSED = "Contract: contract is paused";
     string internal constant _ESSENSE_PAUSED = "Essense: essense is paused";
     string internal constant _OWNER_ONLY = "Owner: only owner";
+    string internal constant _ENGINE_ONLY = "Engine: only engine";
     string internal constant _OWNER_OPERATOR_ONLY =
         "Owner: only owner or operator";
     string internal constant _LENGTH_MISMATCH = "Length: lenght missmatch";
+    string internal constant _SUBSCRIBE_MIDDLEWARE =
+        "Subscribe: middleware not allowed";
 }

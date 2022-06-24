@@ -36,7 +36,7 @@ contract BoxNFTTest is Test {
     }
 
     function testCannotMintAsNonEngine() public {
-        vm.expectRevert("Only Engine");
+        vm.expectRevert(bytes(ErrorMessages._ENGINE_ONLY));
         vm.prank(address(0));
         token.mint(address(0));
     }

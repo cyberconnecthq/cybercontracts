@@ -466,10 +466,7 @@ contract CyberEngine is
         external
         onlyProfileOwner(profileId)
     {
-        require(
-            _subscribeMwAllowlist[mw],
-            "Subscribe middleware is not allowed"
-        );
+        require(_subscribeMwAllowlist[mw], ErrorMessages._SUBSCRIBE_MIDDLEWARE);
         address preMw = _subscribeByProfileId[profileId].subscribeMw;
         _subscribeByProfileId[profileId].subscribeMw = mw;
         emit SetSubscribeMw(profileId, preMw, mw);

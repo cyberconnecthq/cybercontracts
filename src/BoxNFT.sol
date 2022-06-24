@@ -6,13 +6,14 @@ import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { CyberNFTBase } from "./base/CyberNFTBase.sol";
 import { RolesAuthority } from "./dependencies/solmate/RolesAuthority.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { ErrorMessages } from "./libraries/ErrorMessages.sol";
 
 contract BoxNFT is CyberNFTBase, IBoxNFT, UUPSUpgradeable {
     address public immutable ENGINE;
     uint256 private constant VERSION = 1;
 
     modifier onlyEngine() {
-        require(msg.sender == address(ENGINE), "Only Engine");
+        require(msg.sender == address(ENGINE), ErrorMessages._ENGINE_ONLY);
         _;
     }
 
