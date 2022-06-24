@@ -29,6 +29,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     address internal bob = vm.addr(bobPk);
     uint256 internal profileId;
     address internal alice = address(0xA11CE);
+    address mw = address(0xCA11);
 
     function setUp() public {
         authority = new TestAuthority(address(this));
@@ -52,6 +53,12 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             Constants._ENGINE_GOV_ROLE,
             address(engine),
             Constants._SET_SIGNER,
+            true
+        );
+        authority.setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            address(engine),
+            Constants._ALLOW_SUBSCRIBE_MW,
             true
         );
         authority.setUserRole(gov, Constants._ENGINE_GOV_ROLE, true);
@@ -99,6 +106,11 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         assertEq(profileId, 1);
 
         assertEq(engine.nonces(bob), 1);
+
+        vm.prank(gov);
+        engine.allowSubscribeMw(mw, true);
+
+        assertEq(engine.isSubscribeMwAllowed(mw), true);
     }
 
     function testCannotSubscribeEmptyList() public {
@@ -166,7 +178,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
             abi.encode(address(0xDEAD))
         );
-        vm.expectRevert("Only owner can set operator");
+        vm.expectRevert("Only profile owner");
         engine.setOperatorApproval(profileId, address(0), true);
     }
 
@@ -251,5 +263,26 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             abi.encode(0)
         );
         engine.setMetadata(profileId, metadata);
+    }
+
+    function testCannotSetSubscribeMwIfNotOwner() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(address(0xDEAD))
+        );
+        vm.expectRevert("Only profile owner");
+        engine.setSubscribeMw(profileId, mw);
+    }
+
+    function testSetSubscribeMw() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(bob)
+        );
+        vm.prank(bob);
+        engine.setSubscribeMw(profileId, mw);
+        assertEq(engine.getSubscribeMw(profileId), mw);
     }
 }
