@@ -275,6 +275,19 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         engine.setSubscribeMw(profileId, mw);
     }
 
+    function testCannotSetSubscribeMwIfNotAllowed() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(bob)
+        );
+        vm.expectRevert("Subscribe middleware is not allowed");
+        address notMw = address(0xDEEAAAD);
+        vm.prank(bob);
+        engine.setSubscribeMw(profileId, notMw);
+        assertEq(engine.getSubscribeMw(profileId), address(0));
+    }
+
     function testSetSubscribeMw() public {
         vm.mockCall(
             profileAddress,
