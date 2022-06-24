@@ -133,7 +133,6 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     }
 
     function testSubscribeDeployProxy() public {
-        address subscribeProxy = address(0xC0DE);
         uint256[] memory ids = new uint256[](1);
         ids[0] = 1;
         bytes[] memory datas = new bytes[](1);
