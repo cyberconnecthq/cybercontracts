@@ -139,6 +139,12 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
             Constants._SET_STATE,
             true
         );
+        rolesAuthority.setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            address(engine),
+            Constants._ALLOW_SUBSCRIBE_MW,
+            true
+        );
     }
 
     function testBasic() public {
@@ -619,5 +625,21 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         bytes[] memory datas = new bytes[](1);
         vm.expectRevert("Contract is paused");
         engine.subscribe(ids, datas);
+    }
+
+    function testCannotAllowSubscribeMwAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        engine.allowSubscribeMw(address(0), true);
+    }
+
+    function testAllowSubscribeMwAsGov() public {
+        address mw = address(0xCA11);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit AllowSubscribeMw(mw, false, true);
+        engine.allowSubscribeMw(mw, true);
+
+        assertEq(engine.isSubscribeMwAllowed(mw), true);
     }
 }

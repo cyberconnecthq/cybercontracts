@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
+import "forge-std/console.sol";
 import { EIP712 } from "./dependencies/openzeppelin/EIP712.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "./upgradeability/Initializable.sol";
@@ -39,6 +40,7 @@ contract CyberEngine is
     string private constant VERSION_STRING = "1";
     uint256 private constant VERSION = 1;
     mapping(DataTypes.Tier => uint256) public feeMapping;
+    mapping(address => bool) internal _subscribeMwAllowlist;
 
     function initialize(
         address _owner,
@@ -296,6 +298,21 @@ contract CyberEngine is
         emit SetState(preState, state);
     }
 
+    function _requiresProfileOwner(uint256 profileId, address target)
+        internal
+        view
+    {
+        require(
+            ERC721(profileAddress).ownerOf(profileId) == target,
+            "Only profile owner"
+        );
+    }
+
+    modifier onlyProfileOwner(uint256 profileId) {
+        _requiresProfileOwner(profileId, msg.sender);
+        _;
+    }
+
     // Set Metadata
     function setMetadata(uint256 profileId, string calldata metadata) external {
         require(
@@ -338,11 +355,7 @@ contract CyberEngine is
         uint256 profileId,
         address operator,
         bool approved
-    ) external {
-        require(
-            msg.sender == ERC721(profileAddress).ownerOf(profileId),
-            "Only owner can set operator"
-        );
+    ) external onlyProfileOwner(profileId) {
         IProfileNFT(profileAddress).setOperatorApproval(
             profileId,
             operator,
@@ -407,6 +420,30 @@ contract CyberEngine is
         returns (address)
     {
         return _subscribeByProfileId[profileId].subscribeNFT;
+    }
+
+    function allowSubscribeMw(address mw, bool allowed) external requiresAuth {
+        bool preAllowed = _subscribeMwAllowlist[mw];
+        _subscribeMwAllowlist[mw] = allowed;
+        emit AllowSubscribeMw(mw, preAllowed, allowed);
+    }
+
+    function isSubscribeMwAllowed(address mw) external view returns (bool) {
+        return _subscribeMwAllowlist[mw];
+    }
+
+    function getSubscribeMw(uint256 profileId) external view returns (address) {
+        return _subscribeByProfileId[profileId].subscribeMw;
+    }
+
+    // TODO: withSig
+    function setSubscribeMw(uint256 profileId, address mw)
+        external
+        onlyProfileOwner(profileId)
+    {
+        address preMw = _subscribeByProfileId[profileId].subscribeMw;
+        _subscribeByProfileId[profileId].subscribeMw = mw;
+        emit SetSubscribeMw(profileId, preMw, mw);
     }
 
     // UUPS upgradeability

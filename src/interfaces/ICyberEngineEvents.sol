@@ -46,4 +46,16 @@ interface ICyberEngineEvents {
         uint256[] profileIds,
         bytes[] subDatas
     );
+
+    event AllowSubscribeMw(
+        address indexed mw,
+        bool indexed preAllowed,
+        bool indexed newAllowed
+    );
+    event SetSubscribeMw(
+        uint256 indexed profileId,
+        address preMw,
+        address newMw
+    );
+    // TODO: set subscribe NFT event
 }
