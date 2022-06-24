@@ -12,13 +12,10 @@ import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-//     return address(keccak256(0xd6, 0x94, this, 0x80));
-// return address(keccak256(0xd6, 0x94, this, nonce));
-
 contract DeployScript is Script {
     function _calcContractAddress(address _owner, uint256 _nonce)
         internal
-        view
+        pure
         returns (address)
     {
         if (_nonce == 0) {
@@ -70,8 +67,10 @@ contract DeployScript is Script {
     }
 
     function run() external {
-        // XXX: input deployer's nonce here. get it by `cast nonce`
-        uint256 nonce = 0;
+        // HACK: https://github.com/foundry-rs/foundry/issues/2110
+        uint256 nonce = vm.getNonce(msg.sender) - 1;
+        console.log("starting nonce", nonce);
+        console.log("deployer address", msg.sender);
         vm.startBroadcast();
 
         // TODO: emergency admin
