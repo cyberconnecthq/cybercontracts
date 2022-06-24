@@ -6,7 +6,6 @@ import "./utils/MockInitializable.sol";
 import "forge-std/Test.sol";
 
 contract InitializableTest is Test {
-    
     MockInitializable internal initializableContract;
 
     function setUp() public {
