@@ -191,13 +191,22 @@ contract CyberEngine is
         address sender,
         DataTypes.EIP712Signature calldata sig
     ) external whenNotPaused returns (uint256[] memory) {
+        uint256 length = subDatas.length;
+        bytes32[] memory hashes = new bytes32[](length);
+        for (uint256 i = 0; i < length; ) {
+            hashes[i] = keccak256(subDatas[i]);
+            unchecked {
+                ++i;
+            }
+        }
+
         _requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
                         Constants._SUBSCRIBE_TYPEHASH,
-                        profileIds,
-                        subDatas,
+                        keccak256(abi.encodePacked(profileIds)),
+                        keccak256(abi.encodePacked(hashes)),
                         nonces[sender]++,
                         sig.deadline
                     )
@@ -319,7 +328,7 @@ contract CyberEngine is
                     abi.encode(
                         Constants._SET_METADATA_TYPEHASH,
                         profileId,
-                        metadata,
+                        keccak256(bytes(metadata)),
                         nonces[owner]++,
                         sig.deadline
                     )
