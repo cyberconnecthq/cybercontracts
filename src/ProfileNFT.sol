@@ -151,11 +151,8 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT, UUPSUpgradeable {
         returns (bool)
     {
         bytes memory byteHandle = bytes(handle);
-        if (
-            byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
-            byteHandle.length > 0
-        ) return true;
-        return false;
+        return (byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
+            byteHandle.length > 0);
     }
 
     function _validateHandleCharacters(string calldata handle)
