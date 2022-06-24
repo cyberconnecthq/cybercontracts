@@ -5,10 +5,10 @@ pragma solidity 0.8.14;
 import { ICyberEngineEvents } from "./ICyberEngineEvents.sol";
 
 interface ICyberEngine is ICyberEngineEvents {
-    function subscribeNFTTokenURI(uint256 profileId)
+    function getSubscribeNFTTokenURI(uint256 profileId)
         external
         view
         returns (string memory);
 
-    function subscribeNFTImpl() external view returns (address);
+    function getSubscribeNFT(uint256 profileId) external view returns (address);
 }

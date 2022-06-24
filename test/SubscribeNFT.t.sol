@@ -7,27 +7,10 @@ import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { SubscribeNFT } from "../src/SubscribeNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
-import { LibString } from "../src/libraries/LibString.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
-
-contract MockEngine is ICyberEngine {
-    address public subscribeNFTImpl;
-
-    function setSubscribeNFTImpl(address _subscribeNFTImpl) public {
-        subscribeNFTImpl = _subscribeNFTImpl;
-    }
-
-    function subscribeNFTTokenURI(uint256 profileId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return LibString.toString(profileId);
-    }
-}
+import { MockEngine } from "./utils/MockEngine.sol";
 
 contract SubscribeNFTTest is Test {
     UpgradeableBeacon internal beacon;
@@ -51,7 +34,6 @@ contract SubscribeNFTTest is Test {
 
         engine = new MockEngine();
         impl = new SubscribeNFT(address(engine), profile);
-        engine.setSubscribeNFTImpl(address(impl));
         beacon = new UpgradeableBeacon(address(impl), address(engine));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,

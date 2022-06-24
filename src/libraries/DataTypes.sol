@@ -6,14 +6,17 @@ library DataTypes {
     struct CreateProfileParams {
         string handle;
         string imageURI;
-        address subscribeMw;
     }
 
     struct ProfileStruct {
         string handle;
         string imageURI;
+    }
+
+    struct SubscribeStruct {
         address subscribeNFT;
         address subscribeMw;
+        string tokenURI;
     }
 
     struct EIP712Signature {

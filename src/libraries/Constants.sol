@@ -25,6 +25,8 @@ library Constants {
         bytes4(keccak256(bytes("upgradeProfile(address)")));
     bytes4 internal constant _UPGRADE_BOX =
         bytes4(keccak256(bytes("upgradeBox(address)")));
+    bytes4 internal constant _ALLOW_SUBSCRIBE_MW =
+        bytes4(keccak256(bytes("allowSubscribeMw(address,bool)")));
 
     // EIP712 TypeHash
     bytes4 internal constant _REGISTER_TYPEHASH =

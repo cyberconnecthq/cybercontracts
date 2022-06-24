@@ -70,7 +70,7 @@ contract SubscribeNFT is CyberNFTBase, ISubscribeNFT {
         returns (string memory)
     {
         _requireMinted(tokenId);
-        return ICyberEngine(ENGINE).subscribeNFTTokenURI(_profileId);
+        return ICyberEngine(ENGINE).getSubscribeNFTTokenURI(_profileId);
     }
 
     // Subscribe NFT cannot be transferred

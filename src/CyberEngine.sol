@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
+import "forge-std/console.sol";
 import { EIP712 } from "./dependencies/openzeppelin/EIP712.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "./upgradeability/Initializable.sol";
@@ -15,6 +16,7 @@ import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ERC721 } from "./dependencies/solmate/ERC721.sol";
+import { DataTypes } from "./libraries/DataTypes.sol";
 
 // TODO: separate storage contract
 contract CyberEngine is
@@ -29,6 +31,8 @@ contract CyberEngine is
     address public signer;
     bool public boxGiveawayEnded;
     // Shared between register and other withSig functions. Always query onchain to get the current nounce
+    mapping(uint256 => DataTypes.SubscribeStruct)
+        internal _subscribeByProfileId;
     mapping(address => uint256) public nonces;
     address public subscribeNFTBeacon;
     DataTypes.State private _state;
@@ -36,6 +40,7 @@ contract CyberEngine is
     string private constant VERSION_STRING = "1";
     uint256 private constant VERSION = 1;
     mapping(DataTypes.Tier => uint256) public feeMapping;
+    mapping(address => bool) internal _subscribeMwAllowlist;
 
     function initialize(
         address _owner,
@@ -132,7 +137,7 @@ contract CyberEngine is
             IProfileNFT(profileAddress).createProfile(
                 to,
                 // TODO: maybe use profile struct
-                DataTypes.CreateProfileParams(handle, "", address(0))
+                DataTypes.CreateProfileParams(handle, "")
             );
     }
 
@@ -238,9 +243,11 @@ contract CyberEngine is
         );
         uint256[] memory result = new uint256[](profileIds.length);
         for (uint256 i = 0; i < profileIds.length; i++) {
-            (address subscribeNFT, address subscribeMw) = IProfileNFT(
-                profileAddress
-            ).getSubscribeAddrAndMwByProfileId(profileIds[i]);
+            address subscribeNFT = _subscribeByProfileId[profileIds[i]]
+                .subscribeNFT;
+            address subscribeMw = _subscribeByProfileId[profileIds[i]]
+                .subscribeMw;
+
             // lazy deploy subscribe NFT
             // TODO emit SubscribeNFT deployed event
             if (subscribeNFT == address(0)) {
@@ -251,10 +258,8 @@ contract CyberEngine is
                 subscribeNFT = address(
                     new BeaconProxy(subscribeNFTBeacon, initData)
                 );
-                IProfileNFT(profileAddress).setSubscribeNFTAddress(
-                    profileIds[i],
-                    subscribeNFT
-                );
+                _subscribeByProfileId[profileIds[i]]
+                    .subscribeNFT = subscribeNFT;
             }
             // run middleware before subscribe
             if (subscribeMw != address(0)) {
@@ -302,6 +307,21 @@ contract CyberEngine is
         emit SetState(preState, state);
     }
 
+    function _requiresProfileOwner(uint256 profileId, address target)
+        internal
+        view
+    {
+        require(
+            ERC721(profileAddress).ownerOf(profileId) == target,
+            "Only profile owner"
+        );
+    }
+
+    modifier onlyProfileOwner(uint256 profileId) {
+        _requiresProfileOwner(profileId, msg.sender);
+        _;
+    }
+
     // Set Metadata
     function setMetadata(uint256 profileId, string calldata metadata) external {
         require(
@@ -344,11 +364,7 @@ contract CyberEngine is
         uint256 profileId,
         address operator,
         bool approved
-    ) external {
-        require(
-            msg.sender == ERC721(profileAddress).ownerOf(profileId),
-            "Only owner can set operator"
-        );
+    ) external onlyProfileOwner(profileId) {
         IProfileNFT(profileAddress).setOperatorApproval(
             profileId,
             operator,
@@ -395,19 +411,52 @@ contract CyberEngine is
         UUPSUpgradeable(boxAddress).upgradeTo(newImpl);
     }
 
-    function subscribeNFTImpl() external view override returns (address) {
-        // TODO
-        revert();
-    }
-
-    function subscribeNFTTokenURI(uint256 profileId)
+    function getSubscribeNFTTokenURI(uint256 profileId)
         external
         view
+        virtual
         override
         returns (string memory)
     {
-        // TODO
-        revert();
+        return _subscribeByProfileId[profileId].tokenURI;
+    }
+
+    function getSubscribeNFT(uint256 profileId)
+        external
+        view
+        virtual
+        override
+        returns (address)
+    {
+        return _subscribeByProfileId[profileId].subscribeNFT;
+    }
+
+    function allowSubscribeMw(address mw, bool allowed) external requiresAuth {
+        bool preAllowed = _subscribeMwAllowlist[mw];
+        _subscribeMwAllowlist[mw] = allowed;
+        emit AllowSubscribeMw(mw, preAllowed, allowed);
+    }
+
+    function isSubscribeMwAllowed(address mw) external view returns (bool) {
+        return _subscribeMwAllowlist[mw];
+    }
+
+    function getSubscribeMw(uint256 profileId) external view returns (address) {
+        return _subscribeByProfileId[profileId].subscribeMw;
+    }
+
+    // TODO: withSig
+    function setSubscribeMw(uint256 profileId, address mw)
+        external
+        onlyProfileOwner(profileId)
+    {
+        require(
+            _subscribeMwAllowlist[mw],
+            "Subscribe middleware is not allowed"
+        );
+        address preMw = _subscribeByProfileId[profileId].subscribeMw;
+        _subscribeByProfileId[profileId].subscribeMw = mw;
+        emit SetSubscribeMw(profileId, preMw, mw);
     }
 
     // UUPS upgradeability

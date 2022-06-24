@@ -55,33 +55,11 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT, UUPSUpgradeable {
         _mint(to);
         _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: vars.handle,
-            imageURI: vars.imageURI,
-            subscribeNFT: address(0),
-            subscribeMw: vars.subscribeMw
+            imageURI: vars.imageURI
         });
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         return _totalCount;
-    }
-
-    function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
-        external
-        override
-        onlyEngine
-    {
-        _profileById[profileId].subscribeNFT = subscribeNFT;
-    }
-
-    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
-        external
-        view
-        override
-        returns (address, address)
-    {
-        return (
-            _profileById[profileId].subscribeNFT,
-            _profileById[profileId].subscribeMw
-        );
     }
 
     function getHandleByProfileId(uint256 profileId)
