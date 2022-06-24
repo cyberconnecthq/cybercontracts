@@ -8,12 +8,21 @@ import { Constants } from "./libraries/Constants.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
+import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 // TODO: Owner cannot be set with conflicting role for capacity
-contract ProfileNFT is CyberNFTBase, IProfileNFT {
+contract ProfileNFT is CyberNFTBase, IProfileNFT, UUPSUpgradeable {
     address public immutable ENGINE;
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
+    mapping(uint256 => string) internal _metadataById;
+    mapping(uint256 => mapping(address => bool)) internal _operatorApproval; // TODO: reconsider if useful
+    uint256 private constant VERSION = 1;
+
+    modifier onlyEngine() {
+        require(msg.sender == address(ENGINE), "Only Engine");
+        _;
+    }
 
     // ENGINE for createProfile, setSubscribeNFT
     constructor(address _engine) {
@@ -53,7 +62,7 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
     function createProfile(
         address to,
         DataTypes.CreateProfileParams calldata vars
-    ) external override returns (uint256) {
+    ) external override onlyEngine returns (uint256) {
         require(
             msg.sender == address(ENGINE),
             "Only Engine could create profile"
@@ -76,36 +85,11 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
         _mint(to);
         _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: vars.handle,
-            imageURI: vars.imageURI,
-            subscribeNFT: address(0),
-            subscribeMw: vars.subscribeMw
+            imageURI: vars.imageURI
         });
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         return _totalCount;
-    }
-
-    function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
-        external
-        override
-    {
-        require(
-            msg.sender == address(ENGINE),
-            "Only Engine could set SubscribeNFT address"
-        );
-        _profileById[profileId].subscribeNFT = subscribeNFT;
-    }
-
-    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
-        external
-        view
-        override
-        returns (address, address)
-    {
-        return (
-            _profileById[profileId].subscribeNFT,
-            _profileById[profileId].subscribeMw
-        );
     }
 
     function getHandleByProfileId(uint256 profileId)
@@ -192,4 +176,47 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT {
         }
         return true;
     }
+
+    function getOperatorApproval(uint256 profileId, address operator)
+        external
+        view
+        returns (bool)
+    {
+        _requireMinted(profileId);
+        return _operatorApproval[profileId][operator];
+    }
+
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) external onlyEngine {
+        require(operator != address(0), "Operator address cannot be 0");
+        _operatorApproval[profileId][operator] = approved;
+    }
+
+    function setMetadata(uint256 profileId, string calldata metadata)
+        external
+        onlyEngine
+    {
+        _metadataById[profileId] = metadata;
+    }
+
+    function getMetadata(uint256 profileId)
+        external
+        view
+        returns (string memory)
+    {
+        _requireMinted(profileId);
+        return _metadataById[profileId];
+    }
+
+    // TODO: write a test for upgrade profile nft
+    // UUPS upgradeability
+    function version() external pure virtual returns (uint256) {
+        return VERSION;
+    }
+
+    // UUPS upgradeability
+    function _authorizeUpgrade(address) internal override onlyEngine {}
 }

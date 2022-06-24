@@ -49,10 +49,10 @@ to deploy
 # TODO
 - [x] BaseNFT
 - [x] Validate handle (lower-case alphabetical, numerical, _)
-- [ ] Governance, Pausable
-- [ ] Mint with Signature
+- [x] Governance, Pausable
+- [x] Mint with Signature
 - [ ] SVG generation
-- [ ] Purchase logic
+- [x] Purchase logic
 - [ ] SBT NFT
 - [ ] SBT Module
 - [x] Onchain Token URI
@@ -60,12 +60,14 @@ to deploy
 - [x] Upgradeable and Proxy (UUPS)
 - [ ] Crosschain support (openzeppelin contract) (https://docs.openzeppelin.com/contracts/4.x/api/crosschain)
 - [ ] Events
-- [ ] BoxNFT
-- [ ] Test for Initializable (oz testcases)
-- [ ] non transferrable (temporily paused at least)
+- [x] BoxNFT
+- [x] Test for Initializable (oz testcases)
+- [x] non transferrable (temporily paused at least)
 - [ ] Reserve slots for EssenceNFT
 - [ ] Put BoxNFT into peripheral
 - [ ] Include chainID in SubscribeNFT, EssenceNFT
+- [ ] Token URI
+- [x] Profile Metadata
 
 - [x] Hardhat plugin, add license
 - [x] linter

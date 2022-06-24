@@ -14,13 +14,53 @@ library Constants {
     bytes4 internal constant _SET_FEE_BY_TIER =
         bytes4(keccak256(bytes("setFeeByTier(uint8,uint256)")));
     bytes4 internal constant _SET_BOX_OPENED =
-        bytes4(keccak256(bytes("setBoxOpened(bool)")));
-    bytes4 internal constant _REGISTER =
-        bytes4(keccak256(bytes("register(address,string,uint256,uint256)")));
+        bytes4(keccak256(bytes("setBoxGiveawayEnded(bool)")));
     bytes4 internal constant _WITHDRAW =
         bytes4(keccak256(bytes("withdraw(address,uint256)")));
     bytes4 internal constant _AUTHORIZE_UPGRADE =
         bytes4(keccak256(bytes("upgradeTo(address)")));
+    bytes4 internal constant _SET_STATE =
+        bytes4(keccak256(bytes("setState(uint8)")));
+    bytes4 internal constant _UPGRADE_PROFILE =
+        bytes4(keccak256(bytes("upgradeProfile(address)")));
+    bytes4 internal constant _UPGRADE_BOX =
+        bytes4(keccak256(bytes("upgradeBox(address)")));
+    bytes4 internal constant _ALLOW_SUBSCRIBE_MW =
+        bytes4(keccak256(bytes("allowSubscribeMw(address,bool)")));
+
+    // EIP712 TypeHash
+    bytes4 internal constant _REGISTER_TYPEHASH =
+        bytes4(
+            keccak256(
+                bytes(
+                    "register(address to,string handle,uint256 nonce,uint256 deadline)"
+                )
+            )
+        );
+    bytes4 internal constant _SUBSCRIBE_TYPEHASH =
+        bytes4(
+            keccak256(
+                bytes(
+                    "subscribeWithSig(uint256[] profileIds,bytes[] subDatas,uint256 nonce,uint256 deadline)"
+                )
+            )
+        );
+    bytes4 internal constant _SET_METADATA_TYPEHASH =
+        bytes4(
+            keccak256(
+                bytes(
+                    "setMetadataWithSig(uint256 profileId,string metadata,uint256 nonce,uint256 deadline)"
+                )
+            )
+        );
+    bytes4 internal constant _SET_OPERATOR_APPROVAL_TYPEHASH =
+        bytes4(
+            keccak256(
+                bytes(
+                    "setOperatorApprovalWithSign(uint256 profileId,address operator,bool approved,uint256 nonce,uint256 deadline)"
+                )
+            )
+        );
 
     // Parameters
     uint8 internal constant _MAX_HANDLE_LENGTH = 27;

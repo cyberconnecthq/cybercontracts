@@ -15,11 +15,16 @@ interface IProfileNFT {
         view
         returns (string memory);
 
-    function getSubscribeAddrAndMwByProfileId(uint256 profileId)
+    function setMetadata(uint256 profileId, string calldata metadata) external;
+
+    function getOperatorApproval(uint256 profileId, address operator)
         external
         view
-        returns (address, address);
+        returns (bool);
 
-    function setSubscribeNFTAddress(uint256 profileId, address subscribeNFT)
-        external;
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) external;
 }

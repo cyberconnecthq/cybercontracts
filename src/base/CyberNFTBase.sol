@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import { ERC721 } from "./ERC721.sol";
+import { ERC721 } from "../dependencies/solmate/ERC721.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 
 // Sequential mint ERC721
@@ -32,6 +32,6 @@ abstract contract CyberNFTBase is ERC721, Initializable {
     }
 
     function _requireMinted(uint256 tokenId) internal view virtual {
-        require(_exists(tokenId), "ERC721: invalid token ID");
+        require(_exists(tokenId), "NOT_MINTED");
     }
 }

@@ -7,8 +7,8 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
-import { RolesAuthority } from "../src/base/RolesAuthority.sol";
-import { Authority } from "../src/base/Auth.sol";
+import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
+import { Authority } from "../src/dependencies/solmate/Auth.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
@@ -18,11 +18,7 @@ contract ProfileNFTTest is Test {
     string constant imageUri = "https://example.com/image.png";
     address constant subscribeMw = address(0xD);
     DataTypes.CreateProfileParams internal createProfileData =
-        DataTypes.CreateProfileParams(
-            "alice",
-            "https://example.com/alice.jpg",
-            subscribeMw
-        );
+        DataTypes.CreateProfileParams("alice", "https://example.com/alice.jpg");
     string aliceMetadata =
         string(
             abi.encodePacked(
@@ -48,7 +44,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileAsNonEngine() public {
-        vm.expectRevert("Only Engine could create profile");
+        vm.expectRevert("Only Engine");
         vm.prank(address(0xDEAD));
         token.createProfile(alice, createProfileData);
     }
@@ -68,7 +64,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotGetTokenURIOfUnmintted() public {
-        vm.expectRevert("ERC721: invalid token ID");
+        vm.expectRevert("NOT_MINTED");
         token.tokenURI(0);
     }
 
@@ -126,8 +122,7 @@ contract ProfileNFTTest is Test {
             alice,
             DataTypes.CreateProfileParams(
                 "aliceandbobisareallylongname",
-                "https://example.com/alice.jpg",
-                address(0)
+                "https://example.com/alice.jpg"
             )
         );
     }
@@ -137,17 +132,14 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.CreateProfileParams("alice&bob", imageUri, address(0))
+            DataTypes.CreateProfileParams("alice&bob", imageUri)
         );
     }
 
     function testCannotCreateProfileWith0LenthHandle() public {
         vm.expectRevert("Handle has invalid length");
         vm.prank(engine);
-        token.createProfile(
-            alice,
-            DataTypes.CreateProfileParams("", imageUri, address(0))
-        );
+        token.createProfile(alice, DataTypes.CreateProfileParams("", imageUri));
     }
 
     function testCannotCreateProfileWithACapitalLetter() public {
@@ -155,7 +147,7 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.CreateProfileParams("Test", imageUri, address(0))
+            DataTypes.CreateProfileParams("Test", imageUri)
         );
     }
 
@@ -164,17 +156,49 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.CreateProfileParams(" ", imageUri, address(0))
+            DataTypes.CreateProfileParams(" ", imageUri)
         );
     }
 
-    function testCannotSetSubscribeNFTAddress() public {
-        vm.expectRevert("Only Engine could set SubscribeNFT address");
-        token.setSubscribeNFTAddress(0, address(0));
+    // operator
+    function testGetOperatorApproval() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(alice, createProfileData);
+        assertEq(token.getOperatorApproval(id, address(0)), false);
     }
 
-    function testSetSubscribeNFTAddress() public {
+    function testCannotGetOperatorApprovalForNonexistentProfile() public {
+        vm.expectRevert("NOT_MINTED");
+        token.getOperatorApproval(0, address(0));
+    }
+
+    function testCannotSetOperatorIfNotEngine() public {
         vm.prank(engine);
-        token.setSubscribeNFTAddress(0, address(0));
+        uint256 id = token.createProfile(alice, createProfileData);
+        vm.expectRevert("Only Engine");
+        token.setOperatorApproval(id, address(0), true);
+    }
+
+    function testCannotSetOperatorToZeroAddress() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(alice, createProfileData);
+        vm.prank(engine);
+        vm.expectRevert("Operator address cannot be 0");
+        token.setOperatorApproval(id, address(0), true);
+    }
+
+    // metadata
+    function testSetMetadataAsEngine() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(alice, createProfileData);
+        assertEq(token.getMetadata(id), "");
+        vm.prank(engine);
+        token.setMetadata(id, "ipfs");
+        assertEq(token.getMetadata(id), "ipfs");
+    }
+
+    function testCannotGetMetadataForNonexistentProfile() public {
+        vm.expectRevert("NOT_MINTED");
+        token.getMetadata(0);
     }
 }
