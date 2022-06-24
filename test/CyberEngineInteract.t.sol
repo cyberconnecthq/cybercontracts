@@ -4,7 +4,6 @@ pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
 import { MockEngine } from "./utils/MockEngine.sol";
-import { TestAuthority } from "./utils/TestAuthority.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
@@ -32,7 +31,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     address mw = address(0xCA11);
 
     function setUp() public {
-        authority = new TestAuthority(address(this));
+        authority = new RolesAuthority(address(this), Authority(address(0)));
         engine = new MockEngine();
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
         bytes memory code = address(new ProfileNFT(address(engine))).code;

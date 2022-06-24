@@ -12,7 +12,7 @@
     "spdx": "hardhat prepend-spdx-license",
     "deploy": "node ./_scripts.js deploy rinkeby",
     "build": "forge build --force",
-    "deploy:anvil": "source .env.anvil && forge script script/Deploy.s.sol:DeployScript --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast"
+    "deploy:anvil": "source .env.anvil && forge script script/Deploy.s.sol:DeployScript --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv"
   },
   "devDependencies": {
     "hardhat": "^2.9.9",
