@@ -7,8 +7,8 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
-import { RolesAuthority } from "../src/base/RolesAuthority.sol";
-import { Authority } from "../src/base/Auth.sol";
+import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
+import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { ErrorMessages } from "../src/libraries/ErrorMessages.sol";
 
 contract ProfileNFTTest is Test {
@@ -19,11 +19,7 @@ contract ProfileNFTTest is Test {
     string constant imageUri = "https://example.com/image.png";
     address constant subscribeMw = address(0xD);
     DataTypes.CreateProfileParams internal createProfileData =
-        DataTypes.CreateProfileParams(
-            "alice",
-            "https://example.com/alice.jpg",
-            subscribeMw
-        );
+        DataTypes.CreateProfileParams("alice", "https://example.com/alice.jpg");
     string aliceMetadata =
         string(
             abi.encodePacked(
@@ -106,8 +102,7 @@ contract ProfileNFTTest is Test {
             alice,
             DataTypes.CreateProfileParams(
                 "aliceandbobisareallylongname",
-                "https://example.com/alice.jpg",
-                address(0)
+                "https://example.com/alice.jpg"
             )
         );
     }
@@ -117,17 +112,14 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.CreateProfileParams("alice&bob", imageUri, address(0))
+            DataTypes.CreateProfileParams("alice&bob", imageUri)
         );
     }
 
     function testCannotCreateProfileWith0LenthHandle() public {
         vm.expectRevert(bytes(ErrorMessages._PROFILE_HANDLE_INVALID_LENGTH));
         vm.prank(engine);
-        token.createProfile(
-            alice,
-            DataTypes.CreateProfileParams("", imageUri, address(0))
-        );
+        token.createProfile(alice, DataTypes.CreateProfileParams("", imageUri));
     }
 
     function testCannotCreateProfileWithACapitalLetter() public {
@@ -135,7 +127,7 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.CreateProfileParams("Test", imageUri, address(0))
+            DataTypes.CreateProfileParams("Test", imageUri)
         );
     }
 
@@ -144,18 +136,8 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.createProfile(
             alice,
-            DataTypes.CreateProfileParams(" ", imageUri, address(0))
+            DataTypes.CreateProfileParams(" ", imageUri)
         );
-    }
-
-    function testCannotSetSubscribeNFTAddress() public {
-        vm.expectRevert(bytes(ErrorMessages._PROFILE_ONLY_ENGINE));
-        token.setSubscribeNFTAddress(0, address(0));
-    }
-
-    function testSetSubscribeNFTAddress() public {
-        vm.prank(engine);
-        token.setSubscribeNFTAddress(0, address(0));
     }
 
     // operator

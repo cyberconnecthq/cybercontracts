@@ -21,39 +21,29 @@ library Constants {
         bytes4(keccak256(bytes("upgradeTo(address)")));
     bytes4 internal constant _SET_STATE =
         bytes4(keccak256(bytes("setState(uint8)")));
+    bytes4 internal constant _UPGRADE_PROFILE =
+        bytes4(keccak256(bytes("upgradeProfile(address)")));
+    bytes4 internal constant _UPGRADE_BOX =
+        bytes4(keccak256(bytes("upgradeBox(address)")));
+    bytes4 internal constant _ALLOW_SUBSCRIBE_MW =
+        bytes4(keccak256(bytes("allowSubscribeMw(address,bool)")));
 
     // EIP712 TypeHash
-    bytes4 internal constant _REGISTER_TYPEHASH =
-        bytes4(
-            keccak256(
-                bytes(
-                    "register(address to,string handle,uint256 nonce,uint256 deadline)"
-                )
-            )
+    bytes32 internal constant _REGISTER_TYPEHASH =
+        keccak256(
+            "register(address to,string handle,uint256 nonce,uint256 deadline)"
         );
-    bytes4 internal constant _SUBSCRIBE_TYPEHASH =
-        bytes4(
-            keccak256(
-                bytes(
-                    "subscribeWithSig(uint256[] profileIds,bytes[] subDatas,uint256 nonce,uint256 deadline)"
-                )
-            )
+    bytes32 internal constant _SUBSCRIBE_TYPEHASH =
+        keccak256(
+            "subscribeWithSig(uint256[] profileIds,bytes[] subDatas,uint256 nonce,uint256 deadline)"
         );
-    bytes4 internal constant _SET_METADATA_TYPEHASH =
-        bytes4(
-            keccak256(
-                bytes(
-                    "setMetadataWithSig(uint256 profileId,string metadata,uint256 nonce,uint256 deadline)"
-                )
-            )
+    bytes32 internal constant _SET_METADATA_TYPEHASH =
+        keccak256(
+            "setMetadataWithSig(uint256 profileId,string metadata,uint256 nonce,uint256 deadline)"
         );
-    bytes4 internal constant _SET_OPERATOR_APPROVAL_TYPEHASH =
-        bytes4(
-            keccak256(
-                bytes(
-                    "setOperatorApprovalWithSign(uint256 profileId,address operator,bool approved,uint256 nonce,uint256 deadline)"
-                )
-            )
+    bytes32 internal constant _SET_OPERATOR_APPROVAL_TYPEHASH =
+        keccak256(
+            "setOperatorApprovalWithSign(uint256 profileId,address operator,bool approved,uint256 nonce,uint256 deadline)"
         );
 
     // Parameters

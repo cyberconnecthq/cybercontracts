@@ -5,20 +5,21 @@ pragma solidity 0.8.14;
 import "forge-std/Test.sol";
 import { MockEngine } from "./utils/MockEngine.sol";
 import { TestAuthority } from "./utils/TestAuthority.sol";
-import { RolesAuthority } from "../src/base/RolesAuthority.sol";
+import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { ISubscribeNFT } from "../src/interfaces/ISubscribeNFT.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
-import { Auth, Authority } from "../src/base/Auth.sol";
+import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
 import { SubscribeNFT } from "../src/SubscribeNFT.sol";
 import { ProfileNFT } from "../src/ProfileNFT.sol";
-import { ERC721 } from "../src/base/ERC721.sol";
+import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
+import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 import { ErrorMessages } from "../src/libraries/ErrorMessages.sol";
 
-contract CyberEngineInteractTest is Test {
+contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
     RolesAuthority internal authority;
     address internal profileAddress = address(0xA);
@@ -29,12 +30,11 @@ contract CyberEngineInteractTest is Test {
     address internal bob = vm.addr(bobPk);
     uint256 internal profileId;
     address internal alice = address(0xA11CE);
+    address mw = address(0xCA11);
 
     function setUp() public {
         authority = new TestAuthority(address(this));
         engine = new MockEngine();
-        // Cannot use vm.mockCall on one address multiple times (1 for getter, 1 for setter); only used in test `testSubscribeDeployProxy`
-        // profileAddress = address(new MockProfileGetterSetter());
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
         bytes memory code = address(new ProfileNFT(address(engine))).code;
         vm.etch(profileAddress, code);
@@ -42,13 +42,7 @@ contract CyberEngineInteractTest is Test {
         address impl = address(
             new SubscribeNFT(address(engine), profileAddress)
         );
-        subscribeBeacon = address(
-            new UpgradeableBeacon(
-                impl,
-                address(0),
-                new RolesAuthority(address(0), Authority(address(0)))
-            )
-        );
+        subscribeBeacon = address(new UpgradeableBeacon(impl, address(engine)));
         engine.initialize(
             address(0),
             profileAddress,
@@ -60,6 +54,12 @@ contract CyberEngineInteractTest is Test {
             Constants._ENGINE_GOV_ROLE,
             address(engine),
             Constants._SET_SIGNER,
+            true
+        );
+        authority.setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            address(engine),
+            Constants._ALLOW_SUBSCRIBE_MW,
             true
         );
         authority.setUserRole(gov, Constants._ENGINE_GOV_ROLE, true);
@@ -74,7 +74,7 @@ contract CyberEngineInteractTest is Test {
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
-                    handle,
+                    keccak256(bytes(handle)),
                     0,
                     deadline
                 )
@@ -93,7 +93,7 @@ contract CyberEngineInteractTest is Test {
             abi.encodeWithSelector(
                 IProfileNFT.createProfile.selector,
                 address(bob),
-                DataTypes.CreateProfileParams(handle, "", address(0))
+                DataTypes.CreateProfileParams(handle, "")
             ),
             abi.encode(1)
         );
@@ -107,6 +107,11 @@ contract CyberEngineInteractTest is Test {
         assertEq(profileId, 1);
 
         assertEq(engine.nonces(bob), 1);
+
+        vm.prank(gov);
+        engine.allowSubscribeMw(mw, true);
+
+        assertEq(engine.isSubscribeMwAllowed(mw), true);
     }
 
     function testCannotSubscribeEmptyList() public {
@@ -121,15 +126,8 @@ contract CyberEngineInteractTest is Test {
         uint256[] memory ids = new uint256[](1);
         ids[0] = 1;
         bytes[] memory datas = new bytes[](1);
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.getSubscribeAddrAndMwByProfileId.selector,
-                1
-            ),
-            abi.encode(address(subscribeProxy), address(0))
-        );
 
+        engine.setSubscribeNFTAddress(1, subscribeProxy);
         uint256 result = 100;
         vm.mockCall(
             subscribeProxy,
@@ -138,25 +136,19 @@ contract CyberEngineInteractTest is Test {
         );
         uint256[] memory expected = new uint256[](1);
         expected[0] = result;
+
+        vm.expectEmit(true, false, false, true);
+        emit Subscribe(address(this), ids, datas);
+
         uint256[] memory called = engine.subscribe(ids, datas);
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
     }
 
     function testSubscribeDeployProxy() public {
-        address subscribeProxy = address(0xC0DE);
         uint256[] memory ids = new uint256[](1);
         ids[0] = 1;
         bytes[] memory datas = new bytes[](1);
-
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.getSubscribeAddrAndMwByProfileId.selector,
-                1
-            ),
-            abi.encode(address(0), address(0))
-        );
 
         uint256 result = 100;
 
@@ -168,23 +160,14 @@ contract CyberEngineInteractTest is Test {
             abi.encode(result)
         );
 
-        // This is not used but kept for reference. MockCall cannot set on the same address
-        // multiple times, so we used a custom contract `MockProfileGetterSetter`
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.setSubscribeNFTAddress.selector,
-                1,
-                proxy
-            ),
-            abi.encode(address(0))
-        );
-
         uint256[] memory expected = new uint256[](1);
         expected[0] = result;
         uint256[] memory called = engine.subscribe(ids, datas);
+
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
+
+        assertEq(engine.getSubscribeNFT(1), proxy);
     }
 
     // TODO: add test for subscribe to multiple profiles
@@ -281,5 +264,39 @@ contract CyberEngineInteractTest is Test {
             abi.encode(0)
         );
         engine.setMetadata(profileId, metadata);
+    }
+
+    function testCannotSetSubscribeMwIfNotOwner() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(address(0xDEAD))
+        );
+        vm.expectRevert(bytes(ErrorMessages._OWNER_ONLY));
+        engine.setSubscribeMw(profileId, mw);
+    }
+
+    function testCannotSetSubscribeMwIfNotAllowed() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(bob)
+        );
+        vm.expectRevert("Subscribe middleware is not allowed");
+        address notMw = address(0xDEEAAAD);
+        vm.prank(bob);
+        engine.setSubscribeMw(profileId, notMw);
+        assertEq(engine.getSubscribeMw(profileId), address(0));
+    }
+
+    function testSetSubscribeMw() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(bob)
+        );
+        vm.prank(bob);
+        engine.setSubscribeMw(profileId, mw);
+        assertEq(engine.getSubscribeMw(profileId), mw);
     }
 }

@@ -9,10 +9,11 @@ import { CyberEngine } from "../src/CyberEngine.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
-import { RolesAuthority } from "../src/base/RolesAuthority.sol";
-import { Authority } from "../src/base/Auth.sol";
+import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
+import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
+import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 import { ErrorMessages } from "../src/libraries/ErrorMessages.sol";
 
 contract MockBoxNFT is IBoxNFT {
@@ -74,7 +75,7 @@ contract MockProfileNFT is IProfileNFT {
     ) external {}
 }
 
-contract CyberEngineTest is Test {
+contract CyberEngineTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
     RolesAuthority internal rolesAuthority;
     MockBoxNFT internal box;
@@ -139,6 +140,12 @@ contract CyberEngineTest is Test {
             Constants._SET_STATE,
             true
         );
+        rolesAuthority.setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            address(engine),
+            Constants._ALLOW_SUBSCRIBE_MW,
+            true
+        );
     }
 
     function testBasic() public {
@@ -147,7 +154,7 @@ contract CyberEngineTest is Test {
         assertEq(engine.boxGiveawayEnded(), false);
         assertEq(
             uint256(engine.getState()),
-            uint256(CyberEngine.State.Operational)
+            uint256(DataTypes.State.Operational)
         );
     }
 
@@ -176,7 +183,7 @@ contract CyberEngineTest is Test {
     function testCannotSetFeeAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
+        engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
     }
 
     function testCannotSetBoxOpenedAsNonGov() public {
@@ -188,31 +195,55 @@ contract CyberEngineTest is Test {
     function testSetSignerAsGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetSigner(address(0), alice);
+
         engine.setSigner(alice);
     }
 
     function testSetProfileAsGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetProfileAddress(address(profile), alice);
+
         engine.setProfileAddress(alice);
     }
 
     function testSetBoxGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetBoxAddress(address(box), alice);
+
         engine.setBoxAddress(alice);
     }
 
     function testSetFeeGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setFeeByTier(CyberEngine.Tier.Tier0, 1);
-        assertEq(engine.feeMapping(CyberEngine.Tier.Tier0), 1);
+
+        vm.expectEmit(true, true, true, true);
+        emit SetFeeByTier(
+            DataTypes.Tier.Tier0,
+            Constants._INITIAL_FEE_TIER0,
+            1
+        );
+
+        engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
+        assertEq(engine.feeMapping(DataTypes.Tier.Tier0), 1);
     }
 
     function testSetBoxOpenedGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetBoxGiveawayEnded(false, true);
+
         engine.setBoxGiveawayEnded(true);
     }
 
@@ -233,7 +264,7 @@ contract CyberEngineTest is Test {
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
-                    handle,
+                    keccak256(bytes(handle)),
                     0,
                     deadline
                 )
@@ -257,7 +288,7 @@ contract CyberEngineTest is Test {
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
-                    handle,
+                    keccak256(bytes(handle)),
                     0,
                     deadline
                 )
@@ -283,7 +314,7 @@ contract CyberEngineTest is Test {
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
-                    handle,
+                    keccak256(bytes(handle)),
                     0,
                     deadline
                 )
@@ -300,27 +331,27 @@ contract CyberEngineTest is Test {
 
     function testInitialFees() public {
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier0),
+            engine.feeMapping(DataTypes.Tier.Tier0),
             Constants._INITIAL_FEE_TIER0
         );
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier1),
+            engine.feeMapping(DataTypes.Tier.Tier1),
             Constants._INITIAL_FEE_TIER1
         );
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier2),
+            engine.feeMapping(DataTypes.Tier.Tier2),
             Constants._INITIAL_FEE_TIER2
         );
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier3),
+            engine.feeMapping(DataTypes.Tier.Tier3),
             Constants._INITIAL_FEE_TIER3
         );
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier4),
+            engine.feeMapping(DataTypes.Tier.Tier4),
             Constants._INITIAL_FEE_TIER4
         );
         assertEq(
-            engine.feeMapping(CyberEngine.Tier.Tier5),
+            engine.feeMapping(DataTypes.Tier.Tier5),
             Constants._INITIAL_FEE_TIER5
         );
     }
@@ -386,6 +417,9 @@ contract CyberEngineTest is Test {
         assertEq(alice.balance, 0);
 
         vm.prank(alice);
+        vm.expectEmit(true, true, false, true);
+        emit Withdraw(alice, 1);
+
         engine.withdraw(alice, 1);
         assertEq(address(engine).balance, 1);
         assertEq(alice.balance, 1);
@@ -420,7 +454,7 @@ contract CyberEngineTest is Test {
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
-                    handle,
+                    keccak256(bytes(handle)),
                     0,
                     deadline
                 )
@@ -431,6 +465,9 @@ contract CyberEngineTest is Test {
         assertEq(box.mintRan(), false);
         assertEq(profile.createProfileRan(), false);
         assertEq(engine.nonces(bob), 0);
+
+        vm.expectEmit(true, true, false, true);
+        emit Register(bob, handle);
 
         assertEq(
             engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
@@ -463,7 +500,7 @@ contract CyberEngineTest is Test {
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
-                    handle,
+                    keccak256(bytes(handle)),
                     0,
                     deadline
                 )
@@ -497,7 +534,7 @@ contract CyberEngineTest is Test {
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
-                    handle,
+                    keccak256(bytes(handle)),
                     0,
                     deadline
                 )
@@ -537,7 +574,7 @@ contract CyberEngineTest is Test {
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
-                    handle,
+                    keccak256(bytes(handle)),
                     0,
                     deadline
                 )
@@ -563,27 +600,47 @@ contract CyberEngineTest is Test {
     function testSetState() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setState(CyberEngine.State.Paused);
-        assertEq(uint256(engine.getState()), uint256(CyberEngine.State.Paused));
+
+        vm.expectEmit(true, true, false, true);
+        emit SetState(DataTypes.State.Operational, DataTypes.State.Paused);
+
+        engine.setState(DataTypes.State.Paused);
+        assertEq(uint256(engine.getState()), uint256(DataTypes.State.Paused));
     }
 
     function testCannotSetStateWithoutAuth() public {
         vm.expectRevert("UNAUTHORIZED");
-        engine.setState(CyberEngine.State.Paused);
+        engine.setState(DataTypes.State.Paused);
         assertEq(
             uint256(engine.getState()),
-            uint256(CyberEngine.State.Operational)
+            uint256(DataTypes.State.Operational)
         );
     }
 
     function testCannotSubscribeWhenStateIsPaused() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setState(CyberEngine.State.Paused);
+        engine.setState(DataTypes.State.Paused);
         uint256[] memory ids = new uint256[](1);
         ids[0] = 1;
         bytes[] memory datas = new bytes[](1);
         vm.expectRevert(bytes(ErrorMessages._CONTRACT_PAUSED));
         engine.subscribe(ids, datas);
+    }
+
+    function testCannotAllowSubscribeMwAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        engine.allowSubscribeMw(address(0), true);
+    }
+
+    function testAllowSubscribeMwAsGov() public {
+        address mw = address(0xCA11);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit AllowSubscribeMw(mw, false, true);
+        engine.allowSubscribeMw(mw, true);
+
+        assertEq(engine.isSubscribeMwAllowed(mw), true);
     }
 }

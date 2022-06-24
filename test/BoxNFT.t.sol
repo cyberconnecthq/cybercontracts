@@ -5,8 +5,8 @@ pragma solidity 0.8.14;
 import "../src/BoxNFT.sol";
 import "forge-std/Test.sol";
 import "../src/libraries/Constants.sol";
-import { RolesAuthority } from "../src/base/RolesAuthority.sol";
-import { Authority } from "../src/base/Auth.sol";
+import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
+import { Authority } from "../src/dependencies/solmate/Auth.sol";
 
 contract BoxNFTTest is Test {
     BoxNFT internal token;
@@ -36,7 +36,7 @@ contract BoxNFTTest is Test {
     }
 
     function testCannotMintAsNonEngine() public {
-        vm.expectRevert("Only Engine could mint");
+        vm.expectRevert("Only Engine");
         vm.prank(address(0));
         token.mint(address(0));
     }
