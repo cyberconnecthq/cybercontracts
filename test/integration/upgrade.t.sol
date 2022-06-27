@@ -17,7 +17,8 @@ contract UpgradeableBeaconTest is Test, IUpgradeableBeaconEvents {
         beacon = new UpgradeableBeacon(address(v1), owner);
     }
 
-    function testFailCreatedWithNonContractImplementation() public {
+    function testCannotCreatedWithNonContractImplementation() public {
+        vm.expectRevert(bytes("UpgradeableBeacon: implementation is not a contract"));
         UpgradeableBeacon temp = new UpgradeableBeacon(owner, address(0));
     }
 
@@ -34,12 +35,14 @@ contract UpgradeableBeaconTest is Test, IUpgradeableBeaconEvents {
         assertEq(beacon.implementation(), address(v2));
     }
 
-    function testFailUpgradeByNonContract() public {
+    function testCannotUpgradeByNonContract() public {
+        vm.expectRevert(bytes("Only Engine"));
         beacon.upgradeTo(other);
     }
 
-    function testFailUpgradeByOtherAccount() public {
+    function testCannotUpgradeByOtherAccount() public {
         Implementation2 v2 = new Implementation2();
+        vm.expectRevert(bytes("Only Engine"));
         beacon.upgradeTo(address(v2));
     }
 }
