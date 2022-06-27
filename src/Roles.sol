@@ -5,6 +5,7 @@ pragma solidity 0.8.14;
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../src/libraries/Constants.sol";
+import { CyberEngine } from "../src/CyberEngine.sol";
 
 contract Roles is RolesAuthority {
     constructor(address owner, address engine)
@@ -17,61 +18,61 @@ contract Roles is RolesAuthority {
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            Constants._SET_SIGNER,
+            CyberEngine.setSigner.selector,
             true
         );
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            Constants._SET_PROFILE_ADDR,
+            CyberEngine.setProfileAddress.selector,
             true
         );
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            Constants._SET_BOX_ADDR,
+            CyberEngine.setBoxAddress.selector,
             true
         );
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            Constants._SET_FEE_BY_TIER,
+            CyberEngine.setFeeByTier.selector,
             true
         );
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            Constants._WITHDRAW,
+            CyberEngine.withdraw.selector,
             true
         );
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            Constants._SET_BOX_OPENED,
+            CyberEngine.setBoxGiveawayEnded.selector,
             true
         );
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            Constants._SET_STATE,
+            CyberEngine.setState.selector,
             true
         );
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            Constants._ALLOW_SUBSCRIBE_MW,
+            CyberEngine.allowSubscribeMw.selector,
             true
         );
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            Constants._UPGRADE_PROFILE,
+            CyberEngine.upgradeProfile.selector,
             true
         );
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            Constants._UPGRADE_BOX,
+            CyberEngine.upgradeBox.selector,
             true
         );
         setRoleCapability(
