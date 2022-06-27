@@ -35,7 +35,9 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         authority = new RolesAuthority(address(this), Authority(address(0)));
         engine = new MockEngine();
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
-        bytes memory code = address(new ProfileNFT(address(engine))).code;
+        bytes memory code = address(
+            new ProfileNFT(address(engine), "ani_template", "img_template")
+        ).code;
         vm.etch(profileAddress, code);
 
         address impl = address(
@@ -67,6 +69,9 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
 
         // register "bob"
         string memory handle = "bob";
+        string memory avatar = "avatar";
+        string memory metadata = "metadata";
+
         uint256 deadline = 100;
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(
@@ -74,6 +79,8 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
                     Constants._REGISTER_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
                     0,
                     deadline
                 )
@@ -91,16 +98,14 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             profileAddress,
             abi.encodeWithSelector(
                 IProfileNFT.createProfile.selector,
-                address(bob),
-                DataTypes.CreateProfileParams(handle, "")
+                DataTypes.CreateProfileParams(bob, handle, "", "")
             ),
             abi.encode(1)
         );
 
         assertEq(engine.nonces(bob), 0);
         profileId = engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-            bob,
-            handle,
+            DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
         assertEq(profileId, 1);

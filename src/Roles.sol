@@ -81,5 +81,17 @@ contract Roles is RolesAuthority {
             Constants._AUTHORIZE_UPGRADE,
             true
         );
+        setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            engine,
+            CyberEngine.setAnimationTemplate.selector,
+            true
+        );
+        setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            engine,
+            CyberEngine.setImageTemplate.selector,
+            true
+        );
     }
 }

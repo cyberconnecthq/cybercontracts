@@ -37,7 +37,27 @@ interface ICyberEngineEvents {
         DataTypes.State indexed newState
     );
 
-    event Register(address indexed to, string indexed handle);
+    event SetAnimationTemplate(
+        string indexed preTemplate,
+        string indexed newTemplate
+    );
+
+    event SetImageTemplate(
+        string indexed preTemplate,
+        string indexed newTemplate
+    );
+
+    event SetMetadata(
+        uint256 indexed profileId,
+        string indexed preMetadata,
+        string indexed newMetadata
+    );
+
+    event Register(
+        address indexed to,
+        string indexed handle,
+        string indexed avatar
+    );
 
     event Withdraw(address indexed to, uint256 indexed amount);
 

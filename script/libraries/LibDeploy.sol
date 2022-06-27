@@ -99,7 +99,11 @@ library LibDeploy {
         {
             // scope to avoid stack too deep error
             // 3. Deploy ProfileNFT Impl
-            ProfileNFT profileImpl = new ProfileNFT(address(engineAddr));
+            ProfileNFT profileImpl = new ProfileNFT(
+                address(engineAddr),
+                "ani_template",
+                "img_template"
+            );
             _requiresContractAddress(deployer, nonce + 2, address(profileImpl));
             // 4. Deploy Proxy for ProfileNFT
             bytes memory initData = abi.encodeWithSelector(

@@ -30,7 +30,9 @@ contract CyberEngineUpgradeTest is Test {
             Authority(address(0))
         );
         impl = new CyberEngine();
-        bytes memory code = address(new ProfileNFT(address(0xDEADC0DE))).code;
+        bytes memory code = address(
+            new ProfileNFT(address(0xDEADC0DE), "ani_template", "img_template")
+        ).code;
         vm.etch(profile, code);
         bytes memory boxCode = address(new BoxNFT(address(0xDEADC0DE))).code;
         vm.etch(box, boxCode);

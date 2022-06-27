@@ -19,6 +19,8 @@ contract ProfileNFT is
     UUPSUpgradeable
 {
     address public immutable ENGINE;
+    string internal _animationTemplate;
+    string internal _imageTemplate;
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
     mapping(uint256 => string) internal _metadataById;
@@ -31,9 +33,15 @@ contract ProfileNFT is
     }
 
     // ENGINE for createProfile, setSubscribeNFT
-    constructor(address _engine) {
+    constructor(
+        address _engine,
+        string memory animationTemplate,
+        string memory imageTemplate
+    ) {
         require(_engine != address(0), "Engine address cannot be 0");
         ENGINE = _engine;
+        _animationTemplate = animationTemplate;
+        _imageTemplate = imageTemplate;
     }
 
     // TODO: enable this, currently disabled for better testability
@@ -48,23 +56,26 @@ contract ProfileNFT is
         CyberNFTBase._initialize(_name, _symbol);
     }
 
-    function createProfile(
-        address to,
-        DataTypes.CreateProfileParams calldata vars
-    ) external override onlyEngine returns (uint256) {
-        _requiresValidHandle(vars.handle);
+    function createProfile(DataTypes.CreateProfileParams calldata params)
+        external
+        override
+        onlyEngine
+        returns (uint256)
+    {
+        _requiresValidHandle(params.handle);
 
-        bytes32 handleHash = keccak256(bytes(vars.handle));
+        bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
         // TODO: unchecked
-        _mint(to);
+        _mint(params.to);
         _profileById[_totalCount] = DataTypes.ProfileStruct({
-            handle: vars.handle,
-            imageURI: vars.imageURI
+            handle: params.handle,
+            avatar: params.avatar
         });
 
         _profileIdByHandleHash[handleHash] = _totalCount;
+        _metadataById[_totalCount] = params.metadata;
         return _totalCount;
     }
 
@@ -93,8 +104,13 @@ contract ProfileNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
-        string memory formattedName = string(
-            abi.encodePacked("@", _profileById[tokenId].handle)
+        string memory handle = _profileById[tokenId].handle;
+        string memory formattedName = string(abi.encodePacked("@", handle));
+        string memory animationURL = string(
+            abi.encodePacked(_animationTemplate, "?handle=", handle)
+        );
+        string memory imageURL = string(
+            abi.encodePacked(_imageTemplate, "?handle=", handle)
         );
         return
             string(
@@ -104,13 +120,16 @@ contract ProfileNFT is
                         abi.encodePacked(
                             '{"name":"',
                             formattedName,
-                            '","description":"',
+                            '","description":"CyberConnect profile for ',
                             formattedName,
-                            ' - CyberConnect profile","attributes":[{"trait_type":"id","value":"#',
+                            '","image":"',
+                            imageURL,
+                            '","animation_url":"',
+                            animationURL,
+                            '","attributes":[{"trait_type":"id","value":"',
                             LibString.toString(tokenId),
-                            '"},{"trait_type":"owner","value":"',
-                            // TODO: use uint160 will somehow remove the zero padding for 0x address
-                            LibString.toHexString(ownerOf(tokenId)),
+                            '"},{"trait_type":"length","value":"',
+                            LibString.toString(bytes(handle).length),
                             '"},{"trait_type":"handle","value":"',
                             formattedName,
                             '"}]}'
@@ -174,6 +193,25 @@ contract ProfileNFT is
     {
         _requireMinted(profileId);
         return _metadataById[profileId];
+    }
+
+    function setAnimationTemplate(string calldata template)
+        external
+        onlyEngine
+    {
+        _animationTemplate = template;
+    }
+
+    function getAnimationTemplate() external view returns (string memory) {
+        return _animationTemplate;
+    }
+
+    function setImageTemplate(string calldata template) external onlyEngine {
+        _imageTemplate = template;
+    }
+
+    function getImageTemplate() external view returns (string memory) {
+        return _imageTemplate;
     }
 
     // TODO: write a test for upgrade profile nft

@@ -4,13 +4,15 @@ pragma solidity 0.8.14;
 
 library DataTypes {
     struct CreateProfileParams {
+        address to;
         string handle;
-        string imageURI;
+        string avatar;
+        string metadata;
     }
 
     struct ProfileStruct {
         string handle;
-        string imageURI;
+        string avatar;
     }
 
     struct SubscribeStruct {

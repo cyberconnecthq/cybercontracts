@@ -57,6 +57,8 @@ library LibFixture {
         engine.setSigner(bob);
 
         uint256 deadline = 100;
+        string memory avatar = "avatar";
+        string memory metadata = "metadata";
         bytes32 digest = _hashTypedDataV4(
             address(engine),
             keccak256(
@@ -64,6 +66,8 @@ library LibFixture {
                     Constants._REGISTER_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
                     0,
                     deadline
                 )
@@ -73,8 +77,7 @@ library LibFixture {
 
         require(engine.nonces(bob) == 0);
         profileId = engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-            bob,
-            handle,
+            DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
         require(profileId == 1);
