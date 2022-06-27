@@ -3,7 +3,7 @@
 pragma solidity 0.8.14;
 
 import "../../src/upgradeability/UpgradeableBeacon.sol";
-import "../../lib/openzeppelin-contracts/contracts/mocks/RegressionImplementation.sol";
+import "openzeppelin-contracts/contracts/mocks/RegressionImplementation.sol";
 import "forge-std/Test.sol";
 import { IUpgradeableBeaconEvents } from "../../src/interfaces/IUpgradeableBeaconEvents.sol";
 
@@ -28,7 +28,7 @@ contract UpgradeableBeaconTest is Test, IUpgradeableBeaconEvents {
     function testCanBeUpgradedByTheOwner() public {
         Implementation2 v2 = new Implementation2();
         vm.prank(owner);
-        vm.expectEmit(true, false, false, false);
+        vm.expectEmit(true, false, false, true);
         emit Upgraded(address(v2));
         beacon.upgradeTo(address(v2));
         assertEq(beacon.implementation(), address(v2));
