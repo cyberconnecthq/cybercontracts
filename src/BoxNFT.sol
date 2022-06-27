@@ -6,8 +6,9 @@ import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
 import { CyberNFTBase } from "./base/CyberNFTBase.sol";
 import { RolesAuthority } from "./dependencies/solmate/RolesAuthority.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
 
-contract BoxNFT is CyberNFTBase, IBoxNFT, UUPSUpgradeable {
+contract BoxNFT is CyberNFTBase, IBoxNFT, IUpgradeable, UUPSUpgradeable {
     address public immutable ENGINE;
     uint256 private constant VERSION = 1;
 
@@ -46,7 +47,7 @@ contract BoxNFT is CyberNFTBase, IBoxNFT, UUPSUpgradeable {
 
     // TODO: write a test for upgrade box nft
     // UUPS upgradeability
-    function version() external pure virtual returns (uint256) {
+    function version() external pure virtual override returns (uint256) {
         return VERSION;
     }
 

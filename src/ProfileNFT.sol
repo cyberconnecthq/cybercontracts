@@ -3,6 +3,7 @@
 pragma solidity 0.8.14;
 
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
+import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
 import { CyberNFTBase } from "./base/CyberNFTBase.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
@@ -11,7 +12,12 @@ import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 // TODO: Owner cannot be set with conflicting role for capacity
-contract ProfileNFT is CyberNFTBase, IProfileNFT, UUPSUpgradeable {
+contract ProfileNFT is
+    CyberNFTBase,
+    IProfileNFT,
+    IUpgradeable,
+    UUPSUpgradeable
+{
     address public immutable ENGINE;
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
@@ -67,7 +73,6 @@ contract ProfileNFT is CyberNFTBase, IProfileNFT, UUPSUpgradeable {
         view
         returns (string memory)
     {
-        // TODO: maybe remove this check
         require(_exists(profileId), "ERC721: invalid token ID");
         return _profileById[profileId].handle;
     }
