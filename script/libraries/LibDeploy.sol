@@ -4,6 +4,7 @@ pragma solidity 0.8.14;
 import "forge-std/console.sol";
 import { ProfileNFT } from "../../src/ProfileNFT.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
+import { Roles } from "../../src/Roles.sol";
 import { CyberEngine } from "../../src/CyberEngine.sol";
 import { BoxNFT } from "../../src/BoxNFT.sol";
 import { SubscribeNFT } from "../../src/SubscribeNFT.sol";
@@ -84,12 +85,15 @@ library LibDeploy {
         // TODO: emergency admin
         // address emergencyAdmin = address(0x1890);
 
-        // 1. authority
-        authority = new RolesAuthority(deployer, Authority(address(0)));
-        _requiresContractAddress(deployer, nonce, address(authority));
-        // 2. Calc CyberEngine address
-        CyberEngine engineImpl = new CyberEngine();
+        // 0. Cal engine proxy address
         address engineAddr = _calcContractAddress(deployer, nonce + 8);
+
+        // 1. authority
+        // authority = new RolesAuthority(deployer, Authority(address(0)));
+        authority = new Roles(deployer, engineAddr);
+        _requiresContractAddress(deployer, nonce, address(authority));
+        // 2. Deploy engine impl
+        CyberEngine engineImpl = new CyberEngine();
         _requiresContractAddress(deployer, nonce + 1, address(engineImpl));
         ERC1967Proxy profileProxy;
         {
@@ -151,65 +155,29 @@ library LibDeploy {
         );
         engineProxy = new ERC1967Proxy(address(engineImpl), data);
         _requiresContractAddress(deployer, nonce + 8, address(engineProxy));
-        // 10. setupAuth
-        setupAuth(authority, address(engineProxy));
+
+        // 10. health checks
+        healthCheck(CyberEngine(address(engineProxy)), deployer, authority);
+        // TODO: setup governance
     }
 
-    function setupAuth(RolesAuthority authority, address engine) internal {
-        authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            Constants._SET_SIGNER,
-            true
-        );
-        authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            Constants._SET_PROFILE_ADDR,
-            true
-        );
-        authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            Constants._SET_BOX_ADDR,
-            true
-        );
-        authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            Constants._SET_FEE_BY_TIER,
-            true
-        );
-        authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            Constants._WITHDRAW,
-            true
-        );
-        authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            Constants._SET_BOX_OPENED,
-            true
-        );
-        authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            Constants._SET_STATE,
-            true
-        );
-        authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            Constants._ALLOW_SUBSCRIBE_MW,
-            true
-        );
-    }
-
-    function healthCheck(CyberEngine engine, address deployer) internal view {
+    function healthCheck(
+        CyberEngine engine,
+        address deployer,
+        RolesAuthority authority
+    ) internal view {
         require(
-            engine.owner() == deployer,
+            engine.owner() == ENGINE_OWNER,
             "CyberEngine owner is not deployer"
         );
+        // TODO: add all checks
+        // require(
+        //     authority.canCall(
+        //         deployer,
+        //         address(engine),
+        //         CyberEngine.setSigner.selector
+        //     ),
+        //     "CyberEngine Owner can set Signer"
+        // );
     }
 }
