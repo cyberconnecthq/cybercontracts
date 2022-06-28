@@ -17,6 +17,8 @@ import { CyberEngine } from "../src/CyberEngine.sol";
 import { ProfileNFT } from "../src/ProfileNFT.sol";
 import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
 import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 
 contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
@@ -33,24 +35,36 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
 
     function setUp() public {
         authority = new RolesAuthority(address(this), Authority(address(0)));
-        engine = new MockEngine();
+        MockEngine engineImpl = new MockEngine();
+        uint256 nonce = vm.getNonce(address(this));
+        address engineAddr = LibDeploy._calcContractAddress(
+            address(this),
+            nonce + 3
+        );
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
         bytes memory code = address(
-            new ProfileNFT(address(engine), "ani_template", "img_template")
+            new ProfileNFT(engineAddr, "ani_template", "img_template")
         ).code;
         vm.etch(profileAddress, code);
 
-        address impl = address(
-            new SubscribeNFT(address(engine), profileAddress)
-        );
+        address impl = address(new SubscribeNFT(engineAddr, profileAddress));
         subscribeBeacon = address(new UpgradeableBeacon(impl, address(engine)));
-        engine.initialize(
+
+        bytes memory data = abi.encodeWithSelector(
+            CyberEngine.initialize.selector,
             address(0),
             profileAddress,
             boxAddress,
             subscribeBeacon,
             authority
         );
+        ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
+        assertEq(address(engineProxy), engineAddr);
+        engine = MockEngine(address(engineProxy));
+        vm.label(address(engine), "EngineProxy");
+        vm.label(address(this), "Tester");
+        vm.label(bob, "Bob");
+
         authority.setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             address(engine),
@@ -157,7 +171,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         uint256 result = 100;
 
         // Assuming the newly deployed subscribe proxy is always at the same address;
-        address proxy = address(0x9cC6334F1A7Bc20c9Dde91Db536E194865Af0067);
+        address proxy = address(0x93474D608089d9Fa2347A19A0a85EdC8ce562FeA);
         vm.mockCall(
             proxy,
             abi.encodeWithSelector(ISubscribeNFT.mint.selector, address(this)),

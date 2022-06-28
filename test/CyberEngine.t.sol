@@ -15,6 +15,8 @@ import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 
 contract MockBoxNFT is IBoxNFT {
     bool public mintRan;
@@ -114,18 +116,28 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     string constant metadata = "metadata";
 
     function setUp() public {
-        engine = new MockEngine();
-
-        rolesAuthority = new Roles(address(this), address(engine));
         box = new MockBoxNFT();
         profile = new MockProfileNFT();
-        engine.initialize(
+        MockEngine engineImpl = new MockEngine();
+
+        uint256 nonce = vm.getNonce(address(this));
+        address engineAddr = LibDeploy._calcContractAddress(
+            address(this),
+            nonce + 1
+        );
+        rolesAuthority = new Roles(address(this), engineAddr);
+
+        bytes memory data = abi.encodeWithSelector(
+            CyberEngine.initialize.selector,
             address(0),
             address(profile),
             address(box),
             address(0xDEAD),
             rolesAuthority
         );
+        ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
+        assertEq(address(engineProxy), engineAddr);
+        engine = MockEngine(address(engineProxy));
     }
 
     function testBasic() public {
