@@ -18,6 +18,7 @@ import { Constants } from "./libraries/Constants.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ERC721 } from "./dependencies/solmate/ERC721.sol";
 import { CyberEngineStorage } from "./storages/CyberEngineStorage.sol";
+import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
 
 // TODO: separate storage contract
 contract CyberEngine is
@@ -26,6 +27,7 @@ contract CyberEngine is
     EIP712,
     UUPSUpgradeable,
     CyberEngineStorage,
+    IUpgradeable,
     ICyberEngine
 {
     constructor() {
@@ -474,7 +476,7 @@ contract CyberEngine is
     }
 
     // UUPS upgradeability
-    function version() external pure virtual returns (uint256) {
+    function version() external pure virtual override returns (uint256) {
         return VERSION;
     }
 

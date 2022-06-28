@@ -273,7 +273,7 @@ contract ProfileNFT is
 
     // TODO: write a test for upgrade profile nft
     // UUPS upgradeability
-    function version() external pure virtual returns (uint256) {
+    function version() external pure virtual override returns (uint256) {
         return VERSION;
     }
 
