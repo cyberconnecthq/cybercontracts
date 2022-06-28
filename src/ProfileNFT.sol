@@ -90,6 +90,7 @@ contract ProfileNFT is
     function getHandleByProfileId(uint256 profileId)
         external
         view
+        override
         returns (string memory)
     {
         require(_exists(profileId), "ERC721: invalid token ID");
@@ -100,6 +101,7 @@ contract ProfileNFT is
     function getProfileIdByHandle(string calldata handle)
         external
         view
+        override
         returns (uint256)
     {
         bytes32 handleHash = keccak256(bytes(handle));
@@ -190,6 +192,7 @@ contract ProfileNFT is
     function getOperatorApproval(uint256 profileId, address operator)
         external
         view
+        override
         returns (bool)
     {
         _requireMinted(profileId);
@@ -201,7 +204,7 @@ contract ProfileNFT is
         uint256 profileId,
         address operator,
         bool approved
-    ) external onlyEngine {
+    ) external override onlyEngine {
         require(operator != address(0), "Operator address cannot be 0");
         _operatorApproval[profileId][operator] = approved;
     }
@@ -209,6 +212,7 @@ contract ProfileNFT is
     /// @inheritdoc IProfileNFT
     function setMetadata(uint256 profileId, string calldata metadata)
         external
+        override
         onlyEngine
     {
         _metadataById[profileId] = metadata;
@@ -218,6 +222,7 @@ contract ProfileNFT is
     function getMetadata(uint256 profileId)
         external
         view
+        override
         returns (string memory)
     {
         _requireMinted(profileId);
@@ -227,6 +232,7 @@ contract ProfileNFT is
     /// @inheritdoc IProfileNFT
     function setAnimationTemplate(string calldata template)
         external
+        override
         onlyEngine
     {
         _animationTemplate = template;
@@ -238,12 +244,16 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function setImageTemplate(string calldata template) external onlyEngine {
+    function setImageTemplate(string calldata template)
+        external
+        override
+        onlyEngine
+    {
         _imageTemplate = template;
     }
 
     /// @inheritdoc IProfileNFT
-    function getImageTemplate() external view returns (string memory) {
+    function getImageTemplate() external view override returns (string memory) {
         return _imageTemplate;
     }
 

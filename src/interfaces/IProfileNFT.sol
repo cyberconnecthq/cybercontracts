@@ -12,12 +12,12 @@ interface IProfileNFT {
      * @return uint256 profile id of the newly minted profile.
      *
      * @dev The current function validates the caller address and the handle before minting
-     *  and the following conditions must be met:
-     *  - The caller address must be the engine address.
+     * and the following conditions must be met:
+     * - The caller address must be the engine address.
      * - The recipient address must be a valid Ethereum address.
-     * - The handle must be a valid UTF-8 string.
+     * - The handle must contain only a-z, A-Z, 0-9.
      * - The handle must not be already used.
-     * - The handle must not be longer than 32 bytes.
+     * - The handle must not be longer than 27 bytes.
      * - The handle must not be empty.
      */
     function createProfile(DataTypes.CreateProfileParams calldata params)
@@ -25,7 +25,7 @@ interface IProfileNFT {
         returns (uint256);
 
     /**
-     * @notice Gets the profile handle.
+     * @notice Gets the profile handle by ID.
      *
      * @param profileId The profile ID.
      * @return memory the profile handle.
@@ -36,7 +36,7 @@ interface IProfileNFT {
         returns (string memory);
 
     /**
-     * @notice Gets the profile handle.
+     * @notice Gets the profile ID by handle.
      *
      * @param handle The profile handle.
      * @return memory the profile ID.
@@ -47,21 +47,21 @@ interface IProfileNFT {
         returns (uint256);
 
     /**
-     * @notice Sets the NFT animation image.
+     * @notice Sets the NFT animation url.
      *
-     * @param template The new template uri to set.
+     * @param template The new template url to set.
      */
     function setAnimationTemplate(string calldata template) external;
 
     /**
      * @notice Sets the NFT image.
      *
-     * @param template The new template uri to set.
+     * @param template The new template url to set.
      */
     function setImageTemplate(string calldata template) external;
 
     /**
-     * @notice Sets the NFT metadata.
+     * @notice Sets the NFT metadata as IPFS hash.
      *
      * @param profileId The profile ID.
      * @param metadata The new metadata to set.
@@ -69,16 +69,16 @@ interface IProfileNFT {
     function setMetadata(uint256 profileId, string calldata metadata) external;
 
     /**
-     * @notice Gets the animation template uri.
+     * @notice Gets the animation template url.
      *
-     * @return memory the animation template uri.
+     * @return memory the animation template url.
      */
     function getAnimationTemplate() external view returns (string memory);
 
     /**
-     * @notice Gets the image template uri.
+     * @notice Gets the image template url.
      *
-     * @return memory the image template uri.
+     * @return memory the image template url.
      */
     function getImageTemplate() external view returns (string memory);
 
