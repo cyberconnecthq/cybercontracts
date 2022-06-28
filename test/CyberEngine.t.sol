@@ -483,7 +483,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         assertEq(engine.nonces(bob), 0);
 
         vm.expectEmit(true, true, false, true);
-        emit Register(bob, handle, avatar);
+        emit Register(bob, handle, avatar, metadata);
 
         assertEq(
             engine.register{ value: Constants._INITIAL_FEE_TIER2 }(

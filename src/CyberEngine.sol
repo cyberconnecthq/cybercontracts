@@ -133,7 +133,7 @@ contract CyberEngine is
             IBoxNFT(boxAddress).mint(params.to);
         }
 
-        emit Register(params.to, params.handle, params.avatar);
+        emit Register(params.to, params.handle, params.avatar, params.metadata);
 
         return IProfileNFT(profileAddress).createProfile(params);
     }

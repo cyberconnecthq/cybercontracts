@@ -56,7 +56,8 @@ interface ICyberEngineEvents {
     event Register(
         address indexed to,
         string indexed handle,
-        string indexed avatar
+        string indexed avatar,
+        string metadata
     );
 
     event Withdraw(address indexed to, uint256 indexed amount);
