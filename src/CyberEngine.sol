@@ -136,7 +136,6 @@ contract CyberEngine is
         return
             IProfileNFT(profileAddress).createProfile(
                 to,
-                // TODO: maybe use profile struct
                 DataTypes.CreateProfileParams(handle, "")
             );
     }
