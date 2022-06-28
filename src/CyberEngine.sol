@@ -20,7 +20,6 @@ import { ERC721 } from "./dependencies/solmate/ERC721.sol";
 import { CyberEngineStorage } from "./storages/CyberEngineStorage.sol";
 import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
 
-// TODO: separate storage contract
 contract CyberEngine is
     Initializable,
     Auth,
