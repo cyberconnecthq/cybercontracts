@@ -37,21 +37,11 @@ interface ICyberEngineEvents {
         DataTypes.State indexed newState
     );
 
-    event SetAnimationTemplate(
-        string indexed preTemplate,
-        string indexed newTemplate
-    );
+    event SetAnimationTemplate(string indexed newTemplate);
 
-    event SetImageTemplate(
-        string indexed preTemplate,
-        string indexed newTemplate
-    );
+    event SetImageTemplate(string indexed newTemplate);
 
-    event SetMetadata(
-        uint256 indexed profileId,
-        string indexed preMetadata,
-        string indexed newMetadata
-    );
+    event SetMetadata(uint256 indexed profileId, string indexed newMetadata);
 
     event SetAvatar(uint256 indexed profileId, string indexed newAvatar);
 

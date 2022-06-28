@@ -295,18 +295,11 @@ contract CyberEngine is
         emit SetState(preState, state);
     }
 
-    function _requiresProfileOwner(uint256 profileId, address target)
-        internal
-        view
-    {
+    modifier onlyProfileOwner(uint256 profileId) {
         require(
-            ERC721(profileAddress).ownerOf(profileId) == target,
+            ERC721(profileAddress).ownerOf(profileId) == msg.sender,
             "Only profile owner"
         );
-    }
-
-    modifier onlyProfileOwner(uint256 profileId) {
-        _requiresProfileOwner(profileId, msg.sender);
         _;
     }
 
@@ -327,12 +320,9 @@ contract CyberEngine is
         external
         onlyOwnerOrOperator(profileId)
     {
-        string memory preMetadata = IProfileNFT(profileAddress).getMetadata(
-            profileId
-        );
         IProfileNFT(profileAddress).setMetadata(profileId, metadata);
 
-        emit SetMetadata(profileId, preMetadata, metadata);
+        emit SetMetadata(profileId, metadata);
     }
 
     // Set Avatar
@@ -350,19 +340,15 @@ contract CyberEngine is
         external
         requiresAuth
     {
-        string memory preTemplate = IProfileNFT(profileAddress)
-            .getAnimationTemplate();
         IProfileNFT(profileAddress).setAnimationTemplate(template);
 
-        emit SetAnimationTemplate(preTemplate, template);
+        emit SetAnimationTemplate(template);
     }
 
     function setImageTemplate(string calldata template) external requiresAuth {
-        string memory preTemplate = IProfileNFT(profileAddress)
-            .getImageTemplate();
         IProfileNFT(profileAddress).setImageTemplate(template);
 
-        emit SetImageTemplate(preTemplate, template);
+        emit SetImageTemplate(template);
     }
 
     // only owner's signature works

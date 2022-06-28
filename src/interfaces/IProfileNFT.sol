@@ -77,20 +77,6 @@ interface IProfileNFT {
     function setAvatar(uint256 profileId, string calldata avatar) external;
 
     /**
-     * @notice Gets the animation template url.
-     *
-     * @return memory the animation template url.
-     */
-    function getAnimationTemplate() external view returns (string memory);
-
-    /**
-     * @notice Gets the image template url.
-     *
-     * @return memory the image template url.
-     */
-    function getImageTemplate() external view returns (string memory);
-
-    /**
      * @notice Gets the profile metadata.
      *
      * @param profileId The profile ID.

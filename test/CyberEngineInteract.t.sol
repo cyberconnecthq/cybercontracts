@@ -216,6 +216,9 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
             abi.encode(bob)
         );
+
+        vm.expectEmit(true, true, false, true);
+        emit SetMetadata(profileId, "ipfs");
         engine.setMetadata(profileId, "ipfs");
     }
 

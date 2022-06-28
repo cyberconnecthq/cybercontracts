@@ -114,10 +114,10 @@ contract ProfileNFT is
         string memory handle = _profileById[tokenId].handle;
         string memory formattedName = string(abi.encodePacked("@", handle));
         string memory animationURL = string(
-            abi.encodePacked(_animationTemplate, "?handle=", handle)
+            abi.encodePacked(animationTemplate, "?handle=", handle)
         );
         string memory imageURL = string(
-            abi.encodePacked(_imageTemplate, "?handle=", handle)
+            abi.encodePacked(imageTemplate, "?handle=", handle)
         );
         return
             string(
@@ -235,17 +235,7 @@ contract ProfileNFT is
         override
         onlyEngine
     {
-        _animationTemplate = template;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function getAnimationTemplate()
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return _animationTemplate;
+        animationTemplate = template;
     }
 
     /// @inheritdoc IProfileNFT
@@ -254,7 +244,7 @@ contract ProfileNFT is
         override
         onlyEngine
     {
-        _imageTemplate = template;
+        imageTemplate = template;
     }
 
     /// @inheritdoc IProfileNFT
@@ -264,11 +254,6 @@ contract ProfileNFT is
         onlyEngine
     {
         _profileById[profileId].avatar = avatar;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function getImageTemplate() external view override returns (string memory) {
-        return _imageTemplate;
     }
 
     // TODO: write a test for upgrade profile nft
