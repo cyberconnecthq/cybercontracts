@@ -200,6 +200,13 @@ contract ProfileNFTTest is Test {
         token.getMetadata(0);
     }
 
+    function testCannotSetMetadataIfNotEngine() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(createProfileData);
+        vm.expectRevert("Only Engine");
+        token.setMetadata(id, "ipfs");
+    }
+
     // template
     function testCannotSetTemplateIfNotEngine() public {
         vm.expectRevert("Only Engine");
@@ -217,5 +224,27 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.setImageTemplate("img_template");
         assertEq(token.getImageTemplate(), "img_template");
+    }
+
+    // avatar
+    function testSetAvatarAsEngine() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(createProfileData);
+        assertEq(token.getAvatar(id), "https://example.com/alice.jpg");
+        vm.prank(engine);
+        token.setAvatar(id, "avatar");
+        assertEq(token.getAvatar(id), "avatar");
+    }
+
+    function testCannotGetAvatarForNonexistentProfile() public {
+        vm.expectRevert("NOT_MINTED");
+        token.getAvatar(0);
+    }
+
+    function testCannotSetAvatarIfNotEngine() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(createProfileData);
+        vm.expectRevert("Only Engine");
+        token.setAvatar(id, "ipfs");
     }
 }

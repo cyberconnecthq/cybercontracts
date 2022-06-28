@@ -69,6 +69,14 @@ interface IProfileNFT {
     function setMetadata(uint256 profileId, string calldata metadata) external;
 
     /**
+     * @notice Sets the NFT avatar as IPFS hash.
+     *
+     * @param profileId The profile ID.
+     * @param avatar The new avatar to set.
+     */
+    function setAvatar(uint256 profileId, string calldata avatar) external;
+
+    /**
      * @notice Gets the animation template url.
      *
      * @return memory the animation template url.
@@ -92,6 +100,14 @@ interface IProfileNFT {
         external
         view
         returns (string memory);
+
+    /**
+     * @notice Gets the profile avatar.
+     *
+     * @param profileId The profile ID.
+     * @return memory the avatar of the profile.
+     */
+    function getAvatar(uint256 profileId) external view returns (string memory);
 
     function getOperatorApproval(uint256 profileId, address operator)
         external

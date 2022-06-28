@@ -96,6 +96,16 @@ contract MockProfileNFT is IProfileNFT {
         return "metadata";
     }
 
+    function setAvatar(uint256 profileId, string calldata avatar) external {}
+
+    function getAvatar(uint256 profileId)
+        external
+        view
+        returns (string memory)
+    {
+        return "metadata";
+    }
+
     function getOperatorApproval(uint256 profileId, address operator)
         external
         view

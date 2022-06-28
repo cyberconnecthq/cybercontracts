@@ -219,6 +219,17 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
+    function getAvatar(uint256 profileId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        _requireMinted(profileId);
+        return _profileById[profileId].avatar;
+    }
+
+    /// @inheritdoc IProfileNFT
     function setAnimationTemplate(string calldata template)
         external
         override
@@ -244,6 +255,15 @@ contract ProfileNFT is
         onlyEngine
     {
         _imageTemplate = template;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function setAvatar(uint256 profileId, string calldata avatar)
+        external
+        override
+        onlyEngine
+    {
+        _profileById[profileId].avatar = avatar;
     }
 
     /// @inheritdoc IProfileNFT

@@ -310,23 +310,39 @@ contract CyberEngine is
         _;
     }
 
-    // Set Metadata
-    function setMetadata(uint256 profileId, string calldata metadata) external {
+    modifier onlyOwnerOrOperator(uint256 profileId) {
         require(
-            msg.sender == ERC721(profileAddress).ownerOf(profileId) ||
+            ERC721(profileAddress).ownerOf(profileId) == msg.sender ||
                 IProfileNFT(profileAddress).getOperatorApproval(
                     profileId,
                     msg.sender
                 ),
-            "Only owner or operator can set metadata"
+            "Only profile owner or operator"
         );
+        _;
+    }
 
+    // Set Metadata
+    function setMetadata(uint256 profileId, string calldata metadata)
+        external
+        onlyOwnerOrOperator(profileId)
+    {
         string memory preMetadata = IProfileNFT(profileAddress).getMetadata(
             profileId
         );
         IProfileNFT(profileAddress).setMetadata(profileId, metadata);
 
         emit SetMetadata(profileId, preMetadata, metadata);
+    }
+
+    // Set Avatar
+    function setAvatar(uint256 profileId, string calldata avatar)
+        external
+        onlyOwnerOrOperator(profileId)
+    {
+        IProfileNFT(profileAddress).setAvatar(profileId, avatar);
+
+        emit SetAvatar(profileId, avatar);
     }
 
     // Set Template

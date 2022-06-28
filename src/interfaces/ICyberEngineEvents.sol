@@ -53,6 +53,8 @@ interface ICyberEngineEvents {
         string indexed newMetadata
     );
 
+    event SetAvatar(uint256 indexed profileId, string indexed newAvatar);
+
     event Register(
         address indexed to,
         string indexed handle,

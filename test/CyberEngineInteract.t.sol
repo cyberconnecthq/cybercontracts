@@ -242,7 +242,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             ),
             false
         );
-        vm.expectRevert("Only owner or operator can set metadata");
+        vm.expectRevert("Only profile owner or operator");
         engine.setMetadata(profileId, "ipfs");
     }
 
@@ -280,6 +280,79 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             abi.encode(0)
         );
         engine.setMetadata(profileId, metadata);
+    }
+
+    function testSetAvatarAsOwner() public {
+        vm.prank(bob);
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(bob)
+        );
+        engine.setAvatar(profileId, "avatar");
+    }
+
+    function testCannotSetAvatarAsNonOwnerAndOperator() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(address(0xDEAD))
+        );
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.getOperatorApproval.selector,
+                profileId,
+                address(this)
+            ),
+            abi.encode(false)
+        );
+        assertEq(ERC721(profileAddress).ownerOf(profileId), address(0xDEAD));
+        assertEq(
+            IProfileNFT(profileAddress).getOperatorApproval(
+                profileId,
+                address(this)
+            ),
+            false
+        );
+        vm.expectRevert("Only profile owner or operator");
+        engine.setAvatar(profileId, "avatar");
+    }
+
+    function testSetAvatarAsOperator() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(address(0xDEAD))
+        );
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.getOperatorApproval.selector,
+                profileId,
+                address(this)
+            ),
+            abi.encode(true)
+        );
+        assertEq(ERC721(profileAddress).ownerOf(profileId), address(0xDEAD));
+        assertEq(
+            IProfileNFT(profileAddress).getOperatorApproval(
+                profileId,
+                address(this)
+            ),
+            true
+        );
+        string memory avatar = "avatar";
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.setAvatar.selector,
+                profileId,
+                avatar
+            ),
+            abi.encode(0)
+        );
+        engine.setAvatar(profileId, avatar);
     }
 
     function testCannotSetSubscribeMwIfNotOwner() public {
