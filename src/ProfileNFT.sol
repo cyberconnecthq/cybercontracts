@@ -106,6 +106,13 @@ contract ProfileNFT is
         return _profileIdByHandleHash[handleHash];
     }
 
+    /**
+     * @notice generates the metadata json object.
+     *
+     * @param tokenId The profile NFT token ID.
+     * @return memory the metadata json object.
+     * @dev it requires the tokenId to be already minted.
+     */
     function tokenURI(uint256 tokenId)
         public
         view
@@ -148,6 +155,15 @@ contract ProfileNFT is
             );
     }
 
+    /**
+     * @notice verifies a handle for length and invalid characters.
+     *
+     * @param handle The handle to verify.
+     * @dev Throws if:
+     * - handle is empty
+     * - handle is too long
+     * - handle contains invalid characters
+     */
     function _requiresValidHandle(string calldata handle) internal pure {
         bytes memory byteHandle = bytes(handle);
         require(
