@@ -239,7 +239,12 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function getAnimationTemplate() external view returns (string memory) {
+    function getAnimationTemplate()
+        external
+        view
+        override
+        returns (string memory)
+    {
         return _animationTemplate;
     }
 
