@@ -40,14 +40,14 @@ contract ProfileNFT is
     }
 
     function initialize(
-        string calldata _name,
-        string calldata _symbol,
-        string calldata animationTemplate_,
-        string memory imageTemplate_
+        string calldata name,
+        string calldata symbol,
+        string calldata animationTemplate,
+        string memory imageTemplate
     ) external initializer {
-        CyberNFTBase._initialize(_name, _symbol);
-        _animationTemplate = animationTemplate_;
-        _imageTemplate = imageTemplate_;
+        CyberNFTBase._initialize(name, symbol);
+        _animationTemplate = animationTemplate;
+        _imageTemplate = imageTemplate;
     }
 
     /// @inheritdoc IProfileNFT
@@ -217,12 +217,41 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
+    function getAvatar(uint256 profileId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        _requireMinted(profileId);
+        return _profileById[profileId].avatar;
+    }
+
+    /// @inheritdoc IProfileNFT
     function setAnimationTemplate(string calldata template)
         external
         override
         onlyEngine
     {
         _animationTemplate = template;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function setImageTemplate(string calldata template)
+        external
+        override
+        onlyEngine
+    {
+        _imageTemplate = template;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function setAvatar(uint256 profileId, string calldata avatar)
+        external
+        override
+        onlyEngine
+    {
+        _profileById[profileId].avatar = avatar;
     }
 
     /// @inheritdoc IProfileNFT
@@ -236,22 +265,13 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function setImageTemplate(string calldata template)
-        external
-        override
-        onlyEngine
-    {
-        _imageTemplate = template;
-    }
-
-    /// @inheritdoc IProfileNFT
     function getImageTemplate() external view override returns (string memory) {
         return _imageTemplate;
     }
 
     // TODO: write a test for upgrade profile nft
     // UUPS upgradeability
-    function version() external pure virtual returns (uint256) {
+    function version() external pure virtual override returns (uint256) {
         return VERSION;
     }
 

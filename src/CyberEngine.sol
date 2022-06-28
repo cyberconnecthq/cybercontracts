@@ -294,38 +294,44 @@ contract CyberEngine is
         emit SetState(preState, state);
     }
 
-    function _requiresProfileOwner(uint256 profileId, address target)
-        internal
-        view
-    {
+    modifier onlyProfileOwner(uint256 profileId) {
         require(
-            ERC721(profileAddress).ownerOf(profileId) == target,
+            ERC721(profileAddress).ownerOf(profileId) == msg.sender,
             "Only profile owner"
         );
-    }
-
-    modifier onlyProfileOwner(uint256 profileId) {
-        _requiresProfileOwner(profileId, msg.sender);
         _;
     }
 
-    // Set Metadata
-    function setMetadata(uint256 profileId, string calldata metadata) external {
+    modifier onlyOwnerOrOperator(uint256 profileId) {
         require(
-            msg.sender == ERC721(profileAddress).ownerOf(profileId) ||
+            ERC721(profileAddress).ownerOf(profileId) == msg.sender ||
                 IProfileNFT(profileAddress).getOperatorApproval(
                     profileId,
                     msg.sender
                 ),
-            "Only owner or operator can set metadata"
+            "Only profile owner or operator"
         );
+        _;
+    }
 
-        string memory preMetadata = IProfileNFT(profileAddress).getMetadata(
-            profileId
-        );
+    // Set Metadata
+    function setMetadata(uint256 profileId, string calldata metadata)
+        external
+        onlyOwnerOrOperator(profileId)
+    {
         IProfileNFT(profileAddress).setMetadata(profileId, metadata);
 
-        emit SetMetadata(profileId, preMetadata, metadata);
+        emit SetMetadata(profileId, metadata);
+    }
+
+    // Set Avatar
+    function setAvatar(uint256 profileId, string calldata avatar)
+        external
+        onlyOwnerOrOperator(profileId)
+    {
+        IProfileNFT(profileAddress).setAvatar(profileId, avatar);
+
+        emit SetAvatar(profileId, avatar);
     }
 
     // Set Template
@@ -333,19 +339,15 @@ contract CyberEngine is
         external
         requiresAuth
     {
-        string memory preTemplate = IProfileNFT(profileAddress)
-            .getAnimationTemplate();
         IProfileNFT(profileAddress).setAnimationTemplate(template);
 
-        emit SetAnimationTemplate(preTemplate, template);
+        emit SetAnimationTemplate(template);
     }
 
     function setImageTemplate(string calldata template) external requiresAuth {
-        string memory preTemplate = IProfileNFT(profileAddress)
-            .getImageTemplate();
         IProfileNFT(profileAddress).setImageTemplate(template);
 
-        emit SetImageTemplate(preTemplate, template);
+        emit SetImageTemplate(template);
     }
 
     // only owner's signature works
@@ -473,7 +475,7 @@ contract CyberEngine is
     }
 
     // UUPS upgradeability
-    function version() external pure virtual returns (uint256) {
+    function version() external pure virtual override returns (uint256) {
         return VERSION;
     }
 
