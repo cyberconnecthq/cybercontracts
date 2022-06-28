@@ -11,6 +11,7 @@ import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { ISubscribeMiddleware } from "./interfaces/ISubscribeMiddleware.sol";
 import { ICyberEngine } from "./interfaces/ICyberEngine.sol";
 import { ProfileNFT } from "./ProfileNFT.sol";
+import { BoxNFT } from "./BoxNFT.sol";
 import { Auth } from "./dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "./dependencies/solmate/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
@@ -278,6 +279,7 @@ contract CyberEngine is
         _;
     }
 
+    // TODO: maybe remove essence
     modifier whenEssensePaused() {
         require(_state != DataTypes.State.EssensePaused, "Essense is paused");
         _;
@@ -424,6 +426,15 @@ contract CyberEngine is
 
     function upgradeBox(address newImpl) external requiresAuth {
         UUPSUpgradeable(boxAddress).upgradeTo(newImpl);
+    }
+
+    // pause
+    function pauseProfile(bool toPause) external requiresAuth {
+        ProfileNFT(profileAddress).pause(toPause);
+    }
+
+    function pauseBox(bool toPause) external requiresAuth {
+        BoxNFT(boxAddress).pause(toPause);
     }
 
     function getSubscribeNFTTokenURI(uint256 profileId)
