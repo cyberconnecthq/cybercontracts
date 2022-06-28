@@ -12,11 +12,11 @@ const writeDeploy = async () => {
     switch (chainId) {
       case "1":
         chain = "mainnet";
-        etherscan = "https://etherscan.io/";
+        etherscan = "https://etherscan.io/address/";
         break;
       case "4":
         chain = "rinkeby";
-        etherscan = "https://rinkeby.etherscan.io/";
+        etherscan = "https://rinkeby.etherscan.io/address/";
         break;
       case "31337":
         chain = "local";
