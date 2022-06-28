@@ -16,6 +16,10 @@ Some opinions:
 [Foundry](https://github.com/foundry-rs/foundry) ([book](https://book.getfoundry.sh/))
 [slither](https://github.com/crytic/slither)
 
+# Live Deployment
+
+## Rinkeby
+[Deployment](./docs/deploy/rinkeby.md)
 
 # Usage
 To enable husky pre-commit
@@ -35,7 +39,8 @@ To run static analysis
 
 # Deployment:
 
-Set the following environment variables
+(Replace `rinkeby` with `anvil` or other supported network)
+0. Create `.env.rinkeby` file with following env
 
 ```bash
 RINKEBY_RPC_URL=<Your Rinkeby RPC endpoint>
@@ -43,8 +48,15 @@ PRIVATE_KEY=<Your wallets private key>
 ETHERSCAN_KEY=<Your Etherscan API key>
 ```
 
-to deploy
-`npm run deploy rinkeby`
+for local deployment
+
+```bash
+PRIVATE_KEY=
+```
+
+1. Run `yarn deploy:rinkeby` or `yarn deploy:anvil` for local deployment. If you run into any unconfirmed txs, run `yarn deploy:rinkeby --resume` to continue. This also verifies contract on etherscan
+
+2. Run `yarn post_deploy` to update contract addresses and ABI changes
 
 # TODO
 - [ ] SVG generation
