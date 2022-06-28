@@ -42,9 +42,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             nonce + 3
         );
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
-        bytes memory code = address(
-            new ProfileNFT(engineAddr, "ani_template", "img_template")
-        ).code;
+        bytes memory code = address(new ProfileNFT(engineAddr)).code;
         vm.etch(profileAddress, code);
 
         address impl = address(new SubscribeNFT(engineAddr, profileAddress));

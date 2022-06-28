@@ -10,6 +10,7 @@ import { DataTypes } from "./libraries/DataTypes.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { ProfileNFTStorage } from "./storages/ProfileNFTStorage.sol";
 
 /**
  * @title Profile NFT
@@ -20,46 +21,34 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
 // TODO: Owner cannot be set with conflicting role for capacity
 contract ProfileNFT is
     CyberNFTBase,
+    UUPSUpgradeable,
+    ProfileNFTStorage,
     IProfileNFT,
-    IUpgradeable,
-    UUPSUpgradeable
+    IUpgradeable
 {
+    // Immutable
     address public immutable ENGINE;
-    string internal _animationTemplate;
-    string internal _imageTemplate;
-    mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
-    mapping(bytes32 => uint256) internal _profileIdByHandleHash;
-    mapping(uint256 => string) internal _metadataById;
-    mapping(uint256 => mapping(address => bool)) internal _operatorApproval; // TODO: reconsider if useful
-    uint256 private constant VERSION = 1;
 
     modifier onlyEngine() {
         require(msg.sender == address(ENGINE), "Only Engine");
         _;
     }
 
-    // ENGINE for createProfile, setSubscribeNFT
-    constructor(
-        address _engine,
-        string memory animationTemplate,
-        string memory imageTemplate
-    ) {
+    constructor(address _engine) {
         require(_engine != address(0), "Engine address cannot be 0");
         ENGINE = _engine;
-        _animationTemplate = animationTemplate;
-        _imageTemplate = imageTemplate;
+        _disableInitializers();
     }
 
-    // TODO: enable this, currently disabled for better testability
-    // constructor() {
-    //     _disableInitializers();
-    // }
-
-    function initialize(string calldata _name, string calldata _symbol)
-        external
-        initializer
-    {
+    function initialize(
+        string calldata _name,
+        string calldata _symbol,
+        string calldata animationTemplate_,
+        string memory imageTemplate_
+    ) external initializer {
         CyberNFTBase._initialize(_name, _symbol);
+        _animationTemplate = animationTemplate_;
+        _imageTemplate = imageTemplate_;
     }
 
     /// @inheritdoc IProfileNFT
