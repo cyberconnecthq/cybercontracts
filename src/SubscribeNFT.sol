@@ -18,7 +18,6 @@ contract SubscribeNFT is
     IUpgradeable,
     ISubscribeNFT
 {
-    // TODO: use address or ICyberEngine
     address public immutable ENGINE;
     address public immutable PROFILE_NFT;
 

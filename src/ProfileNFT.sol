@@ -18,7 +18,6 @@ import { ProfileNFTStorage } from "./storages/ProfileNFTStorage.sol";
  * @notice This contract is used to create a profile NFT.
  */
 
-// TODO: Owner cannot be set with conflicting role for capacity
 contract ProfileNFT is
     CyberNFTBase,
     UUPSUpgradeable,
@@ -63,7 +62,6 @@ contract ProfileNFT is
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
-        // TODO: unchecked
         _mint(params.to);
         _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: params.handle,
