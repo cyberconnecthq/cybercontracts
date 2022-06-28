@@ -88,6 +88,20 @@ interface IProfileNFT {
         returns (string memory);
 
     /**
+     * @notice Gets the animation template url.
+     *
+     * @return memory the animation template url.
+     */
+    function getAnimationTemplate() external view returns (string memory);
+
+    /**
+     * @notice Gets the image template url.
+     *
+     * @return memory the image template url.
+     */
+    function getImageTemplate() external view returns (string memory);
+
+    /**
      * @notice Gets the profile avatar.
      *
      * @param profileId The profile ID.

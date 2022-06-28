@@ -219,11 +219,11 @@ contract ProfileNFTTest is Test {
     function testSetTemplateAsEngine() public {
         vm.prank(engine);
         token.setAnimationTemplate("ani_template");
-        assertEq(token.animationTemplate(), "ani_template");
+        assertEq(token.getAnimationTemplate(), "ani_template");
 
         vm.prank(engine);
         token.setImageTemplate("img_template");
-        assertEq(token.imageTemplate(), "img_template");
+        assertEq(token.getImageTemplate(), "img_template");
     }
 
     // avatar

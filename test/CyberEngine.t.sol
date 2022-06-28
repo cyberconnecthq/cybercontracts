@@ -43,9 +43,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
         rolesAuthority = new Roles(address(this), engineAddr);
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
-        bytes memory code = address(
-            new ProfileNFT(engineAddr, "ani_template", "img_template")
-        ).code;
+        bytes memory code = address(new ProfileNFT(engineAddr)).code;
         vm.etch(profileAddress, code);
         vm.label(engineAddr, "eng proxy");
         address impl = address(new SubscribeNFT(engineAddr, profileAddress));

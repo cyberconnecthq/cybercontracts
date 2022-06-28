@@ -41,14 +41,14 @@ contract ProfileNFT is
     }
 
     function initialize(
-        string calldata _name,
-        string calldata _symbol,
-        string calldata animationTemplate_,
-        string memory imageTemplate_
+        string calldata name,
+        string calldata symbol,
+        string calldata animationTemplate,
+        string memory imageTemplate
     ) external initializer {
-        CyberNFTBase._initialize(_name, _symbol);
-        _animationTemplate = animationTemplate_;
-        _imageTemplate = imageTemplate_;
+        CyberNFTBase._initialize(name, symbol);
+        _animationTemplate = animationTemplate;
+        _imageTemplate = imageTemplate;
     }
 
     /// @inheritdoc IProfileNFT
@@ -114,10 +114,10 @@ contract ProfileNFT is
         string memory handle = _profileById[tokenId].handle;
         string memory formattedName = string(abi.encodePacked("@", handle));
         string memory animationURL = string(
-            abi.encodePacked(animationTemplate, "?handle=", handle)
+            abi.encodePacked(_animationTemplate, "?handle=", handle)
         );
         string memory imageURL = string(
-            abi.encodePacked(imageTemplate, "?handle=", handle)
+            abi.encodePacked(_imageTemplate, "?handle=", handle)
         );
         return
             string(
@@ -235,7 +235,7 @@ contract ProfileNFT is
         override
         onlyEngine
     {
-        animationTemplate = template;
+        _animationTemplate = template;
     }
 
     /// @inheritdoc IProfileNFT
@@ -244,7 +244,7 @@ contract ProfileNFT is
         override
         onlyEngine
     {
-        imageTemplate = template;
+        _imageTemplate = template;
     }
 
     /// @inheritdoc IProfileNFT
@@ -254,6 +254,21 @@ contract ProfileNFT is
         onlyEngine
     {
         _profileById[profileId].avatar = avatar;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getAnimationTemplate()
+        external
+        view
+        override
+        returns (string memory)
+    {
+        return _animationTemplate;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getImageTemplate() external view override returns (string memory) {
+        return _imageTemplate;
     }
 
     // TODO: write a test for upgrade profile nft
