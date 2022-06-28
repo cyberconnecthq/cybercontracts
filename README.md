@@ -28,19 +28,19 @@ Some opinions:
 
 # Usage
 
-To enable husky pre-commit
+1. To enable husky pre-commit
 `yarn add --dev husky & yarn prepare`
 
-To install contract dependencies
+2. To install contract dependencies
 `forge install`
 
-To build
+3. To build
 `forge build`
 
-To test
+4. To test
 `forge test -vvv`
 
-To run static analysis
+5. (optional) To run static analysis
 `slither src/`
 
 # Deployment:
