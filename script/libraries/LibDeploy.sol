@@ -109,18 +109,17 @@ library LibDeploy {
         {
             // scope to avoid stack too deep error
             // 3. Deploy ProfileNFT Impl
-            ProfileNFT profileImpl = new ProfileNFT(
-                address(engineAddr),
-                "ani_template",
-                "img_template"
-            );
+            ProfileNFT profileImpl = new ProfileNFT(address(engineAddr));
             _requiresContractAddress(deployer, nonce + 2, address(profileImpl));
             // 4. Deploy Proxy for ProfileNFT
             bytes memory initData = abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
                 // TODO: Naming
                 "CyberConnect Profile",
-                "CCP"
+                "CCP",
+                // TODO: fix template
+                "https://animation.example.com",
+                "https://image.example.com"
             );
             profileProxy = new ERC1967Proxy(address(profileImpl), initData);
             profileAddress = address(profileProxy);

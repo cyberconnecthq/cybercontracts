@@ -9,6 +9,7 @@ import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
@@ -35,8 +36,16 @@ contract ProfileNFTTest is Test {
         );
 
     function setUp() public {
-        token = new ProfileNFT(engine, "ani_template", "img_template");
-        token.initialize("TestProfile", "TP");
+        ProfileNFT tokenImpl = new ProfileNFT(engine);
+        bytes memory data = abi.encodeWithSelector(
+            ProfileNFT.initialize.selector,
+            "TestProfile",
+            "TP",
+            "ani_template",
+            "img_template"
+        );
+        ERC1967Proxy engineProxy = new ERC1967Proxy(address(tokenImpl), data);
+        token = ProfileNFT(address(engineProxy));
     }
 
     function testBasic() public {

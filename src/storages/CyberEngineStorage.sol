@@ -4,7 +4,7 @@ pragma solidity 0.8.14;
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 abstract contract CyberEngineStorage {
-    // constants
+    // constant
     string internal constant VERSION_STRING = "1";
     uint256 internal constant VERSION = 1;
 
