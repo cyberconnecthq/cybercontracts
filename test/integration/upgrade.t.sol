@@ -18,7 +18,7 @@ contract UpgradeableBeaconTest is Test, IUpgradeableBeaconEvents {
     }
 
     function testCannotCreatedWithNonContractImplementation() public {
-        vm.expectRevert(bytes("UpgradeableBeacon: implementation is not a contract"));
+        vm.expectRevert("UpgradeableBeacon: implementation is not a contract");
         UpgradeableBeacon temp = new UpgradeableBeacon(owner, address(0));
     }
 
@@ -36,13 +36,13 @@ contract UpgradeableBeaconTest is Test, IUpgradeableBeaconEvents {
     }
 
     function testCannotUpgradeByNonContract() public {
-        vm.expectRevert(bytes("Only Engine"));
+        vm.expectRevert("Only Engine");
         beacon.upgradeTo(other);
     }
 
     function testCannotUpgradeByOtherAccount() public {
         Implementation2 v2 = new Implementation2();
-        vm.expectRevert(bytes("Only Engine"));
+        vm.expectRevert("Only Engine");
         beacon.upgradeTo(address(v2));
     }
 }
