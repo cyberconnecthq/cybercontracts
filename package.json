@@ -13,7 +13,8 @@
     "deploy": "node ./_scripts.js deploy rinkeby",
     "build": "forge build --force",
     "deploy:anvil": "source .env.anvil && forge script script/Deploy.s.sol:DeployScript --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
-    "deploy:rinkeby": "source .env.rinkeby && forge script script/Deploy.s.sol:DeployScript --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv"
+    "deploy:rinkeby": "source .env.rinkeby && forge script script/Deploy.s.sol:DeployScript --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "post_deploy": "node misc/post_deploy.js"
   },
   "devDependencies": {
     "hardhat": "^2.9.9",
@@ -41,5 +42,6 @@
         }
       }
     ]
-  }
+  },
+  "type": "module"
 }
