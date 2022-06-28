@@ -11,6 +11,12 @@ import { LibString } from "./libraries/LibString.sol";
 import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
+/**
+ * @title Profile NFT
+ * @author CyberConnect
+ * @notice This contract is used to create a profile NFT.
+ */
+
 // TODO: Owner cannot be set with conflicting role for capacity
 contract ProfileNFT is
     CyberNFTBase,
@@ -56,6 +62,7 @@ contract ProfileNFT is
         CyberNFTBase._initialize(_name, _symbol);
     }
 
+    /// @inheritdoc IProfileNFT
     function createProfile(DataTypes.CreateProfileParams calldata params)
         external
         override
@@ -79,24 +86,35 @@ contract ProfileNFT is
         return _totalCount;
     }
 
+    /// @inheritdoc IProfileNFT
     function getHandleByProfileId(uint256 profileId)
         external
         view
+        override
         returns (string memory)
     {
         require(_exists(profileId), "ERC721: invalid token ID");
         return _profileById[profileId].handle;
     }
 
+    /// @inheritdoc IProfileNFT
     function getProfileIdByHandle(string calldata handle)
         external
         view
+        override
         returns (uint256)
     {
         bytes32 handleHash = keccak256(bytes(handle));
         return _profileIdByHandleHash[handleHash];
     }
 
+    /**
+     * @notice generates the metadata json object.
+     *
+     * @param tokenId The profile NFT token ID.
+     * @return memory the metadata json object.
+     * @dev it requires the tokenId to be already minted.
+     */
     function tokenURI(uint256 tokenId)
         public
         view
@@ -139,6 +157,15 @@ contract ProfileNFT is
             );
     }
 
+    /**
+     * @notice verifies a handle for length and invalid characters.
+     *
+     * @param handle The handle to verify.
+     * @dev Throws if:
+     * - handle is empty
+     * - handle is too long
+     * - handle contains invalid characters
+     */
     function _requiresValidHandle(string calldata handle) internal pure {
         bytes memory byteHandle = bytes(handle);
         require(
@@ -161,56 +188,77 @@ contract ProfileNFT is
         }
     }
 
+    /// @inheritdoc IProfileNFT
     function getOperatorApproval(uint256 profileId, address operator)
         external
         view
+        override
         returns (bool)
     {
         _requireMinted(profileId);
         return _operatorApproval[profileId][operator];
     }
 
+    /// @inheritdoc IProfileNFT
     function setOperatorApproval(
         uint256 profileId,
         address operator,
         bool approved
-    ) external onlyEngine {
+    ) external override onlyEngine {
         require(operator != address(0), "Operator address cannot be 0");
         _operatorApproval[profileId][operator] = approved;
     }
 
+    /// @inheritdoc IProfileNFT
     function setMetadata(uint256 profileId, string calldata metadata)
         external
+        override
         onlyEngine
     {
         _metadataById[profileId] = metadata;
     }
 
+    /// @inheritdoc IProfileNFT
     function getMetadata(uint256 profileId)
         external
         view
+        override
         returns (string memory)
     {
         _requireMinted(profileId);
         return _metadataById[profileId];
     }
 
+    /// @inheritdoc IProfileNFT
     function setAnimationTemplate(string calldata template)
         external
+        override
         onlyEngine
     {
         _animationTemplate = template;
     }
 
-    function getAnimationTemplate() external view returns (string memory) {
+    /// @inheritdoc IProfileNFT
+    function getAnimationTemplate()
+        external
+        view
+        override
+        returns (string memory)
+    {
         return _animationTemplate;
     }
 
-    function setImageTemplate(string calldata template) external onlyEngine {
+    /// @inheritdoc IProfileNFT
+    function setImageTemplate(string calldata template)
+        external
+        override
+        onlyEngine
+    {
         _imageTemplate = template;
     }
 
-    function getImageTemplate() external view returns (string memory) {
+    /// @inheritdoc IProfileNFT
+    function getImageTemplate() external view override returns (string memory) {
         return _imageTemplate;
     }
 
