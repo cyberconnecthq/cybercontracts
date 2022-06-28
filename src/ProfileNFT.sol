@@ -202,6 +202,10 @@ contract ProfileNFT is
         override
         onlyEngine
     {
+        require(
+            bytes(metadata).length <= Constants._MAX_URI_LENGTH,
+            "Metadata has invalid length"
+        );
         _metadataById[profileId] = metadata;
     }
 
@@ -251,6 +255,10 @@ contract ProfileNFT is
         override
         onlyEngine
     {
+        require(
+            bytes(avatar).length <= Constants._MAX_URI_LENGTH,
+            "Avatar has invalid length"
+        );
         _profileById[profileId].avatar = avatar;
     }
 

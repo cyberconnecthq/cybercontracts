@@ -195,6 +195,17 @@ contract ProfileNFTTest is Test {
         assertEq(token.getMetadata(id), "ipfs");
     }
 
+    function testCannotSetMetadataTooLong() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(createProfileData);
+
+        bytes memory longMetadata = new bytes(Constants._MAX_URI_LENGTH + 1);
+        vm.prank(engine);
+
+        vm.expectRevert("Metadata has invalid length");
+        token.setMetadata(id, string(longMetadata));
+    }
+
     function testCannotGetMetadataForNonexistentProfile() public {
         vm.expectRevert("NOT_MINTED");
         token.getMetadata(0);
@@ -246,5 +257,16 @@ contract ProfileNFTTest is Test {
         uint256 id = token.createProfile(createProfileData);
         vm.expectRevert("Only Engine");
         token.setAvatar(id, "ipfs");
+    }
+
+    function testCannotSetAvatarTooLong() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(createProfileData);
+
+        bytes memory longAvatar = new bytes(Constants._MAX_URI_LENGTH + 1);
+        vm.prank(engine);
+
+        vm.expectRevert("Avatar has invalid length");
+        token.setAvatar(id, string(longAvatar));
     }
 }
