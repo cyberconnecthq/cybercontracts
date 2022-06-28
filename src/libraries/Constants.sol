@@ -5,28 +5,8 @@ pragma solidity 0.8.14;
 library Constants {
     // Access Control for CyebreEngine
     uint8 internal constant _ENGINE_GOV_ROLE = 1;
-    bytes4 internal constant _SET_SIGNER =
-        bytes4(keccak256(bytes("setSigner(address)")));
-    bytes4 internal constant _SET_PROFILE_ADDR =
-        bytes4(keccak256(bytes("setProfileAddress(address)")));
-    bytes4 internal constant _SET_BOX_ADDR =
-        bytes4(keccak256(bytes("setBoxAddress(address)")));
-    bytes4 internal constant _SET_FEE_BY_TIER =
-        bytes4(keccak256(bytes("setFeeByTier(uint8,uint256)")));
-    bytes4 internal constant _SET_BOX_OPENED =
-        bytes4(keccak256(bytes("setBoxGiveawayEnded(bool)")));
-    bytes4 internal constant _WITHDRAW =
-        bytes4(keccak256(bytes("withdraw(address,uint256)")));
     bytes4 internal constant _AUTHORIZE_UPGRADE =
-        bytes4(keccak256(bytes("upgradeTo(address)")));
-    bytes4 internal constant _SET_STATE =
-        bytes4(keccak256(bytes("setState(uint8)")));
-    bytes4 internal constant _UPGRADE_PROFILE =
-        bytes4(keccak256(bytes("upgradeProfile(address)")));
-    bytes4 internal constant _UPGRADE_BOX =
-        bytes4(keccak256(bytes("upgradeBox(address)")));
-    bytes4 internal constant _ALLOW_SUBSCRIBE_MW =
-        bytes4(keccak256(bytes("allowSubscribeMw(address,bool)")));
+        bytes4(keccak256(bytes("_authorizeUpgrade(address)")));
 
     // EIP712 TypeHash
     bytes32 internal constant _REGISTER_TYPEHASH =

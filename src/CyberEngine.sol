@@ -465,5 +465,14 @@ contract CyberEngine is
     }
 
     // UUPS upgradeability
-    function _authorizeUpgrade(address) internal override requiresAuth {}
+    function _authorizeUpgrade(address) internal override canUpgrade {}
+
+    modifier canUpgrade() {
+        require(
+            isAuthorized(msg.sender, Constants._AUTHORIZE_UPGRADE),
+            "UNAUTHORIZED"
+        );
+
+        _;
+    }
 }

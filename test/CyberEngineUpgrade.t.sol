@@ -52,16 +52,43 @@ contract CyberEngineUpgradeTest is Test {
         rolesAuthority.setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             address(proxy),
-            Constants._UPGRADE_PROFILE,
+            CyberEngine.upgradeProfile.selector,
             true
         );
 
         rolesAuthority.setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             address(proxy),
-            Constants._UPGRADE_BOX,
+            CyberEngine.upgradeBox.selector,
             true
         );
+    }
+
+    function testCannotUpgradeToAndCallAsNonGov() public {
+        assertEq(CyberEngine(address(proxy)).version(), 1);
+        MockEngineV2 implV2 = new MockEngineV2();
+
+        vm.prank(alice);
+        vm.expectRevert("UNAUTHORIZED");
+        CyberEngine(address(proxy)).upgradeToAndCall(
+            address(implV2),
+            abi.encodeWithSelector(MockEngineV2.version.selector)
+        );
+        assertEq(CyberEngine(address(proxy)).version(), 1);
+    }
+
+    function testUpgradeToAndCall() public {
+        assertEq(CyberEngine(address(proxy)).version(), 1);
+        MockEngineV2 implV2 = new MockEngineV2();
+
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+
+        CyberEngine(address(proxy)).upgradeToAndCall(
+            address(implV2),
+            abi.encodeWithSelector(MockEngineV2.version.selector)
+        );
+        assertEq(CyberEngine(address(proxy)).version(), 2);
     }
 
     function testUpgrade() public {

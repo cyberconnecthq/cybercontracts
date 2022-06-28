@@ -13,6 +13,7 @@ import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
 import { SubscribeNFT } from "../src/SubscribeNFT.sol";
+import { CyberEngine } from "../src/CyberEngine.sol";
 import { ProfileNFT } from "../src/ProfileNFT.sol";
 import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
 import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
@@ -51,13 +52,13 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         authority.setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             address(engine),
-            Constants._SET_SIGNER,
+            CyberEngine.setSigner.selector,
             true
         );
         authority.setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             address(engine),
-            Constants._ALLOW_SUBSCRIBE_MW,
+            CyberEngine.allowSubscribeMw.selector,
             true
         );
         authority.setUserRole(gov, Constants._ENGINE_GOV_ROLE, true);

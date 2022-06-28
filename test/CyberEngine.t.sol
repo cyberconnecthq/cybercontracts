@@ -10,6 +10,7 @@ import { Constants } from "../src/libraries/Constants.sol";
 import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
+import { Roles } from "../src/Roles.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
@@ -83,67 +84,17 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     address constant bob = address(0xB0B);
 
     function setUp() public {
-        rolesAuthority = new RolesAuthority(
-            address(this),
-            Authority(address(0))
-        );
+        engine = new MockEngine();
+
+        rolesAuthority = new Roles(address(this), address(engine));
         box = new MockBoxNFT();
         profile = new MockProfileNFT();
-        engine = new MockEngine();
         engine.initialize(
             address(0),
             address(profile),
             address(box),
             address(0xDEAD),
             rolesAuthority
-        );
-        rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(engine),
-            Constants._SET_SIGNER,
-            true
-        );
-        rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(engine),
-            Constants._SET_PROFILE_ADDR,
-            true
-        );
-        rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(engine),
-            Constants._SET_BOX_ADDR,
-            true
-        );
-        rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(engine),
-            Constants._SET_FEE_BY_TIER,
-            true
-        );
-        rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(engine),
-            Constants._WITHDRAW,
-            true
-        );
-        rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(engine),
-            Constants._SET_BOX_OPENED,
-            true
-        );
-        rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(engine),
-            Constants._SET_STATE,
-            true
-        );
-        rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(engine),
-            Constants._ALLOW_SUBSCRIBE_MW,
-            true
         );
     }
 
