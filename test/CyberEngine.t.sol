@@ -27,11 +27,13 @@ contract MockBoxNFT is IBoxNFT {
 
 contract MockProfileNFT is IProfileNFT {
     bool public createProfileRan;
+    bool public setAniTemplateRan;
+    bool public setImgTemplateRan;
 
-    function createProfile(
-        address to,
-        DataTypes.CreateProfileParams calldata vars
-    ) external returns (uint256) {
+    function createProfile(DataTypes.CreateProfileParams calldata params)
+        external
+        returns (uint256)
+    {
         createProfileRan = true;
         return 1890;
     }
@@ -56,9 +58,33 @@ contract MockProfileNFT is IProfileNFT {
         external
     {}
 
+    function setAnimationTemplate(string calldata template) external {
+        setAniTemplateRan = true;
+    }
+
+    function getAnimationTemplate() external view returns (string memory) {
+        return "old_ani_template";
+    }
+
+    function setImageTemplate(string calldata template) external {
+        setImgTemplateRan = true;
+    }
+
+    function getImageTemplate() external view returns (string memory) {
+        return "old_img_template";
+    }
+
     function setMetadata(uint256 profileId, string calldata metadata)
         external
     {}
+
+    function getMetadata(uint256 profileId)
+        external
+        view
+        returns (string memory)
+    {
+        return "metadata";
+    }
 
     function getOperatorApproval(uint256 profileId, address operator)
         external
@@ -82,6 +108,10 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     MockProfileNFT internal profile;
     address constant alice = address(0xA11CE);
     address constant bob = address(0xB0B);
+
+    string constant handle = "handle";
+    string constant avatar = "avatar";
+    string constant metadata = "metadata";
 
     function setUp() public {
         engine = new MockEngine();
@@ -142,6 +172,18 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.setBoxGiveawayEnded(true);
     }
 
+    function testCannotSetAniTemplateAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        vm.prank(alice);
+        engine.setAnimationTemplate("ani_template");
+    }
+
+    function testCannotSetImgTemplateAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        vm.prank(alice);
+        engine.setImageTemplate("img_template");
+    }
+
     function testSetSignerAsGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
@@ -197,6 +239,30 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.setBoxGiveawayEnded(true);
     }
 
+    function testSetAniTemplateGov() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        assertEq(profile.setAniTemplateRan(), false);
+
+        vm.prank(alice);
+        vm.expectEmit(true, true, false, true);
+        emit SetAnimationTemplate("old_ani_template", "new_ani_template");
+
+        engine.setAnimationTemplate("new_ani_template");
+        assertEq(profile.setAniTemplateRan(), true);
+    }
+
+    function testSetImgTemplateGov() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        assertEq(profile.setAniTemplateRan(), false);
+
+        vm.prank(alice);
+        vm.expectEmit(true, true, false, true);
+        emit SetImageTemplate("old_img_template", "new_img_template");
+
+        engine.setImageTemplate("new_img_template");
+        assertEq(profile.setImgTemplateRan(), true);
+    }
+
     function testVerify() public {
         // set charlie as signer
         address charlie = vm.addr(1);
@@ -207,14 +273,14 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-
-        string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
                     0,
                     deadline
                 )
@@ -231,14 +297,14 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-
-        string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
                     0,
                     deadline
                 )
@@ -257,14 +323,14 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         // change block timestamp to make deadline invalid
         vm.warp(150);
         uint256 deadline = 100;
-
-        string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
                     0,
                     deadline
                 )
@@ -397,14 +463,14 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-
-        string memory handle = "bob";
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
                     0,
                     deadline
                 )
@@ -417,12 +483,11 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         assertEq(engine.nonces(bob), 0);
 
         vm.expectEmit(true, true, false, true);
-        emit Register(bob, handle);
+        emit Register(bob, handle, avatar, metadata);
 
         assertEq(
             engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-                bob,
-                handle,
+                DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
                 DataTypes.EIP712Signature(v, r, s, deadline)
             ),
             1890
@@ -443,14 +508,14 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-
-        string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
                     0,
                     deadline
                 )
@@ -461,8 +526,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         // charlie signed the handle to bob, but register with a different address(alice).
         vm.expectRevert("Invalid signature");
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-            alice,
-            handle,
+            DataTypes.CreateProfileParams(alice, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
     }
@@ -477,14 +541,14 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-
-        string memory handle = "bob_handle";
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
                     0,
                     deadline
                 )
@@ -492,15 +556,13 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-            bob,
-            handle,
+            DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
 
         vm.expectRevert("Invalid signature");
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-            bob,
-            handle,
+            DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
     }
@@ -517,14 +579,14 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-
-        string memory handle = "bob";
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
                     0,
                     deadline
                 )
@@ -537,8 +599,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         assertEq(engine.nonces(bob), 0);
 
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-            bob,
-            handle,
+            DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
 

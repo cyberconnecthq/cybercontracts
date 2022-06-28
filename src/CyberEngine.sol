@@ -10,6 +10,7 @@ import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { ISubscribeMiddleware } from "./interfaces/ISubscribeMiddleware.sol";
 import { ICyberEngine } from "./interfaces/ICyberEngine.sol";
+import { ProfileNFT } from "./ProfileNFT.sol";
 import { Auth } from "./dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "./dependencies/solmate/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
@@ -105,8 +106,7 @@ contract CyberEngine is
     }
 
     function register(
-        address to,
-        string calldata handle,
+        DataTypes.CreateProfileParams calldata params,
         DataTypes.EIP712Signature calldata sig
     ) external payable returns (uint256) {
         _requiresExpectedSigner(
@@ -114,9 +114,11 @@ contract CyberEngine is
                 keccak256(
                     abi.encode(
                         Constants._REGISTER_TYPEHASH,
-                        to,
-                        keccak256(bytes(handle)),
-                        nonces[to]++,
+                        params.to,
+                        keccak256(bytes(params.handle)),
+                        keccak256(bytes(params.avatar)),
+                        keccak256(bytes(params.metadata)),
+                        nonces[params.to]++,
                         sig.deadline
                     )
                 )
@@ -125,19 +127,15 @@ contract CyberEngine is
             sig
         );
 
-        _requireEnoughFee(handle, msg.value);
+        _requireEnoughFee(params.handle, msg.value);
 
         if (!boxGiveawayEnded) {
-            IBoxNFT(boxAddress).mint(to);
+            IBoxNFT(boxAddress).mint(params.to);
         }
 
-        emit Register(to, handle);
+        emit Register(params.to, params.handle, params.avatar, params.metadata);
 
-        return
-            IProfileNFT(profileAddress).createProfile(
-                to,
-                DataTypes.CreateProfileParams(handle, "")
-            );
+        return IProfileNFT(profileAddress).createProfile(params);
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
@@ -331,7 +329,33 @@ contract CyberEngine is
                 ),
             "Only owner or operator can set metadata"
         );
+
+        string memory preMetadata = IProfileNFT(profileAddress).getMetadata(
+            profileId
+        );
         IProfileNFT(profileAddress).setMetadata(profileId, metadata);
+
+        emit SetMetadata(profileId, preMetadata, metadata);
+    }
+
+    // Set Template
+    function setAnimationTemplate(string calldata template)
+        external
+        requiresAuth
+    {
+        string memory preTemplate = IProfileNFT(profileAddress)
+            .getAnimationTemplate();
+        IProfileNFT(profileAddress).setAnimationTemplate(template);
+
+        emit SetAnimationTemplate(preTemplate, template);
+    }
+
+    function setImageTemplate(string calldata template) external requiresAuth {
+        string memory preTemplate = IProfileNFT(profileAddress)
+            .getImageTemplate();
+        IProfileNFT(profileAddress).setImageTemplate(template);
+
+        emit SetImageTemplate(preTemplate, template);
     }
 
     // only owner's signature works

@@ -11,7 +11,7 @@ library Constants {
     // EIP712 TypeHash
     bytes32 internal constant _REGISTER_TYPEHASH =
         keccak256(
-            "register(address to,string handle,uint256 nonce,uint256 deadline)"
+            "register(address to,string handle,string avatar,string metadata,uint256 nonce,uint256 deadline)"
         );
     bytes32 internal constant _SUBSCRIBE_TYPEHASH =
         keccak256(

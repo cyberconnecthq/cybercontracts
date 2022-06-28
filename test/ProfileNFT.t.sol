@@ -18,19 +18,24 @@ contract ProfileNFTTest is Test {
     string constant imageUri = "https://example.com/image.png";
     address constant subscribeMw = address(0xD);
     DataTypes.CreateProfileParams internal createProfileData =
-        DataTypes.CreateProfileParams("alice", "https://example.com/alice.jpg");
+        DataTypes.CreateProfileParams(
+            alice,
+            "alice",
+            "https://example.com/alice.jpg",
+            "metadata"
+        );
     string aliceMetadata =
         string(
             abi.encodePacked(
                 "data:application/json;base64,",
                 Base64.encode(
-                    '{"name":"@alice","description":"@alice - CyberConnect profile","attributes":[{"trait_type":"id","value":"#1"},{"trait_type":"owner","value":"0x00000000000000000000000000000000000a11ce"},{"trait_type":"handle","value":"@alice"}]}'
+                    '{"name":"@alice","description":"CyberConnect profile for @alice","image":"img_template?handle=alice","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"5"},{"trait_type":"handle","value":"@alice"}]}'
                 )
             )
         );
 
     function setUp() public {
-        token = new ProfileNFT(engine);
+        token = new ProfileNFT(engine, "ani_template", "img_template");
         token.initialize("TestProfile", "TP");
     }
 
@@ -46,18 +51,18 @@ contract ProfileNFTTest is Test {
     function testCannotCreateProfileAsNonEngine() public {
         vm.expectRevert("Only Engine");
         vm.prank(address(0xDEAD));
-        token.createProfile(alice, createProfileData);
+        token.createProfile(createProfileData);
     }
 
     function testCreateProfileAsEngine() public {
         vm.prank(engine);
-        assertEq(token.createProfile(alice, createProfileData), 1);
+        assertEq(token.createProfile(createProfileData), 1);
     }
 
     function testCreateProfile() public {
         assertEq(token.totalSupply(), 0);
         vm.prank(engine);
-        token.createProfile(alice, createProfileData);
+        token.createProfile(createProfileData);
         assertEq(token.totalSupply(), 1);
         assertEq(token.balanceOf(alice), 1);
         // TODO: subscribe middle ware should eq the correct address
@@ -70,38 +75,39 @@ contract ProfileNFTTest is Test {
 
     function testTokenURI() public {
         vm.prank(engine);
-        token.createProfile(alice, createProfileData);
+        token.createProfile(createProfileData);
         assertEq(token.tokenURI(1), aliceMetadata);
     }
 
     function test() public {
         vm.prank(engine);
-        token.createProfile(alice, createProfileData);
+        token.createProfile(createProfileData);
         assertEq(token.getHandleByProfileId(1), "alice");
     }
 
     function testGetProfileIdByHandle() public {
         vm.prank(engine);
-        token.createProfile(alice, createProfileData);
+        token.createProfile(createProfileData);
         assertEq(token.getProfileIdByHandle("alice"), 1);
     }
 
     function testCannotCreateProfileWithHandleTaken() public {
         vm.prank(engine);
-        token.createProfile(alice, createProfileData);
+        token.createProfile(createProfileData);
         vm.expectRevert("Handle taken");
         vm.prank(engine);
-        token.createProfile(alice, createProfileData);
+        token.createProfile(createProfileData);
     }
 
     function testCannotCreateProfileLongerThanMaxHandleLength() public {
         vm.expectRevert("Handle has invalid length");
         vm.prank(engine);
         token.createProfile(
-            alice,
             DataTypes.CreateProfileParams(
+                alice,
                 "aliceandbobisareallylongname",
-                "https://example.com/alice.jpg"
+                "https://example.com/alice.jpg",
+                "metadata"
             )
         );
     }
@@ -110,23 +116,28 @@ contract ProfileNFTTest is Test {
         vm.expectRevert("Handle contains invalid character");
         vm.prank(engine);
         token.createProfile(
-            alice,
-            DataTypes.CreateProfileParams("alice&bob", imageUri)
+            DataTypes.CreateProfileParams(
+                alice,
+                "alice&bob",
+                imageUri,
+                "metadata"
+            )
         );
     }
 
     function testCannotCreateProfileWith0LenthHandle() public {
         vm.expectRevert("Handle has invalid length");
         vm.prank(engine);
-        token.createProfile(alice, DataTypes.CreateProfileParams("", imageUri));
+        token.createProfile(
+            DataTypes.CreateProfileParams(alice, "", imageUri, "metadata")
+        );
     }
 
     function testCannotCreateProfileWithACapitalLetter() public {
         vm.expectRevert("Handle contains invalid character");
         vm.prank(engine);
         token.createProfile(
-            alice,
-            DataTypes.CreateProfileParams("Test", imageUri)
+            DataTypes.CreateProfileParams(alice, "Test", imageUri, "metadata")
         );
     }
 
@@ -134,15 +145,14 @@ contract ProfileNFTTest is Test {
         vm.expectRevert("Handle contains invalid character");
         vm.prank(engine);
         token.createProfile(
-            alice,
-            DataTypes.CreateProfileParams(" ", imageUri)
+            DataTypes.CreateProfileParams(alice, " ", imageUri, "metadata")
         );
     }
 
     // operator
     function testGetOperatorApproval() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(alice, createProfileData);
+        uint256 id = token.createProfile(createProfileData);
         assertEq(token.getOperatorApproval(id, address(0)), false);
     }
 
@@ -153,14 +163,14 @@ contract ProfileNFTTest is Test {
 
     function testCannotSetOperatorIfNotEngine() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(alice, createProfileData);
+        uint256 id = token.createProfile(createProfileData);
         vm.expectRevert("Only Engine");
         token.setOperatorApproval(id, address(0), true);
     }
 
     function testCannotSetOperatorToZeroAddress() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(alice, createProfileData);
+        uint256 id = token.createProfile(createProfileData);
         vm.prank(engine);
         vm.expectRevert("Operator address cannot be 0");
         token.setOperatorApproval(id, address(0), true);
@@ -169,8 +179,8 @@ contract ProfileNFTTest is Test {
     // metadata
     function testSetMetadataAsEngine() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(alice, createProfileData);
-        assertEq(token.getMetadata(id), "");
+        uint256 id = token.createProfile(createProfileData);
+        assertEq(token.getMetadata(id), "metadata");
         vm.prank(engine);
         token.setMetadata(id, "ipfs");
         assertEq(token.getMetadata(id), "ipfs");
@@ -179,5 +189,24 @@ contract ProfileNFTTest is Test {
     function testCannotGetMetadataForNonexistentProfile() public {
         vm.expectRevert("NOT_MINTED");
         token.getMetadata(0);
+    }
+
+    // template
+    function testCannotSetTemplateIfNotEngine() public {
+        vm.expectRevert("Only Engine");
+        token.setAnimationTemplate("template");
+
+        vm.expectRevert("Only Engine");
+        token.setImageTemplate("template");
+    }
+
+    function testSetTemplateAsEngine() public {
+        vm.prank(engine);
+        token.setAnimationTemplate("ani_template");
+        assertEq(token.getAnimationTemplate(), "ani_template");
+
+        vm.prank(engine);
+        token.setImageTemplate("img_template");
+        assertEq(token.getImageTemplate(), "img_template");
     }
 }
