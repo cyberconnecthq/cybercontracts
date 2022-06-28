@@ -17,7 +17,7 @@ import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ERC721 } from "./dependencies/solmate/ERC721.sol";
-import { DataTypes } from "./libraries/DataTypes.sol";
+import { CyberEngineStorage } from "./storages/CyberEngineStorage.sol";
 
 // TODO: separate storage contract
 contract CyberEngine is
@@ -25,23 +25,12 @@ contract CyberEngine is
     Auth,
     EIP712,
     UUPSUpgradeable,
+    CyberEngineStorage,
     ICyberEngine
 {
-    address public profileAddress;
-    address public boxAddress;
-    address public signer;
-    bool public boxGiveawayEnded;
-    // Shared between register and other withSig functions. Always query onchain to get the current nounce
-    mapping(uint256 => DataTypes.SubscribeStruct)
-        internal _subscribeByProfileId;
-    mapping(address => uint256) public nonces;
-    address public subscribeNFTBeacon;
-    DataTypes.State private _state;
-
-    string private constant VERSION_STRING = "1";
-    uint256 private constant VERSION = 1;
-    mapping(DataTypes.Tier => uint256) public feeMapping;
-    mapping(address => bool) internal _subscribeMwAllowlist;
+    constructor() {
+        _disableInitializers();
+    }
 
     function initialize(
         address _owner,
@@ -490,6 +479,7 @@ contract CyberEngine is
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override canUpgrade {}
 
+    // UUPS upgradeability
     modifier canUpgrade() {
         require(
             isAuthorized(msg.sender, Constants._AUTHORIZE_UPGRADE),
