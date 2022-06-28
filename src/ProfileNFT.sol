@@ -23,8 +23,8 @@ contract ProfileNFT is
     CyberNFTBase,
     UUPSUpgradeable,
     ProfileNFTStorage,
-    IProfileNFT,
-    IUpgradeable
+    IUpgradeable,
+    IProfileNFT
 {
     // Immutable
     address public immutable ENGINE;
