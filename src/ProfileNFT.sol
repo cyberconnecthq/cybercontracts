@@ -11,6 +11,12 @@ import { LibString } from "./libraries/LibString.sol";
 import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
+/**
+ * @title Profile NFT
+ * @author CyberConnect
+ * @notice This contract is used to create a profile NFT.
+ */
+
 // TODO: Owner cannot be set with conflicting role for capacity
 contract ProfileNFT is
     CyberNFTBase,
@@ -56,6 +62,7 @@ contract ProfileNFT is
         CyberNFTBase._initialize(_name, _symbol);
     }
 
+    /// @inheritdoc IProfileNFT
     function createProfile(DataTypes.CreateProfileParams calldata params)
         external
         override
@@ -79,6 +86,7 @@ contract ProfileNFT is
         return _totalCount;
     }
 
+    /// @inheritdoc IProfileNFT
     function getHandleByProfileId(uint256 profileId)
         external
         view
@@ -88,6 +96,7 @@ contract ProfileNFT is
         return _profileById[profileId].handle;
     }
 
+    /// @inheritdoc IProfileNFT
     function getProfileIdByHandle(string calldata handle)
         external
         view
@@ -161,6 +170,7 @@ contract ProfileNFT is
         }
     }
 
+    /// @inheritdoc IProfileNFT
     function getOperatorApproval(uint256 profileId, address operator)
         external
         view
@@ -170,6 +180,7 @@ contract ProfileNFT is
         return _operatorApproval[profileId][operator];
     }
 
+    /// @inheritdoc IProfileNFT
     function setOperatorApproval(
         uint256 profileId,
         address operator,
@@ -179,6 +190,7 @@ contract ProfileNFT is
         _operatorApproval[profileId][operator] = approved;
     }
 
+    /// @inheritdoc IProfileNFT
     function setMetadata(uint256 profileId, string calldata metadata)
         external
         onlyEngine
@@ -186,6 +198,7 @@ contract ProfileNFT is
         _metadataById[profileId] = metadata;
     }
 
+    /// @inheritdoc IProfileNFT
     function getMetadata(uint256 profileId)
         external
         view
@@ -195,6 +208,7 @@ contract ProfileNFT is
         return _metadataById[profileId];
     }
 
+    /// @inheritdoc IProfileNFT
     function setAnimationTemplate(string calldata template)
         external
         onlyEngine
@@ -202,14 +216,17 @@ contract ProfileNFT is
         _animationTemplate = template;
     }
 
+    /// @inheritdoc IProfileNFT
     function getAnimationTemplate() external view returns (string memory) {
         return _animationTemplate;
     }
 
+    /// @inheritdoc IProfileNFT
     function setImageTemplate(string calldata template) external onlyEngine {
         _imageTemplate = template;
     }
 
+    /// @inheritdoc IProfileNFT
     function getImageTemplate() external view returns (string memory) {
         return _imageTemplate;
     }

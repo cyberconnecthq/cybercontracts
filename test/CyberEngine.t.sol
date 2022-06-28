@@ -46,6 +46,14 @@ contract MockProfileNFT is IProfileNFT {
         return "";
     }
 
+    function getProfileIdByHandle(string calldata handle)
+        external
+        view
+        returns (uint256)
+    {
+        return 0;
+    }
+
     function getSubscribeAddrAndMwByProfileId(uint256 profileId)
         external
         view
