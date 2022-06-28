@@ -28,6 +28,7 @@ library Constants {
 
     // Parameters
     uint8 internal constant _MAX_HANDLE_LENGTH = 27;
+    uint16 internal constant _MAX_URI_LENGTH = 2000;
 
     // Initial States
     uint256 internal constant _INITIAL_FEE_TIER0 = 0.5 ether;
