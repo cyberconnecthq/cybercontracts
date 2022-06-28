@@ -41,7 +41,7 @@ const writeDeploy = async () => {
         ["SubscribeNFT (Beacon)", rst[7], etherscan + rst[7]],
         ["CyberEngine (Proxy)", rst[8], etherscan + rst[8]],
       ]);
-      await fs.writeFile(path.join("./docs/deploy", chain + ".md"), rst);
+      await fs.writeFile(path.join("./docs/deploy", chain + ".md"), md);
     }
   }
 };

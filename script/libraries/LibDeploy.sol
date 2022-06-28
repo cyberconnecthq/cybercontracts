@@ -12,11 +12,21 @@ import { Authority } from "../../src/dependencies/solmate/Auth.sol";
 import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { Constants } from "../../src/libraries/Constants.sol";
+import "forge-std/Vm.sol";
 
 library LibDeploy {
+    address private constant VM_ADDRESS =
+        address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
+    Vm public constant vm = Vm(VM_ADDRESS);
+
     // TODO: Fix engine owner, use 0 address for integration test.
     // have to be different from deployer to make tests useful
     address internal constant ENGINE_OWNER = address(0);
+
+    address internal constant ENGINE_SIGNER =
+        0x111110E8718C8DAf9262c82DC7898527AC58334a;
+    address internal constant ENGINE_GOV =
+        0x927f355117721e0E8A7b5eA20002b65B8a551890; // TODO: fix
 
     function _calcContractAddress(address _owner, uint256 _nonce)
         internal
@@ -160,9 +170,10 @@ library LibDeploy {
         engineProxy = new ERC1967Proxy(address(engineImpl), data);
         _requiresContractAddress(deployer, nonce + 8, address(engineProxy));
 
-        // 10. health checks
+        // 10. set governance
+        setupGovernance(CyberEngine(address(engineProxy)), deployer, authority);
+        // 11. health checks
         healthCheck(CyberEngine(address(engineProxy)), deployer, authority);
-        // TODO: setup governance
     }
 
     function healthCheck(
@@ -174,6 +185,14 @@ library LibDeploy {
             engine.owner() == ENGINE_OWNER,
             "CyberEngine owner is not deployer"
         );
+        require(
+            engine.signer() == ENGINE_SIGNER,
+            "CyberEngine signer is not set correctly"
+        );
+        require(
+            authority.doesUserHaveRole(ENGINE_GOV, Constants._ENGINE_GOV_ROLE),
+            "Governance address is not set"
+        );
         // TODO: add all checks
         // require(
         //     authority.canCall(
@@ -183,5 +202,19 @@ library LibDeploy {
         //     ),
         //     "CyberEngine Owner can set Signer"
         // );
+    }
+
+    function setupGovernance(
+        CyberEngine engine,
+        address deployer,
+        RolesAuthority authority
+    ) internal {
+        authority.setUserRole(ENGINE_GOV, Constants._ENGINE_GOV_ROLE, true);
+        vm.stopBroadcast();
+
+        // change user from deployer to governance
+        vm.startBroadcast(ENGINE_GOV);
+        engine.setSigner(ENGINE_SIGNER);
+        vm.stopBroadcast();
     }
 }
