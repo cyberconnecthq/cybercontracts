@@ -46,10 +46,17 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
         uint256[] memory ids = new uint256[](1);
         ids[0] = bobProfileId;
         bytes[] memory data = new bytes[](1);
+
+        vm.expectEmit(true, true, false, true);
+        emit DeploySubscribeNFT(
+            bobProfileId,
+            address(0xF5ACE15da8E86BC4366CA0cD34e23230fbee44c2)
+        );
+
         vm.expectEmit(true, false, false, true);
         emit Subscribe(alice, ids, data);
+
         vm.prank(alice);
-        // TODO: maybe need evetns in subscribe middlware
         engine.subscribe(ids, data);
 
         // Second subscribe will fail

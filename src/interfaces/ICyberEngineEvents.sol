@@ -65,9 +65,15 @@ interface ICyberEngineEvents {
         bool indexed preAllowed,
         bool indexed newAllowed
     );
+
     event SetSubscribeMw(
         uint256 indexed profileId,
         address preMw,
         address newMw
+    );
+
+    event DeploySubscribeNFT(
+        uint256 indexed profileId,
+        address indexed subscribeNFT
     );
 }
