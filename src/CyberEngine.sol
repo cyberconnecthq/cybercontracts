@@ -236,7 +236,6 @@ contract CyberEngine is
                 .subscribeMw;
 
             // lazy deploy subscribe NFT
-            // TODO emit SubscribeNFT deployed event
             if (subscribeNFT == address(0)) {
                 bytes memory initData = abi.encodeWithSelector(
                     ISubscribeNFT.initialize.selector,
@@ -247,6 +246,7 @@ contract CyberEngine is
                 );
                 _subscribeByProfileId[profileIds[i]]
                     .subscribeNFT = subscribeNFT;
+                emit DeploySubscribeNFT(profileIds[i], subscribeNFT);
             }
             // run middleware before subscribe
             if (subscribeMw != address(0)) {
