@@ -21,6 +21,11 @@ import { ERC721 } from "./dependencies/solmate/ERC721.sol";
 import { CyberEngineStorage } from "./storages/CyberEngineStorage.sol";
 import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
 
+/**
+ * @title CyberEngine
+ * @author CyberConnect
+ * @notice This is the main entry point for the CyberConnect contract.
+ */
 contract CyberEngine is
     Initializable,
     Auth,
@@ -34,6 +39,14 @@ contract CyberEngine is
         _disableInitializers();
     }
 
+    /**
+     * @notice Initializes the CyberEngine.
+     *
+     * @param _owner Owner to set for CyberEngine.
+     * @param _profileAddress Profile address to set for CyberEngine.
+     * @param _boxAddress Box Address animation url to set for CyberEngine.
+     * @param _subscribeNFTBeacon Subscribe NFT beacon to set for CyberEngine.
+     */
     function initialize(
         address _owner,
         address _profileAddress,
@@ -58,6 +71,12 @@ contract CyberEngine is
         );
     }
 
+    /**
+     * @notice Sets the new signer address.
+     *
+     * @param _signer The signer address.
+     * @dev The address can not be zero address.
+     */
     function setSigner(address _signer) external requiresAuth {
         require(_signer != address(0), "zero address signer");
         address preSigner = signer;
@@ -66,6 +85,12 @@ contract CyberEngine is
         emit SetSigner(preSigner, _signer);
     }
 
+    /**
+     * @notice Sets the new profile address.
+     *
+     * @param _profileAddress The profile address.
+     * @dev The address can not be zero address.
+     */
     function setProfileAddress(address _profileAddress) external requiresAuth {
         require(_profileAddress != address(0), "zero address profile");
         address preProfileAddr = profileAddress;
@@ -74,6 +99,12 @@ contract CyberEngine is
         emit SetProfileAddress(preProfileAddr, _profileAddress);
     }
 
+    /**
+     * @notice Sets the new box address.
+     *
+     * @param _boxAddress The box address.
+     * @dev The address can not be zero address.
+     */
     function setBoxAddress(address _boxAddress) external requiresAuth {
         require(_boxAddress != address(0), "zero address box");
         address preBoxAddr = boxAddress;
@@ -82,6 +113,12 @@ contract CyberEngine is
         emit SetBoxAddress(preBoxAddr, _boxAddress);
     }
 
+    /**
+     * @notice Sets the fee for tiers.
+     *
+     * @param tier The tier number.
+     * @param amount The fee amount to set.
+     */
     function setFeeByTier(DataTypes.Tier tier, uint256 amount)
         external
         requiresAuth
@@ -89,6 +126,11 @@ contract CyberEngine is
         _setFeeByTier(tier, amount);
     }
 
+    /**
+     * @notice Sets the box giveaway as ended.
+     *
+     * @param ended The boolean value (true if ended).
+     */
     function setBoxGiveawayEnded(bool ended) external requiresAuth {
         bool preEnded = boxGiveawayEnded;
         boxGiveawayEnded = ended;
@@ -437,6 +479,7 @@ contract CyberEngine is
         BoxNFT(boxAddress).pause(toPause);
     }
 
+    /// @inheritdoc ICyberEngine
     function getSubscribeNFTTokenURI(uint256 profileId)
         external
         view
@@ -447,6 +490,7 @@ contract CyberEngine is
         return _subscribeByProfileId[profileId].tokenURI;
     }
 
+    /// @inheritdoc ICyberEngine
     function getSubscribeNFT(uint256 profileId)
         external
         view
