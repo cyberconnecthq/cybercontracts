@@ -11,6 +11,7 @@ import { LibString } from "./libraries/LibString.sol";
 import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { ProfileNFTStorage } from "./storages/ProfileNFTStorage.sol";
+import { Pausable } from "./dependencies/openzeppelin/Pausable.sol";
 
 /**
  * @title Profile NFT
@@ -19,6 +20,7 @@ import { ProfileNFTStorage } from "./storages/ProfileNFTStorage.sol";
  */
 
 contract ProfileNFT is
+    Pausable,
     CyberNFTBase,
     UUPSUpgradeable,
     ProfileNFTStorage,
@@ -285,4 +287,21 @@ contract ProfileNFT is
 
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override onlyEngine {}
+
+    // pausable
+    function pause(bool toPause) external onlyEngine {
+        if (toPause) {
+            super._pause();
+        } else {
+            super._unpause();
+        }
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public override whenNotPaused {
+        super.transferFrom(from, to, id);
+    }
 }
