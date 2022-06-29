@@ -56,10 +56,15 @@ PRIVATE_KEY=
 ETHERSCAN_KEY=
 ```
 
-for local deployment
+for local deployment in `.env.anvil`
 
 ```bash
 PRIVATE_KEY=
+```
+
+create `.env` for pinata key
+```bash
+PINATA_KEY=
 ```
 
 1. Run `yarn deploy:rinkeby` or `yarn deploy:anvil` for local deployment. If you run into any unconfirmed txs, run `yarn deploy:rinkeby --resume` to continue. This also verifies contract on etherscan

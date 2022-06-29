@@ -17,6 +17,9 @@
     "post_deploy": "node misc/post_deploy.js"
   },
   "devDependencies": {
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.1",
+    "form-data": "^4.0.0",
     "hardhat": "^2.9.9",
     "hardhat-preprocessor": "^0.1.4",
     "hardhat-spdx-license-identifier": "^2.0.3",
