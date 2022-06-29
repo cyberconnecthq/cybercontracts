@@ -9,6 +9,8 @@ import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
+import { SubscribeNFT } from "../src/SubscribeNFT.sol";
+import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract ProfileNFTTest is Test {
@@ -30,7 +32,7 @@ contract ProfileNFTTest is Test {
             abi.encodePacked(
                 "data:application/json;base64,",
                 Base64.encode(
-                    '{"name":"@alice","description":"CyberConnect profile for @alice","image":"img_template?handle=alice","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"5"},{"trait_type":"handle","value":"@alice"}]}'
+                    '{"name":"@alice","description":"CyberConnect profile for @alice","image":"img_template?handle=alice","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"5"},{"trait_type":"subscribers","value":"0"},{"trait_type":"handle","value":"@alice"}]}'
                 )
             )
         );
@@ -85,7 +87,38 @@ contract ProfileNFTTest is Test {
     function testTokenURI() public {
         vm.prank(engine);
         token.createProfile(createProfileData);
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(CyberEngine.getSubscribeNFT.selector, 1),
+            abi.encode(address(0))
+        );
         assertEq(token.tokenURI(1), aliceMetadata);
+    }
+
+    function testTokenURISubscriber() public {
+        vm.prank(engine);
+        token.createProfile(createProfileData);
+
+        address subscribeNFT = address(0x1111);
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(CyberEngine.getSubscribeNFT.selector, 1),
+            abi.encode(subscribeNFT)
+        );
+        string memory expected = string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(
+                    '{"name":"@alice","description":"CyberConnect profile for @alice","image":"img_template?handle=alice","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"5"},{"trait_type":"subscribers","value":"111"},{"trait_type":"handle","value":"@alice"}]}'
+                )
+            )
+        );
+        vm.mockCall(
+            subscribeNFT,
+            abi.encodeWithSelector(CyberNFTBase.totalSupply.selector),
+            abi.encode(111)
+        );
+        assertEq(token.tokenURI(1), expected);
     }
 
     function test() public {

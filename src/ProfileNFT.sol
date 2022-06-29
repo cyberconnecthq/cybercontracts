@@ -12,6 +12,7 @@ import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { ProfileNFTStorage } from "./storages/ProfileNFTStorage.sol";
 import { Pausable } from "./dependencies/openzeppelin/Pausable.sol";
+import { CyberEngine } from "./CyberEngine.sol";
 
 /**
  * @title Profile NFT
@@ -119,6 +120,13 @@ contract ProfileNFT is
         string memory imageURL = string(
             abi.encodePacked(_imageTemplate, "?handle=", handle)
         );
+        address subscribeNFT = CyberEngine(ENGINE).getSubscribeNFT(tokenId);
+        uint256 subscribers;
+        if (subscribeNFT == address(0)) {
+            subscribers = 0;
+        } else {
+            subscribers = CyberNFTBase(subscribeNFT).totalSupply();
+        }
         return
             string(
                 abi.encodePacked(
@@ -133,16 +141,37 @@ contract ProfileNFT is
                             imageURL,
                             '","animation_url":"',
                             animationURL,
-                            '","attributes":[{"trait_type":"id","value":"',
-                            LibString.toString(tokenId),
-                            '"},{"trait_type":"length","value":"',
-                            LibString.toString(bytes(handle).length),
-                            '"},{"trait_type":"handle","value":"',
-                            formattedName,
-                            '"}]}'
+                            '","attributes":',
+                            _genAttributes(
+                                LibString.toString(tokenId),
+                                LibString.toString(bytes(handle).length),
+                                LibString.toString(subscribers),
+                                formattedName
+                            ),
+                            "}"
                         )
                     )
                 )
+            );
+    }
+
+    function _genAttributes(
+        string memory tokenId,
+        string memory length,
+        string memory subscribers,
+        string memory name
+    ) private pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '[{"trait_type":"id","value":"',
+                tokenId,
+                '"},{"trait_type":"length","value":"',
+                length,
+                '"},{"trait_type":"subscribers","value":"',
+                subscribers,
+                '"},{"trait_type":"handle","value":"',
+                name,
+                '"}]'
             );
     }
 
