@@ -38,8 +38,8 @@ contract BoxNFT is
     /**
      * @notice Initializes the Box NFT.
      *
-     * @param _name name to set for the Box NFT.
-     * @param _symbol symbol to set for the Box NFT.
+     * @param _name The name to set for the Box NFT.
+     * @param _symbol The symbol to set for the Box NFT.
      */
     function initialize(string calldata _name, string calldata _symbol)
         external
@@ -60,8 +60,8 @@ contract BoxNFT is
      * @notice Generates the metadata json object.
      *
      * @param tokenId The profile NFT token ID.
-     * @return memory the metadata json object.
-     * @dev it requires the tokenId to be already minted.
+     * @return memory The metadata json object.
+     * @dev It requires the tokenId to be already minted.
      */
     function tokenURI(uint256 tokenId)
         public

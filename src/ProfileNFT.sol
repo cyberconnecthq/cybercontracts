@@ -42,6 +42,14 @@ contract ProfileNFT is
         _disableInitializers();
     }
 
+    /**
+     * @notice Initializes the Profile NFT.
+     *
+     * @param name Name to set for the Profile NFT.
+     * @param symbol Symbol to set for the Profile NFT.
+     * @param animationTemplate Template animation url to set for the Profile NFT.
+     * @param imageTemplate symbol to set for the Profile NFT.
+     */
     function initialize(
         string calldata name,
         string calldata symbol,
@@ -101,11 +109,11 @@ contract ProfileNFT is
     }
 
     /**
-     * @notice generates the metadata json object.
+     * @notice Generates the metadata json object.
      *
      * @param tokenId The profile NFT token ID.
-     * @return memory the metadata json object.
-     * @dev it requires the tokenId to be already minted.
+     * @return memory The metadata json object.
+     * @dev It requires the tokenId to be already minted.
      */
     function tokenURI(uint256 tokenId)
         public
@@ -178,7 +186,7 @@ contract ProfileNFT is
     }
 
     /**
-     * @notice verifies a handle for length and invalid characters.
+     * @notice Verifies a handle for length and invalid characters.
      *
      * @param handle The handle to verify.
      * @dev Throws if:

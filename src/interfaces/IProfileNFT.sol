@@ -80,7 +80,7 @@ interface IProfileNFT {
      * @notice Gets the profile metadata.
      *
      * @param profileId The profile ID.
-     * @return memory the metadata of the profile.
+     * @return memory The metadata of the profile.
      */
     function getMetadata(uint256 profileId)
         external
@@ -90,14 +90,14 @@ interface IProfileNFT {
     /**
      * @notice Gets the animation template url.
      *
-     * @return memory the animation template url.
+     * @return memory The animation template url.
      */
     function getAnimationTemplate() external view returns (string memory);
 
     /**
      * @notice Gets the image template url.
      *
-     * @return memory the image template url.
+     * @return memory The image template url.
      */
     function getImageTemplate() external view returns (string memory);
 
@@ -105,7 +105,7 @@ interface IProfileNFT {
      * @notice Gets the profile avatar.
      *
      * @param profileId The profile ID.
-     * @return memory the avatar of the profile.
+     * @return memory The avatar of the profile.
      */
     function getAvatar(uint256 profileId) external view returns (string memory);
 

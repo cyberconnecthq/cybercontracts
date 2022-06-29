@@ -6,8 +6,8 @@ interface IBoxNFT {
     /**
      * @notice Mints the Box NFT.
      *
-     * @param _to recipient address.
-     * @return uint256 token id.
+     * @param _to The recipient address.
+     * @return uint256 The token id.
      */
     function mint(address _to) external returns (uint256);
 }
