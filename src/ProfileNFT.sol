@@ -51,6 +51,8 @@ contract ProfileNFT is
         CyberNFTBase._initialize(name, symbol);
         _animationTemplate = animationTemplate;
         _imageTemplate = imageTemplate;
+        // start with paused
+        _pause();
     }
 
     /// @inheritdoc IProfileNFT

@@ -53,6 +53,7 @@ contract ProfileNFTTest is Test {
     function testBasic() public {
         assertEq(token.name(), "TestProfile");
         assertEq(token.symbol(), "TP");
+        assertEq(token.paused(), true);
     }
 
     function testAuth() public {
