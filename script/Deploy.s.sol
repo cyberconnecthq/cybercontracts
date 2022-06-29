@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import {LibDeploy} from "./libraries/LibDeploy.sol";
+import { LibDeploy } from "./libraries/LibDeploy.sol";
 
 contract DeployScript is Script {
     function run() external {
