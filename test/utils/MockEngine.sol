@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import { CyberEngine } from "../../src/CyberEngine.sol";
+import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
 

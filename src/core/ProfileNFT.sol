@@ -2,16 +2,16 @@
 
 pragma solidity 0.8.14;
 
-import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
-import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
-import { CyberNFTBase } from "./base/CyberNFTBase.sol";
-import { Constants } from "./libraries/Constants.sol";
-import { DataTypes } from "./libraries/DataTypes.sol";
-import { LibString } from "./libraries/LibString.sol";
-import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
+import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
+import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
+import { CyberNFTBase } from "../base/CyberNFTBase.sol";
+import { Constants } from "../libraries/Constants.sol";
+import { DataTypes } from "../libraries/DataTypes.sol";
+import { LibString } from "../libraries/LibString.sol";
+import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
-import { ProfileNFTStorage } from "./storages/ProfileNFTStorage.sol";
-import { Pausable } from "./dependencies/openzeppelin/Pausable.sol";
+import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
+import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { CyberEngine } from "./CyberEngine.sol";
 
 /**

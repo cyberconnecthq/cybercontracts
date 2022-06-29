@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import "../src/BoxNFT.sol";
+import "../src/periphery/BoxNFT.sol";
 import "forge-std/Test.sol";
 import "../src/libraries/Constants.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";

@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.14;
 import "forge-std/console.sol";
-import { ProfileNFT } from "../../src/ProfileNFT.sol";
+import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
-import { Roles } from "../../src/Roles.sol";
-import { CyberEngine } from "../../src/CyberEngine.sol";
-import { BoxNFT } from "../../src/BoxNFT.sol";
-import { SubscribeNFT } from "../../src/SubscribeNFT.sol";
+import { Roles } from "../../src/core/Roles.sol";
+import { CyberEngine } from "../../src/core/CyberEngine.sol";
+import { BoxNFT } from "../../src/periphery/BoxNFT.sol";
+import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
 import { Authority } from "../../src/dependencies/solmate/Auth.sol";
 import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
