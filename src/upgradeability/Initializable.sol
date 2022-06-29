@@ -36,15 +36,9 @@ abstract contract Initializable {
             "Contract already initialized"
         );
         _initialized = 1;
-        // TODO: this is dead code after we removed modifier initializer on constructor, kept for now
-        if (isTopLevelCall) {
-            _initializing = true;
-        }
+        _initializing = true;
         _;
-        // TODO: this is dead code after we removed modifier initializer on constructor, kept for now
-        if (isTopLevelCall) {
-            _initializing = false;
-        }
+        _initializing = false;
     }
 
     // For internal base contracts' initialize function

@@ -5,11 +5,11 @@
 This hosts all contracts for CyberConnect's social graph protocol.
 
 Some opinions:
-1. Prefer require for semantic clearity. 
+
+1. Prefer require for semantic clearity.
 2. No custom error until require supports custom error.
 3. NFTs don't support burn
 4. Try to be gas efficient :)
-
 
 # Dependencies
 
@@ -19,6 +19,7 @@ Some opinions:
 # Live Deployment
 
 ## Rinkeby
+
 [Deployment](./docs/deploy/rinkeby.md)
 
 # ABI
@@ -26,25 +27,28 @@ Some opinions:
 [ABI](./docs/abi/README.md)
 
 # Usage
-To enable husky pre-commit
+
+0. Upgrade your foundry
+`foundryup`
+
+1. To enable husky pre-commit
 `yarn add --dev husky & yarn prepare`
 
-To install contract dependencies
+2. To install contract dependencies
 `forge install`
 
-To build
+3. To build
 `forge build`
 
-To test
+4. To test
 `forge test -vvv`
 
-To run static analysis
+5. (optional) To run static analysis
 `slither src/`
 
 # Deployment:
 
-(Replace `rinkeby` with `anvil` or other supported network)
-0. Create `.env.rinkeby` file with following env
+(Replace `rinkeby` with `anvil` or other supported network) 0. Create `.env.rinkeby` file with following env
 
 ```bash
 RINKEBY_RPC_URL=<Your Rinkeby RPC endpoint>
@@ -62,18 +66,33 @@ PRIVATE_KEY=
 
 2. Run `yarn post_deploy` to update contract addresses and ABI changes
 
-# TODO
+# Interaction
+
+To interact with the protocol, directly call functions on CyberEngine.
+
+## Register
+
+Register Fee based on handle length
+| Length | Fee (ETH) |
+|--------|-----------|
+| 2      | 0.5       |
+| 3      | 0.1       |
+| 4      | 0.06      |
+| 5      | 0.03      |
+| 6      | 0.01      |
+| >=7    | 0.006     |
+
+# MAYBE TODO's
 - [ ] SVG generation
 - [ ] SBT NFT
 - [ ] SBT Module
 - [ ] Permit with EIP712
 - [ ] Crosschain support (openzeppelin contract) (https://docs.openzeppelin.com/contracts/4.x/api/crosschain)
-- [ ] Events
 - [ ] Reserve slots for EssenceNFT
 - [ ] Put BoxNFT into peripheral
 - [ ] Include chainID in SubscribeNFT, EssenceNFT
 - [ ] Token URI
-
 - [ ] fix slither
 - [ ] fix solhint
 - [ ] documentation style
+```

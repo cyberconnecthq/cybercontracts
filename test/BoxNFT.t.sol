@@ -21,6 +21,7 @@ contract BoxNFTTest is Test {
     function testBasic() public {
         assertEq(token.name(), "TestBox");
         assertEq(token.symbol(), "TB");
+        assertEq(token.paused(), true);
     }
 
     function testAuth() public {

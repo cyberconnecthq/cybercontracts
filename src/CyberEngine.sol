@@ -11,37 +11,28 @@ import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { ISubscribeMiddleware } from "./interfaces/ISubscribeMiddleware.sol";
 import { ICyberEngine } from "./interfaces/ICyberEngine.sol";
 import { ProfileNFT } from "./ProfileNFT.sol";
+import { BoxNFT } from "./BoxNFT.sol";
 import { Auth } from "./dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "./dependencies/solmate/RolesAuthority.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ERC721 } from "./dependencies/solmate/ERC721.sol";
-import { DataTypes } from "./libraries/DataTypes.sol";
+import { CyberEngineStorage } from "./storages/CyberEngineStorage.sol";
+import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
 
-// TODO: separate storage contract
 contract CyberEngine is
     Initializable,
     Auth,
     EIP712,
     UUPSUpgradeable,
+    CyberEngineStorage,
+    IUpgradeable,
     ICyberEngine
 {
-    address public profileAddress;
-    address public boxAddress;
-    address public signer;
-    bool public boxGiveawayEnded;
-    // Shared between register and other withSig functions. Always query onchain to get the current nounce
-    mapping(uint256 => DataTypes.SubscribeStruct)
-        internal _subscribeByProfileId;
-    mapping(address => uint256) public nonces;
-    address public subscribeNFTBeacon;
-    DataTypes.State private _state;
-
-    string private constant VERSION_STRING = "1";
-    uint256 private constant VERSION = 1;
-    mapping(DataTypes.Tier => uint256) public feeMapping;
-    mapping(address => bool) internal _subscribeMwAllowlist;
+    constructor() {
+        _disableInitializers();
+    }
 
     function initialize(
         address _owner,
@@ -246,7 +237,6 @@ contract CyberEngine is
                 .subscribeMw;
 
             // lazy deploy subscribe NFT
-            // TODO emit SubscribeNFT deployed event
             if (subscribeNFT == address(0)) {
                 bytes memory initData = abi.encodeWithSelector(
                     ISubscribeNFT.initialize.selector,
@@ -257,6 +247,7 @@ contract CyberEngine is
                 );
                 _subscribeByProfileId[profileIds[i]]
                     .subscribeNFT = subscribeNFT;
+                emit DeploySubscribeNFT(profileIds[i], subscribeNFT);
             }
             // run middleware before subscribe
             if (subscribeMw != address(0)) {
@@ -288,6 +279,7 @@ contract CyberEngine is
         _;
     }
 
+    // TODO: maybe remove essence
     modifier whenEssensePaused() {
         require(_state != DataTypes.State.EssensePaused, "Essense is paused");
         _;
@@ -304,38 +296,44 @@ contract CyberEngine is
         emit SetState(preState, state);
     }
 
-    function _requiresProfileOwner(uint256 profileId, address target)
-        internal
-        view
-    {
+    modifier onlyProfileOwner(uint256 profileId) {
         require(
-            ERC721(profileAddress).ownerOf(profileId) == target,
+            ERC721(profileAddress).ownerOf(profileId) == msg.sender,
             "Only profile owner"
         );
-    }
-
-    modifier onlyProfileOwner(uint256 profileId) {
-        _requiresProfileOwner(profileId, msg.sender);
         _;
     }
 
-    // Set Metadata
-    function setMetadata(uint256 profileId, string calldata metadata) external {
+    modifier onlyOwnerOrOperator(uint256 profileId) {
         require(
-            msg.sender == ERC721(profileAddress).ownerOf(profileId) ||
+            ERC721(profileAddress).ownerOf(profileId) == msg.sender ||
                 IProfileNFT(profileAddress).getOperatorApproval(
                     profileId,
                     msg.sender
                 ),
-            "Only owner or operator can set metadata"
+            "Only profile owner or operator"
         );
+        _;
+    }
 
-        string memory preMetadata = IProfileNFT(profileAddress).getMetadata(
-            profileId
-        );
+    // Set Metadata
+    function setMetadata(uint256 profileId, string calldata metadata)
+        external
+        onlyOwnerOrOperator(profileId)
+    {
         IProfileNFT(profileAddress).setMetadata(profileId, metadata);
 
-        emit SetMetadata(profileId, preMetadata, metadata);
+        emit SetMetadata(profileId, metadata);
+    }
+
+    // Set Avatar
+    function setAvatar(uint256 profileId, string calldata avatar)
+        external
+        onlyOwnerOrOperator(profileId)
+    {
+        IProfileNFT(profileAddress).setAvatar(profileId, avatar);
+
+        emit SetAvatar(profileId, avatar);
     }
 
     // Set Template
@@ -343,19 +341,15 @@ contract CyberEngine is
         external
         requiresAuth
     {
-        string memory preTemplate = IProfileNFT(profileAddress)
-            .getAnimationTemplate();
         IProfileNFT(profileAddress).setAnimationTemplate(template);
 
-        emit SetAnimationTemplate(preTemplate, template);
+        emit SetAnimationTemplate(template);
     }
 
     function setImageTemplate(string calldata template) external requiresAuth {
-        string memory preTemplate = IProfileNFT(profileAddress)
-            .getImageTemplate();
         IProfileNFT(profileAddress).setImageTemplate(template);
 
-        emit SetImageTemplate(preTemplate, template);
+        emit SetImageTemplate(template);
     }
 
     // only owner's signature works
@@ -434,6 +428,15 @@ contract CyberEngine is
         UUPSUpgradeable(boxAddress).upgradeTo(newImpl);
     }
 
+    // pause
+    function pauseProfile(bool toPause) external requiresAuth {
+        ProfileNFT(profileAddress).pause(toPause);
+    }
+
+    function pauseBox(bool toPause) external requiresAuth {
+        BoxNFT(boxAddress).pause(toPause);
+    }
+
     function getSubscribeNFTTokenURI(uint256 profileId)
         external
         view
@@ -483,13 +486,14 @@ contract CyberEngine is
     }
 
     // UUPS upgradeability
-    function version() external pure virtual returns (uint256) {
+    function version() external pure virtual override returns (uint256) {
         return VERSION;
     }
 
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override canUpgrade {}
 
+    // UUPS upgradeability
     modifier canUpgrade() {
         require(
             isAuthorized(msg.sender, Constants._AUTHORIZE_UPGRADE),
@@ -498,4 +502,6 @@ contract CyberEngine is
 
         _;
     }
+
+    //
 }

@@ -37,32 +37,23 @@ interface ICyberEngineEvents {
         DataTypes.State indexed newState
     );
 
-    event SetAnimationTemplate(
-        string indexed preTemplate,
-        string indexed newTemplate
-    );
+    event SetAnimationTemplate(string indexed newTemplate);
 
-    event SetImageTemplate(
-        string indexed preTemplate,
-        string indexed newTemplate
-    );
+    event SetImageTemplate(string indexed newTemplate);
 
-    event SetMetadata(
-        uint256 indexed profileId,
-        string indexed preMetadata,
-        string indexed newMetadata
-    );
+    event SetMetadata(uint256 indexed profileId, string newMetadata);
+
+    event SetAvatar(uint256 indexed profileId, string indexed newAvatar);
 
     event Register(
         address indexed to,
-        string indexed handle,
-        string indexed avatar,
+        string handle,
+        string avatar,
         string metadata
     );
 
     event Withdraw(address indexed to, uint256 indexed amount);
 
-    // TODO: looks weird, maybe unfold the array
     event Subscribe(
         address indexed sender,
         uint256[] profileIds,
@@ -74,10 +65,15 @@ interface ICyberEngineEvents {
         bool indexed preAllowed,
         bool indexed newAllowed
     );
+
     event SetSubscribeMw(
         uint256 indexed profileId,
         address preMw,
         address newMw
     );
-    // TODO: set subscribe NFT event
+
+    event DeploySubscribeNFT(
+        uint256 indexed profileId,
+        address indexed subscribeNFT
+    );
 }

@@ -9,6 +9,9 @@ import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
+import { SubscribeNFT } from "../src/SubscribeNFT.sol";
+import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
@@ -29,19 +32,28 @@ contract ProfileNFTTest is Test {
             abi.encodePacked(
                 "data:application/json;base64,",
                 Base64.encode(
-                    '{"name":"@alice","description":"CyberConnect profile for @alice","image":"img_template?handle=alice","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"5"},{"trait_type":"handle","value":"@alice"}]}'
+                    '{"name":"@alice","description":"CyberConnect profile for @alice","image":"img_template?handle=alice","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"5"},{"trait_type":"subscribers","value":"0"},{"trait_type":"handle","value":"@alice"}]}'
                 )
             )
         );
 
     function setUp() public {
-        token = new ProfileNFT(engine, "ani_template", "img_template");
-        token.initialize("TestProfile", "TP");
+        ProfileNFT tokenImpl = new ProfileNFT(engine);
+        bytes memory data = abi.encodeWithSelector(
+            ProfileNFT.initialize.selector,
+            "TestProfile",
+            "TP",
+            "ani_template",
+            "img_template"
+        );
+        ERC1967Proxy engineProxy = new ERC1967Proxy(address(tokenImpl), data);
+        token = ProfileNFT(address(engineProxy));
     }
 
     function testBasic() public {
         assertEq(token.name(), "TestProfile");
         assertEq(token.symbol(), "TP");
+        assertEq(token.paused(), true);
     }
 
     function testAuth() public {
@@ -76,7 +88,38 @@ contract ProfileNFTTest is Test {
     function testTokenURI() public {
         vm.prank(engine);
         token.createProfile(createProfileData);
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(CyberEngine.getSubscribeNFT.selector, 1),
+            abi.encode(address(0))
+        );
         assertEq(token.tokenURI(1), aliceMetadata);
+    }
+
+    function testTokenURISubscriber() public {
+        vm.prank(engine);
+        token.createProfile(createProfileData);
+
+        address subscribeNFT = address(0x1111);
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(CyberEngine.getSubscribeNFT.selector, 1),
+            abi.encode(subscribeNFT)
+        );
+        string memory expected = string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(
+                    '{"name":"@alice","description":"CyberConnect profile for @alice","image":"img_template?handle=alice","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"5"},{"trait_type":"subscribers","value":"111"},{"trait_type":"handle","value":"@alice"}]}'
+                )
+            )
+        );
+        vm.mockCall(
+            subscribeNFT,
+            abi.encodeWithSelector(CyberNFTBase.totalSupply.selector),
+            abi.encode(111)
+        );
+        assertEq(token.tokenURI(1), expected);
     }
 
     function test() public {
@@ -186,9 +229,27 @@ contract ProfileNFTTest is Test {
         assertEq(token.getMetadata(id), "ipfs");
     }
 
+    function testCannotSetMetadataTooLong() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(createProfileData);
+
+        bytes memory longMetadata = new bytes(Constants._MAX_URI_LENGTH + 1);
+        vm.prank(engine);
+
+        vm.expectRevert("Metadata has invalid length");
+        token.setMetadata(id, string(longMetadata));
+    }
+
     function testCannotGetMetadataForNonexistentProfile() public {
         vm.expectRevert("NOT_MINTED");
         token.getMetadata(0);
+    }
+
+    function testCannotSetMetadataIfNotEngine() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(createProfileData);
+        vm.expectRevert("Only Engine");
+        token.setMetadata(id, "ipfs");
     }
 
     // template
@@ -208,5 +269,38 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         token.setImageTemplate("img_template");
         assertEq(token.getImageTemplate(), "img_template");
+    }
+
+    // avatar
+    function testSetAvatarAsEngine() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(createProfileData);
+        assertEq(token.getAvatar(id), "https://example.com/alice.jpg");
+        vm.prank(engine);
+        token.setAvatar(id, "avatar");
+        assertEq(token.getAvatar(id), "avatar");
+    }
+
+    function testCannotGetAvatarForNonexistentProfile() public {
+        vm.expectRevert("NOT_MINTED");
+        token.getAvatar(0);
+    }
+
+    function testCannotSetAvatarIfNotEngine() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(createProfileData);
+        vm.expectRevert("Only Engine");
+        token.setAvatar(id, "ipfs");
+    }
+
+    function testCannotSetAvatarTooLong() public {
+        vm.prank(engine);
+        uint256 id = token.createProfile(createProfileData);
+
+        bytes memory longAvatar = new bytes(Constants._MAX_URI_LENGTH + 1);
+        vm.prank(engine);
+
+        vm.expectRevert("Avatar has invalid length");
+        token.setAvatar(id, string(longAvatar));
     }
 }

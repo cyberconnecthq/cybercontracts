@@ -8,14 +8,18 @@ import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
 import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { LibString } from "./libraries/LibString.sol";
+import { SubscribeNFTStorage } from "./storages/SubscribeNFTStorage.sol";
+import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
 
 // This will be deployed as beacon contracts for gas efficiency
-contract SubscribeNFT is CyberNFTBase, ISubscribeNFT {
-    // TODO: use address or ICyberEngine
+contract SubscribeNFT is
+    CyberNFTBase,
+    SubscribeNFTStorage,
+    IUpgradeable,
+    ISubscribeNFT
+{
     address public immutable ENGINE;
     address public immutable PROFILE_NFT;
-
-    uint256 internal _profileId;
 
     constructor(address engine, address profileNFT) {
         require(engine != address(0), "Engine address cannot be 0");
@@ -59,7 +63,7 @@ contract SubscribeNFT is CyberNFTBase, ISubscribeNFT {
             );
     }
 
-    function version() external pure virtual returns (uint256) {
+    function version() external pure virtual override returns (uint256) {
         return 1;
     }
 

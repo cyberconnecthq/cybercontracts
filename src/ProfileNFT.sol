@@ -10,6 +10,9 @@ import { DataTypes } from "./libraries/DataTypes.sol";
 import { LibString } from "./libraries/LibString.sol";
 import { Base64 } from "./dependencies/openzeppelin/Base64.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { ProfileNFTStorage } from "./storages/ProfileNFTStorage.sol";
+import { Pausable } from "./dependencies/openzeppelin/Pausable.sol";
+import { CyberEngine } from "./CyberEngine.sol";
 
 /**
  * @title Profile NFT
@@ -17,49 +20,39 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
  * @notice This contract is used to create a profile NFT.
  */
 
-// TODO: Owner cannot be set with conflicting role for capacity
 contract ProfileNFT is
+    Pausable,
     CyberNFTBase,
-    IProfileNFT,
+    UUPSUpgradeable,
+    ProfileNFTStorage,
     IUpgradeable,
-    UUPSUpgradeable
+    IProfileNFT
 {
+    // Immutable
     address public immutable ENGINE;
-    string internal _animationTemplate;
-    string internal _imageTemplate;
-    mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
-    mapping(bytes32 => uint256) internal _profileIdByHandleHash;
-    mapping(uint256 => string) internal _metadataById;
-    mapping(uint256 => mapping(address => bool)) internal _operatorApproval; // TODO: reconsider if useful
-    uint256 private constant VERSION = 1;
 
     modifier onlyEngine() {
         require(msg.sender == address(ENGINE), "Only Engine");
         _;
     }
 
-    // ENGINE for createProfile, setSubscribeNFT
-    constructor(
-        address _engine,
-        string memory animationTemplate,
-        string memory imageTemplate
-    ) {
+    constructor(address _engine) {
         require(_engine != address(0), "Engine address cannot be 0");
         ENGINE = _engine;
-        _animationTemplate = animationTemplate;
-        _imageTemplate = imageTemplate;
+        _disableInitializers();
     }
 
-    // TODO: enable this, currently disabled for better testability
-    // constructor() {
-    //     _disableInitializers();
-    // }
-
-    function initialize(string calldata _name, string calldata _symbol)
-        external
-        initializer
-    {
-        CyberNFTBase._initialize(_name, _symbol);
+    function initialize(
+        string calldata name,
+        string calldata symbol,
+        string calldata animationTemplate,
+        string memory imageTemplate
+    ) external initializer {
+        CyberNFTBase._initialize(name, symbol);
+        _animationTemplate = animationTemplate;
+        _imageTemplate = imageTemplate;
+        // start with paused
+        _pause();
     }
 
     /// @inheritdoc IProfileNFT
@@ -74,7 +67,6 @@ contract ProfileNFT is
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
-        // TODO: unchecked
         _mint(params.to);
         _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: params.handle,
@@ -130,6 +122,13 @@ contract ProfileNFT is
         string memory imageURL = string(
             abi.encodePacked(_imageTemplate, "?handle=", handle)
         );
+        address subscribeNFT = CyberEngine(ENGINE).getSubscribeNFT(tokenId);
+        uint256 subscribers;
+        if (subscribeNFT == address(0)) {
+            subscribers = 0;
+        } else {
+            subscribers = CyberNFTBase(subscribeNFT).totalSupply();
+        }
         return
             string(
                 abi.encodePacked(
@@ -144,16 +143,37 @@ contract ProfileNFT is
                             imageURL,
                             '","animation_url":"',
                             animationURL,
-                            '","attributes":[{"trait_type":"id","value":"',
-                            LibString.toString(tokenId),
-                            '"},{"trait_type":"length","value":"',
-                            LibString.toString(bytes(handle).length),
-                            '"},{"trait_type":"handle","value":"',
-                            formattedName,
-                            '"}]}'
+                            '","attributes":',
+                            _genAttributes(
+                                LibString.toString(tokenId),
+                                LibString.toString(bytes(handle).length),
+                                LibString.toString(subscribers),
+                                formattedName
+                            ),
+                            "}"
                         )
                     )
                 )
+            );
+    }
+
+    function _genAttributes(
+        string memory tokenId,
+        string memory length,
+        string memory subscribers,
+        string memory name
+    ) private pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '[{"trait_type":"id","value":"',
+                tokenId,
+                '"},{"trait_type":"length","value":"',
+                length,
+                '"},{"trait_type":"subscribers","value":"',
+                subscribers,
+                '"},{"trait_type":"handle","value":"',
+                name,
+                '"}]'
             );
     }
 
@@ -215,6 +235,10 @@ contract ProfileNFT is
         override
         onlyEngine
     {
+        require(
+            bytes(metadata).length <= Constants._MAX_URI_LENGTH,
+            "Metadata has invalid length"
+        );
         _metadataById[profileId] = metadata;
     }
 
@@ -230,12 +254,45 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
+    function getAvatar(uint256 profileId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        _requireMinted(profileId);
+        return _profileById[profileId].avatar;
+    }
+
+    /// @inheritdoc IProfileNFT
     function setAnimationTemplate(string calldata template)
         external
         override
         onlyEngine
     {
         _animationTemplate = template;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function setImageTemplate(string calldata template)
+        external
+        override
+        onlyEngine
+    {
+        _imageTemplate = template;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function setAvatar(uint256 profileId, string calldata avatar)
+        external
+        override
+        onlyEngine
+    {
+        require(
+            bytes(avatar).length <= Constants._MAX_URI_LENGTH,
+            "Avatar has invalid length"
+        );
+        _profileById[profileId].avatar = avatar;
     }
 
     /// @inheritdoc IProfileNFT
@@ -249,25 +306,33 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function setImageTemplate(string calldata template)
-        external
-        override
-        onlyEngine
-    {
-        _imageTemplate = template;
-    }
-
-    /// @inheritdoc IProfileNFT
     function getImageTemplate() external view override returns (string memory) {
         return _imageTemplate;
     }
 
     // TODO: write a test for upgrade profile nft
     // UUPS upgradeability
-    function version() external pure virtual returns (uint256) {
+    function version() external pure virtual override returns (uint256) {
         return VERSION;
     }
 
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override onlyEngine {}
+
+    // pausable
+    function pause(bool toPause) external onlyEngine {
+        if (toPause) {
+            super._pause();
+        } else {
+            super._unpause();
+        }
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public override whenNotPaused {
+        super.transferFrom(from, to, id);
+    }
 }

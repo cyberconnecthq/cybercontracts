@@ -7,13 +7,20 @@ import { CyberNFTBase } from "./base/CyberNFTBase.sol";
 import { RolesAuthority } from "./dependencies/solmate/RolesAuthority.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
+import { Pausable } from "./dependencies/openzeppelin/Pausable.sol";
 
 /**
  * @title Box NFT
  * @author CyberConnect
  * @notice This contract is used to create Box NFT.
  */
-contract BoxNFT is CyberNFTBase, IBoxNFT, IUpgradeable, UUPSUpgradeable {
+contract BoxNFT is
+    Pausable,
+    CyberNFTBase,
+    IBoxNFT,
+    IUpgradeable,
+    UUPSUpgradeable
+{
     address public immutable ENGINE;
     uint256 private constant VERSION = 1;
 
@@ -39,6 +46,8 @@ contract BoxNFT is CyberNFTBase, IBoxNFT, IUpgradeable, UUPSUpgradeable {
         initializer
     {
         CyberNFTBase._initialize(_name, _symbol);
+        // start with paused
+        _pause();
     }
 
     /// @inheritdoc IBoxNFT
@@ -72,4 +81,21 @@ contract BoxNFT is CyberNFTBase, IBoxNFT, IUpgradeable, UUPSUpgradeable {
 
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override onlyEngine {}
+
+    // pausable
+    function pause(bool toPause) external onlyEngine {
+        if (toPause) {
+            super._pause();
+        } else {
+            super._unpause();
+        }
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public override whenNotPaused {
+        super.transferFrom(from, to, id);
+    }
 }

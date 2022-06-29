@@ -109,18 +109,17 @@ library LibDeploy {
         {
             // scope to avoid stack too deep error
             // 3. Deploy ProfileNFT Impl
-            ProfileNFT profileImpl = new ProfileNFT(
-                address(engineAddr),
-                "ani_template",
-                "img_template"
-            );
+            ProfileNFT profileImpl = new ProfileNFT(address(engineAddr));
             _requiresContractAddress(deployer, nonce + 2, address(profileImpl));
             // 4. Deploy Proxy for ProfileNFT
             bytes memory initData = abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
                 // TODO: Naming
                 "CyberConnect Profile",
-                "CCP"
+                "CCP",
+                // TODO: fix template
+                "https://animation.example.com",
+                "https://image.example.com"
             );
             profileProxy = new ERC1967Proxy(address(profileImpl), initData);
             profileAddress = address(profileProxy);
@@ -173,13 +172,21 @@ library LibDeploy {
         // 10. set governance
         setupGovernance(CyberEngine(address(engineProxy)), deployer, authority);
         // 11. health checks
-        healthCheck(CyberEngine(address(engineProxy)), deployer, authority);
+        healthCheck(
+            CyberEngine(address(engineProxy)),
+            deployer,
+            authority,
+            ProfileNFT(address(profileProxy)),
+            BoxNFT(address(boxProxy))
+        );
     }
 
     function healthCheck(
         CyberEngine engine,
         address deployer,
-        RolesAuthority authority
+        RolesAuthority authority,
+        ProfileNFT profile,
+        BoxNFT box
     ) internal view {
         require(
             engine.owner() == ENGINE_OWNER,
@@ -193,6 +200,8 @@ library LibDeploy {
             authority.doesUserHaveRole(ENGINE_GOV, Constants._ENGINE_GOV_ROLE),
             "Governance address is not set"
         );
+        require(profile.paused(), "ProfileNFT is not paused");
+        require(box.paused(), "BoxNFT is not paused");
         // TODO: add all checks
         // require(
         //     authority.canCall(
