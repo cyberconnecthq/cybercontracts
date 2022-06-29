@@ -28,6 +28,9 @@ Some opinions:
 
 # Usage
 
+0. Upgrade your foundry
+`foundryup`
+
 1. To enable husky pre-commit
 `yarn add --dev husky & yarn prepare`
 
