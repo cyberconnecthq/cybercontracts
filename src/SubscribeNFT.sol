@@ -11,6 +11,11 @@ import { LibString } from "./libraries/LibString.sol";
 import { SubscribeNFTStorage } from "./storages/SubscribeNFTStorage.sol";
 import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
 
+/**
+ * @title Subscribe NFT
+ * @author CyberConnect
+ * @notice This contract is used to create a Subscribe NFT.
+ */
 // This will be deployed as beacon contracts for gas efficiency
 contract SubscribeNFT is
     CyberNFTBase,
