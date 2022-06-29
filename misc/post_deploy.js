@@ -28,21 +28,19 @@ const writeDeploy = async () => {
     );
     const txs = JSON.parse(file);
     const rst = txs.transactions.map((tx) => tx.contractAddress);
-    if (chainId !== "31337") {
-      const md = markdownTable([
-        ["Contract", "Address", "Etherscan"],
-        ["Roles", rst[0], etherscan + rst[0]],
-        ["CyberEngine (Impl)", rst[1], etherscan + rst[1]],
-        ["ProfileNFT (Impl)", rst[2], etherscan + rst[2]],
-        ["ProfileNFT (Proxy)", rst[3], etherscan + rst[3]],
-        ["BoxNFT (Impl)", rst[4], etherscan + rst[4]],
-        ["BoxNFT (Proxy)", rst[5], etherscan + rst[5]],
-        ["SubscribeNFT (Impl)", rst[6], etherscan + rst[6]],
-        ["SubscribeNFT (Beacon)", rst[7], etherscan + rst[7]],
-        ["CyberEngine (Proxy)", rst[8], etherscan + rst[8]],
-      ]);
-      await fs.writeFile(path.join("./docs/deploy", chain + ".md"), md);
-    }
+    const md = markdownTable([
+      ["Contract", "Address", "Etherscan"],
+      ["Roles", rst[0], etherscan + rst[0]],
+      ["CyberEngine (Impl)", rst[1], etherscan + rst[1]],
+      ["ProfileNFT (Impl)", rst[2], etherscan + rst[2]],
+      ["ProfileNFT (Proxy)", rst[3], etherscan + rst[3]],
+      ["BoxNFT (Impl)", rst[4], etherscan + rst[4]],
+      ["BoxNFT (Proxy)", rst[5], etherscan + rst[5]],
+      ["SubscribeNFT (Impl)", rst[6], etherscan + rst[6]],
+      ["SubscribeNFT (Beacon)", rst[7], etherscan + rst[7]],
+      ["CyberEngine (Proxy)", rst[8], etherscan + rst[8]],
+    ]);
+    await fs.writeFile(path.join("./docs/deploy", chain + ".md"), md);
   }
 };
 
@@ -57,7 +55,7 @@ const writeAbi = async () => {
   const ps = folders.map(async (file) => {
     const f = await fs.readFile(path.join("./out", file), "utf8");
     const json = JSON.parse(f);
-    return fs.writeFile(path.join("docs/abi", file), JSON.stringify(json.abi))
+    return fs.writeFile(path.join("docs/abi", file), JSON.stringify(json.abi));
   });
   await Promise.all(ps);
 };

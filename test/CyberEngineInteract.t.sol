@@ -20,6 +20,7 @@ import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 
+// For tests that requires a profile to start with.
 contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
     RolesAuthority internal authority;

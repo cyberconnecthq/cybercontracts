@@ -32,7 +32,7 @@ Some opinions:
 `foundryup`
 
 1. To enable husky pre-commit
-`yarn add --dev husky & yarn prepare`
+`yarn prepare`
 
 2. To install contract dependencies
 `forge install`
@@ -51,9 +51,9 @@ Some opinions:
 (Replace `rinkeby` with `anvil` or other supported network) 0. Create `.env.rinkeby` file with following env
 
 ```bash
-RINKEBY_RPC_URL=<Your Rinkeby RPC endpoint>
-PRIVATE_KEY=<Your wallets private key>
-ETHERSCAN_KEY=<Your Etherscan API key>
+RINKEBY_RPC_URL=
+PRIVATE_KEY=
+ETHERSCAN_KEY=
 ```
 
 for local deployment
