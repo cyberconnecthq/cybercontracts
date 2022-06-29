@@ -374,7 +374,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
             abi.encode(bob)
         );
-        vm.expectRevert("Subscribe middleware is not allowed");
+        vm.expectRevert("Subscribe middleware not allowed");
         address notMw = address(0xDEEAAAD);
         vm.prank(bob);
         engine.setSubscribeMw(profileId, notMw);
