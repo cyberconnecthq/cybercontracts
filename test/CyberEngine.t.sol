@@ -12,6 +12,7 @@ import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Roles } from "../src/Roles.sol";
 import { ProfileNFT } from "../src/ProfileNFT.sol";
+import { BoxNFT } from "../src/BoxNFT.sol";
 import { SubscribeNFT } from "../src/SubscribeNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
@@ -39,12 +40,14 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         uint256 nonce = vm.getNonce(address(this));
         address engineAddr = LibDeploy._calcContractAddress(
             address(this),
-            nonce + 4
+            nonce + 5
         );
         rolesAuthority = new Roles(address(this), engineAddr);
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
         bytes memory code = address(new ProfileNFT(engineAddr)).code;
         vm.etch(profileAddress, code);
+        bytes memory boxCode = address(new BoxNFT(engineAddr)).code;
+        vm.etch(boxAddress, boxCode);
         vm.label(engineAddr, "eng proxy");
         address impl = address(new SubscribeNFT(engineAddr, profileAddress));
         subscribeBeacon = address(new UpgradeableBeacon(impl, address(engine)));
@@ -623,5 +626,49 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         emit SetImageTemplate("new_img_template");
 
         engine.setImageTemplate("new_img_template");
+    }
+
+    // we can't pause from an unauthorized account
+    function testCannotPauseProfileAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        vm.prank(alice);
+        engine.pauseProfile(true);
+    }
+
+    // we can't pause from an unauthorized account
+    function testCannotPauseBoxAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        vm.prank(alice);
+        engine.pauseBox(true);
+    }
+
+    // Profile can be paused
+    // need to use mockcall
+    function testPauseProfile() public {
+        // contract only care about themselves, this is to set when an address
+        // calls ProfileNFT, the pause(function inside) should return a value
+        // the selector part is grammar
+        // then we give alice an auth position
+        // then we call pause
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ProfileNFT.pause.selector, true),
+            abi.encode(0)
+        );
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.pauseProfile(true);
+    }
+
+    // Box can be paused
+    function testPauseBox() public {
+        vm.mockCall(
+            boxAddress,
+            abi.encodeWithSelector(BoxNFT.pause.selector, true),
+            abi.encode(0)
+        );
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.pauseBox(true);
     }
 }
