@@ -22,6 +22,8 @@ const writeTemplate = async (profileProxy) => {
     "./docs/template"
     // Date.now().toString() + "-" + profileProxy
   );
+  await fs.rm(dir, { recursive: true, force: true });
+
   const output = path.join(dir, "index.html");
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(output, out);

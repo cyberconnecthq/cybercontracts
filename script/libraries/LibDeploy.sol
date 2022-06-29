@@ -291,7 +291,8 @@ library LibDeploy {
 
         console.log("block.timestamp", block.timestamp);
         uint256 deadline = block.timestamp + 60 * 60 * 24 * 30; // 30 days
-        string memory avatar = "avatar";
+        string
+            memory avatar = "bafkreibcwcqcdf2pgwmco3pfzdpnfj3lijexzlzrbfv53sogz5uuydmvvu"; // TODO: ryan's punk
         string memory metadata = "metadata";
         bytes32 digest = _hashTypedDataV4(
             address(engine),
