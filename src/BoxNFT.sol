@@ -17,7 +17,7 @@ contract BoxNFT is
     UUPSUpgradeable
 {
     address public immutable ENGINE;
-    uint256 private constant VERSION = 1;
+    uint256 private constant _VERSION = 1;
 
     modifier onlyEngine() {
         require(msg.sender == address(ENGINE), "Only Engine");
@@ -39,7 +39,7 @@ contract BoxNFT is
         _pause();
     }
 
-    function mint(address _to) external onlyEngine returns (uint256) {
+    function mint(address _to) external override onlyEngine returns (uint256) {
         super._mint(_to);
         return _totalCount;
     }
@@ -57,7 +57,7 @@ contract BoxNFT is
     // TODO: write a test for upgrade box nft
     // UUPS upgradeability
     function version() external pure virtual override returns (uint256) {
-        return VERSION;
+        return _VERSION;
     }
 
     // UUPS upgradeability

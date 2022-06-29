@@ -41,16 +41,19 @@ interface ICyberEngineEvents {
 
     event SetImageTemplate(string indexed newTemplate);
 
-    event SetMetadata(uint256 indexed profileId, string indexed newMetadata);
+    event SetMetadata(uint256 indexed profileId, string newMetadata);
 
     event SetAvatar(uint256 indexed profileId, string indexed newAvatar);
 
     event Register(
         address indexed to,
-        string indexed handle,
-        string indexed avatar,
+        uint256 indexed profileId,
+        string handle,
+        string avatar,
         string metadata
     );
+
+    event ClaimBox(address indexed to, uint256 indexed boxId);
 
     event Withdraw(address indexed to, uint256 indexed amount);
 

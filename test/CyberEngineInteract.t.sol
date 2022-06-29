@@ -20,6 +20,7 @@ import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 
+// For tests that requires a profile to start with.
 contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
     RolesAuthority internal authority;
@@ -217,7 +218,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             abi.encode(bob)
         );
 
-        vm.expectEmit(true, true, false, true);
+        vm.expectEmit(true, false, false, true);
         emit SetMetadata(profileId, "ipfs");
         engine.setMetadata(profileId, "ipfs");
     }
@@ -374,7 +375,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
             abi.encode(bob)
         );
-        vm.expectRevert("Subscribe middleware is not allowed");
+        vm.expectRevert("Subscribe middleware not allowed");
         address notMw = address(0xDEEAAAD);
         vm.prank(bob);
         engine.setSubscribeMw(profileId, notMw);

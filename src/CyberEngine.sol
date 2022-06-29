@@ -42,7 +42,7 @@ contract CyberEngine is
         RolesAuthority _rolesAuthority
     ) external initializer {
         Auth.__Auth_Init(_owner, _rolesAuthority);
-        EIP712.__EIP712_Init("CyberEngine", VERSION_STRING);
+        EIP712.__EIP712_Init("CyberEngine", _VERSION_STRING);
 
         signer = _owner;
         profileAddress = _profileAddress;
@@ -89,11 +89,30 @@ contract CyberEngine is
         _setFeeByTier(tier, amount);
     }
 
-    function setBoxGiveawayEnded(bool ended) external requiresAuth {
-        bool preEnded = boxGiveawayEnded;
-        boxGiveawayEnded = ended;
+    function claimBox(address to, DataTypes.EIP712Signature calldata sig)
+        external
+        payable
+        returns (uint256)
+    {
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._CLAIM_BOX_TYPEHASH,
+                        to,
+                        nonces[to]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            signer,
+            sig
+        );
 
-        emit SetBoxGiveawayEnded(preEnded, ended);
+        uint256 boxId = IBoxNFT(boxAddress).mint(to);
+        emit ClaimBox(to, boxId);
+
+        return boxId;
     }
 
     function register(
@@ -120,13 +139,16 @@ contract CyberEngine is
 
         _requireEnoughFee(params.handle, msg.value);
 
-        if (!boxGiveawayEnded) {
-            IBoxNFT(boxAddress).mint(params.to);
-        }
+        uint256 profileId = IProfileNFT(profileAddress).createProfile(params);
+        emit Register(
+            params.to,
+            profileId,
+            params.handle,
+            params.avatar,
+            params.metadata
+        );
 
-        emit Register(params.to, params.handle, params.avatar, params.metadata);
-
-        return IProfileNFT(profileAddress).createProfile(params);
+        return profileId;
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
@@ -227,7 +249,7 @@ contract CyberEngine is
         require(profileIds.length > 0, "No profile ids provided");
         require(
             profileIds.length == subDatas.length,
-            "Lenght missmatch profile ids and sub datas"
+            "Length missmatch ids & sub datas"
         );
         uint256[] memory result = new uint256[](profileIds.length);
         for (uint256 i = 0; i < profileIds.length; i++) {
@@ -476,10 +498,7 @@ contract CyberEngine is
         external
         onlyProfileOwner(profileId)
     {
-        require(
-            _subscribeMwAllowlist[mw],
-            "Subscribe middleware is not allowed"
-        );
+        require(_subscribeMwAllowlist[mw], "Subscribe middleware not allowed");
         address preMw = _subscribeByProfileId[profileId].subscribeMw;
         _subscribeByProfileId[profileId].subscribeMw = mw;
         emit SetSubscribeMw(profileId, preMw, mw);
@@ -487,7 +506,7 @@ contract CyberEngine is
 
     // UUPS upgradeability
     function version() external pure virtual override returns (uint256) {
-        return VERSION;
+        return _VERSION;
     }
 
     // UUPS upgradeability
@@ -502,4 +521,6 @@ contract CyberEngine is
 
         _;
     }
+
+    //
 }
