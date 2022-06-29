@@ -13,7 +13,7 @@ abstract contract CyberEngineStorage {
     address public profileAddress;
     address public boxAddress;
     address public signer;
-    bool public boxGiveawayEnded;
+
     // Shared between register and other withSig functions. Always query onchain to get the current nounce
     mapping(uint256 => DataTypes.SubscribeStruct)
         internal _subscribeByProfileId;

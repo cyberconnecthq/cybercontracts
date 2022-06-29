@@ -89,11 +89,30 @@ contract CyberEngine is
         _setFeeByTier(tier, amount);
     }
 
-    function setBoxGiveawayEnded(bool ended) external requiresAuth {
-        bool preEnded = boxGiveawayEnded;
-        boxGiveawayEnded = ended;
+    function claimBox(address to, DataTypes.EIP712Signature calldata sig)
+        external
+        payable
+        returns (uint256)
+    {
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._CLAIM_BOX_TYPEHASH,
+                        to,
+                        nonces[to]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            signer,
+            sig
+        );
 
-        emit SetBoxGiveawayEnded(preEnded, ended);
+        uint256 boxId = IBoxNFT(boxAddress).mint(to);
+        emit ClaimBox(to, boxId);
+
+        return boxId;
     }
 
     function register(
@@ -120,13 +139,16 @@ contract CyberEngine is
 
         _requireEnoughFee(params.handle, msg.value);
 
-        if (!boxGiveawayEnded) {
-            IBoxNFT(boxAddress).mint(params.to);
-        }
+        uint256 profileId = IProfileNFT(profileAddress).createProfile(params);
+        emit Register(
+            params.to,
+            profileId,
+            params.handle,
+            params.avatar,
+            params.metadata
+        );
 
-        emit Register(params.to, params.handle, params.avatar, params.metadata);
-
-        return IProfileNFT(profileAddress).createProfile(params);
+        return profileId;
     }
 
     function withdraw(address to, uint256 amount) external requiresAuth {
@@ -227,7 +249,7 @@ contract CyberEngine is
         require(profileIds.length > 0, "No profile ids provided");
         require(
             profileIds.length == subDatas.length,
-            "Lenght missmatch ids & sub datas"
+            "Length missmatch ids & sub datas"
         );
         uint256[] memory result = new uint256[](profileIds.length);
         for (uint256 i = 0; i < profileIds.length; i++) {

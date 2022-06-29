@@ -48,12 +48,6 @@ contract Roles is RolesAuthority {
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            CyberEngine.setBoxGiveawayEnded.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
             CyberEngine.setState.selector,
             true
         );

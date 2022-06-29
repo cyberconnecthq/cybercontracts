@@ -47,10 +47,13 @@ interface ICyberEngineEvents {
 
     event Register(
         address indexed to,
+        uint256 indexed profileId,
         string handle,
         string avatar,
         string metadata
     );
+
+    event ClaimBox(address indexed to, uint256 indexed boxId);
 
     event Withdraw(address indexed to, uint256 indexed amount);
 
