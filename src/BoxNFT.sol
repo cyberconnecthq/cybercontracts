@@ -35,6 +35,8 @@ contract BoxNFT is
         initializer
     {
         CyberNFTBase._initialize(_name, _symbol);
+        // start with paused
+        _pause();
     }
 
     function mint(address _to) external onlyEngine returns (uint256) {

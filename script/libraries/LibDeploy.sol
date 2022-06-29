@@ -172,13 +172,21 @@ library LibDeploy {
         // 10. set governance
         setupGovernance(CyberEngine(address(engineProxy)), deployer, authority);
         // 11. health checks
-        healthCheck(CyberEngine(address(engineProxy)), deployer, authority);
+        healthCheck(
+            CyberEngine(address(engineProxy)),
+            deployer,
+            authority,
+            ProfileNFT(address(profileProxy)),
+            BoxNFT(address(boxProxy))
+        );
     }
 
     function healthCheck(
         CyberEngine engine,
         address deployer,
-        RolesAuthority authority
+        RolesAuthority authority,
+        ProfileNFT profile,
+        BoxNFT box
     ) internal view {
         require(
             engine.owner() == ENGINE_OWNER,
@@ -192,6 +200,8 @@ library LibDeploy {
             authority.doesUserHaveRole(ENGINE_GOV, Constants._ENGINE_GOV_ROLE),
             "Governance address is not set"
         );
+        require(profile.paused(), "ProfileNFT is not paused");
+        require(box.paused(), "BoxNFT is not paused");
         // TODO: add all checks
         // require(
         //     authority.canCall(
