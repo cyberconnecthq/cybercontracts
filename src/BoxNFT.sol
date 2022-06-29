@@ -9,6 +9,11 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
 import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
 import { Pausable } from "./dependencies/openzeppelin/Pausable.sol";
 
+/**
+ * @title Box NFT
+ * @author CyberConnect
+ * @notice This contract is used to create Box NFT.
+ */
 contract BoxNFT is
     Pausable,
     CyberNFTBase,
@@ -30,6 +35,12 @@ contract BoxNFT is
         ENGINE = _engine;
     }
 
+    /**
+     * @notice Initializes the Box NFT.
+     *
+     * @param _name The name to set for the Box NFT.
+     * @param _symbol The symbol to set for the Box NFT.
+     */
     function initialize(string calldata _name, string calldata _symbol)
         external
         initializer
@@ -39,11 +50,19 @@ contract BoxNFT is
         _pause();
     }
 
+    /// @inheritdoc IBoxNFT
     function mint(address _to) external override onlyEngine returns (uint256) {
         super._mint(_to);
         return _totalCount;
     }
 
+    /**
+     * @notice Generates the metadata json object.
+     *
+     * @param tokenId The profile NFT token ID.
+     * @return memory The metadata json object.
+     * @dev It requires the tokenId to be already minted.
+     */
     function tokenURI(uint256 tokenId)
         public
         view
