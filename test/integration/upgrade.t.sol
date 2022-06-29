@@ -5,11 +5,11 @@ pragma solidity 0.8.14;
 import "../../src/upgradeability/UpgradeableBeacon.sol";
 import "openzeppelin-contracts/contracts/mocks/RegressionImplementation.sol";
 import "forge-std/Test.sol";
-import { IUpgradeableBeaconEvents } from "../../src/interfaces/IUpgradeableBeaconEvents.sol";
 
-contract UpgradeableBeaconTest is Test, IUpgradeableBeaconEvents {
+contract UpgradeableBeaconTest is Test {
     address internal owner = address(0xA11CE);
     address internal other = address(0xB0B);
+    event Upgraded(address indexed implementation);
     Implementation1 v1;
     UpgradeableBeacon beacon;
     function setUp() public {
