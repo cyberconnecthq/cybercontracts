@@ -2,24 +2,24 @@
 
 pragma solidity 0.8.14;
 import "forge-std/console.sol";
-import { EIP712 } from "./dependencies/openzeppelin/EIP712.sol";
+import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
-import { Initializable } from "./upgradeability/Initializable.sol";
-import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
-import { IProfileNFT } from "./interfaces/IProfileNFT.sol";
-import { ISubscribeNFT } from "./interfaces/ISubscribeNFT.sol";
-import { ISubscribeMiddleware } from "./interfaces/ISubscribeMiddleware.sol";
-import { ICyberEngine } from "./interfaces/ICyberEngine.sol";
+import { Initializable } from "../upgradeability/Initializable.sol";
+import { IBoxNFT } from "../interfaces/IBoxNFT.sol";
+import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
+import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
+import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
+import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { ProfileNFT } from "./ProfileNFT.sol";
-import { BoxNFT } from "./BoxNFT.sol";
-import { Auth } from "./dependencies/solmate/Auth.sol";
-import { RolesAuthority } from "./dependencies/solmate/RolesAuthority.sol";
-import { DataTypes } from "./libraries/DataTypes.sol";
-import { Constants } from "./libraries/Constants.sol";
+import { BoxNFT } from "../periphery/BoxNFT.sol";
+import { Auth } from "../dependencies/solmate/Auth.sol";
+import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+import { DataTypes } from "../libraries/DataTypes.sol";
+import { Constants } from "../libraries/Constants.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
-import { ERC721 } from "./dependencies/solmate/ERC721.sol";
-import { CyberEngineStorage } from "./storages/CyberEngineStorage.sol";
-import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
+import { ERC721 } from "../dependencies/solmate/ERC721.sol";
+import { CyberEngineStorage } from "../storages/CyberEngineStorage.sol";
+import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 
 /**
  * @title CyberEngine
@@ -125,7 +125,6 @@ contract CyberEngine is
     {
         _setFeeByTier(tier, amount);
     }
-
 
     // TODO: comment
     function claimBox(address to, DataTypes.EIP712Signature calldata sig)

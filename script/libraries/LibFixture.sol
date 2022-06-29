@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import { CyberEngine } from "../../src/CyberEngine.sol";
+import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { ECDSA } from "../../src/dependencies/openzeppelin/ECDSA.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../../src/libraries/Constants.sol";

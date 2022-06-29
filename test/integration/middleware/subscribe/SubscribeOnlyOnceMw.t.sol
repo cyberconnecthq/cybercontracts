@@ -4,7 +4,7 @@ pragma solidity 0.8.14;
 import "forge-std/Test.sol";
 import { LibDeploy } from "../../../../script/libraries/LibDeploy.sol";
 import { LibFixture } from "../../../../script/libraries/LibFixture.sol";
-import { CyberEngine } from "../../../../src/CyberEngine.sol";
+import { CyberEngine } from "../../../../src/core/CyberEngine.sol";
 import { RolesAuthority } from "../../../../src/dependencies/solmate/RolesAuthority.sol";
 import { SubscribeOnlyOnceMw } from "../../../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
 import { Constants } from "../../../../src/libraries/Constants.sol";

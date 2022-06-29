@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.14;
 
-import { IBoxNFT } from "./interfaces/IBoxNFT.sol";
-import { CyberNFTBase } from "./base/CyberNFTBase.sol";
-import { RolesAuthority } from "./dependencies/solmate/RolesAuthority.sol";
+import { IBoxNFT } from "../interfaces/IBoxNFT.sol";
+import { CyberNFTBase } from "../base/CyberNFTBase.sol";
+import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
-import { IUpgradeable } from "./interfaces/IUpgradeable.sol";
-import { Pausable } from "./dependencies/openzeppelin/Pausable.sol";
+import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
+import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 
 /**
  * @title Box NFT

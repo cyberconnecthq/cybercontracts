@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.14;
 
-import { Authority } from "../src/dependencies/solmate/Auth.sol";
-import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
-import { Constants } from "../src/libraries/Constants.sol";
-import { CyberEngine } from "../src/CyberEngine.sol";
+import { Authority } from "../dependencies/solmate/Auth.sol";
+import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+import { Constants } from "../libraries/Constants.sol";
+import { CyberEngine } from "./CyberEngine.sol";
 
 contract Roles is RolesAuthority {
     constructor(address owner, address engine)

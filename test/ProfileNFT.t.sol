@@ -2,14 +2,14 @@
 
 pragma solidity 0.8.14;
 
-import "../src/ProfileNFT.sol";
+import "../src/core/ProfileNFT.sol";
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
-import { SubscribeNFT } from "../src/SubscribeNFT.sol";
+import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
@@ -334,6 +334,7 @@ contract ProfileNFTTest is Test {
         token.pause(true);
         assertEq(token.paused(), true);
     }
+
     // we first verify that the contracy is paused, then unpause, and verify
     function testUnpause() public {
         vm.startPrank(engine);
