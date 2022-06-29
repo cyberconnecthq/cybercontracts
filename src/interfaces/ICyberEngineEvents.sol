@@ -41,7 +41,7 @@ interface ICyberEngineEvents {
 
     event SetImageTemplate(string indexed newTemplate);
 
-    event SetMetadata(uint256 indexed profileId, string indexed newMetadata);
+    event SetMetadata(uint256 indexed profileId, string newMetadata);
 
     event SetAvatar(uint256 indexed profileId, string indexed newAvatar);
 
