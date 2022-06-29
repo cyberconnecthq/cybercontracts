@@ -327,10 +327,18 @@ contract CyberEngine is
         _;
     }
 
+    /**
+     * @notice Gets the contract state.
+     */
     function getState() external view returns (DataTypes.State) {
         return _state;
     }
 
+    /**
+     * @notice Sets the contract state.
+     *
+     * @param state The new state to set.
+     */
     function setState(DataTypes.State state) external requiresAuth {
         DataTypes.State preState = _state;
         _state = state;
@@ -358,7 +366,12 @@ contract CyberEngine is
         _;
     }
 
-    // Set Metadata
+    /**
+     * @notice Sets the Profile NFT metadata as IPFS hash.
+     *
+     * @param profileId The profile ID.
+     * @param metadata The new metadata to set.
+     */
     function setMetadata(uint256 profileId, string calldata metadata)
         external
         onlyOwnerOrOperator(profileId)
@@ -368,7 +381,12 @@ contract CyberEngine is
         emit SetMetadata(profileId, metadata);
     }
 
-    // Set Avatar
+    /**
+     * @notice Sets the Profile NFT avatar.
+     *
+     * @param profileId The profile ID.
+     * @param avatar The new avatar url to set.
+     */
     function setAvatar(uint256 profileId, string calldata avatar)
         external
         onlyOwnerOrOperator(profileId)
@@ -378,7 +396,11 @@ contract CyberEngine is
         emit SetAvatar(profileId, avatar);
     }
 
-    // Set Template
+    /**
+     * @notice Sets the Profile NFT animation url.
+     *
+     * @param template The new template url to set.
+     */
     function setAnimationTemplate(string calldata template)
         external
         requiresAuth
@@ -388,6 +410,11 @@ contract CyberEngine is
         emit SetAnimationTemplate(template);
     }
 
+    /**
+     * @notice Sets the Profile NFT image.
+     *
+     * @param template The new template url to set.
+     */
     function setImageTemplate(string calldata template) external requiresAuth {
         IProfileNFT(profileAddress).setImageTemplate(template);
 
