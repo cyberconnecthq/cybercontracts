@@ -89,13 +89,6 @@ contract CyberEngine is
         _setFeeByTier(tier, amount);
     }
 
-    function setBoxGiveawayEnded(bool ended) external requiresAuth {
-        bool preEnded = boxGiveawayEnded;
-        boxGiveawayEnded = ended;
-
-        emit SetBoxGiveawayEnded(preEnded, ended);
-    }
-
     function claimBox(address to, DataTypes.EIP712Signature calldata sig)
         external
         payable

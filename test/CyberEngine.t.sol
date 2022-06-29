@@ -65,7 +65,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     function testBasic() public {
         assertEq(engine.profileAddress(), profileAddress);
         assertEq(engine.boxAddress(), boxAddress);
-        assertEq(engine.boxGiveawayEnded(), false);
         assertEq(
             uint256(engine.getState()),
             uint256(DataTypes.State.Operational)
@@ -98,12 +97,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
         engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
-    }
-
-    function testCannotSetBoxOpenedAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        vm.prank(alice);
-        engine.setBoxGiveawayEnded(true);
     }
 
     function testCannotSetAniTemplateAsNonGov() public {
@@ -161,16 +154,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
 
         engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
         assertEq(engine.feeMapping(DataTypes.Tier.Tier0), 1);
-    }
-
-    function testSetBoxOpenedGov() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-
-        vm.expectEmit(true, true, false, true);
-        emit SetBoxGiveawayEnded(false, true);
-
-        engine.setBoxGiveawayEnded(true);
     }
 
     function testVerify() public {
