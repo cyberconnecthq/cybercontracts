@@ -12,6 +12,9 @@ import { Authority } from "../../src/dependencies/solmate/Auth.sol";
 import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { Constants } from "../../src/libraries/Constants.sol";
+import { ECDSA } from "../../src/dependencies/openzeppelin/ECDSA.sol";
+import { DataTypes } from "../../src/libraries/DataTypes.sol";
+
 import "forge-std/Vm.sol";
 
 library LibDeploy {
@@ -25,46 +28,64 @@ library LibDeploy {
 
     address internal constant ENGINE_SIGNER =
         0x111110E8718C8DAf9262c82DC7898527AC58334a;
-    address internal constant ENGINE_GOV =
-        0x927f355117721e0E8A7b5eA20002b65B8a551890; // TODO: fix
 
-    function _calcContractAddress(address _owner, uint256 _nonce)
+    // currently the engine gov is always deployer
+    // address internal constant ENGINE_GOV =
+    //     0x927f355117721e0E8A7b5eA20002b65B8a551890;
+
+    function _calcContractAddress(address _origin, uint256 _nonce)
         internal
         pure
         returns (address)
     {
-        if (_nonce == 0) {
-            return
-                address(
-                    uint160(
-                        uint256(
-                            keccak256(
-                                abi.encodePacked(
-                                    bytes1(0xd6),
-                                    bytes1(0x94),
-                                    _owner,
-                                    bytes1(0x80)
-                                )
-                            )
-                        )
-                    )
-                );
-        }
-        return
-            address(
-                uint160(
-                    uint256(
-                        keccak256(
-                            abi.encodePacked(
-                                bytes1(0xd6),
-                                bytes1(0x94),
-                                _owner,
-                                bytes1(uint8(_nonce))
-                            )
-                        )
-                    )
-                )
+        bytes memory data;
+        if (_nonce == 0x00)
+            data = abi.encodePacked(
+                bytes1(0xd6),
+                bytes1(0x94),
+                _origin,
+                bytes1(0x80)
             );
+        else if (_nonce <= 0x7f)
+            data = abi.encodePacked(
+                bytes1(0xd6),
+                bytes1(0x94),
+                _origin,
+                uint8(_nonce)
+            );
+        else if (_nonce <= 0xff)
+            data = abi.encodePacked(
+                bytes1(0xd7),
+                bytes1(0x94),
+                _origin,
+                bytes1(0x81),
+                uint8(_nonce)
+            );
+        else if (_nonce <= 0xffff)
+            data = abi.encodePacked(
+                bytes1(0xd8),
+                bytes1(0x94),
+                _origin,
+                bytes1(0x82),
+                uint16(_nonce)
+            );
+        else if (_nonce <= 0xffffff)
+            data = abi.encodePacked(
+                bytes1(0xd9),
+                bytes1(0x94),
+                _origin,
+                bytes1(0x83),
+                uint24(_nonce)
+            );
+        else
+            data = abi.encodePacked(
+                bytes1(0xda),
+                bytes1(0x94),
+                _origin,
+                bytes1(0x84),
+                uint32(_nonce)
+            );
+        return address(uint160(uint256(keccak256(data))));
     }
 
     function _requiresContractAddress(
@@ -179,6 +200,10 @@ library LibDeploy {
             ProfileNFT(address(profileProxy)),
             BoxNFT(address(boxProxy))
         );
+        // 12. register a profile for testing
+        if (block.chainid != 1) {
+            register(CyberEngine(address(engineProxy)), deployer);
+        }
     }
 
     function healthCheck(
@@ -197,20 +222,21 @@ library LibDeploy {
             "CyberEngine signer is not set correctly"
         );
         require(
-            authority.doesUserHaveRole(ENGINE_GOV, Constants._ENGINE_GOV_ROLE),
+            authority.canCall(
+                deployer,
+                address(engine),
+                CyberEngine.setSigner.selector
+            ),
+            "CyberEngine Owner can set Signer"
+        );
+        require(
+            authority.doesUserHaveRole(deployer, Constants._ENGINE_GOV_ROLE),
             "Governance address is not set"
         );
         require(profile.paused(), "ProfileNFT is not paused");
         require(box.paused(), "BoxNFT is not paused");
+
         // TODO: add all checks
-        // require(
-        //     authority.canCall(
-        //         deployer,
-        //         address(engine),
-        //         CyberEngine.setSigner.selector
-        //     ),
-        //     "CyberEngine Owner can set Signer"
-        // );
     }
 
     function setupGovernance(
@@ -218,12 +244,72 @@ library LibDeploy {
         address deployer,
         RolesAuthority authority
     ) internal {
-        authority.setUserRole(ENGINE_GOV, Constants._ENGINE_GOV_ROLE, true);
-        vm.stopBroadcast();
+        authority.setUserRole(deployer, Constants._ENGINE_GOV_ROLE, true);
 
         // change user from deployer to governance
-        vm.startBroadcast(ENGINE_GOV);
         engine.setSigner(ENGINE_SIGNER);
-        vm.stopBroadcast();
+    }
+
+    // utils
+    bytes32 private constant _TYPE_HASH =
+        keccak256(
+            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+        );
+
+    // Util function
+    function _hashTypedDataV4(address engineAddr, bytes32 structHash)
+        private
+        view
+        returns (bytes32)
+    {
+        bytes32 domainSeparator = keccak256(
+            abi.encode(
+                _TYPE_HASH,
+                keccak256(bytes("CyberEngine")),
+                keccak256(bytes("1")),
+                block.chainid,
+                engineAddr
+            )
+        );
+        return ECDSA.toTypedDataHash(domainSeparator, structHash);
+    }
+
+    // for testnet, profile owner is all deployer, signer is fake
+    function register(CyberEngine engine, address deployer) internal {
+        string memory handle = "cyberconnect";
+        // set signer
+        uint256 signerPk = 1;
+        address signer = vm.addr(signerPk);
+        engine.setSigner(signer);
+
+        console.log("block.timestamp", block.timestamp);
+        uint256 deadline = block.timestamp + 60 * 60 * 24 * 30; // 30 days
+        string memory avatar = "avatar";
+        string memory metadata = "metadata";
+        bytes32 digest = _hashTypedDataV4(
+            address(engine),
+            keccak256(
+                abi.encode(
+                    Constants._REGISTER_TYPEHASH,
+                    deployer,
+                    keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
+                    0,
+                    deadline
+                )
+            )
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
+
+        require(engine.nonces(deployer) == 0);
+        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+            DataTypes.CreateProfileParams(deployer, handle, avatar, metadata),
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+        require(engine.nonces(deployer) == 1);
+
+        // revert signer
+        engine.setSigner(ENGINE_SIGNER);
     }
 }

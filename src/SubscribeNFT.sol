@@ -35,13 +35,13 @@ contract SubscribeNFT is
     }
 
     /// @inheritdoc ISubscribeNFT
-    function initialize(uint256 profileId) external initializer {
+    function initialize(uint256 profileId) external override initializer {
         _profileId = profileId;
         // Don't need to initialize CyberNFTBase with name and symbol since they are dynamic
     }
 
     /// @inheritdoc ISubscribeNFT
-    function mint(address to) external returns (uint256) {
+    function mint(address to) external override returns (uint256) {
         require(msg.sender == address(ENGINE), "Only Engine could mint");
         super._mint(to);
         return _totalCount;

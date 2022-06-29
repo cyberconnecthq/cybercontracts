@@ -156,7 +156,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileWithAnInvalidCharacter() public {
-        vm.expectRevert("Handle contains invalid character");
+        vm.expectRevert("Handle has invalid character");
         vm.prank(engine);
         token.createProfile(
             DataTypes.CreateProfileParams(
@@ -177,7 +177,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileWithACapitalLetter() public {
-        vm.expectRevert("Handle contains invalid character");
+        vm.expectRevert("Handle has invalid character");
         vm.prank(engine);
         token.createProfile(
             DataTypes.CreateProfileParams(alice, "Test", imageUri, "metadata")
@@ -185,7 +185,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileWithBlankSpace() public {
-        vm.expectRevert("Handle contains invalid character");
+        vm.expectRevert("Handle has invalid character");
         vm.prank(engine);
         token.createProfile(
             DataTypes.CreateProfileParams(alice, " ", imageUri, "metadata")

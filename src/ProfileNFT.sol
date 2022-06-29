@@ -207,7 +207,7 @@ contract ProfileNFT is
             bytes1 b = byteHandle[i];
             require(
                 (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
-                "Handle contains invalid character"
+                "Handle has invalid character"
             );
             // optimation
             unchecked {
@@ -321,7 +321,7 @@ contract ProfileNFT is
     // TODO: write a test for upgrade profile nft
     // UUPS upgradeability
     function version() external pure virtual override returns (uint256) {
-        return VERSION;
+        return _VERSION;
     }
 
     // UUPS upgradeability
