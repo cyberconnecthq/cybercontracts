@@ -25,6 +25,8 @@ library Constants {
         keccak256(
             "setOperatorApprovalWithSign(uint256 profileId,address operator,bool approved,uint256 nonce,uint256 deadline)"
         );
+    bytes32 internal constant _CLAIM_BOX_TYPEHASH =
+        keccak256("claimBox(address to,uint256 nonce,uint256 deadline)");
 
     // Parameters
     uint8 internal constant _MAX_HANDLE_LENGTH = 27;

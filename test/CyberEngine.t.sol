@@ -389,11 +389,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         vm.mockCall(
-            boxAddress,
-            abi.encodeWithSelector(IBoxNFT.mint.selector, address(bob)),
-            abi.encode(1)
-        );
-        vm.mockCall(
             profileAddress,
             abi.encodeWithSelector(
                 IProfileNFT.createProfile.selector,
@@ -403,8 +398,8 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
         assertEq(engine.nonces(bob), 0);
 
-        vm.expectEmit(true, false, false, true);
-        emit Register(bob, handle, avatar, metadata);
+        vm.expectEmit(true, true, false, true);
+        emit Register(bob, 1, handle, avatar, metadata);
 
         assertEq(
             engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
@@ -473,12 +468,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
             )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-
-        vm.mockCall(
-            boxAddress,
-            abi.encodeWithSelector(IBoxNFT.mint.selector, address(bob)),
-            abi.encode(1)
-        );
         vm.mockCall(
             profileAddress,
             abi.encodeWithSelector(
@@ -500,47 +489,60 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
     }
 
-    // TODO re-enable this test after finalizing boxNFT
-    // function testRegisterAfterBoxOpened() public {
-    //     address charlie = vm.addr(1);
-    //     rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-    //     vm.prank(alice);
-    //     engine.setBoxGiveawayEnded(true);
+    function testClaimBox() public {
+        address charlie = vm.addr(1);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setSigner(charlie);
 
-    //     vm.prank(alice);
-    //     engine.setSigner(charlie);
+        // change block timestamp to make deadline valid
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(
+                abi.encode(Constants._CLAIM_BOX_TYPEHASH, bob, 0, deadline)
+            )
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-    //     // change block timestamp to make deadline valid
-    //     vm.warp(50);
-    //     uint256 deadline = 100;
-    //     bytes32 digest = engine.hashTypedDataV4(
-    //         keccak256(
-    //             abi.encode(
-    //                 Constants._REGISTER_TYPEHASH,
-    //                 bob,
-    //                 keccak256(bytes(handle)),
-    //                 keccak256(bytes(avatar)),
-    //                 keccak256(bytes(metadata)),
-    //                 0,
-    //                 deadline
-    //             )
-    //         )
-    //     );
-    //     (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+        vm.mockCall(
+            boxAddress,
+            abi.encodeWithSelector(IBoxNFT.mint.selector, address(bob)),
+            abi.encode(1)
+        );
+        assertEq(engine.nonces(bob), 0);
 
-    //     assertEq(box.mintRan(), false);
-    //     assertEq(profile.createProfileRan(), false);
-    //     assertEq(engine.nonces(bob), 0);
+        vm.expectEmit(true, true, false, true);
+        emit ClaimBox(bob, 1);
 
-    //     engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-    //         DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
-    //         DataTypes.EIP712Signature(v, r, s, deadline)
-    //     );
+        assertEq(
+            engine.claimBox(bob, DataTypes.EIP712Signature(v, r, s, deadline)),
+            1
+        );
+        assertEq(engine.nonces(bob), 1);
+    }
 
-    //     assertEq(box.mintRan(), false);
-    //     assertEq(profile.createProfileRan(), true);
-    //     assertEq(engine.nonces(bob), 1);
-    // }
+    function testCannotClaimInvalidSig() public {
+        // set charlie as signer
+        address charlie = vm.addr(1);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        engine.setSigner(charlie);
+
+        // change block timestamp to make deadline valid
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(
+                abi.encode(Constants._CLAIM_BOX_TYPEHASH, bob, 0, deadline)
+            )
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+
+        // charlie signed the box to bob, but register with a different address(alice).
+        vm.expectRevert("Invalid signature");
+        engine.claimBox(alice, DataTypes.EIP712Signature(v, r, s, deadline));
+    }
 
     function testSetState() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
