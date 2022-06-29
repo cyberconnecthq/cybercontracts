@@ -48,7 +48,7 @@ contract BoxNFT is CyberNFTBase, IBoxNFT, IUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @notice generates the metadata json object.
+     * @notice Generates the metadata json object.
      *
      * @param tokenId The profile NFT token ID.
      * @return memory the metadata json object.
