@@ -11,11 +11,8 @@ contract DeployScript is Script {
         console.log("vm.getNonce", vm.getNonce(msg.sender));
         vm.startBroadcast();
 
-        address profileProxy = address(
-            0xE325EBc97236e0b62D0166094186d968ab86c8E1
-        );
-        string
-            memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreifp336f6sfergcmgt5bqrdhtuo3wdexgxlefnbutc4jsds7xubv3y";
+        address profileProxy = address(0xDEAD);
+        string memory templateURL = "TEMPLATE_URL";
 
         LibDeploy.deploy(msg.sender, nonce, templateURL);
         // TODO: set correct role capacity

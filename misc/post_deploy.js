@@ -1,15 +1,8 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import { markdownTable } from "markdown-table";
-import "dotenv/config";
-import * as FormData from "form-data";
-import * as axios from "axios";
 
 const base = "./broadcast/Deploy.s.sol";
-const pinata = "https://cyberconnect.mypinata.cloud/";
-const pinataJWT = process.env.PINATA_JWT;
-console.log(pinataJWT);
-
 const writeDeploy = async () => {
   const folders = await fs.readdir(base);
   for (let i = 0; i < folders.length; i++) {
@@ -48,7 +41,6 @@ const writeDeploy = async () => {
       ["CyberEngine (Proxy)", rst[8], etherscan + rst[8]],
     ]);
     await fs.writeFile(path.join("./docs/deploy", chain + ".md"), md);
-    return { profileProxy: rst[3] };
   }
 };
 
@@ -68,50 +60,10 @@ const writeAbi = async () => {
   await Promise.all(ps);
 };
 
-const writeTemplate = async (profileProxy) => {
-  const file = await fs.readFile(path.join("./template", "index.html"), "utf8");
-  const out = file.replace(
-    /0x000000000000000000000000000000000000DEAD/g,
-    profileProxy
-  );
-  const dir = path.join(
-    "./docs/template",
-    Date.now().toString() + "-" + profileProxy
-  );
-  const output = path.join(dir, "index.html");
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(output, out);
-  return output;
-};
-const writeToPinata = async (output) => {
-  var data = new FormData();
-  data.append("file", fs.createReadStream(output));
-  data.append("pinataOptions", '{"cidVersion": 1}');
-  // data.append(
-  //   "pinataMetadata",
-  //   '{"name": "MyFile", "keyvalues": {"company": "Pinata"}}'
-  // );
-
-  const config = {
-    method: "post",
-    url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-    headers: {
-      Authorization: "Bearer " + pinataJWT,
-      ...data.getHeaders(),
-    },
-    data: data,
-  };
-
-  const res = await axios(config);
-
-  console.log(res.data);
-};
 
 const main = async () => {
-  const { profileProxy } = await writeDeploy();
+  await writeDeploy();
   await writeAbi();
-  const out = await writeTemplate(profileProxy);
-  await writeToPinata(out);
 };
 
 main()

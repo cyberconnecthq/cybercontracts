@@ -29,7 +29,9 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
         ERC1967Proxy proxy;
         (proxy, authority, boxAddress, profileAddress) = LibDeploy.deploy(
             address(this),
-            nonce
+            nonce,
+            // address(0),
+            ""
         );
         engine = CyberEngine(address(proxy));
 

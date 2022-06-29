@@ -102,7 +102,12 @@ library LibDeploy {
         }
     }
 
-    function deploy(address deployer, uint256 nonce)
+    function deploy(
+        address deployer,
+        uint256 nonce,
+        // address calProfileProxy,
+        string memory templateURL
+    )
         internal
         returns (
             ERC1967Proxy engineProxy,
@@ -139,7 +144,7 @@ library LibDeploy {
                 "CyberConnect Profile",
                 "CCP",
                 // TODO: fix template
-                "https://animation.example.com",
+                templateURL, // to be set later in `post_deploy` script. circular dependency
                 "https://image.example.com"
             );
             profileProxy = new ERC1967Proxy(address(profileImpl), initData);
@@ -149,6 +154,8 @@ library LibDeploy {
                 nonce + 3,
                 address(profileProxy)
             );
+            // require(calProfileProxy == address(profileProxy));
+            console.log("profile proxy", address(profileProxy));
         }
         ERC1967Proxy boxProxy;
         {
