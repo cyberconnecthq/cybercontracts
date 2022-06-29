@@ -47,8 +47,8 @@ interface ICyberEngineEvents {
 
     event Register(
         address indexed to,
-        string indexed handle,
-        string indexed avatar,
+        string handle,
+        string avatar,
         string metadata
     );
 

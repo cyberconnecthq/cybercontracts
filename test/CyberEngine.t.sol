@@ -403,7 +403,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
         assertEq(engine.nonces(bob), 0);
 
-        vm.expectEmit(true, true, false, true);
+        vm.expectEmit(true, false, false, true);
         emit Register(bob, handle, avatar, metadata);
 
         assertEq(
