@@ -45,6 +45,12 @@ interface ICyberEngineEvents {
 
     event SetAvatar(uint256 indexed profileId, string indexed newAvatar);
 
+    event SetOperatorApproval(
+        uint256 indexed profileId,
+        address indexed operator,
+        bool indexed approved
+    );
+
     event Register(
         address indexed to,
         uint256 indexed profileId,

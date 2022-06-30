@@ -462,6 +462,8 @@ contract CyberEngine is
             sig
         );
         IProfileNFT(profileAddress).setMetadata(profileId, metadata);
+
+        emit SetMetadata(profileId, metadata);
     }
 
     function setOperatorApproval(
@@ -474,6 +476,8 @@ contract CyberEngine is
             operator,
             approved
         );
+
+        emit SetOperatorApproval(profileId, operator, approved);
     }
 
     function setOperatorApprovalWithSig(
@@ -504,6 +508,7 @@ contract CyberEngine is
             operator,
             approved
         );
+        emit SetOperatorApproval(profileId, operator, approved);
     }
 
     // upgrade

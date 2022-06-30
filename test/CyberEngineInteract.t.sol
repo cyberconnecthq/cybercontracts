@@ -28,7 +28,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     address internal boxAddress = address(0xB);
     address internal subscribeBeacon;
     address internal gov = address(0xCCC);
-    uint256 internal bobPk = 1;
+    uint256 internal bobPk = 10000;
     address internal bob = vm.addr(bobPk);
     uint256 internal profileId;
     address internal alice = address(0xA11CE);
@@ -99,7 +99,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
                 )
             )
         );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
         vm.mockCall(
             boxAddress,
@@ -207,6 +207,9 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             abi.encode(alice)
         );
         vm.prank(alice);
+
+        vm.expectEmit(true, true, true, true);
+        emit SetOperatorApproval(profileId, gov, true);
         engine.setOperatorApproval(profileId, gov, true);
     }
 
@@ -221,6 +224,83 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         vm.expectEmit(true, false, false, true);
         emit SetMetadata(profileId, "ipfs");
         engine.setMetadata(profileId, "ipfs");
+    }
+
+    function testSetMetadataWithSig() public {
+        // set all subsequent calls' from bob (but signer/owner is charlie).
+        vm.startPrank(bob);
+
+        uint256 charliePk = 100;
+        address charlie = vm.addr(charliePk);
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(charlie)
+        );
+        assertEq(ERC721(profileAddress).ownerOf(profileId), charlie);
+
+        string memory metadata = "ipfs";
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    Constants._SET_METADATA_TYPEHASH,
+                    profileId,
+                    keccak256(bytes(metadata)),
+                    0,
+                    deadline
+                )
+            )
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
+
+        vm.expectEmit(true, false, false, true);
+        emit SetMetadata(profileId, metadata);
+        engine.setMetadataWithSig(
+            profileId,
+            metadata,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+    }
+
+    function testCannotSetMetadataWithSigInvalidSig() public {
+        // set all subsequent calls' from bob
+        vm.startPrank(bob);
+
+        uint256 charliePk = 100;
+        address charlie = vm.addr(charliePk);
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(charlie)
+        );
+        assertEq(ERC721(profileAddress).ownerOf(profileId), charlie);
+
+        string memory metadata = "ipfs";
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    Constants._SET_METADATA_TYPEHASH,
+                    profileId,
+                    keccak256(bytes(metadata)),
+                    0,
+                    deadline
+                )
+            )
+        );
+
+        // signer is bob, however owner is charlie
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+
+        vm.expectRevert("Invalid signature");
+        engine.setMetadataWithSig(
+            profileId,
+            metadata,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
     }
 
     function testCannotSetMetadataAsNonOwnerAndOperator() public {
