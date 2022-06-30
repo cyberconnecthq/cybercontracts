@@ -32,3 +32,13 @@ jobs:
         run: |
           forge test -vvv --gas-report
         id: test
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+      - name: Install modules
+        run: npm install
+      - name: Install lint
+        run: yarn add lint
+      - name: Run lint
+        run: yarn run lint:fix
