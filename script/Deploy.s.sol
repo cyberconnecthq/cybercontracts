@@ -17,6 +17,7 @@ contract DeployScript is Script {
         string
             memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreigc6pzmqid6sy4owqotqekjl42s25flghijkyrykdm5m4jwcbhsdu";
 
+        // TODO: pass in profileProxy to run a require. need some workaround right now the stack is too deep
         LibDeploy.deploy(msg.sender, nonce, templateURL);
         // TODO: set correct role capacity
         // TODO: do a health check. verify everything
