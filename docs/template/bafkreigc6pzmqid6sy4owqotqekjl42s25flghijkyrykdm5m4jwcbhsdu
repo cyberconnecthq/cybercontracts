@@ -84,7 +84,7 @@
         // TODO: update nodeURL, contractAddress and abi
         const nodeURL = "https://eth-rinkeby.alchemyapi.io/v2/aogLQdKfxyXg2wnlfUt1771XbWfUtCbj";
         const provider = new ethers.providers.JsonRpcProvider(nodeURL);
-        const contractAddress = "0x000000000000000000000000000000000000DEAD";
+        const contractAddress = "0x701A5baBA0701e3B1Dd3107dF47dDC68eaC019bf";
         const abi = [
             {
                 "inputs":[

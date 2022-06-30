@@ -11,13 +11,9 @@ contract DeployScript is Script {
         console.log("vm.getNonce", vm.getNonce(msg.sender));
         vm.startBroadcast();
 
-        address profileProxy = address(
-            0x701A5baBA0701e3B1Dd3107dF47dDC68eaC019bf
-        );
-        string
-            memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreigc6pzmqid6sy4owqotqekjl42s25flghijkyrykdm5m4jwcbhsdu";
+        address profileProxy = address(0xDEAD);
+        string memory templateURL = "TEMPLATE_URL";
 
-        // TODO: pass in profileProxy to run a require. need some workaround right now the stack is too deep
         LibDeploy.deploy(msg.sender, nonce, templateURL);
         // TODO: set correct role capacity
         // TODO: do a health check. verify everything

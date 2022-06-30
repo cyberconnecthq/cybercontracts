@@ -12,6 +12,7 @@ contract UpgradeableBeaconTest is Test {
     event Upgraded(address indexed implementation);
     Implementation1 v1;
     UpgradeableBeacon beacon;
+
     function setUp() public {
         v1 = new Implementation1();
         beacon = new UpgradeableBeacon(address(v1), owner);
