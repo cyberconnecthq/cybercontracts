@@ -176,7 +176,8 @@
                         .attr("id", "svg")
                         .attr("width", width)
                         .attr("height", height)
-                        .attr("viewbox", `0 0 ${500} ${500}`)
+                        .attr("viewbox", `0 0 ${width} ${height}`)
+                        .style("transform-origin", `${width/2} ${height/2}`)
                         .style("overflow", "hidden");
 
             const g = svg.selectAll("g");
@@ -365,8 +366,6 @@
                     });
             }
         }
-
-
 
         const load = async () => {
             // Render to generate placeholder SVG
