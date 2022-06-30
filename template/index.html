@@ -9,6 +9,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            user-select: none;
         }
 
         .container {
@@ -18,8 +19,8 @@
         }
 
         #card {
-            width: 642px;
-            height: 642px;
+            width: 500px;
+            height: 500px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -27,6 +28,15 @@
 
         #profile {
             position: relative;
+        }
+
+        #titletag {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            color: #ffffff;
+            max-width: 227px;
+            word-wrap: break-word;
+            opacity: 0.3;
         }
 
         svg {
@@ -73,8 +83,8 @@
             black: "#000000",
             white: "#ffffff"
         };
-        const width = 345;
-        const height = 553;
+        const width = 500;
+        const height = 500;
         const qrSize = 100;
         const link3Url = "link3.to/";
 
@@ -150,6 +160,14 @@
         );
         console.log(contract);
 
+        const computeFontSize = (elemId, maxFontSize, padding, maxElemWidth) => {
+            const elem = document.getElementById(elemId);
+            const bbox = elem?.getBBox();
+            const textWidth = bbox ? (bbox.width + padding) : 0;
+            const fontSize = maxFontSize * maxElemWidth / textWidth;
+            return Math.min(fontSize, maxFontSize);
+        }
+
         const render = (handle, imageURI, nameTag, titleTag) => {
             const svg = d3.select("#profile")
                 .selectAll("svg")
@@ -158,7 +176,7 @@
                         .attr("id", "svg")
                         .attr("width", width)
                         .attr("height", height)
-                        .attr("viewbox", "0 0 345 553")
+                        .attr("viewbox", `0 0 ${500} ${500}`)
                         .style("overflow", "hidden");
 
             const g = svg.selectAll("g");
@@ -199,7 +217,7 @@
                 .join("div")
                     .attr("id", "#qrcode")
                     .style("position", "absolute")
-                    .style("left", "30px")
+                    .style("left", "130px")
                     .style("bottom", "95px")
                     .html(qrcode.svg());
             }
@@ -209,7 +227,7 @@
                 .join("path")
                     .attr("id", "background")
                     .attr("d", () => { 
-                        return "M0 67.3893C0 64.1771 0.773708 61.0121 2.25566 58.1622L29.1388 6.46377C31.2042 2.49193 35.3087 0 39.7854 0H149.5H337C341.418 0 345 3.58172 345 8V517.158C345 521.399 342.762 525.325 339.112 527.485L300.712 550.212C297.627 552.037 294.109 553 290.525 553H156H8C3.58172 553 0 549.418 0 545V67.3893Z";
+                        return "M107 76.0562C107 73.3842 107.644 70.7515 108.876 68.3808L131.238 25.3767C132.956 22.0729 136.371 20 140.095 20H231.358H387.325C391.001 20 393.98 22.9794 393.98 26.6546V450.186C393.98 453.713 392.118 456.979 389.082 458.776L357.14 477.68C354.574 479.199 351.648 480 348.666 480H236.765H113.655C109.979 480 107 477.021 107 473.345V76.0562Z";
                     })
                     .style("fill", color.black);
 
@@ -221,7 +239,7 @@
                         .attr("d", () => { 
                             return "M65.248 39.8863L56.682 54.5586C55.3759 56.8213 53.4882 58.7001 51.2113 60.0037C48.9344 61.3072 46.3497 61.9889 43.7206 61.9793L26.6233 62C23.9871 61.9944 21.3988 61.3009 19.1184 59.9893C16.838 58.6776 14.9459 56.7939 13.6321 54.5275L5.02677 39.7468C3.70425 37.4854 3.00525 34.9187 3.00003 32.3046C2.99481 29.6904 3.68355 27.121 4.99703 24.8544L13.563 10.1813C14.8691 7.91864 16.7568 6.0398 19.0337 4.73624C21.3106 3.43267 23.8953 2.75099 26.5244 2.76065L43.6217 2.74072C46.2579 2.74584 48.8463 3.439 51.1268 4.75056C53.4072 6.06212 55.2993 7.94584 56.6129 10.2124L65.2142 24.9931C68.0382 29.5464 67.6911 35.8104 64.8897 40.5L65.248 39.8863Z";
                         })
-                        .style("transform", "translate(30px, 35px)")
+                        .style("transform", "translate(130px, 50px)")
                         .style("fill", "url(#pattern)")
                         .style("stroke", color.white)
                         .style("stroke-width", 5);
@@ -230,9 +248,9 @@
                 stroke.data([null])
                     .join("circle")
                         .attr("id", "stroke")
-                        .attr("cx", 65)
-                        .attr("cy", 65)
-                        .attr("r", 35)
+                        .attr("cx", 165)
+                        .attr("cy", 82.5)
+                        .attr("r", 32.5)
                         .style("fill", color.black)
                         .style("stroke", color.white)
                         .style("stroke-width", 5);
@@ -244,40 +262,46 @@
                         .attr("d", () => { 
                             return "M11.3517 14.4352C15.0692 14.4352 18.0824 11.422 18.0824 7.70441C18.0824 3.98686 15.0692 0.973633 11.3517 0.973633C7.63412 0.973633 4.62089 3.98686 4.62089 7.70441C4.62089 11.422 7.63412 14.4352 11.3517 14.4352ZM11.3517 17.5762C5.1548 17.5762 0.130859 19.5557 0.130859 21.9952C0.130859 24.4348 5.1548 26.4171 11.3517 26.4171C17.5485 26.4171 22.5725 24.4376 22.5725 21.9981C22.5725 19.5585 17.5485 17.5762 11.3517 17.5762Z";
                         })
-                        .style("transform", "translate(53.5px, 51.5px)")
+                        .style("transform", "translate(152.5px, 70px)")
                         .style("fill", color.white)
                         .style("opacity", 0.3);
             }
 
             if(nameTag) {
+                const propNametag = g.select("#propNametag");
+                propNametag.data([null])
+                    .join("text")
+                        .attr("id", "propNametag")
+                        .style("font-size", 26)
+                        .style("font-weight", 700)
+                        .style("font-family", "Outfit")
+                        .style("fill", "transparent")
+                        .style("transform", `translate(${width}px, ${height}px)`)
+                        .text(nameTag);
+
                 const nametag = g.select("#nametag");
                 nametag.data([null])
                     .join("text")
                         .attr("id", "nametag")
-                        .style("font-size", 26)
+                        .style("font-size", computeFontSize("propNametag", 26, 0, 227))
                         .style("fill", color.white)
                         .style("font-weight", 700)
-                        .style("font-familiy", "Outfit")
+                        .style("font-family", "Outfit")
                         .style("text-anchor", "start")
-                        .style("transform", "translate(30px, 160px)")
+                        .style("transform", "translate(130px, 160px)")
                         .style("alignment-baseline", "baseline")
                         .text(nameTag);
             }
 
             if(titleTag) {
-                const titletag = g.select("#titletag");
+                const titletag = svg.select("#titletag");
                 titletag.data([null])
-                    .join("text")
-                        .attr("id", "titletag")
-                        .style("font-size", 14)
-                        .style("fill", color.white)
-                        .style("font-weight", 400)
-                        .style("font-familiy", "Outfit")
-                        .style("text-anchor", "start")
-                        .style("transform", "translate(30px, 185px)")
-                        .style("alignment-baseline", "hanging")
-                        .style("opacity", 0.3)
-                        .text(titleTag);
+                    .join("div")
+                    .attr("id", "titletag")
+                        .style("position", "absolute")
+                        .style("left", "130px")
+                        .style("top", "181px")
+                        .html(titleTag);
             }
 
             if(handle) {
@@ -288,10 +312,10 @@
                         .style("font-size", 18)
                         .style("fill", color.white)
                         .style("font-weight", 700)
-                        .style("font-familiy", "Outfit")
+                        .style("font-family", "Outfit")
                         .style("text-anchor", "start")
                         .style("alignment-baseline", "middle")
-                        .style("transform", "translate(30px, 511px)")
+                        .style("transform", "translate(130px, 438px)")
                         .text(link3Url);
 
                 const bgHandle = g.select("#bgHandle");
@@ -301,18 +325,18 @@
                         .attr("width", 0)
                         .attr("height", 25)
                         .attr("rx", 4)
-                        .attr("x", 344)
-                        .attr("y", 496)
+                        .attr("x", 410)
+                        .attr("y", 422)
                         .attr("transform", "skewX(-25)")
                         .style("fill", color.white);
 
-                const propHandle = g.select("#prop");
+                const propHandle = g.select("#propHandle");
                 propHandle.data([null])
                     .join("text")
-                        .attr("id", "prop")
+                        .attr("id", "propHandle")
                         .style("font-size", 18)
                         .style("font-weight", 700)
-                        .style("font-familiy", "Outfit")
+                        .style("font-family", "Outfit")
                         .style("fill", "transparent")
                         .style("transform", `translate(${width}px, ${height}px)`)
                         .text(handle);
@@ -321,19 +345,13 @@
                 txtHandle.data([null])
                     .join("text")
                         .attr("id", "handle")
-                        .style("font-size", () => {
-                            const textElem = document.getElementById("prop");
-                            const bbox = textElem?.getBBox();
-                            const width = bbox ? (bbox.width + 21) : 0;
-                            const size = 18 * 200 / width;
-                            return size > 18 ? 18 : size;
-                        })
+                        .style("font-size", computeFontSize("propHandle", 18, 21, 158))
                         .style("fill", color.black)
                         .style("font-weight", 700)
-                        .style("font-familiy", "Outfit")
+                        .style("font-family", "Outfit")
                         .style("text-anchor", "start")
                         .style("alignment-baseline", "middle")
-                        .style("transform", `translate(117px, 510px)`)
+                        .style("transform", `translate(217.5px, 437px)`)
                         .text(handle);
                     
                 d3.select("#bgHandle")
@@ -347,6 +365,8 @@
                     });
             }
         }
+
+
 
         const load = async () => {
             // Render to generate placeholder SVG
