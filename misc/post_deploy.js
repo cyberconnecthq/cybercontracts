@@ -60,7 +60,6 @@ const writeAbi = async () => {
   await Promise.all(ps);
 };
 
-
 const main = async () => {
   await writeDeploy();
   await writeAbi();

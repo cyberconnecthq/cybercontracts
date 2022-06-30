@@ -6,8 +6,8 @@
   "author": "r@cyberconnect.me",
   "license": "MIT",
   "scripts": {
-    "lint:check": "prettier --check **.sol && npx solhint --config ./config/.solhint.json --ignore-path ./config/.solhintignore -f table 'src/**/*.sol'",
-    "lint:fix": "prettier --write **.sol",
+    "lint:check": "prettier --check **.{sol,js,md} && npx solhint --config ./config/.solhint.json --ignore-path ./config/.solhintignore -f table 'src/**/*.sol'",
+    "lint:fix": "prettier --write **.{sol,js,md}",
     "prepare": "husky install",
     "spdx": "hardhat prepend-spdx-license",
     "deploy": "node ./_scripts.js deploy rinkeby",

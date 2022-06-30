@@ -18,10 +18,7 @@ const writeTemplate = async (profileProxy) => {
     /0x000000000000000000000000000000000000DEAD/g,
     profileProxy
   );
-  const dir = path.join(
-    "./docs/template"
-    // Date.now().toString() + "-" + profileProxy
-  );
+  const dir = path.join("./docs/template");
   await fs.rm(dir, { recursive: true, force: true });
 
   const output = path.join(dir, "index.html");
@@ -33,10 +30,6 @@ const writeToPinata = async ({ output, dir }) => {
   var data = new FormData();
   data.append("file", fsSync.createReadStream(output));
   data.append("pinataOptions", '{"cidVersion": 1}');
-  // data.append(
-  //   "pinataMetadata",
-  //   '{"name": "MyFile", "keyvalues": {"company": "Pinata"}}'
-  // );
 
   const config = {
     method: "post",

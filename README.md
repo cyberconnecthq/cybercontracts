@@ -67,6 +67,8 @@ create `.env` for pinata key
 PINATA_KEY=
 ```
 
+0. Run `yarn pre_deploy` to prepare animation url pinata link that is used to deploy
+
 1. Run `yarn deploy:rinkeby` or `yarn deploy:anvil` for local deployment. If you run into any unconfirmed txs, run `yarn deploy:rinkeby --resume` to continue. This also verifies contract on etherscan
 
 2. Run `yarn post_deploy` to update contract addresses and ABI changes
