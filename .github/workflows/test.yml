@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: 14
       - name: Install modules
-        run: npm install
+        run: yarn install
       - name: Install lint
         run: yarn add lint
       - name: Run lint
