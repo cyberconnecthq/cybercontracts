@@ -27,7 +27,7 @@ library LibDeploy {
     address internal constant ENGINE_OWNER = address(0);
 
     address internal constant ENGINE_SIGNER =
-        0x111110E8718C8DAf9262c82DC7898527AC58334a;
+        0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
 
     // currently the engine gov is always deployer
     // address internal constant ENGINE_GOV =
