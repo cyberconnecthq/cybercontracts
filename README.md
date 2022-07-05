@@ -54,25 +54,21 @@ Some opinions:
 RINKEBY_RPC_URL=
 PRIVATE_KEY=
 ETHERSCAN_KEY=
+PINATA_JWT=
 ```
 
 for local deployment in `.env.anvil`
 
 ```bash
 PRIVATE_KEY=
+PINATA_JWT=
 ```
 
-create `.env` for pinata key
+1. Run `yarn pre_deploy` to prepare animation url pinata link that is used to deploy. Take note of the `profile proxy` address, which will be used later.
 
-```bash
-PINATA_KEY=
-```
+2. Run `yarn deploy:rinkeby` or `yarn deploy:anvil` for local deployment. If you run into any unconfirmed txs, run `yarn deploy:rinkeby --resume` to continue. This also verifies contract on etherscan. Check `profile proxy` address log to make sure it's the same as step 0. Otherwise, abort. (This manual step will be fixed)
 
-0. Run `yarn pre_deploy` to prepare animation url pinata link that is used to deploy. Take note of the `profile proxy` address, which will be used later.
-
-1. Run `yarn deploy:rinkeby` or `yarn deploy:anvil` for local deployment. If you run into any unconfirmed txs, run `yarn deploy:rinkeby --resume` to continue. This also verifies contract on etherscan. Check `profile proxy` address log to make sure it's the same as step 0. Otherwise, abort. (This manual step will be fixed)
-
-2. Run `yarn post_deploy` to update contract addresses and ABI changes
+3. Run `yarn post_deploy` to update contract addresses and ABI changes
 
 # Interaction
 
