@@ -7,6 +7,7 @@
     <style>
         * {
             box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
             margin: 0;
             padding: 0;
             user-select: none;
@@ -30,8 +31,15 @@
             position: relative;
         }
 
+        .nametag {
+            color: #ffffff;
+        }
+        
+        .nametag span:last-child {
+            opacity: 0.3;
+        }
+
         .titletag {
-            font-family: 'Outfit', sans-serif;
             font-size: 14px;
             color: #ffffff;
             max-width: 227px;
@@ -79,7 +87,7 @@
     </div>
     <script type="text/javascript">
         const urlParams = new URLSearchParams(window.location.search);
-        const handle = urlParams.get("handle");
+        const handleParam = urlParams.get("handle");
         const color = {
             black: "#000000",
             white: "#ffffff"
@@ -165,7 +173,7 @@
             return Math.min(fontSize, maxFontSize);
         }
 
-        const render = (handle, imageURI, nameTag, titleTag) => {
+        const render = (handle, imageURI, metadata) => {            
             const svg = d3.select("#profile")
                 .selectAll("svg")
                     .data([null])
@@ -234,44 +242,6 @@
                         .style("opacity", 0.3);
             }
 
-            if(nameTag) {
-                const propNametag = svg.selectAll(".propNametag");
-                propNametag.data([null])
-                    .join("text")
-                        .classed("propNametag", true)
-                        .style("font-size", 26)
-                        .style("font-weight", 700)
-                        .style("font-family", "Outfit")
-                        .style("fill", "transparent")
-                        .style("transform", `translate(${width}px, ${height}px)`)
-                        .text(nameTag);
-
-                const nametag = svg.selectAll(".nametag");
-                nametag.data([null])
-                    .join("text")
-                        .classed("nametag", true)
-                        .style("font-size", computeFontSize("propNametag", 26, 0, 227))
-                        .style("fill", color.white)
-                        .style("font-weight", 700)
-                        .style("font-family", "Outfit")
-                        .style("text-anchor", "start")
-                        .style("transform", "translate(130px, 160px)")
-                        .style("alignment-baseline", "baseline")
-                        .text(nameTag);
-            }
-
-            if(titleTag) {
-                const titletag = d3.select("#profile")
-                .selectAll(".titletag")
-                .data([null])
-                    .join("div")
-                    .classed("titletag", true)
-                        .style("position", "absolute")
-                        .style("left", "130px")
-                        .style("top", "181px")
-                        .html(titleTag);
-            }
-
             if(handle) {
                 // Animate card
                 const card = d3.select("#card")
@@ -326,12 +296,7 @@
                 bgHandle.data([null])
                     .join("rect")
                         .classed("bgHandle", true)
-                        .attr("width", () => {
-                            const textElem = document.getElementsByClassName("propHandle")[0];
-                            const bbox = textElem?.getBBox();
-                            const width = bbox ? (bbox.width + 21) : 0;
-                            return width;
-                        })
+                        .attr("width", 0)
                         .attr("height", 25)
                         .attr("rx", 4)
                         .attr("x", 410)
@@ -351,36 +316,104 @@
                         .style("alignment-baseline", "middle")
                         .style("transform", `translate(217.5px, 436px)`)
                         .text(handle);
+
+                svg.selectAll(".bgHandle")
+                    .transition()
+                    .duration(0)
+                    .attr("width", () => {
+                        const textElem = document.getElementsByClassName("handle")[0];
+                        const bbox = textElem?.getBBox();
+                        const width = bbox ? (bbox.width + 21) : 0;
+                        return width;
+                    });
+            }
+
+            if(metadata?.attributes?.length > 0) {               
+                const displayName = metadata.attributes.find(elem => elem.traitType === "displayName")?.value;
+                const title = metadata.attributes.find(elem => elem.traitType === "title")?.value;
+                const organization = metadata.attributes.find(elem => elem.traitType === "organization")?.value;
+                const displayNameType = metadata.attributes.find(elem => elem.traitType === "displayNameType")?.value
+
+                const propNametag = svg.selectAll(".propNametag");
+                propNametag.data([null])
+                    .join("text")
+                        .classed("propNametag", true)
+                        .style("font-size", 26)
+                        .style("font-weight", 700)
+                        .style("font-family", "Outfit")
+                        .style("fill", "transparent")
+                        .style("transform", `translate(${width}px, ${height}px)`)
+                        .text(displayName);
+    
+                const nametag = d3.select("#profile")
+                    .selectAll(".nametag")
+                    .data([null])
+                        .join("div")
+                        .classed("nametag", true)
+                        .style("position", "absolute")
+                        .style("left", "130px")
+                        .style("top", "136px")
+                        .html(() => {
+                            if(!displayNameType) return;
+                            const fontSize = computeFontSize("propNametag", 26, 0, 227);
+                            const output = `
+                                <span style="font-size: ${fontSize}px">
+                                    ${displayNameType === "ENS" ? displayName.slice(0, -4) : displayNameType}
+                                </span>
+                                <span style="font-size: ${fontSize}px">
+                                    ${displayNameType === "ENS" ? ".eth" : ""}
+                                </span>
+                            `;
+                            return output;
+                        });
+
+                const titletag = d3.select("#profile")
+                    .selectAll(".titletag")
+                    .data([null])
+                        .join("div")
+                        .classed("titletag", true)
+                            .style("position", "absolute")
+                            .style("left", "130px")
+                            .style("top", "181px")
+                            .html(() => {
+                                let output = "";
+                                if(title) {
+                                    output += title;
+                                }
+                                if(organization) {
+                                    output += ` at ${organization}`;
+                                }
+                                return output;
+                            });
             }
         }
 
         const getProfile = async () => {
-            let profileId, imageURI, nameTag, titleTag;
+            let profileId, handle, imageURI, metadata;
 
             try {
                 // Step 1: Get profile id
-                if(handle || handle === 0) {
-                    profileId = await contract.getProfileIdByHandle(handle);
+                if(handleParam || handleParam === 0) {
+                    profileId = await contract.getProfileIdByHandle(handleParam);
                     profileId = profileId?.toNumber();
                 }
 
                 if(profileId) {
+                    handle = handleParam;
+
                     // Step 2: Get avatar image
-                    const ipfsHash = await contract.getAvatar(profileId);
-                    imageURI = `https://cyberconnect.mypinata.cloud/ipfs/${ipfsHash}`;
+                    imageURI = await contract.getAvatar(profileId);
 
                     // Step 3: Get metadata
-                    const metadata = await contract.getMetadata(profileId);
-                    if(typeof metadata === "object") {
-                        nameTag = metadata?.name;
-                        titleTag = metadata?.bio;
-                    }
+                    const ipfsHash = await contract.getMetadata(profileId);
+                    const data = await fetch(`https://ipfs.io/ipfs/${ipfsHash}`);
+                    metadata = await data.json();
                 }
             } catch (error) {
                 console.error(error.message);
             }
 
-            return { imageURI, nameTag, titleTag };
+            return { handle, imageURI, metadata };
         }
 
         const load = async () => {
@@ -388,12 +421,12 @@
             render();
 
             // Render to generate profile SVG
-            const { imageURI, nameTag, titleTag } = await getProfile();
-            render(handle, imageURI, nameTag, titleTag);
+            const { handle, imageURI, metadata } = await getProfile();
+            render(handle, imageURI, metadata);
 
             setInterval(async() => {
-                const { imageURI, nameTag, titleTag } = await getProfile();
-                render(handle, imageURI, nameTag, titleTag);
+                const { handle, imageURI, metadata } = await getProfile();
+                render(handle, imageURI, metadata);
             }, 5000);
         }
 
