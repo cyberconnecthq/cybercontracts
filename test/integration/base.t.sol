@@ -7,7 +7,6 @@ import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { ICyberEngineEvents } from "../../src/interfaces/ICyberEngineEvents.sol";
-import { IProfileNFT } from "../../src/interfaces/IProfileNFT.sol";
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { LibFixture } from "../../script/libraries/LibFixture.sol";
 import { Base64 } from "../../src/dependencies/openzeppelin/Base64.sol";
