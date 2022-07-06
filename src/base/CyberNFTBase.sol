@@ -23,8 +23,9 @@ abstract contract CyberNFTBase is ERC721, Initializable {
         ERC721.__ERC721_Init(_name, _symbol);
     }
 
-    function _mint(address _to) internal virtual {
+    function _mint(address _to) internal virtual returns (uint256) {
         super._mint(_to, ++_totalCount);
+        return _totalCount;
     }
 
     function _exists(uint256 tokenId) internal view returns (bool) {

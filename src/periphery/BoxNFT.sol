@@ -52,8 +52,7 @@ contract BoxNFT is
 
     /// @inheritdoc IBoxNFT
     function mint(address _to) external override onlyEngine returns (uint256) {
-        super._mint(_to);
-        return _totalCount;
+        return super._mint(_to);
     }
 
     /**

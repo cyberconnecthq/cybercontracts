@@ -86,4 +86,11 @@ contract BoxNFTTest is Test {
         token.pause(false);
         assertEq(token.paused(), false);
     }
+    // should return token ID, should increment everytime we call
+    function testReturnTokenId() public {
+        vm.startPrank(engine);
+        assertEq(token.mint(alice), 1);
+        assertEq(token.mint(alice), 2);
+        assertEq(token.mint(alice), 3);
+    }
 }
