@@ -406,7 +406,7 @@
 
                     // Step 3: Get metadata
                     const ipfsHash = await contract.getMetadata(profileId);
-                    const data = await fetch(`https://ipfs.io/ipfs/${ipfsHash}`);
+                    const data = await fetch(`https://cyberconnect.mypinata.cloud/ipfs/${ipfsHash}`);
                     if(data.status === 200) {
                         metadata = await data.json();
                     }
