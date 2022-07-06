@@ -19,7 +19,7 @@ const writeTemplate = async (length, url) => {
 const main = async () => {
   // TODO: make sure to include all characters
   const all = [];
-  for (let j = 1; j <= 25; j++) { // 40 is the max length of the link3 handle
+  for (let j = 1; j <= 27; j++) { // 27 is the max length of the link3 handle
     for (let i = 0; i < 1; i++) { // how many tries for each length
       const str = randomString(j, wordlist);
       all.push(writeTemplate(j, str));

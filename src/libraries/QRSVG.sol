@@ -100,35 +100,23 @@ library QRSVG {
         returns (uint256[70] memory)
     {
         uint8 nblocks = 1;
-        uint8[26] memory genpoly = [
-            173,
-            125,
-            158,
-            2,
-            103,
-            182,
-            118,
-            17,
-            145,
-            201,
-            111,
-            28,
-            165,
-            53,
-            161,
-            21,
-            245,
-            142,
-            13,
-            102,
-            48,
-            227,
-            153,
-            145,
-            218,
-            70
+        uint8[15] memory genpoly = [
+            8,
+            183,
+            61,
+            91,
+            202,
+            37,
+            51,
+            58,
+            58,
+            237,
+            140,
+            124,
+            5,
+            99,
+            105
         ];
-
         uint8[2] memory subsizes = [0, 55];
         uint256 nitemsperblock = 55;
         uint256[26][1] memory eccs;
@@ -377,7 +365,7 @@ library QRSVG {
         for (uint8 i = 0; i < 15; ++i) {
             uint8 r = infoA[i];
             uint8 c = infoB[i];
-            _qrMatrix.matrix[r][8] = _qrMatrix.matrix[8][c] = (24188 >> i) & 1;
+            _qrMatrix.matrix[r][8] = _qrMatrix.matrix[8][c] = (32170 >> i) & 1;
             // we don't have to mark those bits reserved; always done
             // in makebasematrix above.
         }
