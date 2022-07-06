@@ -362,6 +362,7 @@ contract ProfileNFTTest is Test {
         assertEq(token.paused(), false);
     }
 
+<<<<<<< HEAD
     // only Engine can set primary profile id
     function testCannotSetPrimaryProfileIdIfNotEngine() public {
         vm.prank(engine);
@@ -399,5 +400,18 @@ contract ProfileNFTTest is Test {
         token.setPrimaryProfile(profileIdBob);
         uint256 primaryIdBob = token.getPrimaryProfile(engine);
         assertEq(profileIdBob, profileIdBob);
+=======
+    // we create a profile, then set the profile as the primary profile id,
+    // then we call the primary id to see if it returns the right profile id
+    function testReturnProfileId() public {
+        vm.prank(engine);
+        token.pause(false);
+        vm.prank(engine);
+        uint256 profileId = token.createProfile(createProfileData);
+        vm.prank(alice);
+        token.setPrimaryProfile(profileId);
+        uint256 primaryId = token.getPrimaryProfile(alice);
+        assertEq(primaryId, profileId);
+>>>>>>> 104b9c3 (feat: Primary Profile NFT)
     }
 }
