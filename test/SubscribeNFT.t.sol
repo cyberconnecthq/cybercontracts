@@ -101,4 +101,13 @@ contract SubscribeNFTTest is Test {
         vm.expectRevert("Transfer is not allowed");
         c.safeTransferFrom(alice, bob, 1, "");
     }
+
+    function testReturnTokenId() public {
+        vm.startPrank(address(engine));
+        assertEq(c.mint(alice), 1);
+        assertEq(c.mint(alice), 2);
+        assertEq(c.mint(alice), 3);
+    }
 }
+
+

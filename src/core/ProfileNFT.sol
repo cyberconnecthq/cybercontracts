@@ -75,7 +75,8 @@ contract ProfileNFT is
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
-        _mint(params.to);
+        uint256 id = _mint(params.to);
+        
         _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: params.handle,
             avatar: params.avatar
@@ -83,7 +84,7 @@ contract ProfileNFT is
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         _metadataById[_totalCount] = params.metadata;
-        return _totalCount;
+        return id;
     }
 
     /// @inheritdoc IProfileNFT
