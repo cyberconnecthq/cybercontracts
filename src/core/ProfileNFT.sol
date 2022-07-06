@@ -76,7 +76,7 @@ contract ProfileNFT is
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
         uint256 id = _mint(params.to);
-        
+
         _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: params.handle,
             avatar: params.avatar

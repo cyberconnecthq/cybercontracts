@@ -37,8 +37,6 @@ jobs:
         with:
           node-version: 14
       - name: Install modules
-        run: yarn install
-      - name: Install lint
-        run: yarn add lint
+        run: yarn
       - name: Run lint
-        run: yarn run lint:fix
+        run: yarn run lint:gh-check
