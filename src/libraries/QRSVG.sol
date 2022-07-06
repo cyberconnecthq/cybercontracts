@@ -99,7 +99,6 @@ library QRSVG {
         pure
         returns (uint256[70] memory)
     {
-        uint8 nblocks = 1;
         uint8[26] memory genpoly = [
             173,
             125,
@@ -129,27 +128,16 @@ library QRSVG {
             70
         ];
 
-        uint8[2] memory subsizes = [0, 44];
-        uint256 nitemsperblock = 44;
-        uint256[26][1] memory eccs;
         uint256[70] memory result;
-        uint256[44] memory partPoly;
+        uint256[26] memory eccs = calculateECC(poly, genpoly);
 
-        for (uint256 i; i < 44; i++) {
-            partPoly[i] = poly[i];
+        // Put message code words to the result;
+        for (uint8 i = 0; i < 44; ++i) {
+            result[i] = poly[i];
         }
-
-        eccs[0] = calculateECC(partPoly, genpoly);
-
-        for (uint8 i = 0; i < nitemsperblock; ++i) {
-            for (uint8 j = 0; j < nblocks; ++j) {
-                result[i] = poly[subsizes[j] + i];
-            }
-        }
-        for (uint8 i = 0; i < genpoly.length; ++i) {
-            for (uint8 j = 0; j < nblocks; ++j) {
-                result[i + 44] = eccs[j][i];
-            }
+        // Put error correction code words to the result;
+        for (uint8 i = 0; i < 26; ++i) {
+            result[i + 44] = eccs[i];
         }
 
         return result;
