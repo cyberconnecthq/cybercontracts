@@ -23,7 +23,7 @@ library QRSVG {
         // 2. Encode Data
         uint8[] memory encoded = encode(url);
         // 3. Generate buff
-        uint256[44] memory buf = generateBuf(encoded);
+        uint256[55] memory buf = generateBuf(encoded);
 
         // 4. Augument ECCs
         uint256[70] memory bufWithECCs = augumentECCs(buf);
@@ -61,9 +61,9 @@ library QRSVG {
     function generateBuf(uint8[] memory data)
         internal
         pure
-        returns (uint256[44] memory)
+        returns (uint256[55] memory)
     {
-        uint256[44] memory buf;
+        uint256[55] memory buf;
         uint256 dataLen = data.length;
         uint8 maxBufLen = 55;
 
@@ -94,7 +94,7 @@ library QRSVG {
         return buf;
     }
 
-    function augumentECCs(uint256[44] memory poly)
+    function augumentECCs(uint256[55] memory poly)
         internal
         pure
         returns (uint256[70] memory)
@@ -118,13 +118,13 @@ library QRSVG {
             105
         ];
 
-        uint8[2] memory subsizes = [0, 44];
-        uint256 nitemsperblock = 44;
+        uint8[2] memory subsizes = [0, 55];
+        uint256 nitemsperblock = 55;
         uint256[26][1] memory eccs;
         uint256[70] memory result;
-        uint256[44] memory partPoly;
+        uint256[55] memory partPoly;
 
-        for (uint256 i; i < 44; i++) {
+        for (uint256 i; i < 55; i++) {
             partPoly[i] = poly[i];
         }
 
@@ -137,14 +137,14 @@ library QRSVG {
         }
         for (uint8 i = 0; i < genpoly.length; ++i) {
             for (uint8 j = 0; j < nblocks; ++j) {
-                result[i + 44] = eccs[j][i];
+                result[i + 55] = eccs[j][i];
             }
         }
 
         return result;
     }
 
-    function calculateECC(uint256[44] memory poly, uint8[26] memory genpoly)
+    function calculateECC(uint256[55] memory poly, uint8[15] memory genpoly)
         internal
         pure
         returns (uint256[26] memory)
@@ -165,11 +165,11 @@ library QRSVG {
             gf256_value = (gf256_value * 2) ^ (gf256_value >= 128 ? 0x11d : 0);
         }
 
-        for (uint8 i = 0; i < 44; i++) {
+        for (uint8 i = 0; i < 55; i++) {
             modulus[i] = poly[i];
         }
 
-        for (uint8 i = 44; i < 70; ++i) {
+        for (uint8 i = 55; i < 70; ++i) {
             modulus[i] = 0;
         }
 
@@ -191,7 +191,7 @@ library QRSVG {
     }
 
     function pack(
-        uint256[44] memory buf,
+        uint256[55] memory buf,
         uint256 bits,
         uint256 remaining,
         uint256 x,
@@ -201,12 +201,12 @@ library QRSVG {
         internal
         pure
         returns (
-            uint256[44] memory,
+            uint256[55] memory,
             uint256,
             uint256
         )
     {
-        uint256[44] memory newBuf = buf;
+        uint256[55] memory newBuf = buf;
         uint256 newBits = bits;
         uint256 newRemaining = remaining;
 
