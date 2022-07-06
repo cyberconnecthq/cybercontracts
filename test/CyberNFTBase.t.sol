@@ -24,13 +24,11 @@ contract CyberNFTBaseTest is Test {
         assertEq(token.totalSupply(), 1);
         assertEq(token.balanceOf(msg.sender), 1);
     }
-    
+
     // should return token ID, should increment everytime we call
     function testReturnTokenId() public {
         assertEq(token.mint(msg.sender), 1);
         assertEq(token.mint(msg.sender), 2);
         assertEq(token.mint(msg.sender), 3);
     }
-
-
 }
