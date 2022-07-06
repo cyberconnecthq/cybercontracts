@@ -14,8 +14,8 @@ contract MockNFT is CyberNFTBase {
         return "";
     }
 
-    function mint(address _to) public {
-        super._mint(_to);
+    function mint(address _to) public returns (uint256) {
+        return super._mint(_to);
     }
 
     function initialize(string calldata _name, string calldata _symbol)
