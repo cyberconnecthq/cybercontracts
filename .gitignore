@@ -7,3 +7,6 @@ broadcast/
 .DS_Store
 artifacts/
 docs/deploy/local.md
+test/qrcode
+misc/qrcode/svg
+misc/qrcode/html
