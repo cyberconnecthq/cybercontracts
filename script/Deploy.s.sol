@@ -12,12 +12,11 @@ contract DeployScript is Script {
         vm.startBroadcast();
 
         address profileProxy = address(
-            0x701A5baBA0701e3B1Dd3107dF47dDC68eaC019bf
+            0xDb7f2e6c5aFe48232e268964bD0Ab932B46d9bBa
         );
         string
-            memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreigc6pzmqid6sy4owqotqekjl42s25flghijkyrykdm5m4jwcbhsdu";
+            memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreiau22w2k7meawcll2ibwbzmjx5szatzhbkhmmsfmh5van33szczbq";
 
-        // TODO: pass in profileProxy to run a require. need some workaround right now the stack is too deep
         LibDeploy.deploy(msg.sender, nonce, templateURL);
         // TODO: set correct role capacity
         // TODO: do a health check. verify everything

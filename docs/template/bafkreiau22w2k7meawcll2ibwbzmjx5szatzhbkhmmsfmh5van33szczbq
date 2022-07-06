@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #card {
+            width: 500px;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #profile {
+            position: relative;
+        }
+
+        .nametag {
+            color: #ffffff;
+        }
+        
+        .nametag span:last-child {
+            opacity: 0.3;
+        }
+
+        .titletag {
+            font-size: 14px;
+            color: #ffffff;
+            max-width: 227px;
+            word-wrap: break-word;
+            opacity: 0.3;
+        }
+
+        svg {
+            display: block;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        text {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .rotateY {
+            animation: rotateY 10s 0s linear infinite;
+        }
+
+        @keyframes rotateY {
+            0% {
+                transform: rotateY(0deg);
+            }
+
+            100% {
+                transform: rotateY(360deg);
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-svg@1.1.0/lib/qrcode.min.js"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>ProfileNFT</title>
+</head>
+<body>
+    <div class="container">
+        <div id="card">
+            <div id="profile"></div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        const urlParams = new URLSearchParams(window.location.search);
+        const handleParam = urlParams.get("handle");
+        const color = {
+            black: "#000000",
+            white: "#ffffff"
+        };
+        const width = 500;
+        const height = 500;
+        const qrSize = 100;
+        const link3Url = "link3.to/";
+
+        // TODO: update nodeURL, contractAddress and abi
+        const nodeURL = "https://eth-rinkeby.alchemyapi.io/v2/aogLQdKfxyXg2wnlfUt1771XbWfUtCbj";
+        const provider = new ethers.providers.JsonRpcProvider(nodeURL);
+        const contractAddress = "0xDb7f2e6c5aFe48232e268964bD0Ab932B46d9bBa";
+        const abi = [
+            {
+                "inputs":[
+                    {
+                        "internalType":"string",
+                        "name":"handle",
+                        "type":"string"
+                    }
+                ],
+                "name":"getProfileIdByHandle",
+                "outputs":[
+                    {
+                        "internalType":"uint256",
+                        "name":"",
+                        "type":"uint256"
+                    }
+                ],
+                "stateMutability":"view",
+                "type":"function"
+            },
+            {
+                "inputs":[
+                    {
+                        "internalType":"uint256",
+                        "name":"profileId",
+                        "type":"uint256"
+                    }
+                ],
+                "name":"getAvatar",
+                "outputs":[
+                    {
+                        "internalType":"string",
+                        "name":"",
+                        "type":"string"
+                    }
+                ],
+                "stateMutability":"view",
+                "type":"function"
+            },
+            {
+                "inputs":[
+                    {
+                        "internalType":"uint256",
+                        "name":"profileId",
+                        "type":"uint256"
+                    }
+                ],
+                "name":"getMetadata",
+                "outputs":[
+                    {
+                        "internalType":"string",
+                        "name":"","type":"string"
+                    }
+                ],
+                "stateMutability":"view",
+                "type":"function"
+            }
+        ];
+        const contract = new ethers.Contract(
+            contractAddress,
+            abi,
+            provider
+        );
+
+        const computeFontSize = (elemClass, maxFontSize, padding, maxElemWidth) => {
+            const elem = document.getElementsByClassName(elemClass)[0];
+            const bbox = elem?.getBBox();
+            const textWidth = bbox ? (bbox.width + padding) : 0;
+            const fontSize = maxFontSize * maxElemWidth / textWidth;
+            return Math.min(fontSize, maxFontSize);
+        }
+
+        const render = (handle, imageURI, metadata) => {            
+            const svg = d3.select("#profile")
+                .selectAll("svg")
+                    .data([null])
+                    .join("svg")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .attr("viewbox", `0 0 ${width} ${height}`)
+                        .style("overflow", "hidden");
+
+            const background = svg.selectAll(".background")
+            background.data([null])
+                .join("path")
+                    .classed("background", true)
+                    .attr("d", () => { 
+                        return "M107 76.0562C107 73.3842 107.644 70.7515 108.876 68.3808L131.238 25.3767C132.956 22.0729 136.371 20 140.095 20H231.358H387.325C391.001 20 393.98 22.9794 393.98 26.6546V450.186C393.98 453.713 392.118 456.979 389.082 458.776L357.14 477.68C354.574 479.199 351.648 480 348.666 480H236.765H113.655C109.979 480 107 477.021 107 473.345V76.0562Z";
+                    })
+                    .style("fill", color.black);
+
+            if(imageURI) {
+                svg.selectAll("defs").remove();
+                svg.selectAll(".placeholderStroke").remove();
+                svg.selectAll(".placeholderImage").remove();
+
+                const defs = svg.append("defs");
+                defs.append("pattern")
+                        .attr("id", "pattern")
+                        .attr("width", 1)
+                        .attr("height", 1)
+                            .append("image")
+                                .attr("xlink:href", imageURI)
+                                .attr("width", 65)
+                                .attr("height", 60);
+
+                const stroke = svg.selectAll(".stroke");
+                stroke.data([null])
+                    .join("path")
+                        .classed("stroke", true)
+                        .attr("d", () => { 
+                            return "M65.248 39.8863L56.682 54.5586C55.3759 56.8213 53.4882 58.7001 51.2113 60.0037C48.9344 61.3072 46.3497 61.9889 43.7206 61.9793L26.6233 62C23.9871 61.9944 21.3988 61.3009 19.1184 59.9893C16.838 58.6776 14.9459 56.7939 13.6321 54.5275L5.02677 39.7468C3.70425 37.4854 3.00525 34.9187 3.00003 32.3046C2.99481 29.6904 3.68355 27.121 4.99703 24.8544L13.563 10.1813C14.8691 7.91864 16.7568 6.0398 19.0337 4.73624C21.3106 3.43267 23.8953 2.75099 26.5244 2.76065L43.6217 2.74072C46.2579 2.74584 48.8463 3.439 51.1268 4.75056C53.4072 6.06212 55.2993 7.94584 56.6129 10.2124L65.2142 24.9931C68.0382 29.5464 67.6911 35.8104 64.8897 40.5L65.248 39.8863Z";
+                        })
+                        .style("transform", "translate(130px, 50px)")
+                        .style("fill", "url(#pattern)")
+                        .style("stroke", color.white)
+                        .style("stroke-width", 5);
+            } else {
+                const placeholderStroke = svg.selectAll(".placeholderStroke");
+                placeholderStroke.data([null])
+                    .join("circle")
+                        .classed("placeholderStroke", true)
+                        .attr("cx", 165)
+                        .attr("cy", 82.5)
+                        .attr("r", 32.5)
+                        .style("fill", color.black)
+                        .style("stroke", color.white)
+                        .style("stroke-width", 5);
+
+                const placeholderImage = svg.selectAll(".placeholderImage");
+                placeholderImage.data([null])
+                    .join("path")
+                        .classed("placeholderImage", true)
+                        .attr("d", () => { 
+                            return "M11.3517 14.4352C15.0692 14.4352 18.0824 11.422 18.0824 7.70441C18.0824 3.98686 15.0692 0.973633 11.3517 0.973633C7.63412 0.973633 4.62089 3.98686 4.62089 7.70441C4.62089 11.422 7.63412 14.4352 11.3517 14.4352ZM11.3517 17.5762C5.1548 17.5762 0.130859 19.5557 0.130859 21.9952C0.130859 24.4348 5.1548 26.4171 11.3517 26.4171C17.5485 26.4171 22.5725 24.4376 22.5725 21.9981C22.5725 19.5585 17.5485 17.5762 11.3517 17.5762Z";
+                        })
+                        .style("transform", "translate(152.5px, 70px)")
+                        .style("fill", color.white)
+                        .style("opacity", 0.3);
+            }
+
+            if(handle) {
+                // Animate card
+                const card = d3.select("#card")
+                card.classed("rotateY", "true");
+
+                // Generate QR Code
+                const qrcode = new QRCode({
+                    content: `https://link3.to/${handle}`,
+                    padding: 0,
+                    width: qrSize,
+                    height: qrSize,
+                    color: color.white,
+                    background: color.black,
+                    ecl: "M",
+                });
+
+                const qrCode = d3.select("#profile")
+                .selectAll(".qrcode")
+                .data([null])
+                    .join("div")
+                        .classed("qrcode", true)
+                        .style("position", "absolute")
+                        .style("left", "130px")
+                        .style("bottom", "95px")
+                        .html(qrcode.svg());
+
+                const link = svg.selectAll(".link");
+                link.data([null])
+                    .join("text")
+                        .classed("link", true)
+                        .style("font-size", 18)
+                        .style("fill", color.white)
+                        .style("font-weight", 700)
+                        .style("font-family", "Outfit")
+                        .style("text-anchor", "start")
+                        .style("alignment-baseline", "middle")
+                        .style("transform", "translate(130px, 438px)")
+                        .text(link3Url);
+
+                const propHandle = svg.selectAll(".propHandle");
+                propHandle.data([null])
+                    .join("text")
+                        .classed("propHandle", true)
+                        .style("font-size", 18)
+                        .style("font-weight", 700)
+                        .style("font-family", "Outfit")
+                        .style("fill", "transparent")
+                        .style("transform", `translate(${width}px, ${height}px)`)
+                        .text(handle);
+
+                const bgHandle = svg.selectAll(".bgHandle");
+                bgHandle.data([null])
+                    .join("rect")
+                        .classed("bgHandle", true)
+                        .attr("width", 0)
+                        .attr("height", 25)
+                        .attr("rx", 4)
+                        .attr("x", 410)
+                        .attr("y", 422)
+                        .attr("transform", "skewX(-25)")
+                        .style("fill", color.white);
+
+                const txtHandle = svg.selectAll(".handle");
+                txtHandle.data([null])
+                    .join("text")
+                        .classed("handle", true)
+                        .style("font-size", computeFontSize("propHandle", 18, 21, 158))
+                        .style("fill", color.black)
+                        .style("font-weight", 700)
+                        .style("font-family", "Outfit")
+                        .style("text-anchor", "start")
+                        .style("alignment-baseline", "middle")
+                        .style("transform", `translate(217.5px, 436px)`)
+                        .text(handle);
+
+                svg.selectAll(".bgHandle")
+                    .transition()
+                    .duration(0)
+                    .attr("width", () => {
+                        const textElem = document.getElementsByClassName("handle")[0];
+                        const bbox = textElem?.getBBox();
+                        const width = bbox ? (bbox.width + 21) : 0;
+                        return width;
+                    });
+            }
+
+            if(metadata) {               
+                const name = metadata.name;
+                const title = metadata.title;
+                const organization = metadata.organization;
+                const nameType = metadata.name_type;
+
+                const propNametag = svg.selectAll(".propNametag");
+                propNametag.data([null])
+                    .join("text")
+                        .classed("propNametag", true)
+                        .style("font-size", 26)
+                        .style("font-weight", 700)
+                        .style("font-family", "Outfit")
+                        .style("fill", "transparent")
+                        .style("transform", `translate(${width}px, ${height}px)`)
+                        .text(() => name ? name : "");
+    
+                const nametag = d3.select("#profile")
+                    .selectAll(".nametag")
+                    .data([null])
+                        .join("div")
+                        .classed("nametag", true)
+                        .style("position", "absolute")
+                        .style("left", "130px")
+                        .style("top", "136px")
+                        .html(() => {
+                            if(!name) return;
+                            const fontSize = computeFontSize("propNametag", 26, 0, 227);
+                            const output = `
+                                <span style="font-size: ${fontSize}px">
+                                    ${nameType === "ENS" ? name.slice(0, -4) : name}
+                                </span>
+                                <span style="font-size: ${fontSize}px">
+                                    ${nameType === "ENS" ? ".eth" : ""}
+                                </span>
+                            `;
+                            return output;
+                        });
+
+                const titletag = d3.select("#profile")
+                    .selectAll(".titletag")
+                    .data([null])
+                        .join("div")
+                        .classed("titletag", true)
+                            .style("position", "absolute")
+                            .style("left", "130px")
+                            .style("top", "181px")
+                            .html(() => {
+                                let output = "";
+                                if(title) {
+                                    output += title;
+                                }
+                                if(organization) {
+                                    output += ` at ${organization}`;
+                                }
+                                return output;
+                            });
+            }
+        }
+
+        const getProfile = async () => {
+            let profileId, handle, imageURI, metadata;
+
+            try {
+                // Step 1: Get profile id
+                if(handleParam || handleParam === 0) {
+                    profileId = await contract.getProfileIdByHandle(handleParam);
+                    profileId = profileId?.toNumber();
+                }
+
+                if(profileId) {
+                    handle = handleParam;
+
+                    // Step 2: Get avatar image
+                    imageURI = await contract.getAvatar(profileId);
+
+                    // Step 3: Get metadata
+                    const ipfsHash = await contract.getMetadata(profileId);
+                    const data = await fetch(`https://cyberconnect.mypinata.cloud/ipfs/${ipfsHash}`);
+                    if(data.status === 200) {
+                        metadata = await data.json();
+                    }
+                }
+            } catch (error) {
+                console.error(error.message);
+            }
+
+            return { handle, imageURI, metadata };
+        }
+
+        const load = async () => {
+            // Render to generate placeholder SVG
+            render();
+
+            // Render to generate profile SVG
+            const { handle, imageURI, metadata } = await getProfile();
+            render(handle, imageURI, metadata);
+
+            setInterval(async() => {
+                const { handle, imageURI, metadata } = await getProfile();
+                render(handle, imageURI, metadata);
+            }, 5000);
+        }
+
+        window.addEventListener("load", load);
+    </script>
+</body>
+</html>
