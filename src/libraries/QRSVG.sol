@@ -458,9 +458,7 @@ library QRSVG {
                         LibString.toString(startY),
                         "l",
                         LibString.toString(2 * blackBlockCount),
-                        ",0 0,2 -",
-                        LibString.toString(2 * blackBlockCount),
-                        ",0 z "
+                        ",0 "
                     );
                     blackBlockCount = 0;
                 }
@@ -475,16 +473,14 @@ library QRSVG {
                     LibString.toString(startY),
                     "l",
                     LibString.toString(2 * blackBlockCount),
-                    ",0 0,2 -",
-                    LibString.toString(2 * blackBlockCount),
-                    ",0 z "
+                    ",0 "
                 );
             }
         }
 
         qrSvg = abi.encodePacked(
             qrSvg,
-            '" stroke="transparent" fill="black"/></svg>'
+            '" stroke="black" stroke-width="2" fill="transparent"/></svg>'
         );
 
         return
