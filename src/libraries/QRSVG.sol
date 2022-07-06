@@ -20,8 +20,10 @@ library QRSVG {
     {
         // 1. Create base matrix
         QRMatrix memory qrMatrix = createBaseMatrix();
+
         // 2. Encode Data
         uint8[] memory encoded = encode(url);
+
         // 3. Generate buff
         uint256[55] memory buf = generateBuf(encoded);
 
@@ -32,7 +34,7 @@ library QRSVG {
         putData(qrMatrix, bufWithECCs);
 
         // 6. mask data
-        maskData(qrMatrix);
+        // maskData(qrMatrix);
 
         // 7. Put format info
         putFormatInfo(qrMatrix);
@@ -42,20 +44,6 @@ library QRSVG {
         string memory qrCodeUri = generateQRURI(qrMatrix);
 
         return qrCodeUri;
-    }
-
-    function maskData(QRMatrix memory _qrMatrix) internal pure {
-        for (uint256 i = 0; i < SIZE; ++i) {
-            for (uint256 j = 0; j < SIZE; ++j) {
-                if (_qrMatrix.reserved[i][j] == 0) {
-                    if (j % 3 == 0) {
-                        _qrMatrix.matrix[i][j] ^= 1;
-                    } else {
-                        _qrMatrix.matrix[i][j] ^= 0;
-                    }
-                }
-            }
-        }
     }
 
     function generateBuf(uint8[] memory data)
@@ -146,12 +134,12 @@ library QRSVG {
         uint256 gf256_value = 1;
 
         GF256_INVMAP[0] = 0;
-
         for (uint256 i = 0; i < 255; ++i) {
             GF256_MAP[i] = gf256_value;
             GF256_INVMAP[gf256_value] = i;
             gf256_value = (gf256_value * 2) ^ (gf256_value >= 128 ? 0x11d : 0);
         }
+        GF256_MAP[255] = 1;
 
         for (uint8 i = 0; i < 55; i++) {
             modulus[i] = poly[i];
@@ -221,11 +209,13 @@ library QRSVG {
         return encodedArr;
     }
 
+    // Creating finder patterns, timing pattern and alignment patterns
     function createBaseMatrix() internal pure returns (QRMatrix memory) {
         QRMatrix memory _qrMatrix;
         uint8[2] memory aligns = [4, 20];
 
-        _qrMatrix = blit(
+        // Top-Left finder pattern
+        blit(
             _qrMatrix,
             0,
             0,
@@ -234,7 +224,8 @@ library QRSVG {
             [0x7f, 0x41, 0x5d, 0x5d, 0x5d, 0x41, 0x17f, 0x00, 0x40]
         );
 
-        _qrMatrix = blit(
+        // Top-Right finder pattern
+        blit(
             _qrMatrix,
             SIZE - 8,
             0,
@@ -243,6 +234,7 @@ library QRSVG {
             [0x100, 0x7f, 0x41, 0x5d, 0x5d, 0x5d, 0x41, 0x7f, 0x00]
         );
 
+        // Bottom-Right finder pattern
         blit(
             _qrMatrix,
             0,
@@ -262,6 +254,7 @@ library QRSVG {
             ]
         );
 
+        // Timing pattern
         for (uint256 i = 9; i < SIZE - 8; ++i) {
             _qrMatrix.matrix[6][i] = _qrMatrix.matrix[i][6] = ~i & 1;
             _qrMatrix.reserved[6][i] = _qrMatrix.reserved[i][6] = 1;
@@ -297,21 +290,19 @@ library QRSVG {
     }
 
     function blit(
-        QRMatrix memory qrMatrix,
+        QRMatrix memory _qrMatrix,
         uint256 y,
         uint256 x,
         uint256 h,
         uint256 w,
         uint16[9] memory data
-    ) internal pure returns (QRMatrix memory) {
+    ) internal pure {
         for (uint256 i = 0; i < h; ++i) {
             for (uint256 j = 0; j < w; ++j) {
-                qrMatrix.matrix[y + i][x + j] = (data[i] >> j) & 1;
-                qrMatrix.reserved[y + i][x + j] = 1;
+                _qrMatrix.matrix[y + i][x + j] = (data[i] >> j) & 1;
+                _qrMatrix.reserved[y + i][x + j] = 1;
             }
         }
-
-        return qrMatrix;
     }
 
     function putFormatInfo(QRMatrix memory _qrMatrix) internal pure {
@@ -384,8 +375,8 @@ library QRSVG {
                         k >> 3 < 70
                     ) {
                         _qrMatrix.matrix[uint256(jj)][uint256(ii)] =
-                            (data[k >> 3] >> (~k & 7)) &
-                            1;
+                            ((data[k >> 3] >> (~k & 7)) & 1) ^
+                            (ii % 3 == 0 ? 1 : 0);
                         ++k;
                     }
                 }
