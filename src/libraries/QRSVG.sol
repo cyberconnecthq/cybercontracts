@@ -456,13 +456,11 @@ library QRSVG {
                         LibString.toString(startX),
                         ",",
                         LibString.toString(startY),
-                        abi.encodePacked(
-                            "l",
-                            LibString.toString(2 * blackBlockCount),
-                            ",0 0,2 -",
-                            LibString.toString(2 * blackBlockCount),
-                            ",0 z "
-                        )
+                        "l",
+                        LibString.toString(2 * blackBlockCount),
+                        ",0 0,2 -",
+                        LibString.toString(2 * blackBlockCount),
+                        ",0 z "
                     );
                     blackBlockCount = 0;
                 }
@@ -475,13 +473,11 @@ library QRSVG {
                     LibString.toString(startX),
                     ",",
                     LibString.toString(startY),
-                    abi.encodePacked(
-                        "l",
-                        LibString.toString(2 * blackBlockCount),
-                        ",0 0,2 -",
-                        LibString.toString(2 * blackBlockCount),
-                        ",0 z "
-                    )
+                    "l",
+                    LibString.toString(2 * blackBlockCount),
+                    ",0 0,2 -",
+                    LibString.toString(2 * blackBlockCount),
+                    ",0 z "
                 );
             }
         }
