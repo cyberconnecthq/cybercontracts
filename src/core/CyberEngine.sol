@@ -126,6 +126,13 @@ contract CyberEngine is
         _setFeeByTier(tier, amount);
     }
 
+    /**
+     * @notice Claims a box nft for a profile.
+     *
+     * @param to The claimer address.
+     * @param sig The EIP712 signature.
+     * @return uint256 The box id.
+     */
     // TODO: comment
     function claimBox(address to, DataTypes.EIP712Signature calldata sig)
         external
@@ -153,6 +160,13 @@ contract CyberEngine is
         return boxId;
     }
 
+    /**
+     * @notice Register a new profile.
+     *
+     * @param params The new profile parameters.
+     * @param sig The EIP712 signature.
+     * @return uint256 The profile id.
+     */
     function register(
         DataTypes.CreateProfileParams calldata params,
         DataTypes.EIP712Signature calldata sig
@@ -189,6 +203,12 @@ contract CyberEngine is
         return profileId;
     }
 
+    /**
+     * @notice Withdraw to an address.
+     *
+     * @param to The receiver address.
+     * @param amount The amount sent.
+     */
     function withdraw(address to, uint256 amount) external requiresAuth {
         require(to != address(0), "withdraw to the zero address");
         uint256 balance = address(this).balance;
@@ -198,6 +218,12 @@ contract CyberEngine is
         emit Withdraw(to, amount);
     }
 
+    /**
+     * @notice Sets the tier fee.
+     *
+     * @param tier The tier number.
+     * @param amount The fee amount.
+     */
     function _setFeeByTier(DataTypes.Tier tier, uint256 amount) internal {
         uint256 preAmount = feeMapping[tier];
         feeMapping[tier] = amount;
@@ -205,6 +231,9 @@ contract CyberEngine is
         emit SetFeeByTier(tier, preAmount, amount);
     }
 
+    /**
+     * @notice Sets the initial tier fee.
+     */
     function _setInitialFees() internal {
         _setFeeByTier(DataTypes.Tier.Tier0, Constants._INITIAL_FEE_TIER0);
         _setFeeByTier(DataTypes.Tier.Tier1, Constants._INITIAL_FEE_TIER1);
@@ -224,6 +253,12 @@ contract CyberEngine is
         require(recoveredAddress == expectedSigner, "Invalid signature");
     }
 
+    /**
+     * @notice Checks if the fee is enough.
+     *
+     * @param handle The profile handle.
+     * @param amount The msg value.
+     */
     function _requireEnoughFee(string calldata handle, uint256 amount)
         internal
         view
@@ -238,6 +273,16 @@ contract CyberEngine is
         require(amount >= fee, "Insufficient fee");
     }
 
+    /**
+     * @notice Subscribe to an address(es) with a signature.
+     *
+     * @param sender The sender address.
+     * @param profileIds The profile ids to subscribed to.
+     * @param subDatas The subscription data set.
+     * @param sig The EIP712 signature.
+     * @dev the function requires the stated to be not paused.
+     * @return memory The subscription nft ids.
+     */
     function subscribeWithSig(
         uint256[] calldata profileIds,
         bytes[] calldata subDatas,
@@ -271,6 +316,14 @@ contract CyberEngine is
         return _subscribe(sender, profileIds, subDatas);
     }
 
+    /**
+     * @notice The subscribtion functionality.
+     *
+     * @param profileIds The profile ids to subscribed to.
+     * @param subDatas The subscription data set.
+     * @return memory The subscription nft ids.
+     * @dev the function requires the stated to be not paused.
+     */
     function subscribe(uint256[] calldata profileIds, bytes[] calldata subDatas)
         external
         whenNotPaused
@@ -279,6 +332,14 @@ contract CyberEngine is
         return _subscribe(msg.sender, profileIds, subDatas);
     }
 
+    /**
+     * @notice The subscribtion functionality.
+     *
+     * @param sender The sender address.
+     * @param profileIds The profile ids to subscribed to.
+     * @param subDatas The subscription data set.
+     * @return memory The subscription nft ids.
+     */
     function _subscribe(
         address sender,
         uint256[] calldata profileIds,
@@ -333,7 +394,9 @@ contract CyberEngine is
         return result;
     }
 
-    // State
+    /**
+     * @notice Checks that the state is not paused.
+     */
     modifier whenNotPaused() {
         require(_state != DataTypes.State.Paused, "Contract is paused");
         _;
@@ -347,6 +410,8 @@ contract CyberEngine is
 
     /**
      * @notice Gets the contract state.
+     *
+     * @return State The contract state.
      */
     function getState() external view returns (DataTypes.State) {
         return _state;
@@ -364,6 +429,9 @@ contract CyberEngine is
         emit SetState(preState, state);
     }
 
+    /**
+     * @notice Checks that the profile owner is the sender address.
+     */
     modifier onlyProfileOwner(uint256 profileId) {
         require(
             ERC721(profileAddress).ownerOf(profileId) == msg.sender,
@@ -372,6 +440,9 @@ contract CyberEngine is
         _;
     }
 
+    /**
+     * @notice Checks that the profile owner or operator is the sender address.
+     */
     modifier onlyOwnerOrOperator(uint256 profileId) {
         require(
             ERC721(profileAddress).ownerOf(profileId) == msg.sender ||
@@ -439,7 +510,14 @@ contract CyberEngine is
         emit SetImageTemplate(template);
     }
 
-    // only owner's signature works
+    /**
+     * @notice Sets the profile metadata with a signture.
+     *
+     * @param profileId The profile ID.
+     * @param metadata The new metadata to be set.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     */
     function setMetadataWithSig(
         uint256 profileId,
         string calldata metadata,
@@ -466,6 +544,13 @@ contract CyberEngine is
         emit SetMetadata(profileId, metadata);
     }
 
+    /**
+     * @notice Sets the operator approval.
+     *
+     * @param profileId The profile ID.
+     * @param operator The operator address.
+     * @param approved The new state of the approval.
+     */
     function setOperatorApproval(
         uint256 profileId,
         address operator,
@@ -480,6 +565,14 @@ contract CyberEngine is
         emit SetOperatorApproval(profileId, operator, approved);
     }
 
+    /**
+     * @notice Sets the operator approval with a signature.
+     *
+     * @param profileId The profile ID.
+     * @param operator The operator address.
+     * @param approved The new state of the approval.
+     * @param sig The EIP712 signature.
+     */
     function setOperatorApprovalWithSig(
         uint256 profileId,
         address operator,
@@ -551,16 +644,34 @@ contract CyberEngine is
         return _subscribeByProfileId[profileId].subscribeNFT;
     }
 
+    /**
+     * @notice Allows the subscriber middleware.
+     *
+     * @param mw The middleware address.
+     * @param allowed The allowance state.
+     */
     function allowSubscribeMw(address mw, bool allowed) external requiresAuth {
         bool preAllowed = _subscribeMwAllowlist[mw];
         _subscribeMwAllowlist[mw] = allowed;
         emit AllowSubscribeMw(mw, preAllowed, allowed);
     }
 
+    /**
+     * @notice Checks if the subscriber middleware is allowed.
+     *
+     * @param mw The middleware address.
+     * @return bool The allowance state.
+     */
     function isSubscribeMwAllowed(address mw) external view returns (bool) {
         return _subscribeMwAllowlist[mw];
     }
 
+    /**
+     * @notice Gets a profile subscribe middleware address.
+     *
+     * @param profileId The profile id.
+     * @return address The middleware address.
+     */
     function getSubscribeMw(uint256 profileId) external view returns (address) {
         return _subscribeByProfileId[profileId].subscribeMw;
     }
