@@ -342,4 +342,17 @@ contract ProfileNFTTest is Test {
         token.pause(false);
         assertEq(token.paused(), false);
     }
+
+    // we create a profile, then set the profile as the primary profile id,
+    // then we call the primary id to see if it returns the right profile id
+    function testReturnProfileId() public {
+        vm.prank(engine);
+        token.pause(false);
+        vm.prank(engine);
+        uint256 profileId = token.createProfile(createProfileData);
+        vm.prank(alice);
+        token.setPrimaryProfile(profileId);
+        uint256 primaryId = token.getPrimaryProfile(alice);
+        assertEq(primaryId, profileId);
+    }
 }

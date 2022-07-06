@@ -343,4 +343,33 @@ contract ProfileNFT is
     ) public override whenNotPaused {
         super.transferFrom(from, to, id);
     }
+
+    // @inheritdoc IProfileNFT
+    // sets a primary profile id for the user
+    function setPrimaryProfile(uint256 profileId)
+        external
+        override
+        whenNotPaused
+    {
+        _setPrimaryProfile(msg.sender, profileId);
+    }
+
+    // verifies the user, and whether the user is the owner of the profile id
+    function _setPrimaryProfile(address user, uint256 profileId) internal {
+        require(_exists(profileId), "ERC721: invalid token ID");
+        require(user == ownerOf(profileId), "User does not own profileId");
+        _addressToPrimaryProfile[user] = profileId;
+    }
+
+    // @inheritdoc IProfileNFT
+    // returns the primary profile id associated with the user
+    function getPrimaryProfile(address user)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        uint256 primaryProfile = _addressToPrimaryProfile[user];
+        return primaryProfile;
+    }
 }

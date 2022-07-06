@@ -15,4 +15,5 @@ abstract contract ProfileNFTStorage {
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
     mapping(uint256 => string) internal _metadataById;
     mapping(uint256 => mapping(address => bool)) internal _operatorApproval; // TODO: reconsider if useful
+    mapping(address => uint256) internal _addressToPrimaryProfile;
 }
