@@ -39,4 +39,4 @@ jobs:
       - name: Install modules
         run: yarn
       - name: Run lint
-        run: yarn run lint:check
+        run: yarn run lint:gh-check
