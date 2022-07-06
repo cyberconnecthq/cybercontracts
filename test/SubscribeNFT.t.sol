@@ -102,6 +102,7 @@ contract SubscribeNFTTest is Test {
         c.safeTransferFrom(alice, bob, 1, "");
     }
 
+    // should return token ID, should increment everytime we call
     function testReturnTokenId() public {
         vm.startPrank(address(engine));
         assertEq(c.mint(alice), 1);

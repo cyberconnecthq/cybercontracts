@@ -24,8 +24,4 @@ contract CyberNFTBaseTest is Test {
         assertEq(token.totalSupply(), 1);
         assertEq(token.balanceOf(msg.sender), 1);
     }
-
-    // function testReturnTokenId() public {
-    //     assertEq(token.mint(msg.sender), 1);
-    // }
 }
