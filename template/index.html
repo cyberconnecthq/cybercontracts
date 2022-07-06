@@ -328,11 +328,11 @@
                     });
             }
 
-            if(metadata?.attributes?.length > 0) {               
-                const displayName = metadata.attributes.find(elem => elem.traitType === "displayName")?.value;
-                const title = metadata.attributes.find(elem => elem.traitType === "title")?.value;
-                const organization = metadata.attributes.find(elem => elem.traitType === "organization")?.value;
-                const displayNameType = metadata.attributes.find(elem => elem.traitType === "displayNameType")?.value
+            if(metadata) {               
+                const name = metadata.name;
+                const title = metadata.title;
+                const organization = metadata.organization;
+                const nameType = metadata.name_type;
 
                 const propNametag = svg.selectAll(".propNametag");
                 propNametag.data([null])
@@ -343,7 +343,7 @@
                         .style("font-family", "Outfit")
                         .style("fill", "transparent")
                         .style("transform", `translate(${width}px, ${height}px)`)
-                        .text(displayName);
+                        .text(() => name ? name : "");
     
                 const nametag = d3.select("#profile")
                     .selectAll(".nametag")
@@ -354,14 +354,14 @@
                         .style("left", "130px")
                         .style("top", "136px")
                         .html(() => {
-                            if(!displayNameType) return;
+                            if(!name) return;
                             const fontSize = computeFontSize("propNametag", 26, 0, 227);
                             const output = `
                                 <span style="font-size: ${fontSize}px">
-                                    ${displayNameType === "ENS" ? displayName.slice(0, -4) : displayNameType}
+                                    ${nameType === "ENS" ? name.slice(0, -4) : name}
                                 </span>
                                 <span style="font-size: ${fontSize}px">
-                                    ${displayNameType === "ENS" ? ".eth" : ""}
+                                    ${nameType === "ENS" ? ".eth" : ""}
                                 </span>
                             `;
                             return output;
@@ -407,7 +407,9 @@
                     // Step 3: Get metadata
                     const ipfsHash = await contract.getMetadata(profileId);
                     const data = await fetch(`https://ipfs.io/ipfs/${ipfsHash}`);
-                    metadata = await data.json();
+                    if(data.status === 200) {
+                        metadata = await data.json();
+                    }
                 }
             } catch (error) {
                 console.error(error.message);
