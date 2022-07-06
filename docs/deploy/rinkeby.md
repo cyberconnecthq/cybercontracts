@@ -1,11 +1,11 @@
 | Contract              | Address                                    | Etherscan                                                                       |
 | --------------------- | ------------------------------------------ | ------------------------------------------------------------------------------- |
-| Roles                 | 0x41172bd51114718e207f73174a09338a831682df | https://rinkeby.etherscan.io/address/0x41172bd51114718e207f73174a09338a831682df |
-| CyberEngine (Impl)    | 0x90e565544c29fa5d65b8f1a2c9746a3d0a27f03f | https://rinkeby.etherscan.io/address/0x90e565544c29fa5d65b8f1a2c9746a3d0a27f03f |
-| ProfileNFT (Impl)     | 0xa9b64201b4742e5fd3b181c781d9353f29f0d555 | https://rinkeby.etherscan.io/address/0xa9b64201b4742e5fd3b181c781d9353f29f0d555 |
-| ProfileNFT (Proxy)    | 0xea540390af92d88605eafd0c1815298146d54f53 | https://rinkeby.etherscan.io/address/0xea540390af92d88605eafd0c1815298146d54f53 |
-| BoxNFT (Impl)         | 0x805e7469e379fcc70520bfa42a505483335c9aab | https://rinkeby.etherscan.io/address/0x805e7469e379fcc70520bfa42a505483335c9aab |
-| BoxNFT (Proxy)        | 0x25e7451ee7026faa0ffdbd24a2e67478a0bc18b5 | https://rinkeby.etherscan.io/address/0x25e7451ee7026faa0ffdbd24a2e67478a0bc18b5 |
-| SubscribeNFT (Impl)   | 0x734e4c3a8aaa7258744dab60853744a376028452 | https://rinkeby.etherscan.io/address/0x734e4c3a8aaa7258744dab60853744a376028452 |
-| SubscribeNFT (Beacon) | 0x532479585c7ee29dd6d3500109a25d4ba3e36c95 | https://rinkeby.etherscan.io/address/0x532479585c7ee29dd6d3500109a25d4ba3e36c95 |
-| CyberEngine (Proxy)   | 0x99a961b73d9259dc40385e659a8ce0ebe63aafc3 | https://rinkeby.etherscan.io/address/0x99a961b73d9259dc40385e659a8ce0ebe63aafc3 |
+| Roles                 | 0x5c5b66c6ca77ffcf37c5c76ed68e440aaa30ced5 | https://rinkeby.etherscan.io/address/0x5c5b66c6ca77ffcf37c5c76ed68e440aaa30ced5 |
+| CyberEngine (Impl)    | 0xf803d51ce1cdb5dfc0bc458a98f38f0fb4008217 | https://rinkeby.etherscan.io/address/0xf803d51ce1cdb5dfc0bc458a98f38f0fb4008217 |
+| ProfileNFT (Impl)     | 0x1bb05a1ca872f43099ec389fee54f02f581eb537 | https://rinkeby.etherscan.io/address/0x1bb05a1ca872f43099ec389fee54f02f581eb537 |
+| ProfileNFT (Proxy)    | 0xdb7f2e6c5afe48232e268964bd0ab932b46d9bba | https://rinkeby.etherscan.io/address/0xdb7f2e6c5afe48232e268964bd0ab932b46d9bba |
+| BoxNFT (Impl)         | 0x094f1669308561aa299aff8a922eed51e92ea662 | https://rinkeby.etherscan.io/address/0x094f1669308561aa299aff8a922eed51e92ea662 |
+| BoxNFT (Proxy)        | 0xa479dcd34cb981eb0f28f87822b19d3f992878a5 | https://rinkeby.etherscan.io/address/0xa479dcd34cb981eb0f28f87822b19d3f992878a5 |
+| SubscribeNFT (Impl)   | 0x125f2bd4e9bb677e28aab16e5d26e3a30a9b5a6d | https://rinkeby.etherscan.io/address/0x125f2bd4e9bb677e28aab16e5d26e3a30a9b5a6d |
+| SubscribeNFT (Beacon) | 0xe87d33c714a5cacff9cbbab87d1fd3b1da43c95c | https://rinkeby.etherscan.io/address/0xe87d33c714a5cacff9cbbab87d1fd3b1da43c95c |
+| CyberEngine (Proxy)   | 0xf08cfd541da2ea42ab0f9603ae1c2293cdf39e69 | https://rinkeby.etherscan.io/address/0xf08cfd541da2ea42ab0f9603ae1c2293cdf39e69 |
