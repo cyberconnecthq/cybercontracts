@@ -13,6 +13,7 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { CyberEngine } from "./CyberEngine.sol";
+import { QRSVG } from "../libraries/QRSVG.sol";
 
 /**
  * @title Profile NFT
@@ -158,6 +159,13 @@ contract ProfileNFT is
                                 LibString.toString(subscribers),
                                 formattedName
                             ),
+                            // ',"qr_code":"',
+                            // QRSVG.generateQRCode(
+                            //     string(
+                            //         abi.encodePacked("https://link3.to", handle)
+                            //     )
+                            // ),
+                            // '"}'
                             "}"
                         )
                     )
