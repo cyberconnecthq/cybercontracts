@@ -17,9 +17,9 @@ import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 contract BoxNFT is
     Pausable,
     CyberNFTBase,
+    UUPSUpgradeable,
     IBoxNFT,
-    IUpgradeable,
-    UUPSUpgradeable
+    IUpgradeable
 {
     address public immutable ENGINE;
     uint256 private constant _VERSION = 1;
