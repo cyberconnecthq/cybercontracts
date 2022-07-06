@@ -70,6 +70,10 @@ PINATA_JWT=
 
 3. Run `yarn post_deploy` to update contract addresses and ABI changes
 
+# Tests
+
+[QRCode](./docs/test/qrcode.md)
+
 # Interaction
 
 To interact with the protocol, directly call functions on CyberEngine.

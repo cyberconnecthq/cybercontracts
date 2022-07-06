@@ -65,7 +65,7 @@ library QRSVG {
     {
         uint256[55] memory buf;
         uint256 dataLen = data.length;
-        uint8 maxBufLen = 55;
+        uint8 maxBufLen = 44;
 
         uint256 bits = 0;
         uint256 remaining = 8;
@@ -117,7 +117,6 @@ library QRSVG {
             99,
             105
         ];
-
         uint8[2] memory subsizes = [0, 55];
         uint256 nitemsperblock = 55;
         uint256[26][1] memory eccs;
@@ -421,61 +420,66 @@ library QRSVG {
         pure
         returns (string memory)
     {
-        bytes memory QRCodeURI = bytes(
-            '<svg viewBox="0 0 74 74" style="shape-rendering:crispEdges" xmlns="http://www.w3.org/2000/svg"><style>.bg{fill:#FFF}</style><rect class="bg" x="0" y="0" width="74" height="74"></rect>'
+        bytes memory qrSvg = abi.encodePacked(
+            '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="74px" height="74px" viewBox="0 0 74 74"><rect width="100%" height="100%" fill="white" cx="0" cy="0"/><path d="'
         );
 
-        uint256 yo = 8;
-        for (uint256 y = 0; y < SIZE; ++y) {
-            uint256 xo = 0;
-            uint256 xe = 0;
-            for (uint256 x = 0; x < SIZE; ++x) {
-                if (_qrMatrix.matrix[y][x] == 1) {
-                    if (xo == 0) {
-                        xo = 8 + x * 2;
-                        xe = xo + 2;
-                    } else {
-                        xe += 2;
+        for (uint256 row = 0; row < SIZE; row += 1) {
+            uint256 startY = row * 2 + 8;
+            uint256 blackBlockCount;
+            uint256 startX;
+            for (uint256 col = 0; col < SIZE; col += 1) {
+                if (_qrMatrix.matrix[row][col] == 1) {
+                    // Record the first black block coordinate in a consecutive black blocks
+                    if (blackBlockCount == 0) {
+                        startX = col * 2 + 8;
                     }
-                } else if (xo != 0) {
-                    QRCodeURI = (
-                        abi.encodePacked(
-                            QRCodeURI,
-                            '<rect x="',
-                            LibString.toString(xo),
-                            '" y="',
-                            LibString.toString(yo),
-                            '" width="',
-                            LibString.toString(xe - xo),
-                            '"  height="2" />'
-                        )
+                    blackBlockCount++;
+                }
+                // Draw svg when meets the white block after some black block
+                else if (blackBlockCount > 0) {
+                    qrSvg = abi.encodePacked(
+                        qrSvg,
+                        "M",
+                        LibString.toString(startX),
+                        ",",
+                        LibString.toString(startY),
+                        "l",
+                        LibString.toString(2 * blackBlockCount),
+                        ",0 0,2 -",
+                        LibString.toString(2 * blackBlockCount),
+                        ",0 z "
                     );
-                    xo = 0;
-                    xe = 0;
+                    blackBlockCount = 0;
                 }
             }
-            if (xo != 0) {
-                QRCodeURI = (
-                    abi.encodePacked(
-                        QRCodeURI,
-                        '<rect x="',
-                        LibString.toString(xo),
-                        '" y="',
-                        LibString.toString(yo),
-                        '" width="',
-                        LibString.toString(xe - xo),
-                        '"  height="2" />'
-                    )
+            // Draw if end of the line is reached and the last block is black
+            if (blackBlockCount > 0) {
+                qrSvg = abi.encodePacked(
+                    qrSvg,
+                    "M",
+                    LibString.toString(startX),
+                    ",",
+                    LibString.toString(startY),
+                    "l",
+                    LibString.toString(2 * blackBlockCount),
+                    ",0 0,2 -",
+                    LibString.toString(2 * blackBlockCount),
+                    ",0 z "
                 );
             }
-            yo += 2;
         }
+
+        qrSvg = abi.encodePacked(
+            qrSvg,
+            '" stroke="transparent" fill="black"/></svg>'
+        );
 
         return
             string(
                 abi.encodePacked(
                     "data:image/svg+xml;base64,",
-                    Base64.encode(abi.encodePacked(QRCodeURI, "</svg>"))
+                    Base64.encode(qrSvg)
                 )
             );
     }

@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity 0.8.14;
+
+import "forge-std/Test.sol";
+import { QRSVG } from "../../src/libraries/QRSVG.sol";
+import "forge-std/console.sol";
+
+contract QRSVGTest is Test {
+    string url = "REPLACE_ME";
+    string name = "NAME";
+
+    function testGenerateQR() public {
+        string memory code = QRSVG.generateQRCode(url);
+        vm.writeFile(string(abi.encodePacked("./misc/qrcode/svg/", name)), code);
+    }
+}
