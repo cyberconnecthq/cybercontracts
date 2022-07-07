@@ -25,7 +25,7 @@ mkdir -pv misc/qrcode/svg
 4. Run
 
 ```bash
-forge test --match-contract QRSVG -vvv
+forge test --match-contract QRSVGIntegration -vvv
 ```
 
 This runs QRSVG.sol against all generated input cases and write base64 encoded svg of the QRCode to `./misc/qrcode/svg`.
