@@ -264,6 +264,103 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         );
     }
 
+    function testSubscribeWithSig() public {
+        //let Charlie subscribe Bob's profile while the sender is Alice
+        vm.startPrank(alice);
+
+        uint256 charliePk = 100;
+        address charlie = vm.addr(charliePk);
+
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, 1),
+            abi.encode(charlie)
+        );
+
+        assertEq(ERC721(profileAddress).ownerOf(1), charlie);
+
+        uint256[] memory profileIds = new uint256[](1);
+        bytes[] memory subDatas = new bytes[](1);
+        bytes32[] memory hashes = new bytes32[](1);
+        profileIds[0] = 1;
+        subDatas[0] = bytes("simple subdata");
+        hashes[0] = keccak256(subDatas[0]);
+
+        vm.warp(50);
+        uint256 deadline = 100;
+
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    Constants._SUBSCRIBE_TYPEHASH,
+                    keccak256(abi.encodePacked(profileIds)),
+                    keccak256(abi.encodePacked(hashes)),
+                    0,
+                    deadline
+                )
+            )
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
+
+        vm.expectEmit(true, false, false, true);
+        emit Subscribe(charlie, profileIds, subDatas);
+
+        engine.subscribeWithSig(
+            profileIds,
+            subDatas,
+            charlie,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+    }
+
+    function testSetOperatorApprovalWithSig() public {
+        vm.startPrank(alice);
+
+        uint256 charliePk = 100;
+        address charlie = vm.addr(charliePk);
+
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, 1),
+            abi.encode(charlie)
+        );
+
+        assertEq(ERC721(profileAddress).ownerOf(1), charlie);
+
+        bytes[] memory subDatas = new bytes[](1);
+        subDatas[0] = bytes("simple subdata");
+        bool approved = true;
+
+        vm.warp(50);
+        uint256 deadline = 100;
+
+        bytes32 digest = engine.hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
+                    profileId,
+                    gov,
+                    approved,
+                    0,
+                    deadline
+                )
+            )
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
+
+        vm.expectEmit(true, false, false, true);
+        emit SetOperatorApproval(profileId, gov, approved);
+
+        engine.setOperatorApprovalWithSig(
+            profileId,
+            gov,
+            approved,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+    }
+
     function testCannotSetMetadataWithSigInvalidSig() public {
         // set all subsequent calls' from bob
         vm.startPrank(bob);
