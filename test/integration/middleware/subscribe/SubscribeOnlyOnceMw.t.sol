@@ -19,7 +19,7 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
     address profileAddress;
     address alice = address(0xA11CE);
     uint256 bobPk = 1;
-    address bob = vm.addr(bobPk); // matches LibFixture
+    address bob = vm.addr(bobPk); // matches TestLibFixture
     uint256 bobProfileId;
 
     function setUp() public {

@@ -9,7 +9,7 @@ import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.so
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { ICyberEngineEvents } from "../../src/interfaces/ICyberEngineEvents.sol";
 import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
-import { LibFixture } from "../../script/libraries/LibFixture.sol";
+import { TestLibFixture } from "../utils/TestLibFixture.sol";
 import { Base64 } from "../../src/dependencies/openzeppelin/Base64.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
 import { ERC721 } from "../../src/dependencies/solmate/ERC721.sol";
@@ -32,10 +32,10 @@ contract SubscribeTest is Test, ICyberEngineEvents {
             nonce,
             ""
         );
-        LibFixture.auth(authority);
+        TestLibFixture.auth(authority);
         engine = CyberEngine(address(proxy));
-        bobProfileId = LibFixture.registerBobProfile(engine);
-        LibFixture.auth(authority);
+        bobProfileId = TestLibFixture.registerBobProfile(engine);
+        TestLibFixture.auth(authority);
     }
 
     // test sub without sub only once mw

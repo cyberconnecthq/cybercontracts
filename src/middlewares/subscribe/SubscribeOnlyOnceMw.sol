@@ -16,10 +16,10 @@ contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
      * @notice Proccess that checks if the subscriber is aready subscribed.
      */
     function preProcess(
-        uint256 profileId,
+        uint256,
         address subscriber,
         address subscrbeNFT,
-        bytes calldata data
+        bytes calldata
     ) external {
         require(
             ERC721(subscrbeNFT).balanceOf(subscriber) == 0,

@@ -6,7 +6,7 @@ import "./QRSVG.sol";
 pragma solidity 0.8.14;
 
 library StaticNFTSVG {
-    string constant BASE_URL = "https://link3.to/";
+    string internal constant BASE_URL = "https://link3.to/";
 
     function draw(string memory handle) internal pure returns (string memory) {
         uint16 handleBackgroundWidth = 0;
