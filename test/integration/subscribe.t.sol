@@ -16,7 +16,6 @@ import { ERC721 } from "../../src/dependencies/solmate/ERC721.sol";
 
 contract SubscribeTest is Test, ICyberEngineEvents {
     CyberEngine engine;
-    SubscribeNFT subNFT;
     RolesAuthority authority;
     address boxAddress;
     address profileAddress;
@@ -46,6 +45,11 @@ contract SubscribeTest is Test, ICyberEngineEvents {
         bytes[] memory data = new bytes[](1);
 
         // alice subscribes to bob
+        vm.expectEmit(true, true, false, true);
+        emit DeploySubscribeNFT(
+            ids[0],
+            address(0x760C3B9cb28eBf12F5fd66AfED48c45a18D0b98D)
+        );
         vm.expectEmit(true, false, false, true);
         emit Subscribe(alice, ids, data);
         vm.prank(alice);
