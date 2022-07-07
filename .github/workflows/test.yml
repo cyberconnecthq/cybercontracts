@@ -22,11 +22,11 @@ jobs:
         with:
           version: nightly
 
-      - name: Run Forge build
-        run: |
-          forge --version
-          forge build --contracts src --sizes
-        id: build
+      - name: Check contract sizes
+        run: forge build --contracts src --sizes
+
+      - name: Check gas snapshots
+        run: forge snapshot --check
 
       - name: Run Forge tests
         run: |

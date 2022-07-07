@@ -38,7 +38,7 @@
     "typescript": "^4.7.3"
   },
   "lint-staged": {
-    "*.sol": "prettier --write"
+    "*.{sol,js,md}": "prettier --write"
   },
   "prettier": {
     "overrides": [
