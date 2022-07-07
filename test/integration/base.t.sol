@@ -11,6 +11,7 @@ import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { LibFixture } from "../../script/libraries/LibFixture.sol";
 import { Base64 } from "../../src/dependencies/openzeppelin/Base64.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
+import { StaticNFTSVG } from "../../src/libraries/StaticNFTSVG.sol";
 
 contract BaseTest is Test, ICyberEngineEvents {
     CyberEngine engine;
@@ -64,8 +65,8 @@ contract BaseTest is Test, ICyberEngineEvents {
                         handle,
                         '","description":"CyberConnect profile for @',
                         handle,
-                        '","image":"https://image.example.com?handle=',
-                        handle,
+                        '","image":"',
+                        StaticNFTSVG.draw(handle),
                         '","animation_url":"https://animation.example.com?handle=',
                         handle,
                         '","attributes":[{"trait_type":"id","value":"',

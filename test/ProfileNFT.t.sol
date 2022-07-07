@@ -12,6 +12,8 @@ import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import { StaticNFTSVG } from "../src/libraries/StaticNFTSVG.sol";
+import { LibString } from "../../src/libraries/LibString.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
@@ -27,15 +29,37 @@ contract ProfileNFTTest is Test {
             "https://example.com/alice.jpg",
             "metadata"
         );
-    string aliceMetadata =
-        string(
-            abi.encodePacked(
-                "data:application/json;base64,",
-                Base64.encode(
-                    '{"name":"@alice","description":"CyberConnect profile for @alice","image":"img_template?handle=alice","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"5"},{"trait_type":"subscribers","value":"0"},{"trait_type":"handle","value":"@alice"}]}'
+
+    function getMetaData(string memory handle, string memory subscribers)
+        public
+        returns (string memory)
+    {
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(
+                        abi.encodePacked(
+                            '{"name":"@',
+                            handle,
+                            '","description":"CyberConnect profile for @',
+                            handle,
+                            '","image":"',
+                            StaticNFTSVG.draw(handle),
+                            '","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"',
+                            LibString.toString(bytes(handle).length),
+                            '"},{"trait_type":"subscribers","value":"',
+                            subscribers,
+                            '"},{"trait_type":"handle","value":"@',
+                            handle,
+                            '"}]}'
+                        )
+                    )
                 )
-            )
-        );
+            );
+    }
+
+    string aliceMetadata = getMetaData("alice", "0");
 
     function setUp() public {
         ProfileNFT tokenImpl = new ProfileNFT(engine);
@@ -106,14 +130,8 @@ contract ProfileNFTTest is Test {
             abi.encodeWithSelector(CyberEngine.getSubscribeNFT.selector, 1),
             abi.encode(subscribeNFT)
         );
-        string memory expected = string(
-            abi.encodePacked(
-                "data:application/json;base64,",
-                Base64.encode(
-                    '{"name":"@alice","description":"CyberConnect profile for @alice","image":"img_template?handle=alice","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"5"},{"trait_type":"subscribers","value":"111"},{"trait_type":"handle","value":"@alice"}]}'
-                )
-            )
-        );
+        string memory expected = getMetaData("alice", "111");
+
         vm.mockCall(
             subscribeNFT,
             abi.encodeWithSelector(CyberNFTBase.totalSupply.selector),
