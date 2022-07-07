@@ -29,16 +29,16 @@ library Constants {
         keccak256("claimBox(address to,uint256 nonce,uint256 deadline)");
 
     // Parameters
-    uint8 internal constant _MAX_HANDLE_LENGTH = 27;
+    uint8 internal constant _MAX_HANDLE_LENGTH = 20;
     uint16 internal constant _MAX_URI_LENGTH = 2000;
 
     // Initial States
-    uint256 internal constant _INITIAL_FEE_TIER0 = 0.5 ether;
-    uint256 internal constant _INITIAL_FEE_TIER1 = 0.1 ether;
-    uint256 internal constant _INITIAL_FEE_TIER2 = 0.06 ether;
-    uint256 internal constant _INITIAL_FEE_TIER3 = 0.03 ether;
-    uint256 internal constant _INITIAL_FEE_TIER4 = 0.01 ether;
-    uint256 internal constant _INITIAL_FEE_TIER5 = 0.006 ether;
+    uint256 internal constant _INITIAL_FEE_TIER0 = 10 ether;
+    uint256 internal constant _INITIAL_FEE_TIER1 = 2 ether;
+    uint256 internal constant _INITIAL_FEE_TIER2 = 1 ether;
+    uint256 internal constant _INITIAL_FEE_TIER3 = 0.5 ether;
+    uint256 internal constant _INITIAL_FEE_TIER4 = 0.1 ether;
+    uint256 internal constant _INITIAL_FEE_TIER5 = 0.01 ether;
 
     // Access Control for UpgradeableBeacon
     bytes4 internal constant _BEACON_UPGRADE_TO =
