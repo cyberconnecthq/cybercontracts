@@ -23,14 +23,16 @@ contract SubscribeTest is Test, ICyberEngineEvents {
     uint256 bobPk = 1;
     address bob = vm.addr(bobPk);
     uint256 bobProfileId;
+    address profileNFTDescriptor;
 
     function setUp() public {
         uint256 nonce = vm.getNonce(address(this));
+        profileNFTDescriptor = address(0xB);
         ERC1967Proxy proxy;
         (proxy, authority, boxAddress, profileAddress) = LibDeploy.deploy(
             address(this),
             nonce,
-            ""
+            profileNFTDescriptor
         );
         TestLibFixture.auth(authority);
         engine = CyberEngine(address(proxy));

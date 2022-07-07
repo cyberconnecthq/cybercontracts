@@ -106,7 +106,7 @@ library LibDeploy {
         address deployer,
         uint256 nonce,
         // address calProfileProxy,
-        string memory templateURL
+        address profileNFTDescriptor
     )
         internal
         returns (
@@ -143,9 +143,7 @@ library LibDeploy {
                 // TODO: Naming
                 "CyberConnect Profile",
                 "CCP",
-                // TODO: fix template
-                templateURL, // to be set later in `post_deploy` script. circular dependency
-                "https://image.example.com"
+                profileNFTDescriptor
             );
             profileProxy = new ERC1967Proxy(address(profileImpl), initData);
             profileAddress = address(profileProxy);

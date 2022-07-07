@@ -17,7 +17,7 @@ contract DeployScript is Script {
         string
             memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreieyuwfk4zuaibbx457n5od5n3drkyyqga7fp7bexdxzg2dfpzv7xq";
 
-        LibDeploy.deploy(msg.sender, nonce, templateURL);
+        LibDeploy.deploy(msg.sender, nonce, address(0xB));
         // TODO: set correct role capacity
         // TODO: do a health check. verify everything
         vm.stopBroadcast();

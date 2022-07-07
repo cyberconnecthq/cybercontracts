@@ -25,6 +25,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     RolesAuthority internal rolesAuthority;
     address internal profileAddress = address(0xA);
     address internal essenceBeacon = address(0xC);
+    address internal profileNFTDescriptor = address(0xD);
     address internal subscribeBeacon;
 
     address constant alice = address(0xA11CE);
@@ -92,16 +93,10 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
     }
 
-    function testCannotSetAniTemplateAsNonGov() public {
+    function testCannotSetProfileNFTDescriptorAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setAnimationTemplate("ani_template");
-    }
-
-    function testCannotSetImgTemplateAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        vm.prank(alice);
-        engine.setImageTemplate("img_template");
+        engine.setProfileNFTDescriptor(profileNFTDescriptor);
     }
 
     function testSetSignerAsGov() public {
@@ -531,40 +526,22 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         assertEq(engine.isEssenceMwAllowed(mw), true);
     }
 
-    function testSetAniTemplateGov() public {
+    function testSetProfileNFTDescriptorGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.mockCall(
             profileAddress,
             abi.encodeWithSelector(
-                IProfileNFT.setAnimationTemplate.selector,
-                "new_ani_template"
+                IProfileNFT.setProfileNFTDescriptor.selector,
+                profileNFTDescriptor
             ),
             abi.encode(0)
         );
 
         vm.prank(alice);
         vm.expectEmit(true, false, false, true);
-        emit SetAnimationTemplate("new_ani_template");
+        emit SetProfileNFTDescriptor(profileNFTDescriptor);
 
-        engine.setAnimationTemplate("new_ani_template");
-    }
-
-    function testSetImgTemplateGov() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.setAnimationTemplate.selector,
-                "new_img_template"
-            ),
-            abi.encode(0)
-        );
-
-        vm.prank(alice);
-        vm.expectEmit(true, false, false, true);
-        emit SetImageTemplate("new_img_template");
-
-        engine.setImageTemplate("new_img_template");
+        engine.setProfileNFTDescriptor(profileNFTDescriptor);
     }
 
     // we can't pause from an unauthorized account

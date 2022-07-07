@@ -22,18 +22,19 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
     uint256 bobPk = 1;
     address bob = vm.addr(bobPk);
     uint256 bobProfileId;
+    address profileNFTDescriptor;
 
     function setUp() public {
         uint256 nonce = vm.getNonce(address(this));
         ERC1967Proxy proxy;
+        profileNFTDescriptor = address(0xB);
         (proxy, authority, boxAddress, profileAddress) = LibDeploy.deploy(
             address(this),
             nonce,
-            ""
+            profileNFTDescriptor
         );
         engine = CyberEngine(address(proxy));
         profileNFT = ProfileNFT(profileAddress);
-        engine.setAnimationTemplate("https://animation.example.com");
         TestLibFixture.auth(authority);
     }
 
@@ -69,7 +70,7 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
                         handle,
                         '","image":"',
                         StaticNFTSVG.draw(handle),
-                        '","animation_url":"https://animation.example.com?handle=',
+                        '","animation_url":"?handle=',
                         handle,
                         '","attributes":[{"trait_type":"id","value":"',
                         LibString.toString(bobProfileId),

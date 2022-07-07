@@ -51,16 +51,17 @@ contract ProfileNFT is
      *
      * @param name Name to set for the Profile NFT.
      * @param symbol Symbol to set for the Profile NFT.
-     * @param animationTemplate Template animation url to set for the Profile NFT.
-     * @param imageTemplate symbol to set for the Profile NFT.
+     * @param profileNFTDescriptor The profile NFT descriptor address to set for the Profile NFT.
      */
     function initialize(
         string calldata name,
         string calldata symbol,
-        string calldata animationTemplate,
         address profileNFTDescriptor
     ) external initializer {
-        require(profileNFTDescriptor != address(0), "Descriptor address cannot be 0");
+        require(
+            profileNFTDescriptor != address(0),
+            "Descriptor address cannot be 0"
+        );
         CyberNFTBase._initialize(name, symbol, _VERSION_STR);
         _profileNFTDescriptor = profileNFTDescriptor;
         // start with paused
@@ -142,7 +143,11 @@ contract ProfileNFT is
 
         return
             IProfileNFTDescriptor(_profileNFTDescriptor).tokenURI(
-                IProfileNFTDescriptor.ConstructTokenURIParams({tokenId, handle, subscribers})
+                IProfileNFTDescriptor.ConstructTokenURIParams({
+                    tokenId: tokenId,
+                    handle: handle,
+                    subscribers: subscribers
+                })
             );
     }
 
@@ -175,6 +180,16 @@ contract ProfileNFT is
                 ++i;
             }
         }
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getProfileNFTDescriptor()
+        external
+        view
+        override
+        returns (address)
+    {
+        return _profileNFTDescriptor;
     }
 
     /// @inheritdoc IProfileNFT

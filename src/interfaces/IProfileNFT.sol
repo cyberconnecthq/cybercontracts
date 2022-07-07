@@ -49,7 +49,7 @@ interface IProfileNFT {
     /**
      * @notice Sets the Profile NFT Descriptor.
      *
-     * @param template The new address to set.
+     * @param descriptor The new descriptor address to set.
      */
     function setProfileNFTDescriptor(address descriptor) external;
 
@@ -81,18 +81,11 @@ interface IProfileNFT {
         returns (string memory);
 
     /**
-     * @notice Gets the animation template url.
-     *
-     * @return memory The animation template url.
-     */
-    function getAnimationTemplate() external view returns (string memory);
-
-    /**
      * @notice Gets the image template url.
      *
      * @return memory The image template url.
      */
-    function getImageTemplate() external view returns (string memory);
+    function getProfileNFTDescriptor() external view returns (address);
 
     /**
      * @notice Gets the profile avatar.
