@@ -49,7 +49,7 @@ contract BoxNFT is
         external
         initializer
     {
-        CyberNFTBase._initialize(_name, _symbol);
+        CyberNFTBase._initialize(_name, _symbol, _VERSION_STR);
         // start with paused
         _pause();
     }

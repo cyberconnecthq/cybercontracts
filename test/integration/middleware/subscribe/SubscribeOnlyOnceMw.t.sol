@@ -3,7 +3,7 @@
 pragma solidity 0.8.14;
 import "forge-std/Test.sol";
 import { LibDeploy } from "../../../../script/libraries/LibDeploy.sol";
-import { LibFixture } from "../../../../script/libraries/LibFixture.sol";
+import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
 import { CyberEngine } from "../../../../src/core/CyberEngine.sol";
 import { RolesAuthority } from "../../../../src/dependencies/solmate/RolesAuthority.sol";
 import { SubscribeOnlyOnceMw } from "../../../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
@@ -35,10 +35,10 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
         );
         engine = CyberEngine(address(proxy));
 
-        LibFixture.auth(authority);
-        vm.prank(LibFixture._GOV);
+        TestLibFixture.auth(authority);
+        vm.prank(TestLibFixture._GOV);
         engine.allowSubscribeMw(address(mw), true);
-        bobProfileId = LibFixture.registerBobProfile(engine);
+        bobProfileId = TestLibFixture.registerBobProfile(engine);
         // set module
         vm.prank(bob);
         engine.setSubscribeMw(bobProfileId, address(mw));

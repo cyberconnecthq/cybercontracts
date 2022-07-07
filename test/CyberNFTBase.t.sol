@@ -4,9 +4,19 @@ pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
 import "./utils/MockNFT.sol";
+import { Constants } from "../src/libraries/Constants.sol";
+import { TestLib712 } from "./utils/TestLib712.sol";
+import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 contract CyberNFTBaseTest is Test {
     MockNFT internal token;
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 indexed id
+    );
+
+    address internal alice = address(0xA11CE);
 
     function setUp() public {
         token = new MockNFT();
@@ -30,5 +40,75 @@ contract CyberNFTBaseTest is Test {
         assertEq(token.mint(msg.sender), 1);
         assertEq(token.mint(msg.sender), 2);
         assertEq(token.mint(msg.sender), 3);
+    }
+
+    function testDomainSeparator() public {
+        bytes32 separator = token.DOMAIN_SEPARATOR();
+        assertEq(
+            separator,
+            0xe195559d9b70b05d0726a7f24d7fdcf906037d65ca4dd8998d7516b987eda7ab
+        );
+    }
+
+    function testPermit() public {
+        uint256 bobPk = 11111;
+        address bobAddr = vm.addr(bobPk);
+        assertEq(token.mint(bobAddr), 1);
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 data = keccak256(
+            abi.encode(Constants._PERMIT_TYPEHASH, alice, 1, 0, deadline)
+        );
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(token),
+            data,
+            "TestNFT",
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+        vm.expectEmit(true, true, true, true);
+        emit Approval(bobAddr, alice, 1);
+        token.permit(alice, 1, DataTypes.EIP712Signature(v, r, s, deadline));
+    }
+
+    function testCannotPermitFromNonOwner() public {
+        uint256 bobPk = 11111;
+        address bobAddr = vm.addr(bobPk);
+        uint256 charliePk = 22222;
+        assertEq(token.mint(bobAddr), 1);
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 data = keccak256(
+            abi.encode(Constants._PERMIT_TYPEHASH, alice, 1, 0, deadline)
+        );
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(token),
+            data,
+            "TestNFT",
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
+        vm.expectRevert("Invalid signature");
+        token.permit(alice, 1, DataTypes.EIP712Signature(v, r, s, deadline));
+    }
+
+    function testCannotPermitOwner() public {
+        uint256 bobPk = 11111;
+        address bobAddr = vm.addr(bobPk);
+        assertEq(token.mint(bobAddr), 1);
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 data = keccak256(
+            abi.encode(Constants._PERMIT_TYPEHASH, alice, 1, 0, deadline)
+        );
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(token),
+            data,
+            "TestNFT",
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+        vm.expectRevert("CANNOT_PERMIT_OWNER");
+        token.permit(bobAddr, 1, DataTypes.EIP712Signature(v, r, s, deadline));
     }
 }

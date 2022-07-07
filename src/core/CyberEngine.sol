@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
-import "forge-std/console.sol";
+
 import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
+import { Lib712Check } from "../libraries/Lib712Check.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 import { IBoxNFT } from "../interfaces/IBoxNFT.sol";
@@ -139,7 +140,7 @@ contract CyberEngine is
         payable
         returns (uint256)
     {
-        _requiresExpectedSigner(
+        Lib712Check._requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
@@ -171,7 +172,7 @@ contract CyberEngine is
         DataTypes.CreateProfileParams calldata params,
         DataTypes.EIP712Signature calldata sig
     ) external payable returns (uint256) {
-        _requiresExpectedSigner(
+        Lib712Check._requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
@@ -243,16 +244,6 @@ contract CyberEngine is
         _setFeeByTier(DataTypes.Tier.Tier5, Constants._INITIAL_FEE_TIER5);
     }
 
-    function _requiresExpectedSigner(
-        bytes32 digest,
-        address expectedSigner,
-        DataTypes.EIP712Signature calldata sig
-    ) internal view {
-        require(sig.deadline >= block.timestamp, "Deadline expired");
-        address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
-        require(recoveredAddress == expectedSigner, "Invalid signature");
-    }
-
     /**
      * @notice Checks if the fee is enough.
      *
@@ -298,7 +289,7 @@ contract CyberEngine is
             }
         }
 
-        _requiresExpectedSigner(
+        Lib712Check._requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
@@ -524,7 +515,7 @@ contract CyberEngine is
         DataTypes.EIP712Signature calldata sig
     ) external {
         address owner = ERC721(profileAddress).ownerOf(profileId);
-        _requiresExpectedSigner(
+        Lib712Check._requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
@@ -580,7 +571,7 @@ contract CyberEngine is
         DataTypes.EIP712Signature calldata sig
     ) external {
         address owner = ERC721(profileAddress).ownerOf(profileId);
-        _requiresExpectedSigner(
+        Lib712Check._requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
@@ -704,6 +695,4 @@ contract CyberEngine is
 
         _;
     }
-
-    //
 }

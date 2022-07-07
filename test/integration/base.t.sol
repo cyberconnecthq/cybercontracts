@@ -8,7 +8,7 @@ import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.so
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { ICyberEngineEvents } from "../../src/interfaces/ICyberEngineEvents.sol";
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
-import { LibFixture } from "../../script/libraries/LibFixture.sol";
+import { TestLibFixture } from "../utils/TestLibFixture.sol";
 import { Base64 } from "../../src/dependencies/openzeppelin/Base64.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
 
@@ -33,12 +33,12 @@ contract BaseTest is Test, ICyberEngineEvents {
         engine = CyberEngine(address(proxy));
         profileNFT = ProfileNFT(profileAddress);
         engine.setAnimationTemplate("https://animation.example.com");
-        LibFixture.auth(authority);
+        TestLibFixture.auth(authority);
     }
 
     function testRegistration() public {
         // Register bob profile
-        bobProfileId = LibFixture.registerBobProfile(engine);
+        bobProfileId = TestLibFixture.registerBobProfile(engine);
 
         // check bob profile details
         string memory handle = profileNFT.getHandleByProfileId(bobProfileId);

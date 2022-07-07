@@ -3,44 +3,22 @@
 pragma solidity 0.8.14;
 
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
-import { ECDSA } from "../../src/dependencies/openzeppelin/ECDSA.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../../src/libraries/Constants.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { IBoxNFT } from "../../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../../src/interfaces/IProfileNFT.sol";
+import { TestLib712 } from "./TestLib712.sol";
 import "forge-std/Vm.sol";
 
 // Only for testing, not for deploying script
 // TODO: move to test folder
-library LibFixture {
+library TestLibFixture {
     address constant _GOV = address(0xC11); // TODO: dont hardcode this
-    bytes32 private constant _TYPE_HASH =
-        keccak256(
-            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-        );
 
     address private constant VM_ADDRESS =
         address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
     Vm public constant vm = Vm(VM_ADDRESS);
-
-    // Util function
-    function _hashTypedDataV4(address engineAddr, bytes32 structHash)
-        private
-        view
-        returns (bytes32)
-    {
-        bytes32 domainSeparator = keccak256(
-            abi.encode(
-                _TYPE_HASH,
-                keccak256(bytes("CyberEngine")),
-                keccak256(bytes("1")),
-                block.chainid,
-                engineAddr
-            )
-        );
-        return ECDSA.toTypedDataHash(domainSeparator, structHash);
-    }
 
     function auth(RolesAuthority authority) internal {
         authority.setUserRole(_GOV, Constants._ENGINE_GOV_ROLE, true);
@@ -61,7 +39,7 @@ library LibFixture {
         uint256 deadline = 100;
         string memory avatar = "avatar";
         string memory metadata = "metadata";
-        bytes32 digest = _hashTypedDataV4(
+        bytes32 digest = TestLib712.hashTypedDataV4(
             address(engine),
             keccak256(
                 abi.encode(
@@ -73,7 +51,9 @@ library LibFixture {
                     0,
                     deadline
                 )
-            )
+            ),
+            "CyberEngine",
+            "1"
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
