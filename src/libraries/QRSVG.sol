@@ -402,14 +402,14 @@ library QRSVG {
         );
 
         for (uint256 row = 0; row < SIZE; row += 1) {
-            uint256 startY = row * 2 + 8;
+            uint256 startY = row * 2;
             uint256 blackBlockCount;
             uint256 startX;
             for (uint256 col = 0; col < SIZE; col += 1) {
                 if (qrMatrix.matrix[row][col] == 1) {
                     // Record the first black block coordinate in a consecutive black blocks
                     if (blackBlockCount == 0) {
-                        startX = col * 2 + 8;
+                        startX = col * 2;
                     }
                     blackBlockCount++;
                 }
