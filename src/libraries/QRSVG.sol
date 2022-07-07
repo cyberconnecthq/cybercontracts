@@ -208,12 +208,12 @@ library QRSVG {
 
     // Creating finder patterns, timing pattern and alignment patterns
     function createBaseMatrix() internal pure returns (QRMatrix memory) {
-        QRMatrix memory _qrMatrix;
+        QRMatrix memory qrMatrix;
         uint8[2] memory aligns = [4, 20];
 
         // Top-Left finder pattern
         blit(
-            _qrMatrix,
+            qrMatrix,
             0,
             0,
             9,
@@ -223,7 +223,7 @@ library QRSVG {
 
         // Top-Right finder pattern
         blit(
-            _qrMatrix,
+            qrMatrix,
             SIZE - 8,
             0,
             8,
@@ -233,7 +233,7 @@ library QRSVG {
 
         // Bottom-Right finder pattern
         blit(
-            _qrMatrix,
+            qrMatrix,
             0,
             SIZE - 8,
             9,
@@ -253,8 +253,8 @@ library QRSVG {
 
         // Timing pattern
         for (uint256 i = 9; i < SIZE - 8; ++i) {
-            _qrMatrix.matrix[6][i] = _qrMatrix.matrix[i][6] = ~i & 1;
-            _qrMatrix.reserved[6][i] = _qrMatrix.reserved[i][6] = 1;
+            qrMatrix.matrix[6][i] = qrMatrix.matrix[i][6] = ~i & 1;
+            qrMatrix.reserved[6][i] = qrMatrix.reserved[i][6] = 1;
         }
 
         // alignment patterns
@@ -263,7 +263,7 @@ library QRSVG {
             uint8 maxj = i == 0 ? 1 : 2;
             for (uint8 j = minj; j < maxj; ++j) {
                 blit(
-                    _qrMatrix,
+                    qrMatrix,
                     aligns[i],
                     aligns[j],
                     5,
@@ -283,11 +283,11 @@ library QRSVG {
             }
         }
 
-        return _qrMatrix;
+        return qrMatrix;
     }
 
     function blit(
-        QRMatrix memory _qrMatrix,
+        QRMatrix memory qrMatrix,
         uint256 y,
         uint256 x,
         uint256 h,
@@ -296,13 +296,13 @@ library QRSVG {
     ) internal pure {
         for (uint256 i = 0; i < h; ++i) {
             for (uint256 j = 0; j < w; ++j) {
-                _qrMatrix.matrix[y + i][x + j] = (data[i] >> j) & 1;
-                _qrMatrix.reserved[y + i][x + j] = 1;
+                qrMatrix.matrix[y + i][x + j] = (data[i] >> j) & 1;
+                qrMatrix.reserved[y + i][x + j] = 1;
             }
         }
     }
 
-    function putFormatInfo(QRMatrix memory _qrMatrix) internal pure {
+    function putFormatInfo(QRMatrix memory qrMatrix) internal pure {
         uint8[15] memory infoA = [
             0,
             1,
@@ -342,13 +342,13 @@ library QRSVG {
         for (uint8 i = 0; i < 15; ++i) {
             uint8 r = infoA[i];
             uint8 c = infoB[i];
-            _qrMatrix.matrix[r][8] = _qrMatrix.matrix[8][c] = (32170 >> i) & 1;
+            qrMatrix.matrix[r][8] = qrMatrix.matrix[8][c] = (32170 >> i) & 1;
             // we don't have to mark those bits reserved; always done
             // in makebasematrix above.
         }
     }
 
-    function putData(QRMatrix memory _qrMatrix, uint256[70] memory data)
+    function putData(QRMatrix memory qrMatrix, uint256[70] memory data)
         internal
         pure
         returns (QRMatrix memory)
@@ -368,10 +368,10 @@ library QRSVG {
                 for (int256 ii = int256(i); ii > int256(i) - 2; ii--) {
                     // uint256(jj) and uint256(ii) will never underflow here
                     if (
-                        _qrMatrix.reserved[uint256(jj)][uint256(ii)] == 0 &&
+                        qrMatrix.reserved[uint256(jj)][uint256(ii)] == 0 &&
                         k >> 3 < 70
                     ) {
-                        _qrMatrix.matrix[uint256(jj)][uint256(ii)] =
+                        qrMatrix.matrix[uint256(jj)][uint256(ii)] =
                             ((data[k >> 3] >> (~k & 7)) & 1) ^
                             (ii % 3 == 0 ? 1 : 0);
                         ++k;
@@ -389,10 +389,10 @@ library QRSVG {
             dir = -dir;
         }
 
-        return _qrMatrix;
+        return qrMatrix;
     }
 
-    function generateQRURI(QRMatrix memory _qrMatrix)
+    function generateQRURI(QRMatrix memory qrMatrix)
         internal
         pure
         returns (string memory)
@@ -406,7 +406,7 @@ library QRSVG {
             uint256 blackBlockCount;
             uint256 startX;
             for (uint256 col = 0; col < SIZE; col += 1) {
-                if (_qrMatrix.matrix[row][col] == 1) {
+                if (qrMatrix.matrix[row][col] == 1) {
                     // Record the first black block coordinate in a consecutive black blocks
                     if (blackBlockCount == 0) {
                         startX = col * 2 + 8;
