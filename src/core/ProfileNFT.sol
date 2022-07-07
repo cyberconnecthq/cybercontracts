@@ -57,7 +57,7 @@ contract ProfileNFT is
         string calldata animationTemplate,
         string calldata imageTemplate
     ) external initializer {
-        CyberNFTBase._initialize(name, symbol, _VERSION_STR);
+        CyberNFTBase._initialize(name, symbol, "1");
         _animationTemplate = animationTemplate;
         _imageTemplate = imageTemplate;
         // start with paused
@@ -132,9 +132,6 @@ contract ProfileNFT is
         string memory formattedName = string(abi.encodePacked("@", handle));
         string memory animationURL = string(
             abi.encodePacked(_animationTemplate, "?handle=", handle)
-        );
-        string memory imageURL = string(
-            abi.encodePacked(_imageTemplate, "?handle=", handle)
         );
         address subscribeNFT = CyberEngine(ENGINE).getSubscribeNFT(tokenId);
         uint256 subscribers;
