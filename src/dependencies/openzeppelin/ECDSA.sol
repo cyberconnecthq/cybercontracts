@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 // OpenZeppelin Contracts (last updated v4.5.0) (utils/cryptography/ECDSA.sol)
 // Use the gas efficient LibString library
 
