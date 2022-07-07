@@ -209,7 +209,16 @@
             return Math.min(fontSize, maxFontSize);
         }
 
-        const render = (handle, imageURI, metadata) => {            
+        const getTextWidth = (text, fontSize, padding) => {
+            const element = document.createElement('canvas');
+            const context = element.getContext('2d');
+            context.font = `${fontSize}px Arial`;
+            const textWidth = context.measureText(text).width;
+            const width = textWidth ? textWidth + padding : 0;
+            return width;
+        }
+
+        const render = (handle, imageURI, metadata) => {
             const svgFront = d3.select("#profile")
                 .selectAll("svg")
                     .data([null])
@@ -321,13 +330,15 @@
                 propHandle.data([null])
                     .join("text")
                         .classed("propHandle", true)
+                        .style("font-family", "Arial")
                         .style("font-size", 18)
-                        .style("font-weight", 700)
-                        .style("font-family", "Outfit")
                         .style("fill", "transparent")
+                        .style("font-weight", 700)
+                        .style("text-anchor", "start")
+                        .style("alignment-baseline", "middle")
                         .style("transform", `translate(${width}px, ${height}px)`)
                         .text(handle);
-
+                        
                 const bgHandle = svgFront.selectAll(".bgHandle");
                 bgHandle.data([null])
                     .join("rect")
@@ -339,36 +350,28 @@
                         .attr("y", 422)
                         .attr("transform", "skewX(-25)")
                         .style("fill", color.white);
-
-                const txtHandle = svgFront.selectAll(".handle");
+            
+                const txtHandle = svgFront.selectAll(".txtHandle");
                 txtHandle.data([null])
                     .join("text")
-                        .classed("handle", true)
+                        .classed("txtHandle", true)
+                        .style("font-family", "Outfit")
                         .style("font-size", computeFontSize("propHandle", 18, 21, 158))
                         .style("fill", color.black)
                         .style("font-weight", 700)
-                        .style("font-family", "Outfit")
                         .style("text-anchor", "start")
                         .style("alignment-baseline", "middle")
                         .style("transform", `translate(217.5px, 436px)`)
                         .text(handle);
 
                 svgFront.selectAll(".bgHandle")
-                    .data([null])
-                    .join("rect")
-                        .classed("bgHandle", true)
-                        .attr("width", () => {
-                            const textElem = document.getElementsByClassName("handle")[0];
-                            const bbox = textElem?.getBBox();
-                            const width = bbox ? (bbox.width + 21) : 0;
-                            return width;
-                        })
-                        .attr("height", 25)
-                        .attr("rx", 4)
-                        .attr("x", 410)
-                        .attr("y", 422)
-                        .attr("transform", "skewX(-25)")
-                        .style("fill", color.white);
+                    .transition()
+                    .duration(0)
+                    .attr("width", () => {
+                        const font = computeFontSize("propHandle", 18, 21, 158);
+                        const width = getTextWidth(handle, font, 21);
+                        return width;
+                    });
             }
 
             if(metadata) {               
