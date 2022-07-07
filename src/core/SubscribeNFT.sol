@@ -100,7 +100,9 @@ contract SubscribeNFT is
         return ICyberEngine(ENGINE).getSubscribeNFTTokenURI(_profileId);
     }
 
-    // Subscribe NFT cannot be transferred
+    /**
+     * @notice Disallows the transfer of the subscribe nft.
+     */
     function transferFrom(
         address,
         address,

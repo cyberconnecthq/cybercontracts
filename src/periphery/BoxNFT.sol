@@ -24,6 +24,9 @@ contract BoxNFT is
     address public immutable ENGINE;
     uint256 private constant _VERSION = 1;
 
+    /**
+     * @notice Checks that sender is engine address.
+     */
     modifier onlyEngine() {
         require(msg.sender == address(ENGINE), "Only Engine");
         _;
@@ -81,7 +84,11 @@ contract BoxNFT is
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override onlyEngine {}
 
-    // pausable
+    /**
+     * @notice Changes the pause state of the box nft.
+     *
+     * @param toPause The pause state.
+     */
     function pause(bool toPause) external onlyEngine {
         if (toPause) {
             super._pause();
@@ -90,6 +97,14 @@ contract BoxNFT is
         }
     }
 
+    /**
+     * @notice Transfers the box nft.
+     *
+     * @param from The initial owner address.
+     * @param to The receipient address.
+     * @param from The nft id.
+     * @dev It requires the state to be unpaused
+     */
     function transferFrom(
         address from,
         address to,
