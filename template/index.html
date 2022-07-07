@@ -212,7 +212,7 @@
             const context = element.getContext('2d');
             context.font = `${fontSize}px Arial`;
             const textWidth = context.measureText(text).width;
-            const width = textWidth ? textWidth + padding : 0;
+            const width = (textWidth ? textWidth + padding : 0) * 1.03;
             return width;
         }
 
