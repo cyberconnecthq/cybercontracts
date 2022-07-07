@@ -17,7 +17,7 @@ library StaticNFTSVG {
         );
 
         if (bytes(handle).length > 13) {
-            string memory headString = substring(handle, 0, 13);
+            string memory headString = substring(handle, 0, 12);
 
             handleSVGElement = string(
                 abi.encodePacked(
@@ -75,7 +75,8 @@ library StaticNFTSVG {
     }
 
     function getFontStyleSVGElement() internal pure returns (string memory) {
-        return "<style>@font-face {font-family: 'Outfit';}</style>";
+        return
+            "<style>@font-face {font-family='\"Outfit\", sans-serif;'}</style>";
     }
 
     function getBackgroundPath() internal pure returns (string memory) {
@@ -91,9 +92,9 @@ library StaticNFTSVG {
         return
             string(
                 abi.encodePacked(
-                    "<image x='88' y='232' href='",
+                    "<image x='20.69%' y='42.72%' href='",
                     base64String,
-                    "' width='160' height='160' opacity='0.3'/>"
+                    "' width='32.305%' height='32.305%' opacity='0.3'/>"
                 )
             );
     }
@@ -106,12 +107,12 @@ library StaticNFTSVG {
         return
             string(
                 abi.encodePacked(
-                    "<g style='transform:translate(89px, 422px)'>",
-                    "<text dominant-baseline='hanging' x='0' y='0' fill='#fff' font-size='22px' font-family='Outfit'>link3.to/</text>",
+                    "<g style='transform:translate(19.626%, 83.8%)'>",
+                    "<text dominant-baseline='hanging' x='0' y='0' fill='#fff' font-size='22px' font-weight='700' font-family='\"Outfit\", sans-serif'>link3.to/</text>",
                     "<rect width='",
                     LibString.toString(backgroundWidth),
                     "px' height='24px' rx='4px' ry='4px' fill='#fff' transform='skewX(-25)' x='95' y='-3'/>",
-                    "<text dominant-baseline='hanging' text-anchor='start' x='100' y='-1' font-family='Outfit' font-size='22px' fill='#000' fontWeight='700'>",
+                    "<text dominant-baseline='hanging' text-anchor='start' x='100' y='-1' font-weight='700' font-family='\"Outfit\", sans-serif' font-size='22px' fill='#000' fontWeight='700'>",
                     handle,
                     "</text></g>"
                 )
@@ -151,7 +152,7 @@ library StaticNFTSVG {
                 abi.encodePacked(
                     "<text text-anchor='end' dominant-baseline='hanging' x='412' y='",
                     LibString.toString(y),
-                    "' fill='#fff' font-weight='600' font-family='Outfit' font-size='32'>",
+                    "' fill='#fff' font-weight='700' font-family='\"Outfit\", sans-serif' font-size='32'>",
                     handle,
                     "</text>"
                 )
