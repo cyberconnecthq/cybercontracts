@@ -18,8 +18,8 @@ contract BoxNFT is
     Pausable,
     CyberNFTBase,
     UUPSUpgradeable,
-    IBoxNFT,
-    IUpgradeable
+    IUpgradeable,
+    IBoxNFT
 {
     address public immutable ENGINE;
     uint256 private constant _VERSION = 1;
