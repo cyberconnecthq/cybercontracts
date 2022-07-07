@@ -5,14 +5,13 @@ pragma solidity 0.8.14;
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
-import { Lib712Check } from "../../src/libraries/Lib712Check.sol";
 
 contract MockEngine is CyberEngine {
     function verifySignature(
         bytes32 digest,
         DataTypes.EIP712Signature calldata sig
     ) public view {
-        Lib712Check._requiresExpectedSigner(digest, signer, sig);
+        _requiresExpectedSigner(digest, signer, sig);
     }
 
     function requireEnoughFee(string calldata handle, uint256 amount)

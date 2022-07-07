@@ -8,7 +8,6 @@ import { Initializable } from "../upgradeability/Initializable.sol";
 import { ERC721 } from "../dependencies/solmate/ERC721.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
-import { Lib712Check } from "../libraries/Lib712Check.sol";
 
 // Sequential mint ERC721
 // TODO: Put EIP712 permit logic here
@@ -18,10 +17,9 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
     uint256 internal _totalCount = 0;
     mapping(address => uint256) public nonces;
 
-    // TODO:
-    // constructor() {
-    //     _disableInitializers();
-    // }
+    constructor() {
+        _disableInitializers();
+    }
 
     function totalSupply() external view virtual returns (uint256) {
         return _totalCount;
@@ -50,6 +48,17 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
     }
 
     // Permit
+    function _requiresExpectedSigner(
+        bytes32 digest,
+        address expectedSigner,
+        DataTypes.EIP712Signature calldata sig
+    ) internal view {
+        require(sig.deadline >= block.timestamp, "Deadline expired");
+        address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
+        require(recoveredAddress == expectedSigner, "Invalid signature");
+    }
+
+    // Permit
     function DOMAIN_SEPARATOR() public view returns (bytes32) {
         return _domainSeparatorV4();
     }
@@ -62,7 +71,7 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
     ) external payable {
         address owner = ownerOf(tokenId);
         require(owner != spender, "CANNOT_PERMIT_OWNER");
-        Lib712Check._requiresExpectedSigner(
+        _requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(

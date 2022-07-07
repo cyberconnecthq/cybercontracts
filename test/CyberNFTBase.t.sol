@@ -7,9 +7,11 @@ import "./utils/MockNFT.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract CyberNFTBaseTest is Test {
     MockNFT internal token;
+    MockNFT internal impl;
     event Approval(
         address indexed owner,
         address indexed spender,
@@ -19,8 +21,19 @@ contract CyberNFTBaseTest is Test {
     address internal alice = address(0xA11CE);
 
     function setUp() public {
-        token = new MockNFT();
-        token.initialize("TestNFT", "TNFT");
+        impl = new MockNFT();
+        bytes memory data = abi.encodeWithSelector(
+            MockNFT.initialize.selector,
+            "TestNFT",
+            "TNFT"
+        );
+        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), data);
+        token = MockNFT(address(proxy));
+    }
+
+    function testCannotInitializeImpl() public {
+        vm.expectRevert("Contract already initialized");
+        impl.initialize("TestNFT", "TNFT");
     }
 
     function testBasic() public {
@@ -46,7 +59,7 @@ contract CyberNFTBaseTest is Test {
         bytes32 separator = token.DOMAIN_SEPARATOR();
         assertEq(
             separator,
-            0xe195559d9b70b05d0726a7f24d7fdcf906037d65ca4dd8998d7516b987eda7ab
+            0x256e864a569c543568285877c820a2df690cff3cf09c54b7bddc5767f7545ccb
         );
     }
 
