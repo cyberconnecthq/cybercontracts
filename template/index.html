@@ -19,12 +19,38 @@
             justify-content: center;
         }
 
-        #card {
+        .wrapper {
             width: 500px;
             height: 500px;
+            perspective: 2500px;
+            overflow: hidden;
+        }
+        
+        #flip-card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transform-style: preserve-3d;
+        }
+
+        #card-front,
+        #card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+
+        #card-front {
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        #card-back {
+            transform: rotateY(180deg);
         }
 
         #profile {
@@ -45,6 +71,7 @@
             max-width: 227px;
             word-wrap: break-word;
             opacity: 0.3;
+            text-align: left;
         }
 
         svg {
@@ -66,6 +93,10 @@
                 transform: rotateY(0deg);
             }
 
+            80% {
+                transform: rotateY(360deg);
+            }
+
             100% {
                 transform: rotateY(360deg);
             }
@@ -81,8 +112,13 @@
 </head>
 <body>
     <div class="container">
-        <div id="card">
-            <div id="profile"></div>
+        <div class="wrapper">
+            <div id="flip-card">
+                <div id="card-front">
+                    <div id="profile"></div>
+                </div>
+                <div id="card-back"></div>
+            </div>
         </div>
     </div>
     <script type="text/javascript">
@@ -174,7 +210,7 @@
         }
 
         const render = (handle, imageURI, metadata) => {            
-            const svg = d3.select("#profile")
+            const svgFront = d3.select("#profile")
                 .selectAll("svg")
                     .data([null])
                     .join("svg")
@@ -183,21 +219,21 @@
                         .attr("viewbox", `0 0 ${width} ${height}`)
                         .style("overflow", "hidden");
 
-            const background = svg.selectAll(".background")
-            background.data([null])
+            const backgroundFront = svgFront.selectAll(".backgroundFront")
+            backgroundFront.data([null])
                 .join("path")
-                    .classed("background", true)
+                    .classed("backgroundFront", true)
                     .attr("d", () => { 
-                        return "M107 76.0562C107 73.3842 107.644 70.7515 108.876 68.3808L131.238 25.3767C132.956 22.0729 136.371 20 140.095 20H231.358H387.325C391.001 20 393.98 22.9794 393.98 26.6546V450.186C393.98 453.713 392.118 456.979 389.082 458.776L357.14 477.68C354.574 479.199 351.648 480 348.666 480H236.765H113.655C109.979 480 107 477.021 107 473.345V76.0562Z";
+                        return "M393.98 76.0562C393.98 73.3842 393.337 70.7515 392.104 68.3808L369.742 25.3767C368.024 22.0729 364.609 20 360.886 20H269.622H113.655C109.979 20 107 22.9794 107 26.6546V450.186C107 453.713 108.862 456.979 111.898 458.776L143.84 477.68C146.406 479.199 149.332 480 152.314 480H264.215H387.325C391.001 480 393.98 477.021 393.98 473.345V76.0562Z";
                     })
                     .style("fill", color.black);
 
             if(imageURI) {
-                svg.selectAll("defs").remove();
-                svg.selectAll(".placeholderStroke").remove();
-                svg.selectAll(".placeholderImage").remove();
+                svgFront.selectAll("defs").remove();
+                svgFront.selectAll(".placeholderStroke").remove();
+                svgFront.selectAll(".placeholderImage").remove();
 
-                const defs = svg.append("defs");
+                const defs = svgFront.append("defs");
                 defs.append("pattern")
                         .attr("id", "pattern")
                         .attr("width", 1)
@@ -207,7 +243,7 @@
                                 .attr("width", 65)
                                 .attr("height", 60);
 
-                const stroke = svg.selectAll(".stroke");
+                const stroke = svgFront.selectAll(".stroke");
                 stroke.data([null])
                     .join("path")
                         .classed("stroke", true)
@@ -219,7 +255,7 @@
                         .style("stroke", color.white)
                         .style("stroke-width", 5);
             } else {
-                const placeholderStroke = svg.selectAll(".placeholderStroke");
+                const placeholderStroke = svgFront.selectAll(".placeholderStroke");
                 placeholderStroke.data([null])
                     .join("circle")
                         .classed("placeholderStroke", true)
@@ -230,7 +266,7 @@
                         .style("stroke", color.white)
                         .style("stroke-width", 5);
 
-                const placeholderImage = svg.selectAll(".placeholderImage");
+                const placeholderImage = svgFront.selectAll(".placeholderImage");
                 placeholderImage.data([null])
                     .join("path")
                         .classed("placeholderImage", true)
@@ -244,7 +280,7 @@
 
             if(handle) {
                 // Animate card
-                const card = d3.select("#card")
+                const card = d3.select("#flip-card")
                 card.classed("rotateY", "true");
 
                 // Generate QR Code
@@ -268,7 +304,7 @@
                         .style("bottom", "95px")
                         .html(qrcode.svg());
 
-                const link = svg.selectAll(".link");
+                const link = svgFront.selectAll(".link");
                 link.data([null])
                     .join("text")
                         .classed("link", true)
@@ -281,7 +317,7 @@
                         .style("transform", "translate(130px, 438px)")
                         .text(link3Url);
 
-                const propHandle = svg.selectAll(".propHandle");
+                const propHandle = svgFront.selectAll(".propHandle");
                 propHandle.data([null])
                     .join("text")
                         .classed("propHandle", true)
@@ -292,7 +328,7 @@
                         .style("transform", `translate(${width}px, ${height}px)`)
                         .text(handle);
 
-                const bgHandle = svg.selectAll(".bgHandle");
+                const bgHandle = svgFront.selectAll(".bgHandle");
                 bgHandle.data([null])
                     .join("rect")
                         .classed("bgHandle", true)
@@ -304,7 +340,7 @@
                         .attr("transform", "skewX(-25)")
                         .style("fill", color.white);
 
-                const txtHandle = svg.selectAll(".handle");
+                const txtHandle = svgFront.selectAll(".handle");
                 txtHandle.data([null])
                     .join("text")
                         .classed("handle", true)
@@ -317,15 +353,22 @@
                         .style("transform", `translate(217.5px, 436px)`)
                         .text(handle);
 
-                svg.selectAll(".bgHandle")
-                    .transition()
-                    .duration(0)
-                    .attr("width", () => {
-                        const textElem = document.getElementsByClassName("handle")[0];
-                        const bbox = textElem?.getBBox();
-                        const width = bbox ? (bbox.width + 21) : 0;
-                        return width;
-                    });
+                svgFront.selectAll(".bgHandle")
+                    .data([null])
+                    .join("rect")
+                        .classed("bgHandle", true)
+                        .attr("width", () => {
+                            const textElem = document.getElementsByClassName("handle")[0];
+                            const bbox = textElem?.getBBox();
+                            const width = bbox ? (bbox.width + 21) : 0;
+                            return width;
+                        })
+                        .attr("height", 25)
+                        .attr("rx", 4)
+                        .attr("x", 410)
+                        .attr("y", 422)
+                        .attr("transform", "skewX(-25)")
+                        .style("fill", color.white);
             }
 
             if(metadata) {               
@@ -334,7 +377,7 @@
                 const organization = metadata.organization;
                 const nameType = metadata.name_type;
 
-                const propNametag = svg.selectAll(".propNametag");
+                const propNametag = svgFront.selectAll(".propNametag");
                 propNametag.data([null])
                     .join("text")
                         .classed("propNametag", true)
@@ -356,14 +399,7 @@
                         .html(() => {
                             if(!name) return;
                             const fontSize = computeFontSize("propNametag", 26, 0, 227);
-                            const output = `
-                                <span style="font-size: ${fontSize}px">
-                                    ${nameType === "ENS" ? name.slice(0, -4) : name}
-                                </span>
-                                <span style="font-size: ${fontSize}px">
-                                    ${nameType === "ENS" ? ".eth" : ""}
-                                </span>
-                            `;
+                            const output = `<span style="font-size: ${fontSize}px">${nameType === "ENS" ? name.slice(0, -4) : name}</span><span style="font-size: ${fontSize}px">${nameType === "ENS" ? ".eth" : ""}</span>`;
                             return output;
                         });
 
@@ -386,6 +422,34 @@
                                 return output;
                             });
             }
+
+            // Render the back of the card
+            const svgBack = d3.select("#card-back")
+                .selectAll("svg")
+                    .data([null])
+                    .join("svg")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .attr("viewbox", `0 0 ${width} ${height}`)
+                        .style("overflow", "hidden");
+
+            const backgroundBack = svgBack.selectAll(".backgroundBack")
+            backgroundBack.data([null])
+                .join("path")
+                    .classed("backgroundBack", true)
+                    .attr("d", () => { 
+                        return "M107 76.0562C107 73.3842 107.644 70.7515 108.876 68.3808L131.238 25.3767C132.956 22.0729 136.371 20 140.095 20H231.358H387.325C391.001 20 393.98 22.9794 393.98 26.6546V450.186C393.98 453.713 392.118 456.979 389.082 458.776L357.14 477.68C354.574 479.199 351.648 480 348.666 480H236.765H113.655C109.979 480 107 477.021 107 473.345V76.0562Z";
+                    })
+                    .style("fill", color.black);
+
+            const link3Logo = svgBack.selectAll(".link3Logo")
+            link3Logo.data([null])
+                .join("path")
+                    .classed("link3Logo", true)
+                    .attr("d", () => { 
+                        return "M267.264 250.128L278.919 264.621C279.013 264.735 279.131 264.827 279.265 264.889C279.4 264.95 279.546 264.981 279.694 264.977H286.22C286.382 264.994 286.545 264.964 286.691 264.89C286.836 264.816 286.957 264.701 287.038 264.56C287.119 264.419 287.158 264.257 287.149 264.094C287.141 263.931 287.085 263.774 286.989 263.643L276.137 250.128C275.871 249.799 275.733 249.385 275.747 248.962C275.762 248.539 275.928 248.136 276.216 247.826L286.785 236.386C286.896 236.258 286.966 236.1 286.985 235.931C287.004 235.763 286.972 235.593 286.892 235.443C286.813 235.294 286.689 235.172 286.539 235.094C286.389 235.016 286.218 234.985 286.05 235.006H279.654C279.517 235.004 279.38 235.031 279.254 235.085C279.127 235.138 279.013 235.217 278.919 235.317L267.344 247.82C267.056 248.132 266.891 248.536 266.876 248.959C266.862 249.383 266.999 249.797 267.264 250.128ZM219.424 235.007H215.296C214.562 235.007 213.967 235.602 213.967 236.336V263.649C213.967 264.383 214.562 264.978 215.296 264.978H219.424C220.158 264.978 220.753 264.383 220.753 263.649V236.336C220.753 235.602 220.158 235.007 219.424 235.007ZM317.451 251.078V248.449C317.451 247.693 316.839 247.08 316.083 247.08H299.028C298.272 247.08 297.659 247.693 297.659 248.449V251.078C297.659 251.834 298.272 252.447 299.028 252.447H316.083C316.839 252.447 317.451 251.834 317.451 251.078ZM317.451 260.974V263.603C317.451 264.359 316.839 264.972 316.083 264.972H299.028C298.272 264.972 297.659 264.359 297.659 263.603V260.974C297.659 260.218 298.272 259.605 299.028 259.605H316.083C316.839 259.605 317.451 260.218 317.451 260.974ZM317.446 239.005V236.375C317.446 235.619 316.833 235.007 316.077 235.007H299.022C298.267 235.007 297.654 235.619 297.654 236.375V239.005C297.654 239.76 298.267 240.373 299.022 240.373H316.077C316.833 240.373 317.446 239.76 317.446 239.005ZM246.506 235.007C250.69 235.007 256.283 237.93 256.379 248.301V248.352V263.847C256.379 264.146 256.26 264.434 256.048 264.646C255.835 264.858 255.548 264.978 255.248 264.978H250.724C250.424 264.978 250.136 264.858 249.924 264.646C249.712 264.434 249.593 264.146 249.593 263.847V249.709C249.593 241.793 245.702 241.793 243.938 241.793H239.98C239.68 241.793 239.392 241.912 239.18 242.124C238.968 242.336 238.849 242.624 238.849 242.924V263.847C238.849 264.146 238.73 264.434 238.518 264.646C238.305 264.858 238.018 264.978 237.718 264.978H233.194C232.894 264.978 232.606 264.858 232.394 264.646C232.182 264.434 232.063 264.146 232.063 263.847V238.903C232.062 238.391 232.162 237.884 232.358 237.411C232.553 236.938 232.84 236.508 233.202 236.146C233.564 235.784 233.994 235.497 234.467 235.302C234.94 235.106 235.447 235.006 235.959 235.007H246.506ZM188.298 235.472C188 235.174 187.596 235.007 187.174 235.007H183.589C183.168 235.007 182.763 235.174 182.465 235.472C182.167 235.77 182 236.174 182 236.596V251.92C182 259.498 185.676 265 195.074 265H201.391C201.812 265 202.216 264.833 202.514 264.535C202.812 264.237 202.98 263.833 202.98 263.411V259.402C202.98 258.98 202.812 258.576 202.514 258.278C202.216 257.98 201.812 257.813 201.391 257.813H195.442C189.894 257.813 188.763 255.517 188.763 251.864V236.596C188.763 236.174 188.596 235.77 188.298 235.472Z";
+                    })
+                    .style("fill", color.white);
         }
 
         const getProfile = async () => {
@@ -425,11 +489,6 @@
             // Render to generate profile SVG
             const { handle, imageURI, metadata } = await getProfile();
             render(handle, imageURI, metadata);
-
-            setInterval(async() => {
-                const { handle, imageURI, metadata } = await getProfile();
-                render(handle, imageURI, metadata);
-            }, 5000);
         }
 
         window.addEventListener("load", load);
