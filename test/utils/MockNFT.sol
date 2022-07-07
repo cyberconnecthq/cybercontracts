@@ -22,6 +22,6 @@ contract MockNFT is CyberNFTBase {
         external
         initializer
     {
-        super._initialize(_name, _symbol);
+        super._initialize(_name, _symbol, "1");
     }
 }

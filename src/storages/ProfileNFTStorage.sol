@@ -7,6 +7,7 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 abstract contract ProfileNFTStorage {
     // constant
     uint256 internal constant _VERSION = 1;
+    string internal constant _VERSION_STR = "1";
 
     // storage
     string internal _animationTemplate;

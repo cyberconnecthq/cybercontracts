@@ -7,6 +7,7 @@ import "forge-std/Test.sol";
 import "../src/libraries/Constants.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract BoxNFTTest is Test {
     BoxNFT internal token;
@@ -14,8 +15,14 @@ contract BoxNFTTest is Test {
     address constant engine = address(0xe);
 
     function setUp() public {
-        token = new BoxNFT(engine);
-        token.initialize("TestBox", "TB");
+        BoxNFT impl = new BoxNFT(engine);
+        bytes memory data = abi.encodeWithSelector(
+            BoxNFT.initialize.selector,
+            "TestBox",
+            "TB"
+        );
+        ERC1967Proxy engineProxy = new ERC1967Proxy(address(impl), data);
+        token = BoxNFT(address(engineProxy));
     }
 
     function testBasic() public {

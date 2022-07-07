@@ -37,6 +37,7 @@ contract BoxNFT is
     constructor(address _engine) {
         require(_engine != address(0), "Engine address cannot be 0");
         ENGINE = _engine;
+        _disableInitializers();
     }
 
     /**
@@ -49,7 +50,7 @@ contract BoxNFT is
         external
         initializer
     {
-        CyberNFTBase._initialize(_name, _symbol);
+        CyberNFTBase._initialize(_name, _symbol, _VERSION_STR);
         // start with paused
         _pause();
     }

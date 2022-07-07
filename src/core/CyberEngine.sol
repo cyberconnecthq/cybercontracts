@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
-import "forge-std/console.sol";
+
 import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
@@ -243,6 +243,13 @@ contract CyberEngine is
         _setFeeByTier(DataTypes.Tier.Tier5, Constants._INITIAL_FEE_TIER5);
     }
 
+    /**
+     * @notice Checks if the EIP712 signature is valid.
+     *
+     * @param digest The data digest
+     * @param expectedSigner The expected signer address.
+     * @param sig The signature data type
+     */
     function _requiresExpectedSigner(
         bytes32 digest,
         address expectedSigner,
@@ -704,6 +711,4 @@ contract CyberEngine is
 
         _;
     }
-
-    //
 }

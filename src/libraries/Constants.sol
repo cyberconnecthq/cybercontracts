@@ -9,6 +9,10 @@ library Constants {
         bytes4(keccak256(bytes("_authorizeUpgrade(address)")));
 
     // EIP712 TypeHash
+    bytes32 internal constant _PERMIT_TYPEHASH =
+        keccak256(
+            "permit(address spender,uint256 tokenId,uint256 nonce,uint256 deadline)"
+        );
     bytes32 internal constant _REGISTER_TYPEHASH =
         keccak256(
             "register(address to,string handle,string avatar,string metadata,uint256 nonce,uint256 deadline)"

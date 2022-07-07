@@ -11,7 +11,7 @@ contract MockEngine is CyberEngine {
         bytes32 digest,
         DataTypes.EIP712Signature calldata sig
     ) public view {
-        super._requiresExpectedSigner(digest, signer, sig);
+        _requiresExpectedSigner(digest, signer, sig);
     }
 
     function requireEnoughFee(string calldata handle, uint256 amount)
