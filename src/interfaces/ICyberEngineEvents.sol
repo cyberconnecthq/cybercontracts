@@ -10,7 +10,7 @@ interface ICyberEngineEvents {
      *
      * @param owner Owner to set for CyberEngine.
      * @param profileAddress Profile address to set for CyberEngine.
-     * @param boxAddress Box Address animation url to set for CyberEngine.
+     * @param boxAddress Box Address to set for CyberEngine.
      * @param subscribeNFTBeacon Subscribe NFT beacon to set for CyberEngine.
      */
     event Initialize(

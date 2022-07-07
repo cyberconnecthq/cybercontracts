@@ -317,7 +317,7 @@ contract CyberEngine is
     }
 
     /**
-     * @notice The subscribtion functionality.
+     * @notice The subscription functionality.
      *
      * @param profileIds The profile ids to subscribed to.
      * @param subDatas The subscription data set.
@@ -333,7 +333,7 @@ contract CyberEngine is
     }
 
     /**
-     * @notice The subscribtion functionality.
+     * @notice The subscription functionality.
      *
      * @param sender The sender address.
      * @param profileIds The profile ids to subscribed to.
