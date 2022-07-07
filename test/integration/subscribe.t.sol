@@ -36,7 +36,6 @@ contract SubscribeTest is Test, ICyberEngineEvents {
         LibFixture.auth(authority);
         engine = CyberEngine(address(proxy));
         bobProfileId = LibFixture.registerBobProfile(engine);
-        subNFT = new SubscribeNFT(address(proxy), profileAddress);
         LibFixture.auth(authority);
     }
 
@@ -45,10 +44,6 @@ contract SubscribeTest is Test, ICyberEngineEvents {
         uint256[] memory ids = new uint256[](1);
         ids[0] = bobProfileId;
         bytes[] memory data = new bytes[](1);
-
-        // mint bob sub nft
-        vm.prank(address(engine));
-        uint256 bobSubId = subNFT.mint(bob);
 
         // alice subscribes to bob
         vm.expectEmit(true, false, false, true);
