@@ -13,7 +13,7 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { CyberEngine } from "./CyberEngine.sol";
-import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
+import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 
 /**
  * @title Profile NFT
@@ -40,9 +40,11 @@ contract ProfileNFT is
         _;
     }
 
-    constructor(address _engine) {
+    constructor(address _engine, address _descriptor) {
         require(_engine != address(0), "Engine address cannot be 0");
+        require(_descriptor != address(0), "Descriptor address cannot be 0");
         ENGINE = _engine;
+        DESCRIPTOR = _descriptor;
         _disableInitializers();
     }
 
@@ -143,31 +145,10 @@ contract ProfileNFT is
         } else {
             subscribers = CyberNFTBase(subscribeNFT).totalSupply();
         }
+
         return
-            string(
-                abi.encodePacked(
-                    "data:application/json;base64,",
-                    Base64.encode(
-                        abi.encodePacked(
-                            '{"name":"',
-                            formattedName,
-                            '","description":"CyberConnect profile for ',
-                            formattedName,
-                            '","image":"',
-                            StaticNFTSVG.draw(handle),
-                            '","animation_url":"',
-                            animationURL,
-                            '","attributes":',
-                            _genAttributes(
-                                LibString.toString(tokenId),
-                                LibString.toString(bytes(handle).length),
-                                LibString.toString(subscribers),
-                                formattedName
-                            ),
-                            "}"
-                        )
-                    )
-                )
+            IProfileNFTDescriptor(DESCRIPTOR).tokenURI(
+                IProfileNFTDescriptor.ConstructTokenURIParams({tokenId, })
             );
     }
 
