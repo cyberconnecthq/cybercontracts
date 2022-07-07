@@ -359,25 +359,9 @@ contract ProfileNFT is
 
     // @inheritdoc IProfileNFT
     // sets a primary profile id for the user
-<<<<<<< HEAD
     function setPrimaryProfile(uint256 profileId) public override onlyEngine {
         _requireMinted(profileId);
         _addressToPrimaryProfile[msg.sender] = profileId;
-=======
-    function setPrimaryProfile(uint256 profileId)
-        external
-        override
-        whenNotPaused
-    {
-        _setPrimaryProfile(msg.sender, profileId);
-    }
-
-    // verifies the user, and whether the user is the owner of the profile id
-    function _setPrimaryProfile(address user, uint256 profileId) internal {
-        require(_exists(profileId), "ERC721: invalid token ID");
-        require(user == ownerOf(profileId), "User does not own profileId");
-        _addressToPrimaryProfile[user] = profileId;
->>>>>>> 104b9c3 (feat: Primary Profile NFT)
     }
 
     // @inheritdoc IProfileNFT
