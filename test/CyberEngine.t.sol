@@ -27,6 +27,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     RolesAuthority internal rolesAuthority;
     address internal profileAddress = address(0xA);
     address internal boxAddress = address(0xB);
+    address internal essenceBeacon = address(0xC);
     address internal subscribeBeacon;
 
     address constant alice = address(0xA11CE);
@@ -58,6 +59,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
             profileAddress,
             boxAddress,
             subscribeBeacon,
+            essenceBeacon,
             rolesAuthority
         );
         ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
@@ -94,6 +96,12 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
         engine.setBoxAddress(alice);
+    }
+
+    function testCannotSetEssenceBeaconAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        vm.prank(alice);
+        engine.setEssenceNFTBeacon(alice);
     }
 
     function testCannotSetFeeAsNonGov() public {
@@ -142,6 +150,16 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         emit SetBoxAddress(boxAddress, alice);
 
         engine.setBoxAddress(alice);
+    }
+
+    function testSetEssenceBeaconGov() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetEssenceNFTBeacon(essenceBeacon, alice);
+
+        engine.setEssenceNFTBeacon(alice);
     }
 
     function testSetFeeGov() public {
@@ -566,6 +584,11 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.allowSubscribeMw(address(0), true);
     }
 
+    function testCannotAllowEssenceMwAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        engine.allowEssenceMw(address(0), true);
+    }
+
     function testAllowSubscribeMwAsGov() public {
         address mw = address(0xCA11);
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
@@ -575,6 +598,17 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.allowSubscribeMw(mw, true);
 
         assertEq(engine.isSubscribeMwAllowed(mw), true);
+    }
+
+    function testAllowEssenceMwAsGov() public {
+        address mw = address(0xCA11);
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit AllowEssenceMw(mw, false, true);
+        engine.allowEssenceMw(mw, true);
+
+        assertEq(engine.isEssenceMwAllowed(mw), true);
     }
 
     function testSetAniTemplateGov() public {

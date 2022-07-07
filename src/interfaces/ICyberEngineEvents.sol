@@ -12,12 +12,14 @@ interface ICyberEngineEvents {
      * @param profileAddress Profile address to set for CyberEngine.
      * @param boxAddress Box Address to set for CyberEngine.
      * @param subscribeNFTBeacon Subscribe NFT beacon to set for CyberEngine.
+     * @param essenceNFTBeacon Essence NFT beacon to set for CyberEngine.
      */
     event Initialize(
         address indexed owner,
         address profileAddress,
         address boxAddress,
-        address subscribeNFTBeacon
+        address subscribeNFTBeacon,
+        address essenceNFTBeacon
     );
 
     /**
@@ -48,6 +50,17 @@ interface ICyberEngineEvents {
     event SetBoxAddress(
         address indexed preBoxAddr,
         address indexed newBoxAddress
+    );
+
+    /**
+     * @dev Emitted when a new essence beacon address has been set.
+     *
+     * @param preEssenceNFTBeacon The previous essence beacon address.
+     * @param newEssenceNFTBeacon The newly set essence beacon address.
+     */
+    event SetEssenceNFTBeacon(
+        address indexed preEssenceNFTBeacon,
+        address indexed newEssenceNFTBeacon
     );
 
     /**
@@ -179,6 +192,19 @@ interface ICyberEngineEvents {
      * @param newAllowed The newly set allow state.
      */
     event AllowSubscribeMw(
+        address indexed mw,
+        bool indexed preAllowed,
+        bool indexed newAllowed
+    );
+
+    /**
+     * @notice Emitted when a essence middleware has been allowed.
+     *
+     * @param mw The middleware address.
+     * @param preAllowed The previously allow state.
+     * @param newAllowed The newly set allow state.
+     */
+    event AllowEssenceMw(
         address indexed mw,
         bool indexed preAllowed,
         bool indexed newAllowed

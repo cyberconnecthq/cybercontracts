@@ -46,12 +46,14 @@ contract CyberEngine is
      * @param _profileAddress Profile address to set for CyberEngine.
      * @param _boxAddress Box Address animation url to set for CyberEngine.
      * @param _subscribeNFTBeacon Subscribe NFT beacon to set for CyberEngine.
+     * @param _essenceNFTBeacon Subscribe NFT beacon to set for CyberEngine.
      */
     function initialize(
         address _owner,
         address _profileAddress,
         address _boxAddress,
         address _subscribeNFTBeacon,
+        address _essenceNFTBeacon,
         RolesAuthority _rolesAuthority
     ) external initializer {
         Auth.__Auth_Init(_owner, _rolesAuthority);
@@ -61,13 +63,15 @@ contract CyberEngine is
         profileAddress = _profileAddress;
         boxAddress = _boxAddress;
         subscribeNFTBeacon = _subscribeNFTBeacon;
+        essenceNFTBeacon = _essenceNFTBeacon;
         _setInitialFees();
 
         emit Initialize(
             _owner,
             _profileAddress,
             _boxAddress,
-            _subscribeNFTBeacon
+            _subscribeNFTBeacon,
+            _essenceNFTBeacon
         );
     }
 
@@ -111,6 +115,23 @@ contract CyberEngine is
         boxAddress = _boxAddress;
 
         emit SetBoxAddress(preBoxAddr, _boxAddress);
+    }
+
+    /**
+     * @notice Sets the new essence beacon address.
+     *
+     * @param _essenceNFTBeacon The essence beacon address.
+     * @dev The address can not be zero address.
+     */
+    function setEssenceNFTBeacon(address _essenceNFTBeacon)
+        external
+        requiresAuth
+    {
+        require(_essenceNFTBeacon != address(0), "zero address essence beacon");
+        address preEssenceNFTBeacon = essenceNFTBeacon;
+        essenceNFTBeacon = _essenceNFTBeacon;
+
+        emit SetEssenceNFTBeacon(preEssenceNFTBeacon, _essenceNFTBeacon);
     }
 
     /**
@@ -671,6 +692,28 @@ contract CyberEngine is
      */
     function isSubscribeMwAllowed(address mw) external view returns (bool) {
         return _subscribeMwAllowlist[mw];
+    }
+
+    /**
+     * @notice Allows the essence middleware.
+     *
+     * @param mw The middleware address.
+     * @param allowed The allowance state.
+     */
+    function allowEssenceMw(address mw, bool allowed) external requiresAuth {
+        bool preAllowed = _essenceMwAllowlist[mw];
+        _essenceMwAllowlist[mw] = allowed;
+        emit AllowEssenceMw(mw, preAllowed, allowed);
+    }
+
+    /**
+     * @notice Checks if the essence middleware is allowed.
+     *
+     * @param mw The middleware address.
+     * @return bool The allowance state.
+     */
+    function isEssenceMwAllowed(address mw) external view returns (bool) {
+        return _essenceMwAllowlist[mw];
     }
 
     /**

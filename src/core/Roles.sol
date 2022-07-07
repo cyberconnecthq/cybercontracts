@@ -46,6 +46,12 @@ contract Roles is RolesAuthority {
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
+            CyberEngine.setEssenceNFTBeacon.selector,
+            true
+        );
+        setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            engine,
             CyberEngine.setFeeByTier.selector,
             true
         );
@@ -65,6 +71,12 @@ contract Roles is RolesAuthority {
             Constants._ENGINE_GOV_ROLE,
             engine,
             CyberEngine.allowSubscribeMw.selector,
+            true
+        );
+        setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            engine,
+            CyberEngine.allowEssenceMw.selector,
             true
         );
         setRoleCapability(

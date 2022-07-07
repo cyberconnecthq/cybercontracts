@@ -48,6 +48,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
 
         address impl = address(new SubscribeNFT(engineAddr, profileAddress));
         subscribeBeacon = address(new UpgradeableBeacon(impl, address(engine)));
+        address essenceBeacon = address(0);
 
         bytes memory data = abi.encodeWithSelector(
             CyberEngine.initialize.selector,
@@ -55,6 +56,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             profileAddress,
             boxAddress,
             subscribeBeacon,
+            essenceBeacon,
             authority
         );
         ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
