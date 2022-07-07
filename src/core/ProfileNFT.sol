@@ -85,6 +85,11 @@ contract ProfileNFT is
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         _metadataById[_totalCount] = params.metadata;
+
+        if (_addressToPrimaryProfile[msg.sender] == 0) {
+            setPrimaryProfile(id);
+        }
+
         return id;
     }
 
@@ -351,5 +356,24 @@ contract ProfileNFT is
         uint256 id
     ) public override whenNotPaused {
         super.transferFrom(from, to, id);
+    }
+
+    // @inheritdoc IProfileNFT
+    // sets a primary profile id for the user
+    function setPrimaryProfile(uint256 profileId) public override onlyEngine {
+        _requireMinted(profileId);
+        _addressToPrimaryProfile[msg.sender] = profileId;
+    }
+
+    // @inheritdoc IProfileNFT
+    // returns the primary profile id associated with the user
+    function getPrimaryProfile(address user)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        uint256 primaryProfile = _addressToPrimaryProfile[user];
+        return primaryProfile;
     }
 }
