@@ -22,7 +22,8 @@
         .wrapper {
             width: 500px;
             height: 500px;
-            perspective: 2000px;
+            perspective: 2500px;
+            overflow: hidden;
         }
         
         #flip-card {
@@ -70,6 +71,7 @@
             max-width: 227px;
             word-wrap: break-word;
             opacity: 0.3;
+            text-align: left;
         }
 
         svg {
@@ -352,14 +354,21 @@
                         .text(handle);
 
                 svgFront.selectAll(".bgHandle")
-                    .transition()
-                    .duration(0)
-                    .attr("width", () => {
-                        const textElem = document.getElementsByClassName("handle")[0];
-                        const bbox = textElem?.getBBox();
-                        const width = bbox ? (bbox.width + 21) : 0;
-                        return width;
-                    });
+                    .data([null])
+                    .join("rect")
+                        .classed("bgHandle", true)
+                        .attr("width", () => {
+                            const textElem = document.getElementsByClassName("handle")[0];
+                            const bbox = textElem?.getBBox();
+                            const width = bbox ? (bbox.width + 21) : 0;
+                            return width;
+                        })
+                        .attr("height", 25)
+                        .attr("rx", 4)
+                        .attr("x", 410)
+                        .attr("y", 422)
+                        .attr("transform", "skewX(-25)")
+                        .style("fill", color.white);
             }
 
             if(metadata) {               
