@@ -148,27 +148,7 @@ contract ProfileNFT is
 
         return
             IProfileNFTDescriptor(DESCRIPTOR).tokenURI(
-                IProfileNFTDescriptor.ConstructTokenURIParams({tokenId, })
-            );
-    }
-
-    function _genAttributes(
-        string memory tokenId,
-        string memory length,
-        string memory subscribers,
-        string memory name
-    ) private pure returns (bytes memory) {
-        return
-            abi.encodePacked(
-                '[{"trait_type":"id","value":"',
-                tokenId,
-                '"},{"trait_type":"length","value":"',
-                length,
-                '"},{"trait_type":"subscribers","value":"',
-                subscribers,
-                '"},{"trait_type":"handle","value":"',
-                name,
-                '"}]'
+                IProfileNFTDescriptor.ConstructTokenURIParams({tokenId, handle, imageURL, animationURL, subscribers})
             );
     }
 

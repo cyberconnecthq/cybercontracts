@@ -10,9 +10,10 @@ import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 /**
  * @title Profile NFT Descriptor
  * @author CyberConnect
- * @notice This contract is used to create Box NFT.
+ * @notice This contract is used to create profile NFT token uri.
  */
 contract ProfileNFTDescriptor is IProfileNFTDescriptor {
+    /// @inheritdoc IProfileNFTDescriptor
     function tokenURI(ConstructTokenURIParams calldata params)
         external
         view
