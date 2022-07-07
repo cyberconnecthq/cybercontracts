@@ -3040,6 +3040,13 @@ punycode@^2.1.0:
   resolved "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
+puppeteer-cluster@^0.23.0:
+  version "0.23.0"
+  resolved "https://registry.yarnpkg.com/puppeteer-cluster/-/puppeteer-cluster-0.23.0.tgz#da3f5c07de8a3069962bd9af6ee1767ba08fdbaf"
+  integrity sha512-108terIWDzPrQopmoYSPd5yDoy3FGJ2dNnoGMkGYPs6xtkdhgaECwpfZkzaRToMQPZibUOz0/dSSGgPEdXEhkQ==
+  dependencies:
+    debug "^4.3.3"
+
 puppeteer@^15.3.0:
   version "15.3.0"
   resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-15.3.0.tgz#2d79200cb72d938dfc7af4fdedaa03c04e7ace14"

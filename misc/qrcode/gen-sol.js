@@ -1,30 +1,59 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-const writeTemplate = async (length, url) => {
+const writeTemplate = async (i, batch) => {
   const file = await fs.readFile(
     path.join("./misc/qrcode", "QRSVG.t.sol.template"),
     "utf8"
   );
-  let out = file.replace(/REPLACE_ME/g, "https://link3.to/" + url);
-  out = out.replace(/NAME/g, url);
-  const dir = path.join("./test/qrcode/");
-  await fs.rm(dir, { recursive: true, force: true });
+  const urls = batch.map((str) => `https://link3.to/${str}`);
+  let out = file.replace(/URLS/g, JSON.stringify(urls));
+  out = out.replace(/NAMES/g, JSON.stringify(batch));
 
-  const output = path.join(dir, `QRSVG-${length}-${url}.t.sol`);
+  const output = path.join(dir, `QRSVG-${i}-${batch.length}.t.sol`);
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(output, out);
   return { output, dir };
 };
 
+const dir = path.join("./test/qrcode/");
+
 const main = async () => {
-  // TODO: make sure to include all characters
+  try {
+    const exists = await fs.access(dir, 0);
+    if (exists) {
+      await fs.rm(dir, { recursive: true, force: true });
+    }
+  } catch (err) {}
   const all = [];
-  for (let j = 1; j <= 27; j++) { // 27 is the max length of the link3 handle
-    for (let i = 0; i < 1; i++) { // how many tries for each length
+  let batch = [];
+  let counter = 0;
+  const length = 27;
+  const iteration = 100;
+  let total = [];
+  for (let j = 1; j <= length; j++) {
+    // 27 is the max length of the link3 handle
+    for (let i = 0; i < iteration; i++) {
+      // how many tries for each length
       const str = randomString(j, wordlist);
-      all.push(writeTemplate(j, str));
+      batch.push(str);
+      if (batch.length == 40) {
+        all.push(writeTemplate(counter, batch));
+        total = total.concat(batch);
+        batch = [];
+        counter++;
+      }
     }
   }
+  if (batch) {
+    all.push(writeTemplate(counter, batch));
+    total = total.concat(batch);
+  }
+  const toFindDuplicates = (arry) =>
+    arry.filter((item, index) => arry.indexOf(item) !== index);
+  const duplicates = toFindDuplicates(total);
+  console.log("random tests:", total.length);
+  console.log("duplicate", duplicates.length);
+  console.log("total unique tests", total.length - duplicates.length);
   return Promise.all(all);
 };
 function randomString(length, chars) {

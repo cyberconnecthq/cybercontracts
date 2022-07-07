@@ -1,13 +1,13 @@
 import * as fs from "fs/promises";
 import * as path from "path";
+const dir = path.join("./misc/qrcode/html/");
+
 const writeTemplate = async (url, content) => {
   const file = await fs.readFile(
     path.join("./misc/qrcode/", "qr-test.html.template"),
     "utf8"
   );
   const out = file.replace(/REPLACE_ME/g, content);
-  const dir = path.join("./misc/qrcode/html/");
-  await fs.rm(dir, { recursive: true, force: true });
 
   const output = path.join(dir, `${url}.html`);
   await fs.mkdir(dir, { recursive: true });
@@ -18,8 +18,16 @@ const writeTemplate = async (url, content) => {
 const p = "./misc/qrcode/svg";
 
 const main = async () => {
+  try {
+    const exists = await fs.access(dir, 0);
+    if (exists) {
+      await fs.rm(dir, { recursive: true, force: true });
+    }
+  } catch (err) {
+  }
   const files = await fs.readdir(p);
-  console.log(files);
+  console.log('total tests:', files.length)
+  // console.log(files);
   const all = [];
   const a = async (aa) => {
     const content = await fs.readFile(path.join(p, aa));

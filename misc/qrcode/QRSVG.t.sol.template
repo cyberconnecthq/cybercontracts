@@ -6,12 +6,20 @@ import "forge-std/Test.sol";
 import { QRSVG } from "../../src/libraries/QRSVG.sol";
 import "forge-std/console.sol";
 
-contract QRSVGTest is Test {
-    string url = "REPLACE_ME";
-    string name = "NAME";
+contract QRSVGIntegrationTest is Test {
+    string[] names = NAMES;
+    string[] urls = URLS;
 
     function testGenerateQR() public {
-        string memory code = QRSVG.generateQRCode(url);
-        vm.writeFile(string(abi.encodePacked("./misc/qrcode/svg/", name)), code);
+        assert(names.length == urls.length);
+        for (uint256 i = 0; i < names.length; i++) {
+            string memory name = names[i];
+            string memory url = urls[i];
+            string memory code = QRSVG.generateQRCode(url);
+            vm.writeFile(
+                string(abi.encodePacked("./misc/qrcode/svg/", name)),
+                code
+            );
+        }
     }
 }
