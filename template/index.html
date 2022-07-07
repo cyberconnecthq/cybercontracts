@@ -219,10 +219,10 @@
                         .attr("viewbox", `0 0 ${width} ${height}`)
                         .style("overflow", "hidden");
 
-            const background = svgFront.selectAll(".background")
-            background.data([null])
+            const backgroundFront = svgFront.selectAll(".backgroundFront")
+            backgroundFront.data([null])
                 .join("path")
-                    .classed("background", true)
+                    .classed("backgroundFront", true)
                     .attr("d", () => { 
                         return "M393.98 76.0562C393.98 73.3842 393.337 70.7515 392.104 68.3808L369.742 25.3767C368.024 22.0729 364.609 20 360.886 20H269.622H113.655C109.979 20 107 22.9794 107 26.6546V450.186C107 453.713 108.862 456.979 111.898 458.776L143.84 477.68C146.406 479.199 149.332 480 152.314 480H264.215H387.325C391.001 480 393.98 477.021 393.98 473.345V76.0562Z";
                     })
