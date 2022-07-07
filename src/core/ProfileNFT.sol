@@ -13,7 +13,7 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { CyberEngine } from "./CyberEngine.sol";
-import { QRSVG } from "../libraries/QRSVG.sol";
+import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
 
 /**
  * @title Profile NFT
@@ -150,7 +150,7 @@ contract ProfileNFT is
                             '","description":"CyberConnect profile for ',
                             formattedName,
                             '","image":"',
-                            imageURL,
+                            StaticNFTSVG.draw(handle),
                             '","animation_url":"',
                             animationURL,
                             '","attributes":',
