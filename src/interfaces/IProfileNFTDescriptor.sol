@@ -3,21 +3,35 @@
 pragma solidity 0.8.14;
 
 interface IProfileNFTDescriptor {
-    /**
-     * @notice Mints the Box NFT.
-     *
-     * @param _to The recipient address.
-     * @return uint256 The token id.
-     */
-
     struct ConstructTokenURIParams {
         uint256 tokenId;
         string handle;
-        string imageURL;
-        string animationURL;
         uint256 subscribers;
     }
 
+    /**
+     * @notice Emitted when a new animation template has been set.
+     *
+     * @param newTemplate The newly set animation template.
+     */
+    event SetAnimationTemplate(string indexed newTemplate);
+
+    function setAnimationTemplate(string calldata template)
+        external
+        view
+        returns (string memory);
+
+    function getAnimationTemplate(string calldata template)
+        external
+        view
+        returns (string memory);
+
+    /**
+     * @notice Generate the Profile NFT Token URI.
+     *
+     * @param params The dependences of token URI.
+     * @return string The token URI.
+     */
     function tokenURI(ConstructTokenURIParams calldata params)
         external
         view

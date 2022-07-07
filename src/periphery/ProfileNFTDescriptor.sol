@@ -2,10 +2,12 @@
 
 pragma solidity 0.8.14;
 
-import { QRSVG } from "../libraries/QRSVG.sol";
+import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
 import { LibString } from "../libraries/LibString.sol";
 import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
+import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
+import { CyberEngine } from "./CyberEngine.sol";
 
 /**
  * @title Profile NFT Descriptor
@@ -13,6 +15,49 @@ import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
  * @notice This contract is used to create profile NFT token uri.
  */
 contract ProfileNFTDescriptor is IProfileNFTDescriptor {
+    address public immutable ENGINE;
+    string public _animationTemplate;
+
+    constructor(address engine) {
+        require(engine != address(0), "Engine address cannot be 0");
+        ENGINE = engine;
+        _disableInitializers();
+    }
+
+    /**
+     * @notice Initializes the Profile NFT Descriptor.
+     *
+     * @param animationTemplate Template animation url to set for the Profile NFT.
+     */
+    function initialize(
+        string calldata _animationTemplate,
+    ) external initializer {
+        _animationTemplate = animationTemplate;
+        // start with paused
+        _pause();
+    }
+
+    /// @inheritdoc IProfileNFTDescriptor
+    function setAnimationTemplate(string calldata template)
+        external
+        override
+        onlyEngine
+    {
+        _animationTemplate = template;
+
+        emit SetAnimationTemplate(template)
+    }
+
+    /// @inheritdoc IProfileNFTDescriptor
+    function getAnimationTemplate()
+        external
+        view
+        override
+        returns (string memory)
+    {
+        return _animationTemplate;
+    }
+
     /// @inheritdoc IProfileNFTDescriptor
     function tokenURI(ConstructTokenURIParams calldata params)
         external
@@ -22,6 +67,10 @@ contract ProfileNFTDescriptor is IProfileNFTDescriptor {
     {
         string memory formattedName = string(
             abi.encodePacked("@", params.handle)
+        );
+
+        string memory animationURL = string(
+            abi.encodePacked(_animationTemplate, "?handle=", handle)
         );
 
         return
@@ -35,9 +84,9 @@ contract ProfileNFTDescriptor is IProfileNFTDescriptor {
                             '","description":"CyberConnect profile for ',
                             formattedName,
                             '","image":"',
-                            params.imageURL,
+                            StaticNFTSVG.draw(handle),
                             '","animation_url":"',
-                            params.animationURL,
+                            animationURL,
                             '","attributes":',
                             genAttributes(
                                 LibString.toString(params.tokenId),

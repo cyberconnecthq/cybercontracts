@@ -10,8 +10,7 @@ abstract contract ProfileNFTStorage {
     string internal constant _VERSION_STR = "1";
 
     // storage
-    string internal _animationTemplate;
-    string internal _imageTemplate;
+    address internal _profileNFTDescriptor;
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
     mapping(uint256 => string) internal _metadataById;

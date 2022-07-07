@@ -40,11 +40,9 @@ contract ProfileNFT is
         _;
     }
 
-    constructor(address _engine, address _descriptor) {
+    constructor(address _engine) {
         require(_engine != address(0), "Engine address cannot be 0");
-        require(_descriptor != address(0), "Descriptor address cannot be 0");
         ENGINE = _engine;
-        DESCRIPTOR = _descriptor;
         _disableInitializers();
     }
 
@@ -60,11 +58,11 @@ contract ProfileNFT is
         string calldata name,
         string calldata symbol,
         string calldata animationTemplate,
-        string calldata imageTemplate
+        address profileNFTDescriptor
     ) external initializer {
+        require(profileNFTDescriptor != address(0), "Descriptor address cannot be 0");
         CyberNFTBase._initialize(name, symbol, _VERSION_STR);
-        _animationTemplate = animationTemplate;
-        _imageTemplate = imageTemplate;
+        _profileNFTDescriptor = profileNFTDescriptor;
         // start with paused
         _pause();
     }
@@ -134,10 +132,6 @@ contract ProfileNFT is
     {
         _requireMinted(tokenId);
         string memory handle = _profileById[tokenId].handle;
-        string memory formattedName = string(abi.encodePacked("@", handle));
-        string memory animationURL = string(
-            abi.encodePacked(_animationTemplate, "?handle=", handle)
-        );
         address subscribeNFT = CyberEngine(ENGINE).getSubscribeNFT(tokenId);
         uint256 subscribers;
         if (subscribeNFT == address(0)) {
@@ -147,8 +141,8 @@ contract ProfileNFT is
         }
 
         return
-            IProfileNFTDescriptor(DESCRIPTOR).tokenURI(
-                IProfileNFTDescriptor.ConstructTokenURIParams({tokenId, handle, imageURL, animationURL, subscribers})
+            IProfileNFTDescriptor(_profileNFTDescriptor).tokenURI(
+                IProfileNFTDescriptor.ConstructTokenURIParams({tokenId, handle, subscribers})
             );
     }
 
@@ -240,21 +234,12 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function setAnimationTemplate(string calldata template)
+    function setProfileNFTDescriptor(address descriptor)
         external
         override
         onlyEngine
     {
-        _animationTemplate = template;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function setImageTemplate(string calldata template)
-        external
-        override
-        onlyEngine
-    {
-        _imageTemplate = template;
+        _profileNFTDescriptor = descriptor;
     }
 
     /// @inheritdoc IProfileNFT
@@ -270,27 +255,6 @@ contract ProfileNFT is
         _profileById[profileId].avatar = avatar;
     }
 
-    /// @inheritdoc IProfileNFT
-    function getAnimationTemplate()
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return _animationTemplate;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function getImageTemplate() external view override returns (string memory) {
-        return _imageTemplate;
-    }
-
-    /**
-     * @notice Contract version number.
-     *
-     * @return uint256 The version number.
-     * @dev This contract can be upgraded with UUPS upgradeability
-     */
     // TODO: write a test for upgrade profile nft
     function version() external pure virtual override returns (uint256) {
         return _VERSION;

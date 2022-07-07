@@ -75,18 +75,11 @@ interface ICyberEngineEvents {
     );
 
     /**
-     * @notice Emitted when a new animation template has been set.
+     * @notice Emitted when a new Profile NFT Descriptor has been set.
      *
-     * @param newTemplate The newly set animation template.
+     * @param newDescriptor The newly set descriptor address.
      */
-    event SetAnimationTemplate(string indexed newTemplate);
-
-    /**
-     * @notice Emitted when a new image template has been set.
-     *
-     * @param newTemplate The newly set image template.
-     */
-    event SetImageTemplate(string indexed newTemplate);
+    event SetProfileNFTDescriptor(address indexed newDescriptor);
 
     /**
      * @notice Emitted when a new metadata has been set to a profile.
