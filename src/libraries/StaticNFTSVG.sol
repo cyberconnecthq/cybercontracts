@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import "./LibString.sol";
 import "../dependencies/openzeppelin/Base64.sol";
 import "./QRSVG.sol";

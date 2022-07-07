@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
 import "./LibString.sol";
 import "../dependencies/openzeppelin/Base64.sol";
 
