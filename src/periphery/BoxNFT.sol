@@ -8,6 +8,7 @@ import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
+import { BoxNFTStorage } from "../storages/BoxNFTStorage.sol";
 
 /**
  * @title Box NFT
@@ -18,11 +19,11 @@ contract BoxNFT is
     Pausable,
     CyberNFTBase,
     UUPSUpgradeable,
+    BoxNFTStorage,
     IUpgradeable,
     IBoxNFT
 {
     address public immutable ENGINE;
-    uint256 private constant _VERSION = 1;
 
     /**
      * @notice Checks that sender is engine address.
