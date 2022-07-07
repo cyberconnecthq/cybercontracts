@@ -119,4 +119,22 @@ interface IProfileNFT {
         address operator,
         bool approved
     ) external;
+
+    /**
+     * @notice Sets the primary profile for the user
+     *
+     * @param profileId The profile ID that is set to be primary
+     */
+    function setPrimaryProfile(uint256 profileId) external;
+
+    /**
+     * @notice Gets the primary profile of the user
+     *
+     * @param user The wallet address of the user
+     * @return profileId The primary profile of the user
+     */
+    function getPrimaryProfile(address user)
+        external
+        view
+        returns (uint256 profileId);
 }
