@@ -397,19 +397,20 @@ library QRSVG {
         pure
         returns (string memory)
     {
+        // using stroke width = 1 to draw will get 0.5 px out of bound, so we shift y + 1 and shift viewBox + 0.5
         bytes memory qrSvg = abi.encodePacked(
-            '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="74px" height="74px" viewBox="0 0 74 74"><rect width="100%" height="100%" fill="white" cx="0" cy="0"/><path d="'
+            '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0.5 29 29"><path d="'
         );
 
         for (uint256 row = 0; row < SIZE; row += 1) {
-            uint256 startY = row * 2;
+            uint256 startY = row + 1;
             uint256 blackBlockCount;
             uint256 startX;
             for (uint256 col = 0; col < SIZE; col += 1) {
                 if (qrMatrix.matrix[row][col] == 1) {
                     // Record the first black block coordinate in a consecutive black blocks
                     if (blackBlockCount == 0) {
-                        startX = col * 2;
+                        startX = col;
                     }
                     blackBlockCount++;
                 }
@@ -422,7 +423,7 @@ library QRSVG {
                         ",",
                         LibString.toString(startY),
                         "l",
-                        LibString.toString(2 * blackBlockCount),
+                        LibString.toString(blackBlockCount),
                         ",0 "
                     );
                     blackBlockCount = 0;
@@ -437,7 +438,7 @@ library QRSVG {
                     ",",
                     LibString.toString(startY),
                     "l",
-                    LibString.toString(2 * blackBlockCount),
+                    LibString.toString(blackBlockCount),
                     ",0 "
                 );
             }
@@ -445,7 +446,7 @@ library QRSVG {
 
         qrSvg = abi.encodePacked(
             qrSvg,
-            '" stroke="black" stroke-width="2" fill="transparent"/></svg>'
+            '" stroke="white" stroke-width="1" fill="none"/></svg>'
         );
 
         return
