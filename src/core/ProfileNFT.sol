@@ -57,7 +57,7 @@ contract ProfileNFT is
         string calldata animationTemplate,
         string calldata imageTemplate
     ) external initializer {
-        CyberNFTBase._initialize(name, symbol, "1");
+        CyberNFTBase._initialize(name, symbol, _VERSION_STR);
         _animationTemplate = animationTemplate;
         _imageTemplate = imageTemplate;
         // start with paused

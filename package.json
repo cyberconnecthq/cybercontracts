@@ -6,7 +6,12 @@
   "author": "r@cyberconnect.me",
   "license": "GPL-3.0-or-later",
   "scripts": {
+<<<<<<< HEAD
     "lint:gh-check": "prettier --check **.{sol,js,md,html}", 
+||||||| parent of 2c13c0a (fix: merge error)
+    "lint:gh-check": "prettier --check **.{sol,js,md,html}",
+=======
+>>>>>>> 2c13c0a (fix: merge error)
     "lint:check": "prettier --check **.{sol,js,md,html} && solhint --config ./config/.solhint.json --ignore-path ./config/.solhintignore -f table 'src/**/*.sol'",
     "lint:fix": "prettier --write **.{sol,js,md}",
     "prepare": "husky install",
