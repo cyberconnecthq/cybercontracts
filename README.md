@@ -4,10 +4,10 @@
 
 This hosts all contracts for CyberConnect's social graph protocol.
 
-Some opinions:
+Some opinionated design decisino:
 
-1. Prefer require for semantic clearity.
-2. No custom error until require supports custom error.
+1. Prefer `require` for semantic clearity.
+2. No custom error until `require` supports custom error.
 3. NFTs don't support burn
 4. Try to be gas efficient :)
 
@@ -83,12 +83,12 @@ To interact with the protocol, directly call functions on CyberEngine.
 Register Fee based on handle length
 | Length | Fee (ETH) |
 |--------|-----------|
-| 2 | 0.5 |
-| 3 | 0.1 |
-| 4 | 0.06 |
-| 5 | 0.03 |
-| 6 | 0.01 |
-| >=7 | 0.006 |
+| 1 | 10 |
+| 2 | 2 |
+| 3 | 1 |
+| 4 | 0.5 |
+| 5 | 0.1 |
+| >=6 | 0.01 |
 
 # MAYBE TODO's
 
