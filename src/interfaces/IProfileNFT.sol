@@ -124,8 +124,9 @@ interface IProfileNFT {
      * @notice Sets the primary profile for the user
      *
      * @param profileId The profile ID that is set to be primary
+     * @param user The address of the user
      */
-    function setPrimaryProfile(uint256 profileId) external;
+    function setPrimaryProfile(uint256 profileId, address user) external;
 
     /**
      * @notice Gets the primary profile of the user

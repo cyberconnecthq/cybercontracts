@@ -478,6 +478,21 @@ contract CyberEngine is
     }
 
     /**
+     * @notice Sets the primary profile id for the user
+     *
+     * @param profileId The profile ID.
+     * @param user The address of the user.
+     */
+    function setPrimaryProfile(uint256 profileId, address user)
+        external
+        onlyOwnerOrOperator(profileId)
+    {
+        IProfileNFT(profileAddress).setPrimaryProfile(profileId, msg.sender);
+
+        emit SetPrimaryProfile(profileId, user);
+    }
+
+    /**
      * @notice Sets the Profile NFT avatar.
      *
      * @param profileId The profile ID.

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.14;
 
@@ -30,7 +30,7 @@ contract ProfileNFT is
     IProfileNFT
 {
     // Immutable
-    address public immutable ENGINE; // solhint-disable-line
+    address public immutable ENGINE;
 
     modifier onlyEngine() {
         require(msg.sender == address(ENGINE), "Only Engine");
@@ -86,8 +86,8 @@ contract ProfileNFT is
         _profileIdByHandleHash[handleHash] = _totalCount;
         _metadataById[_totalCount] = params.metadata;
 
-        if (_addressToPrimaryProfile[msg.sender] == 0) {
-            setPrimaryProfile(id);
+        if (_addressToPrimaryProfile[params.to] == 0) {
+            setPrimaryProfile(id, params.to);
         }
 
         return id;
@@ -134,6 +134,9 @@ contract ProfileNFT is
         string memory animationURL = string(
             abi.encodePacked(_animationTemplate, "?handle=", handle)
         );
+        string memory imageURL = string(
+            abi.encodePacked(_imageTemplate, "?handle=", handle)
+        );
         address subscribeNFT = CyberEngine(ENGINE).getSubscribeNFT(tokenId);
         uint256 subscribers;
         if (subscribeNFT == address(0)) {
@@ -162,6 +165,13 @@ contract ProfileNFT is
                                 LibString.toString(subscribers),
                                 formattedName
                             ),
+                            // ',"qr_code":"',
+                            // QRSVG.generateQRCode(
+                            //     string(
+                            //         abi.encodePacked("https://link3.to", handle)
+                            //     )
+                            // ),
+                            // '"}'
                             "}"
                         )
                     )
@@ -350,20 +360,24 @@ contract ProfileNFT is
 
     // @inheritdoc IProfileNFT
     // sets a primary profile id for the user
-    function setPrimaryProfile(uint256 profileId) public override onlyEngine {
+    function setPrimaryProfile(uint256 profileId, address to)
+        public
+        override
+        onlyEngine
+    {
         _requireMinted(profileId);
-        _addressToPrimaryProfile[msg.sender] = profileId;
+        _addressToPrimaryProfile[to] = profileId;
     }
 
     // @inheritdoc IProfileNFT
     // returns the primary profile id associated with the user
-    function getPrimaryProfile(address user)
+    function getPrimaryProfile(address to)
         external
         view
         override
         returns (uint256)
     {
-        uint256 primaryProfile = _addressToPrimaryProfile[user];
+        uint256 primaryProfile = _addressToPrimaryProfile[to];
         return primaryProfile;
     }
 }

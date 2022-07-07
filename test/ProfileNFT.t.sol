@@ -384,21 +384,21 @@ contract ProfileNFTTest is Test {
         vm.prank(engine);
         uint256 id = token.createProfile(createProfileDataAlice);
         vm.expectRevert("Only Engine");
-        token.setPrimaryProfile(id);
+        token.setPrimaryProfile(id, address(alice));
     }
 
     // to set a primary profile id, the id has to exist
     function testCannotSetProfileIdForNonexistentProfile() public {
         vm.startPrank(engine);
         vm.expectRevert("NOT_MINTED");
-        token.setPrimaryProfile(0);
+        token.setPrimaryProfile(0, address(alice));
     }
 
     // should automatically set initial profile id as primary
     function testInitialProfileId() public {
         vm.startPrank(engine);
         uint256 profileIdAlice = token.createProfile(createProfileDataAlice);
-        uint256 primaryIdAlice = token.getPrimaryProfile(engine);
+        uint256 primaryIdAlice = token.getPrimaryProfile(alice);
         assertEq(primaryIdAlice, profileIdAlice);
     }
 
@@ -410,11 +410,11 @@ contract ProfileNFTTest is Test {
         uint256 profileIdAlice = token.createProfile(createProfileDataAlice);
         uint256 profileIdBob = token.createProfile(createProfileDataBob);
         // get the default profile id
-        uint256 primaryIdAlice = token.getPrimaryProfile(engine);
+        uint256 primaryIdAlice = token.getPrimaryProfile(alice);
         assertEq(primaryIdAlice, profileIdAlice);
         // set another primary profile id
-        token.setPrimaryProfile(profileIdBob);
-        uint256 primaryIdBob = token.getPrimaryProfile(engine);
+        token.setPrimaryProfile(profileIdBob, address(bob));
+        uint256 primaryIdBob = token.getPrimaryProfile(bob);
         assertEq(profileIdBob, profileIdBob);
     }
 }
