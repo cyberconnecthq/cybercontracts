@@ -112,7 +112,7 @@ library StaticNFTSVG {
                     "<rect width='",
                     LibString.toString(backgroundWidth),
                     "px' height='24px' rx='4px' ry='4px' fill='#fff' transform='skewX(-25)' x='95' y='-3'/>",
-                    "<text dominant-baseline='hanging' text-anchor='start' x='100' y='-1' font-weight='700' font-family='\"Outfit\", sans-serif' font-size='22px' fill='#000' fontWeight='700'>",
+                    "<text dominant-baseline='hanging' text-anchor='start' x='100' y='-1' font-weight='400' font-family='\"Outfit\", sans-serif' font-size='22px' fill='#000'>",
                     handle,
                     "</text></g>"
                 )

@@ -397,12 +397,13 @@ library QRSVG {
         pure
         returns (string memory)
     {
+        // using stroke width = 1 to draw will get 0.5 px out of bound, so we shift y + 1 and shift viewBox + 0.5
         bytes memory qrSvg = abi.encodePacked(
             '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0.5 29 29"><path d="'
         );
 
         for (uint256 row = 0; row < SIZE; row += 1) {
-            uint256 startY = row;
+            uint256 startY = row + 1;
             uint256 blackBlockCount;
             uint256 startX;
             for (uint256 col = 0; col < SIZE; col += 1) {
@@ -420,7 +421,7 @@ library QRSVG {
                         "M",
                         LibString.toString(startX),
                         ",",
-                        LibString.toString(startY + 1),
+                        LibString.toString(startY),
                         "l",
                         LibString.toString(blackBlockCount),
                         ",0 "
@@ -435,7 +436,7 @@ library QRSVG {
                     "M",
                     LibString.toString(startX),
                     ",",
-                    LibString.toString(startY + 1),
+                    LibString.toString(startY),
                     "l",
                     LibString.toString(blackBlockCount),
                     ",0 "
