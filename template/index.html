@@ -425,11 +425,6 @@
             // Render to generate profile SVG
             const { handle, imageURI, metadata } = await getProfile();
             render(handle, imageURI, metadata);
-
-            setInterval(async() => {
-                const { handle, imageURI, metadata } = await getProfile();
-                render(handle, imageURI, metadata);
-            }, 5000);
         }
 
         window.addEventListener("load", load);
