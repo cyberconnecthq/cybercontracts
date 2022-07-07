@@ -23,8 +23,8 @@ contract SubscribeNFT is
     IUpgradeable,
     ISubscribeNFT
 {
-    address public immutable ENGINE;
-    address public immutable PROFILE_NFT;
+    address public immutable ENGINE; // solhint-disable-line
+    address public immutable PROFILE_NFT; // solhint-disable-line
 
     constructor(address engine, address profileNFT) {
         require(engine != address(0), "Engine address cannot be 0");

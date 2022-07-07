@@ -60,6 +60,7 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
 
     // Permit
     function DOMAIN_SEPARATOR() public view returns (bytes32) {
+        // solhint-disable-line
         return _domainSeparatorV4();
     }
 

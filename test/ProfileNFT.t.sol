@@ -13,7 +13,7 @@ import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { StaticNFTSVG } from "../src/libraries/StaticNFTSVG.sol";
-import { LibString } from "../../src/libraries/LibString.sol";
+import { LibString } from "../src/libraries/LibString.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;

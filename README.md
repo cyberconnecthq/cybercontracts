@@ -26,13 +26,13 @@ Some opinionated design decisino:
 
 [ABI](./docs/abi/README.md)
 
-# Usage
+# Set Up
 
 0. Upgrade your foundry
    `foundryup`
 
 1. To enable husky pre-commit
-   `yarn prepare`
+   `yarn && yarn prepare`
 
 2. To install contract dependencies
    `forge install`

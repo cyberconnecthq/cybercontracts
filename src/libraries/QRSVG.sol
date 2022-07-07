@@ -5,7 +5,7 @@ import "../dependencies/openzeppelin/Base64.sol";
 pragma solidity 0.8.14;
 
 library QRSVG {
-    uint256 constant SIZE = 29;
+    uint256 internal constant SIZE = 29;
 
     struct QRMatrix {
         uint256[SIZE][SIZE] matrix;
@@ -122,21 +122,21 @@ library QRSVG {
         pure
         returns (uint256[26] memory)
     {
-        uint256[256] memory GF256_MAP;
-        uint256[256] memory GF256_INVMAP;
+        uint256[256] memory gf256Map;
+        uint256[256] memory gf256InvMap;
         uint256[70] memory modulus;
         uint8 polylen = uint8(poly.length);
         uint8 genpolylen = uint8(genpoly.length);
         uint256[26] memory result;
-        uint256 gf256_value = 1;
+        uint256 gf256Value = 1;
 
-        GF256_INVMAP[0] = 0;
+        gf256InvMap[0] = 0;
         for (uint256 i = 0; i < 255; ++i) {
-            GF256_MAP[i] = gf256_value;
-            GF256_INVMAP[gf256_value] = i;
-            gf256_value = (gf256_value * 2) ^ (gf256_value >= 128 ? 0x11d : 0);
+            gf256Map[i] = gf256Value;
+            gf256InvMap[gf256Value] = i;
+            gf256Value = (gf256Value * 2) ^ (gf256Value >= 128 ? 0x11d : 0);
         }
-        GF256_MAP[255] = 1;
+        gf256Map[255] = 1;
 
         for (uint8 i = 0; i < 55; i++) {
             modulus[i] = poly[i];
@@ -149,9 +149,9 @@ library QRSVG {
         for (uint8 i = 0; i < polylen; ) {
             uint256 idx = modulus[i++];
             if (idx > 0) {
-                uint256 quotient = GF256_INVMAP[idx];
+                uint256 quotient = gf256InvMap[idx];
                 for (uint8 j = 0; j < genpolylen; ++j) {
-                    modulus[i + j] ^= GF256_MAP[(quotient + genpoly[j]) % 255];
+                    modulus[i + j] ^= gf256Map[(quotient + genpoly[j]) % 255];
                 }
             }
         }

@@ -30,7 +30,7 @@ contract ProfileNFT is
     IProfileNFT
 {
     // Immutable
-    address public immutable ENGINE;
+    address public immutable ENGINE; // solhint-disable-line
 
     modifier onlyEngine() {
         require(msg.sender == address(ENGINE), "Only Engine");
@@ -129,9 +129,6 @@ contract ProfileNFT is
         string memory animationURL = string(
             abi.encodePacked(_animationTemplate, "?handle=", handle)
         );
-        string memory imageURL = string(
-            abi.encodePacked(_imageTemplate, "?handle=", handle)
-        );
         address subscribeNFT = CyberEngine(ENGINE).getSubscribeNFT(tokenId);
         uint256 subscribers;
         if (subscribeNFT == address(0)) {
@@ -160,13 +157,6 @@ contract ProfileNFT is
                                 LibString.toString(subscribers),
                                 formattedName
                             ),
-                            // ',"qr_code":"',
-                            // QRSVG.generateQRCode(
-                            //     string(
-                            //         abi.encodePacked("https://link3.to", handle)
-                            //     )
-                            // ),
-                            // '"}'
                             "}"
                         )
                     )

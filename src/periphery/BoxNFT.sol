@@ -23,7 +23,7 @@ contract BoxNFT is
     IUpgradeable,
     IBoxNFT
 {
-    address public immutable ENGINE;
+    address public immutable ENGINE; // solhint-disable-line
 
     /**
      * @notice Checks that sender is engine address.
