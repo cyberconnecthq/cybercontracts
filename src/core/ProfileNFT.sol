@@ -14,6 +14,7 @@ import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { CyberEngine } from "./CyberEngine.sol";
 import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
+import "forge-std/console.sol";
 
 /**
  * @title Profile NFT

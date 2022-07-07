@@ -317,7 +317,7 @@ library LibDeploy {
             keccak256(
                 abi.encode(
                     Constants._REGISTER_TYPEHASH,
-                    deployer,
+                    ENGINE_SIGNER,
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
                     keccak256(bytes(metadata)),
@@ -328,12 +328,18 @@ library LibDeploy {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
 
-        require(engine.nonces(deployer) == 0);
+        // use ENGINE_SIGNER instead of deployer since deployer could be a contract in anvil environment and safeMint will fail
+        require(engine.nonces(ENGINE_SIGNER) == 0);
         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
-            DataTypes.CreateProfileParams(deployer, handle, avatar, metadata),
+            DataTypes.CreateProfileParams(
+                ENGINE_SIGNER,
+                handle,
+                avatar,
+                metadata
+            ),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
-        require(engine.nonces(deployer) == 1);
+        require(engine.nonces(ENGINE_SIGNER) == 1);
 
         // revert signer
         engine.setSigner(ENGINE_SIGNER);

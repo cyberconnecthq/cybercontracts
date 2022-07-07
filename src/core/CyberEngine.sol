@@ -222,9 +222,8 @@ contract CyberEngine is
         require(to != address(0), "withdraw to the zero address");
         uint256 balance = address(this).balance;
         require(balance >= amount, "Insufficient balance");
-        payable(to).transfer(amount);
-
         emit Withdraw(to, amount);
+        payable(to).transfer(amount);
     }
 
     /**
