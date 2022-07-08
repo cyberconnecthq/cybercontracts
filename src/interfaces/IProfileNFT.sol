@@ -109,11 +109,25 @@ interface IProfileNFT {
      */
     function getAvatar(uint256 profileId) external view returns (string memory);
 
+    /**
+     * @notice Gets the operator approval status.
+     *
+     * @param profileId The profile ID.
+     * @param operator The operator address.
+     * @return bool The approval status.
+     */
     function getOperatorApproval(uint256 profileId, address operator)
         external
         view
         returns (bool);
 
+    /**
+     * @notice Sets the operator approval.
+     *
+     * @param profileId The profile ID.
+     * @param operator The operator address.
+     * @param approved The approval status.
+     */
     function setOperatorApproval(
         uint256 profileId,
         address operator,
@@ -121,18 +135,18 @@ interface IProfileNFT {
     ) external;
 
     /**
-     * @notice Sets the primary profile for the user
+     * @notice Sets the primary profile for the user.
      *
-     * @param user The address of the user
-     * @param profileId The profile ID that is set to be primary
+     * @param user The address of the user.
+     * @param profileId The profile ID that is set to be primary.
      */
     function setPrimaryProfile(address user, uint256 profileId) external;
 
     /**
-     * @notice Gets the primary profile of the user
+     * @notice Gets the primary profile of the user.
      *
-     * @param user The wallet address of the user
-     * @return profileId The primary profile of the user
+     * @param user The wallet address of the user.
+     * @return profileId The primary profile of the user.
      */
     function getPrimaryProfile(address user)
         external

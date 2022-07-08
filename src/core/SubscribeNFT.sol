@@ -79,6 +79,12 @@ contract SubscribeNFT is
             );
     }
 
+    /**
+     * @notice Contract version number.
+     *
+     * @return uint256 The version number.
+     * @dev This contract can be upgraded with UUPS upgradeability
+     */
     function version() external pure virtual override returns (uint256) {
         return 1;
     }

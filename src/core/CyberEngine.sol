@@ -587,12 +587,20 @@ contract CyberEngine is
         emit SetOperatorApproval(profileId, operator, approved);
     }
 
-    // upgrade
+    /**
+     * @notice Upgrades the contract with a new implementation.
+     *
+     * @param newImpl The new implementation address.
+     */
     function upgradeProfile(address newImpl) external requiresAuth {
         UUPSUpgradeable(profileAddress).upgradeTo(newImpl);
     }
 
-    // pause
+    /**
+     * @notice Changes the pause state of the profile nft.
+     *
+     * @param toPause The pause state.
+     */
     function pauseProfile(bool toPause) external requiresAuth {
         ProfileNFT(profileAddress).pause(toPause);
     }
@@ -684,7 +692,12 @@ contract CyberEngine is
         emit SetSubscribeMw(profileId, preMw, mw);
     }
 
-    // UUPS upgradeability
+    /**
+     * @notice Contract version number.
+     *
+     * @return uint256 The version number.
+     * @dev This contract can be upgraded with UUPS upgradeability
+     */
     function version() external pure virtual override returns (uint256) {
         return _VERSION;
     }
@@ -692,7 +705,9 @@ contract CyberEngine is
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override canUpgrade {}
 
-    // UUPS upgradeability
+    /**
+     * @notice Checks if the sender is authorized to upgrade the contract.
+     */
     modifier canUpgrade() {
         require(
             isAuthorized(msg.sender, Constants._AUTHORIZE_UPGRADE),

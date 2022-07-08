@@ -10,7 +10,6 @@
     "lint:check": "prettier --check **.{sol,js,md,html} && solhint --config ./config/.solhint.json --ignore-path ./config/.solhintignore -f table 'src/**/*.sol'",
     "lint:fix": "prettier --write **.{sol,js,md}",
     "prepare": "husky install",
-    "deploy": "node ./_scripts.js deploy rinkeby",
     "build": "forge build --force",
     "deploy:anvil": "source .env.anvil && forge script script/Deploy.s.sol:DeployScript --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
     "deploy:rinkeby": "source .env.rinkeby && forge script script/Deploy.s.sol:DeployScript --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",

@@ -68,8 +68,13 @@ contract CyberBoxNFT is
         return "";
     }
 
+    /**
+     * @notice Contract version number.
+     *
+     * @return uint256 The version number.
+     * @dev This contract can be upgraded with UUPS upgradeability
+     */
     // TODO: write a test for upgrade box nft
-    // UUPS upgradeability
     function version() external pure virtual override returns (uint256) {
         return _VERSION;
     }
