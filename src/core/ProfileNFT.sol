@@ -2,18 +2,21 @@
 
 pragma solidity 0.8.14;
 
+import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
+import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
+import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
+
+import { CyberEngine } from "./CyberEngine.sol";
 import { CyberNFTBase } from "../base/CyberNFTBase.sol";
+import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
+
+import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { LibString } from "../libraries/LibString.sol";
-import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
-import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
-import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
-import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
-import { CyberEngine } from "./CyberEngine.sol";
-import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
 
 /**
  * @title Profile NFT

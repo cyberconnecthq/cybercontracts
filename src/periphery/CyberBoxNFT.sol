@@ -3,12 +3,16 @@
 pragma solidity 0.8.14;
 
 import { CyberNFTBase } from "../base/CyberNFTBase.sol";
+
+import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { ICyberBoxEvents } from "../interfaces/ICyberBoxEvents.sol";
-import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
+
 import { CyberBoxNFTStorage } from "../storages/CyberBoxNFTStorage.sol";
+
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { Constants } from "../libraries/Constants.sol";
 
