@@ -18,6 +18,7 @@ import { ProfileNFTDescriptor } from "../src/periphery/ProfileNFTDescriptor.sol"
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
+    ProfileNFTDescriptor internal descriptor;
     address constant alice = address(0xA11CE);
     address constant bob = address(0xA12CE);
     address constant minter = address(0xB0B);
@@ -82,7 +83,7 @@ contract ProfileNFTTest is Test {
 
     function setUp() public {
         ProfileNFT tokenImpl = new ProfileNFT(engine);
-        ProfileNFTDescriptor descriptor = new ProfileNFTDescriptor(engine);
+        descriptor = new ProfileNFTDescriptor(engine);
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             "TestProfile",
@@ -297,13 +298,13 @@ contract ProfileNFTTest is Test {
     // template
     function testCannotSetTemplateIfNotEngine() public {
         vm.expectRevert("Only Engine");
-        token.setProfileNFTDescriptor(profileNFTDescriptor);
+        token.setProfileNFTDescriptor(address(descriptor));
     }
 
     function testSetDescriptorAsEngine() public {
         vm.prank(engine);
-        token.setProfileNFTDescriptor(profileNFTDescriptor);
-        assertEq(token.getProfileNFTDescriptor(), profileNFTDescriptor);
+        token.setProfileNFTDescriptor(address(descriptor));
+        assertEq(token.getProfileNFTDescriptor(), address(descriptor));
     }
 
     // avatar
