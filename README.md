@@ -105,11 +105,8 @@ Register Fee based on handle length
 - [ ] fix solhint
 - [ ] documentation style
 
-```
-
-```
-
 # License
+
 GNU General Public License v3.0 or later
 
 See [COPYING](./COPYING) to see the full text.

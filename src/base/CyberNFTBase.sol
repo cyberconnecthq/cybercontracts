@@ -35,7 +35,7 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
     }
 
     function _mint(address _to) internal virtual returns (uint256) {
-        super._mint(_to, ++_totalCount);
+        super._safeMint(_to, ++_totalCount);
         return _totalCount;
     }
 
@@ -59,7 +59,7 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
     }
 
     // Permit
-    function DOMAIN_SEPARATOR() public view returns (bytes32) {
+    function DOMAIN_SEPARATOR() external view returns (bytes32) {
         // solhint-disable-line
         return _domainSeparatorV4();
     }
@@ -69,7 +69,7 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
         address spender,
         uint256 tokenId,
         DataTypes.EIP712Signature calldata sig
-    ) external payable {
+    ) external {
         address owner = ownerOf(tokenId);
         require(owner != spender, "CANNOT_PERMIT_OWNER");
         _requiresExpectedSigner(

@@ -20,7 +20,7 @@ contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
         address subscriber,
         address subscrbeNFT,
         bytes calldata
-    ) external {
+    ) external view {
         require(
             ERC721(subscrbeNFT).balanceOf(subscriber) == 0,
             "Already subscribed"

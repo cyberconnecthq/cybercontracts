@@ -43,14 +43,14 @@ contract BoxNFT is
     /**
      * @notice Initializes the Box NFT.
      *
-     * @param _name The name to set for the Box NFT.
-     * @param _symbol The symbol to set for the Box NFT.
+     * @param _name_ The name to set for the Box NFT.
+     * @param _symbol_ The symbol to set for the Box NFT.
      */
-    function initialize(string calldata _name, string calldata _symbol)
+    function initialize(string calldata _name_, string calldata _symbol_)
         external
         initializer
     {
-        CyberNFTBase._initialize(_name, _symbol, _VERSION_STR);
+        CyberNFTBase._initialize(_name_, _symbol_, _VERSION_STR);
         // start with paused
         _pause();
     }

@@ -133,9 +133,6 @@ contract ProfileNFT is
         string memory animationURL = string(
             abi.encodePacked(_animationTemplate, "?handle=", handle)
         );
-        string memory imageURL = string(
-            abi.encodePacked(_imageTemplate, "?handle=", handle)
-        );
         address subscribeNFT = CyberEngine(ENGINE).getSubscribeNFT(tokenId);
         uint256 subscribers;
         if (subscribeNFT == address(0)) {

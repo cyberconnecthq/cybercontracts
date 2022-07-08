@@ -23,10 +23,9 @@ const main = async () => {
     if (exists) {
       await fs.rm(dir, { recursive: true, force: true });
     }
-  } catch (err) {
-  }
+  } catch (err) {}
   const files = await fs.readdir(p);
-  console.log('total tests:', files.length)
+  console.log("total tests:", files.length);
   // console.log(files);
   const all = [];
   const a = async (aa) => {

@@ -10,6 +10,7 @@ import { IBoxNFT } from "../../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../../src/interfaces/IProfileNFT.sol";
 import { TestLib712 } from "./TestLib712.sol";
 import "forge-std/Vm.sol";
+import "forge-std/console.sol";
 
 // Only for testing, not for deploying script
 // TODO: move to test folder
