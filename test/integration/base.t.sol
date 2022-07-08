@@ -29,15 +29,19 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
     function setUp() public {
         uint256 nonce = vm.getNonce(address(this));
 
-        ERC1967Proxy proxy;
+        address proxy;
         (
             proxy,
             authority,
             boxAddress,
             profileAddress,
             profileDescriptorAddress
-        ) = LibDeploy.deploy(address(this), nonce);
-        engine = CyberEngine(address(proxy));
+        ) = LibDeploy.deploy(
+            address(this),
+            nonce,
+            "https://animation.example.com"
+        );
+        engine = CyberEngine(proxy);
         profileNFT = ProfileNFT(profileAddress);
         profileDescriptor = ProfileNFTDescriptor(profileDescriptorAddress);
         TestLibFixture.auth(authority);
@@ -60,10 +64,7 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
         assertEq(avatar, "avatar");
         assertEq(metadata, "metadata");
         assertEq(descriptor, profileDescriptorAddress);
-        assertEq(
-            animationTemplate,
-            "https://cyberconnect.mypinata.cloud/ipfs/bafkreiau22w2k7meawcll2ibwbzmjx5szatzhbkhmmsfmh5van33szczbq"
-        );
+        assertEq(animationTemplate, "https://animation.example.com");
 
         // check bob balance
         assertEq(profileNFT.balanceOf(bob), 1);

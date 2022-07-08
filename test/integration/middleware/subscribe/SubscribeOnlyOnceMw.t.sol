@@ -27,7 +27,7 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
         mw = new SubscribeOnlyOnceMw();
         vm.label(address(mw), "SubscribeMiddleware");
         uint256 nonce = vm.getNonce(address(this));
-        ERC1967Proxy proxy;
+        address proxy;
         (
             proxy,
             authority,
@@ -36,8 +36,8 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
             profileDescriptorAddress
         ) = LibDeploy.deploy(
             address(this),
-            nonce
-            // address(0),
+            nonce,
+            "https://animation.example.com"
         );
         engine = CyberEngine(address(proxy));
 
