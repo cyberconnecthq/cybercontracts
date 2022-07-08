@@ -597,7 +597,6 @@ contract CyberEngine is
         ProfileNFT(profileAddress).pause(toPause);
     }
 
-
     /// @inheritdoc ICyberEngine
     function getSubscribeNFTTokenURI(uint256 profileId)
         external

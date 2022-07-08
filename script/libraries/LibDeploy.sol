@@ -166,7 +166,7 @@ library LibDeploy {
             // 6. Deploy Proxy for BoxNFT
             bytes memory boxInitData = abi.encodeWithSelector(
                 CyberBoxNFT.initialize.selector,
-                engineAddr, // TODO re-evaluate cyberbox owner addr
+                deployer,
                 "CyberBox",
                 "CYBER_BOX"
             );

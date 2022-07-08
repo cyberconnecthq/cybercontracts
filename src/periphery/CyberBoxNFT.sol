@@ -39,10 +39,11 @@ contract CyberBoxNFT is
      * @param _name_ The name to set for the Box NFT.
      * @param _symbol_ The symbol to set for the Box NFT.
      */
-    function initialize(address _owner, string calldata _name_, string calldata _symbol_)
-        external
-        initializer
-    {
+    function initialize(
+        address _owner,
+        string calldata _name_,
+        string calldata _symbol_
+    ) external initializer {
         CyberNFTBase._initialize(_name_, _symbol_, _VERSION_STR);
         signer = _owner;
         owner = _owner;
@@ -165,5 +166,4 @@ contract CyberBoxNFT is
 
         emit SetOwner(preOwner, _owner);
     }
-
 }
