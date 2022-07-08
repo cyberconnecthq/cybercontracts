@@ -6,6 +6,7 @@ import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
+import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
@@ -476,6 +477,21 @@ contract CyberEngine is
     function setProfileNFTDescriptor(address descriptor) external requiresAuth {
         IProfileNFT(profileAddress).setProfileNFTDescriptor(descriptor);
         emit SetProfileNFTDescriptor(descriptor);
+    }
+
+    /**
+     * @notice Sets the profile NFT animation template.
+     *
+     * @param template The new template.
+     */
+    function setAnimationTemplate(string calldata template)
+        external
+        requiresAuth
+    {
+        IProfileNFTDescriptor(
+            IProfileNFT(profileAddress).getProfileNFTDescriptor()
+        ).setAnimationTemplate(template);
+        emit SetAnimationTemplate(template);
     }
 
     /**

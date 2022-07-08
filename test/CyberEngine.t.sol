@@ -19,6 +19,8 @@ import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
+import { IProfileNFTDescriptor } from "../src/interfaces/IProfileNFTDescriptor.sol";
+import { ProfileNFTDescriptor } from "../src/periphery/ProfileNFTDescriptor.sol";
 
 contract CyberEngineTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
@@ -97,6 +99,12 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
         engine.setProfileNFTDescriptor(profileNFTDescriptor);
+    }
+
+    function testCannotSetAnimationTemplateAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        vm.prank(alice);
+        engine.setAnimationTemplate("new_ani_template");
     }
 
     function testSetSignerAsGov() public {
@@ -542,6 +550,24 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         emit SetProfileNFTDescriptor(profileNFTDescriptor);
 
         engine.setProfileNFTDescriptor(profileNFTDescriptor);
+    }
+
+    function testSetAnimationTemplateGov() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.getProfileNFTDescriptor.selector,
+                profileNFTDescriptor
+            ),
+            abi.encode(0)
+        );
+
+        vm.prank(alice);
+        vm.expectEmit(true, false, false, true);
+        emit SetAnimationTemplate("new_ani_template");
+
+        engine.setAnimationTemplate("new_ani_template");
     }
 
     // we can't pause from an unauthorized account

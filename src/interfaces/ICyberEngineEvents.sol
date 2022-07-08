@@ -82,6 +82,13 @@ interface ICyberEngineEvents {
     event SetProfileNFTDescriptor(address indexed newDescriptor);
 
     /**
+     * @notice Emitted when a new Profile NFT Descriptor has been set.
+     *
+     * @param newTemplate The newly set descriptor address.
+     */
+    event SetAnimationTemplate(string indexed newTemplate);
+
+    /**
      * @notice Emitted when a new metadata has been set to a profile.
      *
      * @param profileId The profile id.
