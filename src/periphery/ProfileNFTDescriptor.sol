@@ -6,7 +6,6 @@ import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
 import { LibString } from "../libraries/LibString.sol";
 import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
-import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { CyberEngine } from "../core/CyberEngine.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 
@@ -15,13 +14,9 @@ import { Initializable } from "../upgradeability/Initializable.sol";
  * @author CyberConnect
  * @notice This contract is used to create profile NFT token uri.
  */
-contract ProfileNFTDescriptor is
-    IProfileNFTDescriptor,
-    Initializable,
-    Pausable
-{
+contract ProfileNFTDescriptor is IProfileNFTDescriptor, Initializable {
     address public immutable ENGINE;
-    string public _animationTemplate;
+    string public animationTemplate;
 
     modifier onlyEngine() {
         require(msg.sender == address(ENGINE), "Only Engine");
@@ -37,15 +32,13 @@ contract ProfileNFTDescriptor is
     /**
      * @notice Initializes the Profile NFT Descriptor.
      *
-     * @param animationTemplate Template animation url to set for the Profile NFT.
+     * @param _animationTemplate Template animation url to set for the Profile NFT.
      */
-    function initialize(string calldata animationTemplate)
+    function initialize(string calldata _animationTemplate)
         external
         initializer
     {
-        _animationTemplate = animationTemplate;
-        // start with paused
-        _pause();
+        animationTemplate = _animationTemplate;
     }
 
     /// @inheritdoc IProfileNFTDescriptor
@@ -54,17 +47,7 @@ contract ProfileNFTDescriptor is
         override
         onlyEngine
     {
-        _animationTemplate = template;
-    }
-
-    /// @inheritdoc IProfileNFTDescriptor
-    function getAnimationTemplate()
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return _animationTemplate;
+        animationTemplate = template;
     }
 
     function tokenURI(ConstructTokenURIParams calldata params)
@@ -78,7 +61,7 @@ contract ProfileNFTDescriptor is
         );
 
         string memory animationURL = string(
-            abi.encodePacked(_animationTemplate, "?handle=", params.handle)
+            abi.encodePacked(animationTemplate, "?handle=", params.handle)
         );
 
         return
@@ -102,13 +85,6 @@ contract ProfileNFTDescriptor is
                                 LibString.toString(params.subscribers),
                                 formattedName
                             ),
-                            // ',"qr_code":"',
-                            // QRSVG.generateQRCode(
-                            //     string(
-                            //         abi.encodePacked("https://link3.to", handle)
-                            //     )
-                            // ),
-                            // '"}'
                             "}"
                         )
                     )

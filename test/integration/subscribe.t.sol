@@ -34,7 +34,11 @@ contract SubscribeTest is Test, ICyberEngineEvents {
             boxAddress,
             profileAddress,
             profileDescriptorAddress
-        ) = LibDeploy.deploy(address(this), nonce, "https://animation.example.com");
+        ) = LibDeploy.deploy(
+            address(this),
+            nonce,
+            "https://animation.example.com"
+        );
         TestLibFixture.auth(authority);
         engine = CyberEngine(address(proxy));
         bobProfileId = TestLibFixture.registerBobProfile(engine);

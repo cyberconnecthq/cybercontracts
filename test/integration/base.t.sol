@@ -58,8 +58,7 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
         string memory avatar = profileNFT.getAvatar(bobProfileId);
         string memory metadata = profileNFT.getMetadata(bobProfileId);
         address descriptor = profileNFT.getProfileNFTDescriptor();
-        string memory animationTemplate = profileDescriptor
-            .getAnimationTemplate();
+        string memory animationTemplate = profileDescriptor.animationTemplate();
         assertEq(handle, "bob");
         assertEq(avatar, "avatar");
         assertEq(metadata, "metadata");
@@ -84,7 +83,7 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
                         handle,
                         '","image":"',
                         StaticNFTSVG.draw(handle),
-                        '","animation_url":"https://cyberconnect.mypinata.cloud/ipfs/bafkreiau22w2k7meawcll2ibwbzmjx5szatzhbkhmmsfmh5van33szczbq?handle=',
+                        '","animation_url":"https://animation.example.com?handle=',
                         handle,
                         '","attributes":[{"trait_type":"id","value":"',
                         LibString.toString(bobProfileId),

@@ -11,8 +11,6 @@ interface IProfileNFTDescriptor {
 
     function setAnimationTemplate(string calldata template) external;
 
-    function getAnimationTemplate() external view returns (string memory);
-
     /**
      * @notice Generate the Profile NFT Token URI.
      *
