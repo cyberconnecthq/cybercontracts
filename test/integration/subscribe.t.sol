@@ -48,7 +48,7 @@ contract SubscribeTest is Test, ICyberEngineEvents {
         vm.expectEmit(true, true, false, true);
         emit DeploySubscribeNFT(
             ids[0],
-            address(0x760C3B9cb28eBf12F5fd66AfED48c45a18D0b98D)
+            address(0xF5ACE15da8E86BC4366CA0cD34e23230fbee44c2)
         );
         vm.expectEmit(true, false, false, true);
         emit Subscribe(alice, ids, data);

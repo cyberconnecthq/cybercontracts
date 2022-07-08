@@ -12,10 +12,10 @@ contract DeployScript is Script {
         vm.startBroadcast();
 
         address profileProxy = address(
-            0xDb7f2e6c5aFe48232e268964bD0Ab932B46d9bBa
+            0x70f433251AEBbf404796dB99864792eC14024F4D
         );
         string
-            memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreiau22w2k7meawcll2ibwbzmjx5szatzhbkhmmsfmh5van33szczbq";
+            memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreieyuwfk4zuaibbx457n5od5n3drkyyqga7fp7bexdxzg2dfpzv7xq";
 
         LibDeploy.deploy(msg.sender, nonce, templateURL);
         // TODO: set correct role capacity

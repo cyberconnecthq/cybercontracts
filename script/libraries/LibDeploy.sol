@@ -122,7 +122,7 @@ library LibDeploy {
         // address emergencyAdmin = address(0x1890);
 
         // 0. Cal engine proxy address
-        address engineAddr = _calcContractAddress(deployer, nonce + 8);
+        address engineAddr = _calcContractAddress(deployer, nonce + 9);
 
         // 1. authority
         // authority = new RolesAuthority(deployer, Authority(address(0)));
@@ -173,18 +173,35 @@ library LibDeploy {
             _requiresContractAddress(deployer, nonce + 5, address(boxProxy));
             boxAddress = address(boxProxy);
         }
-        // 7. Deploy SubscribeNFT Impl
-        SubscribeNFT subscribeImpl = new SubscribeNFT(
-            address(engineAddr),
-            address(profileProxy)
-        );
-        _requiresContractAddress(deployer, nonce + 6, address(subscribeImpl));
-        // 8. Deploy Subscribe Beacon
-        UpgradeableBeacon subscribeBeacon = new UpgradeableBeacon(
-            address(subscribeImpl),
-            address(engineAddr)
-        );
-        _requiresContractAddress(deployer, nonce + 7, address(subscribeBeacon));
+        UpgradeableBeacon subscribeBeacon;
+        UpgradeableBeacon essenceBeacon;
+        {
+            // 7. Deploy SubscribeNFT Impl
+            SubscribeNFT subscribeImpl = new SubscribeNFT(
+                address(engineAddr),
+                address(profileProxy)
+            );
+            _requiresContractAddress(
+                deployer,
+                nonce + 6,
+                address(subscribeImpl)
+            );
+            // 8. Deploy Subscribe Beacon
+            subscribeBeacon = new UpgradeableBeacon(
+                address(subscribeImpl),
+                address(engineAddr)
+            );
+            _requiresContractAddress(
+                deployer,
+                nonce + 7,
+                address(subscribeBeacon)
+            );
+            // 9. Deploy an Essence Beacon with temp subscribeIml
+            essenceBeacon = new UpgradeableBeacon(
+                address(subscribeImpl),
+                address(engineAddr)
+            );
+        }
         // 9. Deploy Proxy for CyberEngine
         bytes memory data = abi.encodeWithSelector(
             CyberEngine.initialize.selector,
@@ -192,11 +209,11 @@ library LibDeploy {
             address(profileProxy),
             address(boxProxy),
             address(subscribeBeacon),
-            address(0),
+            address(essenceBeacon),
             address(authority)
         );
         engineProxy = new ERC1967Proxy(address(engineImpl), data);
-        _requiresContractAddress(deployer, nonce + 8, address(engineProxy));
+        _requiresContractAddress(deployer, nonce + 9, address(engineProxy));
 
         // 10. set governance
         setupGovernance(CyberEngine(address(engineProxy)), deployer, authority);
