@@ -19,12 +19,15 @@ import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
+import { IProfileNFTDescriptor } from "../src/interfaces/IProfileNFTDescriptor.sol";
+import { ProfileNFTDescriptor } from "../src/periphery/ProfileNFTDescriptor.sol";
 
 contract CyberEngineTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
     RolesAuthority internal rolesAuthority;
     address internal profileAddress = address(0xA);
     address internal essenceBeacon = address(0xC);
+    address internal profileNFTDescriptor = address(0xD);
     address internal subscribeBeacon;
 
     address constant alice = address(0xA11CE);
@@ -42,6 +45,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
             nonce + 4
         );
         rolesAuthority = new Roles(address(this), engineAddr);
+
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
         bytes memory code = address(new ProfileNFT(engineAddr)).code;
         vm.etch(profileAddress, code);
@@ -92,16 +96,16 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
     }
 
-    function testCannotSetAniTemplateAsNonGov() public {
+    function testCannotSetProfileNFTDescriptorAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setAnimationTemplate("ani_template");
+        engine.setProfileNFTDescriptor(profileNFTDescriptor);
     }
 
-    function testCannotSetImgTemplateAsNonGov() public {
+    function testCannotSetAnimationTemplateAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setImageTemplate("img_template");
+        engine.setAnimationTemplate("new_ani_template");
     }
 
     function testSetSignerAsGov() public {
@@ -531,12 +535,38 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         assertEq(engine.isEssenceMwAllowed(mw), true);
     }
 
-    function testSetAniTemplateGov() public {
+    function testSetProfileNFTDescriptorGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.mockCall(
             profileAddress,
             abi.encodeWithSelector(
-                IProfileNFT.setAnimationTemplate.selector,
+                IProfileNFT.setProfileNFTDescriptor.selector,
+                profileNFTDescriptor
+            ),
+            abi.encode(0)
+        );
+
+        vm.prank(alice);
+        vm.expectEmit(true, false, false, true);
+        emit SetProfileNFTDescriptor(profileNFTDescriptor);
+
+        engine.setProfileNFTDescriptor(profileNFTDescriptor);
+    }
+
+    function testSetAnimationTemplateGov() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.getProfileNFTDescriptor.selector
+            ),
+            abi.encode(profileAddress)
+        );
+
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFTDescriptor.setAnimationTemplate.selector,
                 "new_ani_template"
             ),
             abi.encode(0)
@@ -547,24 +577,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         emit SetAnimationTemplate("new_ani_template");
 
         engine.setAnimationTemplate("new_ani_template");
-    }
-
-    function testSetImgTemplateGov() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.setAnimationTemplate.selector,
-                "new_img_template"
-            ),
-            abi.encode(0)
-        );
-
-        vm.prank(alice);
-        vm.expectEmit(true, false, false, true);
-        emit SetImageTemplate("new_img_template");
-
-        engine.setImageTemplate("new_img_template");
     }
 
     // we can't pause from an unauthorized account

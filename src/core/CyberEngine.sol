@@ -6,6 +6,7 @@ import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
+import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
@@ -469,28 +470,30 @@ contract CyberEngine is
     }
 
     /**
-     * @notice Sets the Profile NFT animation url.
+     * @notice Sets the Profile NFT Descriptor.
      *
-     * @param template The new template url to set.
+     * @param descriptor The new descriptor address to set.
+     */
+    function setProfileNFTDescriptor(address descriptor) external requiresAuth {
+        IProfileNFT(profileAddress).setProfileNFTDescriptor(descriptor);
+
+        emit SetProfileNFTDescriptor(descriptor);
+    }
+
+    /**
+     * @notice Sets the profile NFT animation template.
+     *
+     * @param template The new template.
      */
     function setAnimationTemplate(string calldata template)
         external
         requiresAuth
     {
-        IProfileNFT(profileAddress).setAnimationTemplate(template);
+        address descriptor = IProfileNFT(profileAddress)
+            .getProfileNFTDescriptor();
+        IProfileNFTDescriptor(descriptor).setAnimationTemplate(template);
 
         emit SetAnimationTemplate(template);
-    }
-
-    /**
-     * @notice Sets the Profile NFT image.
-     *
-     * @param template The new template url to set.
-     */
-    function setImageTemplate(string calldata template) external requiresAuth {
-        IProfileNFT(profileAddress).setImageTemplate(template);
-
-        emit SetImageTemplate(template);
     }
 
     /**

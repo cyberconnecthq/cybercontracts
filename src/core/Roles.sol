@@ -88,7 +88,7 @@ contract Roles is RolesAuthority {
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            CyberEngine.setImageTemplate.selector,
+            CyberEngine.setProfileNFTDescriptor.selector,
             true
         );
         setRoleCapability(

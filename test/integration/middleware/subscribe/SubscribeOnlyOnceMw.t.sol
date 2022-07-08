@@ -21,17 +21,23 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
     uint256 bobPk = 1;
     address bob = vm.addr(bobPk); // matches TestLibFixture
     uint256 bobProfileId;
+    address profileDescriptorAddress;
 
     function setUp() public {
         mw = new SubscribeOnlyOnceMw();
         vm.label(address(mw), "SubscribeMiddleware");
         uint256 nonce = vm.getNonce(address(this));
-        ERC1967Proxy proxy;
-        (proxy, authority, boxAddress, profileAddress) = LibDeploy.deploy(
+        address proxy;
+        (
+            proxy,
+            authority,
+            boxAddress,
+            profileAddress,
+            profileDescriptorAddress
+        ) = LibDeploy.deploy(
             address(this),
             nonce,
-            // address(0),
-            ""
+            "https://animation.example.com"
         );
         engine = CyberEngine(address(proxy));
 

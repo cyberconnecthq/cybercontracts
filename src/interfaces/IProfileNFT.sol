@@ -47,18 +47,11 @@ interface IProfileNFT {
         returns (uint256);
 
     /**
-     * @notice Sets the NFT animation url.
+     * @notice Sets the Profile NFT Descriptor.
      *
-     * @param template The new template url to set.
+     * @param descriptor The new descriptor address to set.
      */
-    function setAnimationTemplate(string calldata template) external;
-
-    /**
-     * @notice Sets the NFT image.
-     *
-     * @param template The new template url to set.
-     */
-    function setImageTemplate(string calldata template) external;
+    function setProfileNFTDescriptor(address descriptor) external;
 
     /**
      * @notice Sets the NFT metadata as IPFS hash.
@@ -88,18 +81,11 @@ interface IProfileNFT {
         returns (string memory);
 
     /**
-     * @notice Gets the animation template url.
-     *
-     * @return memory The animation template url.
-     */
-    function getAnimationTemplate() external view returns (string memory);
-
-    /**
      * @notice Gets the image template url.
      *
      * @return memory The image template url.
      */
-    function getImageTemplate() external view returns (string memory);
+    function getProfileNFTDescriptor() external view returns (address);
 
     /**
      * @notice Gets the profile avatar.

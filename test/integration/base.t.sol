@@ -12,28 +12,38 @@ import { TestLibFixture } from "../utils/TestLibFixture.sol";
 import { Base64 } from "../../src/dependencies/openzeppelin/Base64.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
 import { StaticNFTSVG } from "../../src/libraries/StaticNFTSVG.sol";
+import { ProfileNFTDescriptor } from "../../src/periphery/ProfileNFTDescriptor.sol";
 
 contract IntegrationBaseTest is Test, ICyberEngineEvents {
     CyberEngine engine;
     ProfileNFT profileNFT;
+    ProfileNFTDescriptor profileDescriptor;
     RolesAuthority authority;
     address boxAddress;
     address profileAddress;
     uint256 bobPk = 1;
     address bob = vm.addr(bobPk);
     uint256 bobProfileId;
+    address profileDescriptorAddress;
 
     function setUp() public {
         uint256 nonce = vm.getNonce(address(this));
-        ERC1967Proxy proxy;
-        (proxy, authority, boxAddress, profileAddress) = LibDeploy.deploy(
+
+        address proxy;
+        (
+            proxy,
+            authority,
+            boxAddress,
+            profileAddress,
+            profileDescriptorAddress
+        ) = LibDeploy.deploy(
             address(this),
             nonce,
-            ""
+            "https://animation.example.com"
         );
-        engine = CyberEngine(address(proxy));
+        engine = CyberEngine(proxy);
         profileNFT = ProfileNFT(profileAddress);
-        engine.setAnimationTemplate("https://animation.example.com");
+        profileDescriptor = ProfileNFTDescriptor(profileDescriptorAddress);
         TestLibFixture.auth(authority);
     }
 
@@ -47,9 +57,13 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
         string memory handle = profileNFT.getHandleByProfileId(bobProfileId);
         string memory avatar = profileNFT.getAvatar(bobProfileId);
         string memory metadata = profileNFT.getMetadata(bobProfileId);
+        address descriptor = profileNFT.getProfileNFTDescriptor();
+        string memory animationTemplate = profileDescriptor.animationTemplate();
         assertEq(handle, "bob");
         assertEq(avatar, "avatar");
         assertEq(metadata, "metadata");
+        assertEq(descriptor, profileDescriptorAddress);
+        assertEq(animationTemplate, "https://animation.example.com");
 
         // check bob balance
         assertEq(profileNFT.balanceOf(bob), 1);

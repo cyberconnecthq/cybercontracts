@@ -14,9 +14,11 @@ import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { StaticNFTSVG } from "../src/libraries/StaticNFTSVG.sol";
 import { LibString } from "../src/libraries/LibString.sol";
+import { ProfileNFTDescriptor } from "../src/periphery/ProfileNFTDescriptor.sol";
 
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
+    ProfileNFTDescriptor internal descriptor;
     address constant alice = address(0xA11CE);
     address constant bob = address(0xA12CE);
     address constant minter = address(0xB0B);
@@ -47,7 +49,7 @@ contract ProfileNFTTest is Test {
                             handle,
                             '","image":"',
                             StaticNFTSVG.draw(handle),
-                            '","animation_url":"ani_template?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"',
+                            '","animation_url":"?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"',
                             LibString.toString(bytes(handle).length),
                             '"},{"trait_type":"subscribers","value":"',
                             subscribers,
@@ -81,12 +83,12 @@ contract ProfileNFTTest is Test {
 
     function setUp() public {
         ProfileNFT tokenImpl = new ProfileNFT(engine);
+        descriptor = new ProfileNFTDescriptor(engine);
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             "TestProfile",
             "TP",
-            "ani_template",
-            "img_template"
+            address(descriptor)
         );
         ERC1967Proxy engineProxy = new ERC1967Proxy(address(tokenImpl), data);
         token = ProfileNFT(address(engineProxy));
@@ -296,20 +298,13 @@ contract ProfileNFTTest is Test {
     // template
     function testCannotSetTemplateIfNotEngine() public {
         vm.expectRevert("Only Engine");
-        token.setAnimationTemplate("template");
-
-        vm.expectRevert("Only Engine");
-        token.setImageTemplate("template");
+        token.setProfileNFTDescriptor(address(descriptor));
     }
 
-    function testSetTemplateAsEngine() public {
+    function testSetDescriptorAsEngine() public {
         vm.prank(engine);
-        token.setAnimationTemplate("ani_template");
-        assertEq(token.getAnimationTemplate(), "ani_template");
-
-        vm.prank(engine);
-        token.setImageTemplate("img_template");
-        assertEq(token.getImageTemplate(), "img_template");
+        token.setProfileNFTDescriptor(address(descriptor));
+        assertEq(token.getProfileNFTDescriptor(), address(descriptor));
     }
 
     // avatar

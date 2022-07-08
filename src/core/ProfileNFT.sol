@@ -13,7 +13,7 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { CyberEngine } from "./CyberEngine.sol";
-import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
+import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 
 /**
  * @title Profile NFT
@@ -51,18 +51,19 @@ contract ProfileNFT is
      *
      * @param name Name to set for the Profile NFT.
      * @param symbol Symbol to set for the Profile NFT.
-     * @param animationTemplate Template animation url to set for the Profile NFT.
-     * @param imageTemplate symbol to set for the Profile NFT.
+     * @param profileNFTDescriptor The profile NFT descriptor address to set for the Profile NFT.
      */
     function initialize(
         string calldata name,
         string calldata symbol,
-        string calldata animationTemplate,
-        string calldata imageTemplate
+        address profileNFTDescriptor
     ) external initializer {
+        require(
+            profileNFTDescriptor != address(0),
+            "Descriptor address cannot be 0"
+        );
         CyberNFTBase._initialize(name, symbol, _VERSION_STR);
-        _animationTemplate = animationTemplate;
-        _imageTemplate = imageTemplate;
+        _profileNFTDescriptor = profileNFTDescriptor;
         // start with paused
         _pause();
     }
@@ -132,10 +133,6 @@ contract ProfileNFT is
     {
         _requireMinted(tokenId);
         string memory handle = _profileById[tokenId].handle;
-        string memory formattedName = string(abi.encodePacked("@", handle));
-        string memory animationURL = string(
-            abi.encodePacked(_animationTemplate, "?handle=", handle)
-        );
         address subscribeNFT = CyberEngine(ENGINE).getSubscribeNFT(tokenId);
         uint256 subscribers;
         if (subscribeNFT == address(0)) {
@@ -143,51 +140,14 @@ contract ProfileNFT is
         } else {
             subscribers = CyberNFTBase(subscribeNFT).totalSupply();
         }
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;base64,",
-                    Base64.encode(
-                        abi.encodePacked(
-                            '{"name":"',
-                            formattedName,
-                            '","description":"CyberConnect profile for ',
-                            formattedName,
-                            '","image":"',
-                            StaticNFTSVG.draw(handle),
-                            '","animation_url":"',
-                            animationURL,
-                            '","attributes":',
-                            _genAttributes(
-                                LibString.toString(tokenId),
-                                LibString.toString(bytes(handle).length),
-                                LibString.toString(subscribers),
-                                formattedName
-                            ),
-                            "}"
-                        )
-                    )
-                )
-            );
-    }
 
-    function _genAttributes(
-        string memory tokenId,
-        string memory length,
-        string memory subscribers,
-        string memory name
-    ) private pure returns (bytes memory) {
         return
-            abi.encodePacked(
-                '[{"trait_type":"id","value":"',
-                tokenId,
-                '"},{"trait_type":"length","value":"',
-                length,
-                '"},{"trait_type":"subscribers","value":"',
-                subscribers,
-                '"},{"trait_type":"handle","value":"',
-                name,
-                '"}]'
+            IProfileNFTDescriptor(_profileNFTDescriptor).tokenURI(
+                IProfileNFTDescriptor.ConstructTokenURIParams({
+                    tokenId: tokenId,
+                    handle: handle,
+                    subscribers: subscribers
+                })
             );
     }
 
@@ -220,6 +180,16 @@ contract ProfileNFT is
                 ++i;
             }
         }
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getProfileNFTDescriptor()
+        external
+        view
+        override
+        returns (address)
+    {
+        return _profileNFTDescriptor;
     }
 
     /// @inheritdoc IProfileNFT
@@ -279,21 +249,12 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function setAnimationTemplate(string calldata template)
+    function setProfileNFTDescriptor(address descriptor)
         external
         override
         onlyEngine
     {
-        _animationTemplate = template;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function setImageTemplate(string calldata template)
-        external
-        override
-        onlyEngine
-    {
-        _imageTemplate = template;
+        _profileNFTDescriptor = descriptor;
     }
 
     /// @inheritdoc IProfileNFT
@@ -309,27 +270,6 @@ contract ProfileNFT is
         _profileById[profileId].avatar = avatar;
     }
 
-    /// @inheritdoc IProfileNFT
-    function getAnimationTemplate()
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return _animationTemplate;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function getImageTemplate() external view override returns (string memory) {
-        return _imageTemplate;
-    }
-
-    /**
-     * @notice Contract version number.
-     *
-     * @return uint256 The version number.
-     * @dev This contract can be upgraded with UUPS upgradeability
-     */
     // TODO: write a test for upgrade profile nft
     function version() external pure virtual override returns (uint256) {
         return _VERSION;
