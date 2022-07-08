@@ -52,7 +52,7 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
         vm.expectEmit(true, true, false, true);
         emit DeploySubscribeNFT(
             bobProfileId,
-            address(0xF5ACE15da8E86BC4366CA0cD34e23230fbee44c2)
+            address(0x80fa3ce05Cca48fA7C0377acD80F065Ff24a67b8)
         );
 
         vm.expectEmit(true, false, false, true);
