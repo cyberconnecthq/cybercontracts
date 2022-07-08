@@ -210,20 +210,12 @@
             provider
         );
 
-        const computeFontSize = (elemClass, maxFontSize, padding, maxElemWidth) => {
-            const elem = document.getElementsByClassName(elemClass)[0];
-            const bbox = elem?.getBBox();
-            const textWidth = bbox ? (bbox.width + padding) : 0;
-            const fontSize = maxFontSize * maxElemWidth / textWidth;
-            return Math.min(fontSize, maxFontSize);
-        }
-
         const getTextWidth = (text, fontSize, padding) => {
             const element = document.createElement('canvas');
             const context = element.getContext('2d');
-            context.font = `${fontSize}px Arial`;
+            context.font = `${fontSize}px sans-serif`;
             const textWidth = context.measureText(text).width;
-            const width = (textWidth ? textWidth + padding : 0) * 1.03;
+            const width = (textWidth ? textWidth + padding : 0) * 1.05;
             return width;
         }
 
@@ -933,19 +925,6 @@
                     .style("transform", "translate(136.5px, 438px)")
                     .text(link3Url);
 
-                const propHandle = svgFront.selectAll(".propHandle");
-                propHandle.data([null])
-                    .join("text")
-                    .classed("propHandle", true)
-                    .style("font-family", "Arial")
-                    .style("font-size", 18)
-                    .style("fill", "transparent")
-                    .style("font-weight", 700)
-                    .style("text-anchor", "start")
-                    .style("alignment-baseline", "middle")
-                    .style("transform", `translate(${width}px, ${height}px)`)
-                    .text(handle);
-
                 const bgHandle = svgFront.selectAll(".bgHandle");
                 bgHandle.data([null])
                     .join("rect")
@@ -958,7 +937,9 @@
                     .attr("transform", "skewX(-25)")
                     .style("fill", color.white);
 
-                const handleFontSize = computeFontSize("propHandle", 18, 21, 152);
+                const handleMaxFontSize = 18;
+                const handleMaxElemWidth = 142;
+                const handleFontSize = Math.min(handleMaxFontSize,  handleMaxFontSize * handleMaxElemWidth / getTextWidth(handle, handleMaxFontSize, 21));
 
                 const txtHandle = svgFront.selectAll(".txtHandle");
                 txtHandle.data([null])
@@ -970,7 +951,7 @@
                     .style("font-family", "Outfit")
                     .style("text-anchor", "start")
                     .style("alignment-baseline", "middle")
-                    .style("transform", "translate(224px, 436px)")
+                    .style("transform", "translate(223.5px, 436px)")
                     .text(handle);
 
                 svgFront.selectAll(".bgHandle")
@@ -985,17 +966,6 @@
                 const organization = metadata.organization;
                 const nameType = metadata.name_type;
 
-                const propNametag = svgFront.selectAll(".propNametag");
-                propNametag.data([null])
-                    .join("text")
-                    .classed("propNametag", true)
-                    .style("font-size", 26)
-                    .style("font-weight", 700)
-                    .style("font-family", "Outfit")
-                    .style("fill", "transparent")
-                    .style("transform", `translate(${width}px, ${height}px)`)
-                    .text(() => name ? name : "");
-
                 const nametag = d3.select("#profile")
                     .selectAll(".nametag")
                     .data([null])
@@ -1006,7 +976,9 @@
                     .style("top", "136px")
                     .html(() => {
                         if (!name) return;
-                        const fontSize = computeFontSize("propNametag", 26, 0, 227);
+                        const maxFontSize = 26;
+                        const maxElemWidth = 227;
+                        const fontSize = Math.min(maxFontSize,  maxFontSize * maxElemWidth / getTextWidth(name, maxFontSize, 0));
                         let displayName = name;
                         let displayEns = "";
                         if(nameType === "ENS") {
