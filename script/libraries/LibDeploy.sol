@@ -34,6 +34,30 @@ library LibDeploy {
     // address internal constant ENGINE_GOV =
     //     0x927f355117721e0E8A7b5eA20002b65B8a551890;
 
+    struct Engine {
+        address engineAddr;
+        CyberEngine engineImpl;
+    }
+
+    struct Profile {
+        ERC1967Proxy profileProxy;
+        ProfileNFT profileImpl;
+    }
+
+    struct Box {
+        ERC1967Proxy boxProxy;
+        BoxNFT boxImpl;
+    }
+
+    struct Subscribe {
+        UpgradeableBeacon subscribeBeacon;
+        SubscribeNFT subscribeImpl;
+    }
+
+    struct Essence {
+        UpgradeableBeacon essenceBeacon;
+    }
+
     function _calcContractAddress(address _origin, uint256 _nonce)
         internal
         pure
@@ -154,108 +178,139 @@ library LibDeploy {
         // TODO: emergency admin
         // address emergencyAdmin = address(0x1890);
 
+        // Define variables by using struct to avoid stack too deep error
+        Engine memory engine;
+        Profile memory profile;
+        Box memory box;
+        Subscribe memory subscribe;
+        Essence memory essence;
+
         // 0. Cal engine proxy address
-        address engineAddr = _calcContractAddress(deployer, nonce + 10);
+        engine.engineAddr = _calcContractAddress(deployer, nonce + 10);
 
         // 1. authority
         // authority = new RolesAuthority(deployer, Authority(address(0)));
-        authority = new Roles(deployer, engineAddr);
+        authority = new Roles(deployer, engine.engineAddr);
         _requiresContractAddress(deployer, nonce, address(authority));
+
         // 2. Deploy engine impl
-        CyberEngine engineImpl = new CyberEngine();
-        _requiresContractAddress(deployer, nonce + 1, address(engineImpl));
+        engine.engineImpl = new CyberEngine();
+        _requiresContractAddress(
+            deployer,
+            nonce + 1,
+            address(engine.engineImpl)
+        );
 
         // 3. Deploy ProfileNFTDescriptor
         profileDescriptorAddress = deployDescriptor(
             deployer,
             nonce,
-            engineAddr
+            engine.engineAddr
         );
 
-        ERC1967Proxy profileProxy;
         {
             // scope to avoid stack too deep error
             // 4. Deploy ProfileNFT Impl
-            ProfileNFT profileImpl = new ProfileNFT(address(engineAddr));
-            _requiresContractAddress(deployer, nonce + 4, address(profileImpl));
-            // 5. Deploy Proxy for ProfileNFT
-            bytes memory initData = abi.encodeWithSelector(
-                ProfileNFT.initialize.selector,
-                // TODO: Naming
-                "CyberConnect Profile",
-                "CCP",
-                profileDescriptorAddress
+            profile.profileImpl = new ProfileNFT(address(engine.engineAddr));
+            _requiresContractAddress(
+                deployer,
+                nonce + 4,
+                address(profile.profileImpl)
             );
-            profileProxy = new ERC1967Proxy(address(profileImpl), initData);
-            profileAddress = address(profileProxy);
+
+            // 5. Deploy Proxy for ProfileNFT
+            profile.profileProxy = new ERC1967Proxy(
+                address(profile.profileImpl),
+                abi.encodeWithSelector(
+                    ProfileNFT.initialize.selector,
+                    // TODO: Naming
+                    "CyberConnect Profile",
+                    "CCP",
+                    profileDescriptorAddress
+                )
+            );
+            profileAddress = address(profile.profileProxy);
             _requiresContractAddress(
                 deployer,
                 nonce + 5,
-                address(profileProxy)
+                address(profile.profileProxy)
             );
             // require(calProfileProxy == address(profileProxy));
-            console.log("profile proxy", address(profileProxy));
+            console.log("profile proxy", address(profile.profileProxy));
         }
-        ERC1967Proxy boxProxy;
+
         {
             // scope to avoid stack too deep error
-            // 5. Deploy BoxNFT Impl
-            CyberBoxNFT boxImpl = new CyberBoxNFT();
-            _requiresContractAddress(deployer, nonce + 4, address(boxImpl));
-            // 6. Deploy Proxy for BoxNFT
-            bytes memory boxInitData = abi.encodeWithSelector(
-                CyberBoxNFT.initialize.selector,
-                deployer,
-                "CyberBox",
-                "CYBER_BOX"
+            // 6. Deploy BoxNFT Impl
+            box.boxImpl = new CyberBoxNFT();
+            _requiresContractAddress(deployer, nonce + 6, address(box.boxImpl));
+
+            // 7. Deploy Proxy for BoxNFT
+            box.boxProxy = new ERC1967Proxy(
+                address(box.boxImpl),
+                abi.encodeWithSelector(
+                    BoxNFT.initialize.selector,
+                    "CyberBox",
+                    "CYBER_BOX"
+                )
             );
-            boxProxy = new ERC1967Proxy(address(boxImpl), boxInitData);
-            _requiresContractAddress(deployer, nonce + 7, address(boxProxy));
-            boxAddress = address(boxProxy);
+            _requiresContractAddress(
+                deployer,
+                nonce + 7,
+                address(box.boxProxy)
+            );
+            boxAddress = address(box.boxProxy);
         }
-        UpgradeableBeacon subscribeBeacon;
-        UpgradeableBeacon essenceBeacon;
+
         {
+            // scope to avoid stack too deep error
             // 8. Deploy SubscribeNFT Impl
-            SubscribeNFT subscribeImpl = new SubscribeNFT(
-                address(engineAddr),
-                address(profileProxy)
+            subscribe.subscribeImpl = new SubscribeNFT(
+                address(engine.engineAddr),
+                address(profile.profileProxy)
             );
             _requiresContractAddress(
                 deployer,
                 nonce + 8,
-                address(subscribeImpl)
+                address(subscribe.subscribeImpl)
             );
+
             // 9. Deploy Subscribe Beacon
-            subscribeBeacon = new UpgradeableBeacon(
-                address(subscribeImpl),
-                address(engineAddr)
+            subscribe.subscribeBeacon = new UpgradeableBeacon(
+                address(subscribe.subscribeImpl),
+                address(engine.engineAddr)
             );
             _requiresContractAddress(
                 deployer,
                 nonce + 9,
-                address(subscribeBeacon)
+                address(subscribe.subscribeBeacon)
             );
+
             // 10. Deploy an Essence Beacon with temp subscribeIml
-            essenceBeacon = new UpgradeableBeacon(
-                address(subscribeImpl),
-                address(engineAddr)
+            essence.essenceBeacon = new UpgradeableBeacon(
+                address(subscribe.subscribeImpl),
+                address(engine.engineAddr)
             );
         }
+
         // 9. Deploy Proxy for CyberEngine
-        bytes memory data = abi.encodeWithSelector(
-            CyberEngine.initialize.selector,
-            ENGINE_OWNER, // TODO: emergency admin
-            address(profileProxy),
-            address(subscribeBeacon),
-            address(essenceBeacon),
-            address(authority)
+        engineProxy = new ERC1967Proxy(
+            address(engine.engineImpl),
+            abi.encodeWithSelector(
+                CyberEngine.initialize.selector,
+                ENGINE_OWNER, // TODO: emergency admin
+                address(profile.profileProxy),
+                address(box.boxProxy),
+                address(subscribe.subscribeBeacon),
+                address(essence.essenceBeacon),
+                address(authority)
+            )
         );
-        engineProxy = new ERC1967Proxy(address(engineImpl), data);
         _requiresContractAddress(deployer, nonce + 10, address(engineProxy));
 
         // 10. set governance
         setupGovernance(CyberEngine(address(engineProxy)), deployer, authority);
+
         // 11. health checks
         healthCheck(
             CyberEngine(address(engineProxy)),
@@ -264,6 +319,7 @@ library LibDeploy {
             ProfileNFT(address(profileProxy)),
             CyberBoxNFT(address(boxProxy))
         );
+
         // 12. register a profile for testing
         if (block.chainid != 1) {
             register(CyberEngine(address(engineProxy)), deployer);
