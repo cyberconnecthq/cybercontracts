@@ -32,6 +32,9 @@ contract ProfileNFT is
     // Immutable
     address public immutable ENGINE; // solhint-disable-line
 
+    /**
+     * @notice Checks that sender is engine address.
+     */
     modifier onlyEngine() {
         require(msg.sender == address(ENGINE), "Only Engine");
         _;
@@ -321,8 +324,13 @@ contract ProfileNFT is
         return _imageTemplate;
     }
 
+    /**
+     * @notice Contract version number.
+     *
+     * @return uint256 The version number.
+     * @dev This contract can be upgraded with UUPS upgradeability
+     */
     // TODO: write a test for upgrade profile nft
-    // UUPS upgradeability
     function version() external pure virtual override returns (uint256) {
         return _VERSION;
     }
@@ -330,7 +338,11 @@ contract ProfileNFT is
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override onlyEngine {}
 
-    // pausable
+    /**
+     * @notice Changes the pause state of the profile nft.
+     *
+     * @param toPause The pause state.
+     */
     function pause(bool toPause) external onlyEngine {
         if (toPause) {
             super._pause();
@@ -347,8 +359,7 @@ contract ProfileNFT is
         super.transferFrom(from, to, id);
     }
 
-    // @inheritdoc IProfileNFT
-    // sets a primary profile id for the user
+    /// @inheritdoc IProfileNFT
     function setPrimaryProfile(address user, uint256 profileId)
         public
         override
@@ -362,8 +373,7 @@ contract ProfileNFT is
         _addressToPrimaryProfile[user] = profileId;
     }
 
-    // @inheritdoc IProfileNFT
-    // returns the primary profile id associated with the user
+    /// @inheritdoc IProfileNFT
     function getPrimaryProfile(address user)
         external
         view
