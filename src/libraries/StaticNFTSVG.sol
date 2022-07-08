@@ -17,7 +17,7 @@ library StaticNFTSVG {
         );
 
         if (bytes(handle).length > 13) {
-            string memory headString = substring(handle, 0, 12);
+            string memory headString = substring(handle, 0, 13);
 
             handleSVGElement = string(
                 abi.encodePacked(
