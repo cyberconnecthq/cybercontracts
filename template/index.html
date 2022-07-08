@@ -830,17 +830,17 @@
                 }
             };
 
-            const profileElem = document.getElementById("qrcode");
+            const qrCodeElem = document.getElementById("qrcode");
             const svg = QRCode.generateSVG(text, {
                 version: 3,
                 ecclevel: "L",
             });
-            let child = profileElem.lastElementChild;
+            let child = qrCodeElem.lastElementChild;
             while (child) {
-                profileElem.removeChild(child);
-                child = profileElem.lastElementChild;
+                qrCodeElem.removeChild(child);
+                child = qrCodeElem.lastElementChild;
             }
-            profileElem.appendChild(svg);
+            qrCodeElem.appendChild(svg);
         }
 
         const render = (handle, imageURI, metadata) => {
