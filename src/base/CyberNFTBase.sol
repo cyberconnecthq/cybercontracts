@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.14;
 
+import { Initializable } from "../upgradeability/Initializable.sol";
+
 import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
 import { ERC721 } from "../dependencies/solmate/ERC721.sol";
-
-import { Initializable } from "../upgradeability/Initializable.sol";
 
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
