@@ -17,7 +17,7 @@ abstract contract CyberEngineStorage {
     // Shared between register and other withSig functions. Always query onchain to get the current nounce
     mapping(uint256 => DataTypes.SubscribeStruct)
         internal _subscribeByProfileId;
-    mapping(address => uint256) public nonces;
+    mapping(address => uint256) public nonces; // TODO: reconsider if move nonces to CyberNFTBase
     address public subscribeNFTBeacon;
     mapping(DataTypes.Tier => uint256) public feeMapping;
     mapping(address => bool) internal _subscribeMwAllowlist;
