@@ -476,6 +476,7 @@ contract CyberEngine is
      */
     function setProfileNFTDescriptor(address descriptor) external requiresAuth {
         IProfileNFT(profileAddress).setProfileNFTDescriptor(descriptor);
+
         emit SetProfileNFTDescriptor(descriptor);
     }
 
@@ -488,9 +489,10 @@ contract CyberEngine is
         external
         requiresAuth
     {
-        IProfileNFTDescriptor(
-            IProfileNFT(profileAddress).getProfileNFTDescriptor()
-        ).setAnimationTemplate(template);
+        address descriptor = IProfileNFT(profileAddress)
+            .getProfileNFTDescriptor();
+        IProfileNFTDescriptor(descriptor).setAnimationTemplate(template);
+
         emit SetAnimationTemplate(template);
     }
 

@@ -45,6 +45,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
             nonce + 4
         );
         rolesAuthority = new Roles(address(this), engineAddr);
+
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
         bytes memory code = address(new ProfileNFT(engineAddr)).code;
         vm.etch(profileAddress, code);
@@ -557,8 +558,16 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         vm.mockCall(
             profileAddress,
             abi.encodeWithSelector(
-                IProfileNFT.getProfileNFTDescriptor.selector,
-                profileNFTDescriptor
+                IProfileNFT.getProfileNFTDescriptor.selector
+            ),
+            abi.encode(profileAddress)
+        );
+
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFTDescriptor.setAnimationTemplate.selector,
+                "new_ani_template"
             ),
             abi.encode(0)
         );

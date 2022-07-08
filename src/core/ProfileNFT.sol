@@ -141,6 +141,13 @@ contract ProfileNFT is
             subscribers = CyberNFTBase(subscribeNFT).totalSupply();
         }
 
+        IProfileNFTDescriptor.ConstructTokenURIParams
+            memory param = IProfileNFTDescriptor.ConstructTokenURIParams({
+                tokenId: tokenId,
+                handle: handle,
+                subscribers: subscribers
+            });
+
         return
             IProfileNFTDescriptor(_profileNFTDescriptor).tokenURI(
                 IProfileNFTDescriptor.ConstructTokenURIParams({

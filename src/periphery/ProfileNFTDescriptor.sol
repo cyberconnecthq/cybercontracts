@@ -55,7 +55,6 @@ contract ProfileNFTDescriptor is
         onlyEngine
     {
         _animationTemplate = template;
-        emit SetAnimationTemplate(template);
     }
 
     /// @inheritdoc IProfileNFTDescriptor

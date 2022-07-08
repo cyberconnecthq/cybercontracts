@@ -82,9 +82,9 @@ interface ICyberEngineEvents {
     event SetProfileNFTDescriptor(address indexed newDescriptor);
 
     /**
-     * @notice Emitted when a new Profile NFT Descriptor has been set.
+     * @notice Emitted when a new animation template has been set.
      *
-     * @param newTemplate The newly set descriptor address.
+     * @param newTemplate The newly set animation template.
      */
     event SetAnimationTemplate(string indexed newTemplate);
 

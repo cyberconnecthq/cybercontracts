@@ -9,13 +9,6 @@ interface IProfileNFTDescriptor {
         uint256 subscribers;
     }
 
-    /**
-     * @notice Emitted when a new animation template has been set.
-     *
-     * @param newTemplate The newly set animation template.
-     */
-    event SetAnimationTemplate(string indexed newTemplate);
-
     function setAnimationTemplate(string calldata template) external;
 
     function getAnimationTemplate() external view returns (string memory);

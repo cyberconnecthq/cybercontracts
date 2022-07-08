@@ -14,6 +14,7 @@ import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC
 import { Constants } from "../../src/libraries/Constants.sol";
 import { ECDSA } from "../../src/dependencies/openzeppelin/ECDSA.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
+import { ProfileNFTDescriptor } from "../../src/periphery/ProfileNFTDescriptor.sol";
 
 import "forge-std/Vm.sol";
 
@@ -102,18 +103,50 @@ library LibDeploy {
         }
     }
 
-    function deploy(
+    function deployDescriptor(
         address deployer,
         uint256 nonce,
-        // address calProfileProxy,
-        address profileNFTDescriptor
-    )
+        address engineAddr
+    ) internal returns (address) {
+        ERC1967Proxy profileDescriptorProxy;
+        address profileDescriptorAddress;
+        ProfileNFTDescriptor profileNFTDescriptorImpl = new ProfileNFTDescriptor(
+                address(engineAddr)
+            );
+        _requiresContractAddress(
+            deployer,
+            nonce + 2,
+            address(profileNFTDescriptorImpl)
+        );
+        string
+            memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreiau22w2k7meawcll2ibwbzmjx5szatzhbkhmmsfmh5van33szczbq";
+        bytes memory descriptorInitData = abi.encodeWithSelector(
+            ProfileNFTDescriptor.initialize.selector,
+            templateURL
+        );
+        profileDescriptorProxy = new ERC1967Proxy(
+            address(profileNFTDescriptorImpl),
+            descriptorInitData
+        );
+        profileDescriptorAddress = address(profileDescriptorProxy);
+        _requiresContractAddress(
+            deployer,
+            nonce + 3,
+            address(profileDescriptorProxy)
+        );
+
+        return profileDescriptorAddress;
+    }
+
+    function deploy(address deployer, uint256 nonce)
         internal
         returns (
+            // address calProfileProxy,
             ERC1967Proxy engineProxy,
             RolesAuthority authority,
             address boxAddress,
-            address profileAddress
+            address profileAddress,
+            address profileDescriptorAddress
         )
     {
         console.log("starting nonce", nonce);
@@ -122,7 +155,7 @@ library LibDeploy {
         // address emergencyAdmin = address(0x1890);
 
         // 0. Cal engine proxy address
-        address engineAddr = _calcContractAddress(deployer, nonce + 9);
+        address engineAddr = _calcContractAddress(deployer, nonce + 10);
 
         // 1. authority
         // authority = new RolesAuthority(deployer, Authority(address(0)));
@@ -131,25 +164,33 @@ library LibDeploy {
         // 2. Deploy engine impl
         CyberEngine engineImpl = new CyberEngine();
         _requiresContractAddress(deployer, nonce + 1, address(engineImpl));
+
+        // 3. Deploy ProfileNFTDescriptor
+        profileDescriptorAddress = deployDescriptor(
+            deployer,
+            nonce,
+            engineAddr
+        );
+
         ERC1967Proxy profileProxy;
         {
             // scope to avoid stack too deep error
-            // 3. Deploy ProfileNFT Impl
+            // 4. Deploy ProfileNFT Impl
             ProfileNFT profileImpl = new ProfileNFT(address(engineAddr));
-            _requiresContractAddress(deployer, nonce + 2, address(profileImpl));
-            // 4. Deploy Proxy for ProfileNFT
+            _requiresContractAddress(deployer, nonce + 4, address(profileImpl));
+            // 5. Deploy Proxy for ProfileNFT
             bytes memory initData = abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
                 // TODO: Naming
                 "CyberConnect Profile",
                 "CCP",
-                profileNFTDescriptor
+                profileDescriptorAddress
             );
             profileProxy = new ERC1967Proxy(address(profileImpl), initData);
             profileAddress = address(profileProxy);
             _requiresContractAddress(
                 deployer,
-                nonce + 3,
+                nonce + 5,
                 address(profileProxy)
             );
             // require(calProfileProxy == address(profileProxy));
@@ -169,33 +210,33 @@ library LibDeploy {
                 "CYBER_BOX"
             );
             boxProxy = new ERC1967Proxy(address(boxImpl), boxInitData);
-            _requiresContractAddress(deployer, nonce + 5, address(boxProxy));
+            _requiresContractAddress(deployer, nonce + 7, address(boxProxy));
             boxAddress = address(boxProxy);
         }
         UpgradeableBeacon subscribeBeacon;
         UpgradeableBeacon essenceBeacon;
         {
-            // 7. Deploy SubscribeNFT Impl
+            // 8. Deploy SubscribeNFT Impl
             SubscribeNFT subscribeImpl = new SubscribeNFT(
                 address(engineAddr),
                 address(profileProxy)
             );
             _requiresContractAddress(
                 deployer,
-                nonce + 6,
+                nonce + 8,
                 address(subscribeImpl)
             );
-            // 8. Deploy Subscribe Beacon
+            // 9. Deploy Subscribe Beacon
             subscribeBeacon = new UpgradeableBeacon(
                 address(subscribeImpl),
                 address(engineAddr)
             );
             _requiresContractAddress(
                 deployer,
-                nonce + 7,
+                nonce + 9,
                 address(subscribeBeacon)
             );
-            // 9. Deploy an Essence Beacon with temp subscribeIml
+            // 10. Deploy an Essence Beacon with temp subscribeIml
             essenceBeacon = new UpgradeableBeacon(
                 address(subscribeImpl),
                 address(engineAddr)
@@ -211,7 +252,7 @@ library LibDeploy {
             address(authority)
         );
         engineProxy = new ERC1967Proxy(address(engineImpl), data);
-        _requiresContractAddress(deployer, nonce + 9, address(engineProxy));
+        _requiresContractAddress(deployer, nonce + 10, address(engineProxy));
 
         // 10. set governance
         setupGovernance(CyberEngine(address(engineProxy)), deployer, authority);
