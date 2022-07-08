@@ -50,7 +50,7 @@ library QRSVG {
     {
         uint256[55] memory buf;
         uint256 dataLen = data.length;
-        uint8 maxBufLen = 44;
+        uint8 maxBufLen = 55;
 
         uint256 bits = 0;
         uint256 remaining = 8;

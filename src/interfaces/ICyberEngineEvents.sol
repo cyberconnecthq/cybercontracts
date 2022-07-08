@@ -10,14 +10,12 @@ interface ICyberEngineEvents {
      *
      * @param owner Owner to set for CyberEngine.
      * @param profileAddress Profile address to set for CyberEngine.
-     * @param boxAddress Box Address to set for CyberEngine.
      * @param subscribeNFTBeacon Subscribe NFT beacon to set for CyberEngine.
      * @param essenceNFTBeacon Essence NFT beacon to set for CyberEngine.
      */
     event Initialize(
         address indexed owner,
         address profileAddress,
-        address boxAddress,
         address subscribeNFTBeacon,
         address essenceNFTBeacon
     );
@@ -64,14 +62,6 @@ interface ICyberEngineEvents {
         uint256 indexed preAmount,
         uint256 indexed newAmount
     );
-
-    /**
-     * @notice Emitted when the box giveaway state has been set to `ended`.
-     *
-     * @param preEnded The previous box giveaway state.
-     * @param newEnded The newly set box giveaway state.
-     */
-    event SetBoxGiveawayEnded(bool indexed preEnded, bool indexed newEnded);
 
     /**
      * @notice Emitted when a new state has been set.
@@ -150,14 +140,6 @@ interface ICyberEngineEvents {
         string avatar,
         string metadata
     );
-
-    /**
-     * @notice Emitted when a profile claims a box nft.
-     *
-     * @param to The claimer address.
-     * @param boxId The box id that has been claimed.
-     */
-    event ClaimBox(address indexed to, uint256 indexed boxId);
 
     /**
      * @notice Emitted when an address has withdrawed.

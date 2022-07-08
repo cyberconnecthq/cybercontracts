@@ -40,12 +40,6 @@ contract Roles is RolesAuthority {
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            CyberEngine.setBoxAddress.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
             CyberEngine.setFeeByTier.selector,
             true
         );
@@ -82,12 +76,6 @@ contract Roles is RolesAuthority {
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
-            CyberEngine.upgradeBox.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
             Constants._AUTHORIZE_UPGRADE,
             true
         );
@@ -101,12 +89,6 @@ contract Roles is RolesAuthority {
             Constants._ENGINE_GOV_ROLE,
             engine,
             CyberEngine.setImageTemplate.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.pauseBox.selector,
             true
         );
         setRoleCapability(

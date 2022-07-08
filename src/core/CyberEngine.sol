@@ -5,13 +5,11 @@ pragma solidity 0.8.14;
 import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
-import { IBoxNFT } from "../interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { ProfileNFT } from "./ProfileNFT.sol";
-import { BoxNFT } from "../periphery/BoxNFT.sol";
 import { Auth } from "../dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
@@ -44,14 +42,12 @@ contract CyberEngine is
      *
      * @param _owner Owner to set for CyberEngine.
      * @param _profileAddress Profile address to set for CyberEngine.
-     * @param _boxAddress Box Address animation url to set for CyberEngine.
      * @param _subscribeNFTBeacon Subscribe NFT beacon to set for CyberEngine.
      * @param _essenceNFTBeacon Subscribe NFT beacon to set for CyberEngine.
      */
     function initialize(
         address _owner,
         address _profileAddress,
-        address _boxAddress,
         address _subscribeNFTBeacon,
         address _essenceNFTBeacon,
         RolesAuthority _rolesAuthority
@@ -61,7 +57,6 @@ contract CyberEngine is
 
         signer = _owner;
         profileAddress = _profileAddress;
-        boxAddress = _boxAddress;
         subscribeNFTBeacon = _subscribeNFTBeacon;
         essenceNFTBeacon = _essenceNFTBeacon;
         _setInitialFees();
@@ -69,7 +64,6 @@ contract CyberEngine is
         emit Initialize(
             _owner,
             _profileAddress,
-            _boxAddress,
             _subscribeNFTBeacon,
             _essenceNFTBeacon
         );
@@ -104,20 +98,6 @@ contract CyberEngine is
     }
 
     /**
-     * @notice Sets the new box address.
-     *
-     * @param _boxAddress The box address.
-     * @dev The address can not be zero address.
-     */
-    function setBoxAddress(address _boxAddress) external requiresAuth {
-        require(_boxAddress != address(0), "zero address box");
-        address preBoxAddr = boxAddress;
-        boxAddress = _boxAddress;
-
-        emit SetBoxAddress(preBoxAddr, _boxAddress);
-    }
-
-    /**
      * @notice Sets the fee for tiers.
      *
      * @param tier The tier number.
@@ -128,40 +108,6 @@ contract CyberEngine is
         requiresAuth
     {
         _setFeeByTier(tier, amount);
-    }
-
-    /**
-     * @notice Claims a box nft for a profile.
-     *
-     * @param to The claimer address.
-     * @param sig The EIP712 signature.
-     * @return uint256 The box id.
-     */
-    // TODO: comment
-    function claimBox(address to, DataTypes.EIP712Signature calldata sig)
-        external
-        payable
-        returns (uint256)
-    {
-        _requiresExpectedSigner(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        Constants._CLAIM_BOX_TYPEHASH,
-                        to,
-                        nonces[to]++,
-                        sig.deadline
-                    )
-                )
-            ),
-            signer,
-            sig
-        );
-
-        uint256 boxId = IBoxNFT(boxAddress).mint(to);
-        emit ClaimBox(to, boxId);
-
-        return boxId;
     }
 
     /**
@@ -651,30 +597,12 @@ contract CyberEngine is
     }
 
     /**
-     * @notice Upgrades the contract with a new implementation.
-     *
-     * @param newImpl The new implementation address.
-     */
-    function upgradeBox(address newImpl) external requiresAuth {
-        UUPSUpgradeable(boxAddress).upgradeTo(newImpl);
-    }
-
-    /**
      * @notice Changes the pause state of the profile nft.
      *
      * @param toPause The pause state.
      */
     function pauseProfile(bool toPause) external requiresAuth {
         ProfileNFT(profileAddress).pause(toPause);
-    }
-
-    /**
-     * @notice Changes the pause state of the box nft.
-     *
-     * @param toPause The pause state.
-     */
-    function pauseBox(bool toPause) external requiresAuth {
-        BoxNFT(boxAddress).pause(toPause);
     }
 
     /// @inheritdoc ICyberEngine

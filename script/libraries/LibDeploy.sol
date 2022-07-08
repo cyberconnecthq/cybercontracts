@@ -6,7 +6,7 @@ import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { Roles } from "../../src/core/Roles.sol";
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
-import { BoxNFT } from "../../src/periphery/BoxNFT.sol";
+import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
 import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
 import { Authority } from "../../src/dependencies/solmate/Auth.sol";
 import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
@@ -161,11 +161,12 @@ library LibDeploy {
         {
             // scope to avoid stack too deep error
             // 5. Deploy BoxNFT Impl
-            BoxNFT boxImpl = new BoxNFT(address(engineAddr));
+            CyberBoxNFT boxImpl = new CyberBoxNFT();
             _requiresContractAddress(deployer, nonce + 4, address(boxImpl));
             // 6. Deploy Proxy for BoxNFT
             bytes memory boxInitData = abi.encodeWithSelector(
-                BoxNFT.initialize.selector,
+                CyberBoxNFT.initialize.selector,
+                deployer,
                 "CyberBox",
                 "CYBER_BOX"
             );
@@ -207,7 +208,6 @@ library LibDeploy {
             CyberEngine.initialize.selector,
             ENGINE_OWNER, // TODO: emergency admin
             address(profileProxy),
-            address(boxProxy),
             address(subscribeBeacon),
             address(essenceBeacon),
             address(authority)
@@ -223,7 +223,7 @@ library LibDeploy {
             deployer,
             authority,
             ProfileNFT(address(profileProxy)),
-            BoxNFT(address(boxProxy))
+            CyberBoxNFT(address(boxProxy))
         );
         // 12. register a profile for testing
         if (block.chainid != 1) {
@@ -236,7 +236,7 @@ library LibDeploy {
         address deployer,
         RolesAuthority authority,
         ProfileNFT profile,
-        BoxNFT box
+        CyberBoxNFT box
     ) internal view {
         require(
             engine.owner() == ENGINE_OWNER,
@@ -259,7 +259,7 @@ library LibDeploy {
             "Governance address is not set"
         );
         require(profile.paused(), "ProfileNFT is not paused");
-        require(box.paused(), "BoxNFT is not paused");
+        require(box.paused(), "CyberBoxNFT is not paused");
 
         // TODO: add all checks
     }

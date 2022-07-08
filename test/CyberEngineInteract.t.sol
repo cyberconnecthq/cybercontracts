@@ -6,7 +6,6 @@ import "forge-std/Test.sol";
 import { MockEngine } from "./utils/MockEngine.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../src/libraries/Constants.sol";
-import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { ISubscribeNFT } from "../src/interfaces/ISubscribeNFT.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
@@ -25,7 +24,6 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
     RolesAuthority internal authority;
     address internal profileAddress = address(0xA);
-    address internal boxAddress = address(0xB);
     address internal subscribeBeacon;
     address internal gov = address(0xCCC);
     uint256 internal bobPk = 10000;
@@ -54,7 +52,6 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             CyberEngine.initialize.selector,
             address(0),
             profileAddress,
-            boxAddress,
             subscribeBeacon,
             essenceBeacon,
             authority
@@ -102,12 +99,6 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
             )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
-
-        vm.mockCall(
-            boxAddress,
-            abi.encodeWithSelector(IBoxNFT.mint.selector, address(bob)),
-            abi.encode(1)
-        );
 
         vm.mockCall(
             profileAddress,

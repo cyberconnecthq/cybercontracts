@@ -14,7 +14,8 @@
     "deploy:anvil": "source .env.anvil && forge script script/Deploy.s.sol:DeployScript --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
     "deploy:rinkeby": "source .env.rinkeby && forge script script/Deploy.s.sol:DeployScript --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "pre_deploy": "node misc/pre_deploy.js",
-    "post_deploy": "node misc/post_deploy.js"
+    "post_deploy": "node misc/post_deploy.js",
+    "qrtest": "rm -rf ./test/qrcode ./misc/qrcode/html ./misc/qrcode/svg && node misc/qrcode/gen-sol.js && mkdir -pv misc/qrcode/svg && forge test --match-contract QRSVGIntegration -vvv && node misc/qrcode/gen-html.js  && node misc/qrcode/puppet.js"
   },
   "devDependencies": {
     "axios": "^0.27.2",
