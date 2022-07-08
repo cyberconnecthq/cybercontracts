@@ -18,11 +18,12 @@ import { LibString } from "../src/libraries/LibString.sol";
 contract ProfileNFTTest is Test {
     ProfileNFT internal token;
     address constant alice = address(0xA11CE);
+    address constant bob = address(0xA12CE);
     address constant minter = address(0xB0B);
     address constant engine = address(0xE);
     string constant imageUri = "https://example.com/image.png";
     address constant subscribeMw = address(0xD);
-    DataTypes.CreateProfileParams internal createProfileData =
+    DataTypes.CreateProfileParams internal createProfileDataAlice =
         DataTypes.CreateProfileParams(
             alice,
             "alice",
@@ -61,6 +62,23 @@ contract ProfileNFTTest is Test {
 
     string aliceMetadata = getMetaData("alice", "0");
 
+    DataTypes.CreateProfileParams internal createProfileDataBob =
+        DataTypes.CreateProfileParams(
+            bob,
+            "bob",
+            "https://example.com/bob.jpg",
+            "metadata"
+        );
+    string bobMetadata =
+        string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(
+                    '{"name":"@bob","description":"CyberConnect profile for @bob","image":"img_template?handle=bob","animation_url":"ani_template?handle=bob","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"5"},{"trait_type":"subscribers","value":"0"},{"trait_type":"handle","value":"@bob"}]}'
+                )
+            )
+        );
+
     function setUp() public {
         ProfileNFT tokenImpl = new ProfileNFT(engine);
         bytes memory data = abi.encodeWithSelector(
@@ -87,18 +105,23 @@ contract ProfileNFTTest is Test {
     function testCannotCreateProfileAsNonEngine() public {
         vm.expectRevert("Only Engine");
         vm.prank(address(0xDEAD));
-        token.createProfile(createProfileData);
+        token.createProfile(createProfileDataAlice);
     }
 
     function testCreateProfileAsEngine() public {
         vm.prank(engine);
-        assertEq(token.createProfile(createProfileData), 1);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
+        assertEq(id, 1);
     }
 
     function testCreateProfile() public {
         assertEq(token.totalSupply(), 0);
         vm.prank(engine);
-        token.createProfile(createProfileData);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
+
+        uint256 primaryIdAlice = token.getPrimaryProfile(alice);
+        assertEq(primaryIdAlice, id);
+
         assertEq(token.totalSupply(), 1);
         assertEq(token.balanceOf(alice), 1);
         // TODO: subscribe middle ware should eq the correct address
@@ -111,7 +134,7 @@ contract ProfileNFTTest is Test {
 
     function testTokenURI() public {
         vm.prank(engine);
-        token.createProfile(createProfileData);
+        token.createProfile(createProfileDataAlice);
         vm.mockCall(
             engine,
             abi.encodeWithSelector(CyberEngine.getSubscribeNFT.selector, 1),
@@ -122,7 +145,7 @@ contract ProfileNFTTest is Test {
 
     function testTokenURISubscriber() public {
         vm.prank(engine);
-        token.createProfile(createProfileData);
+        token.createProfile(createProfileDataAlice);
 
         address subscribeNFT = address(0x1111);
         vm.mockCall(
@@ -142,22 +165,22 @@ contract ProfileNFTTest is Test {
 
     function test() public {
         vm.prank(engine);
-        token.createProfile(createProfileData);
+        token.createProfile(createProfileDataAlice);
         assertEq(token.getHandleByProfileId(1), "alice");
     }
 
     function testGetProfileIdByHandle() public {
         vm.prank(engine);
-        token.createProfile(createProfileData);
+        token.createProfile(createProfileDataAlice);
         assertEq(token.getProfileIdByHandle("alice"), 1);
     }
 
     function testCannotCreateProfileWithHandleTaken() public {
         vm.prank(engine);
-        token.createProfile(createProfileData);
+        token.createProfile(createProfileDataAlice);
         vm.expectRevert("Handle taken");
         vm.prank(engine);
-        token.createProfile(createProfileData);
+        token.createProfile(createProfileDataAlice);
     }
 
     function testCannotCreateProfileLongerThanMaxHandleLength() public {
@@ -213,7 +236,7 @@ contract ProfileNFTTest is Test {
     // operator
     function testGetOperatorApproval() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(createProfileData);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
         assertEq(token.getOperatorApproval(id, address(0)), false);
     }
 
@@ -224,14 +247,14 @@ contract ProfileNFTTest is Test {
 
     function testCannotSetOperatorIfNotEngine() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(createProfileData);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
         vm.expectRevert("Only Engine");
         token.setOperatorApproval(id, address(0), true);
     }
 
     function testCannotSetOperatorToZeroAddress() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(createProfileData);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
         vm.prank(engine);
         vm.expectRevert("Operator address cannot be 0");
         token.setOperatorApproval(id, address(0), true);
@@ -240,7 +263,7 @@ contract ProfileNFTTest is Test {
     // metadata
     function testSetMetadataAsEngine() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(createProfileData);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
         assertEq(token.getMetadata(id), "metadata");
         vm.prank(engine);
         token.setMetadata(id, "ipfs");
@@ -249,7 +272,7 @@ contract ProfileNFTTest is Test {
 
     function testCannotSetMetadataTooLong() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(createProfileData);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
 
         bytes memory longMetadata = new bytes(Constants._MAX_URI_LENGTH + 1);
         vm.prank(engine);
@@ -265,7 +288,7 @@ contract ProfileNFTTest is Test {
 
     function testCannotSetMetadataIfNotEngine() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(createProfileData);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
         vm.expectRevert("Only Engine");
         token.setMetadata(id, "ipfs");
     }
@@ -292,7 +315,7 @@ contract ProfileNFTTest is Test {
     // avatar
     function testSetAvatarAsEngine() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(createProfileData);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
         assertEq(token.getAvatar(id), "https://example.com/alice.jpg");
         vm.prank(engine);
         token.setAvatar(id, "avatar");
@@ -306,14 +329,14 @@ contract ProfileNFTTest is Test {
 
     function testCannotSetAvatarIfNotEngine() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(createProfileData);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
         vm.expectRevert("Only Engine");
         token.setAvatar(id, "ipfs");
     }
 
     function testCannotSetAvatarTooLong() public {
         vm.prank(engine);
-        uint256 id = token.createProfile(createProfileData);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
 
         bytes memory longAvatar = new bytes(Constants._MAX_URI_LENGTH + 1);
         vm.prank(engine);
@@ -359,5 +382,38 @@ contract ProfileNFTTest is Test {
         assertEq(token.paused(), true);
         token.pause(false);
         assertEq(token.paused(), false);
+    }
+
+    // only Engine can set primary profile id
+    function testCannotSetPrimaryProfileIdIfNotEngine() public {
+        vm.prank(engine);
+        (uint256 id, ) = token.createProfile(createProfileDataAlice);
+        vm.expectRevert("Only Engine");
+        token.setPrimaryProfile(address(alice), id);
+    }
+
+    // to set a primary profile id, the id has to exist
+    function testCannotSetProfileIdForNonexistentProfile() public {
+        vm.startPrank(engine);
+        vm.expectRevert("NOT_MINTED");
+        token.setPrimaryProfile(address(alice), 0);
+    }
+
+    // we create two profile ids, then switch to a new profile id
+    // the function returns the correct primary id associated with the address
+    function testReturnProfileId() public {
+        vm.startPrank(engine);
+        // creates 2 profiles, bob's profile is automatically set as default
+        (uint256 profileIdAlice, ) = token.createProfile(
+            createProfileDataAlice
+        );
+        (uint256 profileIdBob, ) = token.createProfile(createProfileDataBob);
+        // get the default profile id
+        uint256 primaryIdAlice = token.getPrimaryProfile(alice);
+        assertEq(primaryIdAlice, profileIdAlice);
+        // set another primary profile id
+        token.setPrimaryProfile(address(bob), profileIdBob);
+        uint256 primaryIdBob = token.getPrimaryProfile(bob);
+        assertEq(profileIdBob, profileIdBob);
     }
 }

@@ -33,6 +33,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     address constant alice = address(0xA11CE);
     address constant bob = address(0xB0B);
     string constant handle = "handle";
+    string constant handle2 = "handle2";
     string constant avatar = "avatar";
     string constant metadata = "metadata";
 
@@ -382,12 +383,25 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
                 IProfileNFT.createProfile.selector,
                 DataTypes.CreateProfileParams(bob, handle, "", "")
             ),
-            abi.encode(1)
+            abi.encode(1, true)
         );
         assertEq(engine.nonces(bob), 0);
 
         vm.expectEmit(true, true, false, true);
         emit Register(bob, 1, handle, avatar, metadata);
+
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.setPrimaryProfile.selector,
+                bob,
+                1
+            ),
+            abi.encode(0)
+        );
+
+        vm.expectEmit(true, true, false, true);
+        emit SetPrimaryProfile(bob, 1);
 
         assertEq(
             engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
@@ -674,4 +688,66 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         vm.prank(alice);
         engine.pauseBox(true);
     }
+
+    // TODO: etch is not working well with mockCall
+    // function testRegisterTwiceWillNotChangePrimaryProfile() public {
+    //     // register first time
+    //     address charlie = vm.addr(1);
+    //     rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+    //     vm.prank(alice);
+    //     engine.setSigner(charlie);
+
+    //     // change block timestamp to make deadline valid
+    //     vm.warp(50);
+    //     uint256 deadline = 100;
+    //     bytes32 digest = engine.hashTypedDataV4(
+    //         keccak256(
+    //             abi.encode(
+    //                 Constants._REGISTER_TYPEHASH,
+    //                 bob,
+    //                 keccak256(bytes(handle)),
+    //                 keccak256(bytes(avatar)),
+    //                 keccak256(bytes(metadata)),
+    //                 0,
+    //                 deadline
+    //             )
+    //         )
+    //     );
+    //     (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+
+    //     vm.mockCall(
+    //         profileAddress,
+    //         abi.encodeWithSelector(
+    //             IProfileNFT.createProfile.selector,
+    //             DataTypes.CreateProfileParams(bob, handle, "", "")
+    //         ),
+    //         // return false here to indicate that the address has primary profile set already
+    //         abi.encode(2, false)
+    //     );
+    //     vm.mockCall(
+    //         profileAddress,
+    //         abi.encodeWithSelector(
+    //             IProfileNFT.setPrimaryProfile.selector,
+    //             bob,
+    //             1
+    //         ),
+    //         abi.encode(0)
+    //     );
+    //     assertEq(engine.nonces(bob), 0);
+
+    //     vm.expectEmit(true, true, false, true);
+    //     emit Register(bob, 1, handle, avatar, metadata);
+
+    //     vm.expectEmit(true, true, false, true);
+    //     emit SetPrimaryProfile(bob, 1);
+
+    //     assertEq(
+    //         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+    //             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
+    //             DataTypes.EIP712Signature(v, r, s, deadline)
+    //         ),
+    //         1
+    //     );
+    //     assertEq(engine.nonces(bob), 1);
+    // }
 }

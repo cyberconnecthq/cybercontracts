@@ -69,14 +69,14 @@ contract ProfileNFT is
         external
         override
         onlyEngine
-        returns (uint256)
+        returns (uint256 id, bool primaryProfileSet)
     {
         _requiresValidHandle(params.handle);
 
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
-        uint256 id = _mint(params.to);
+        id = _mint(params.to);
 
         _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: params.handle,
@@ -85,7 +85,11 @@ contract ProfileNFT is
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         _metadataById[_totalCount] = params.metadata;
-        return id;
+
+        if (_addressToPrimaryProfile[params.to] == 0) {
+            _setPrimaryProfile(params.to, id);
+            primaryProfileSet = true;
+        }
     }
 
     /// @inheritdoc IProfileNFT
@@ -128,6 +132,9 @@ contract ProfileNFT is
         string memory formattedName = string(abi.encodePacked("@", handle));
         string memory animationURL = string(
             abi.encodePacked(_animationTemplate, "?handle=", handle)
+        );
+        string memory imageURL = string(
+            abi.encodePacked(_imageTemplate, "?handle=", handle)
         );
         address subscribeNFT = CyberEngine(ENGINE).getSubscribeNFT(tokenId);
         uint256 subscribers;
@@ -341,5 +348,31 @@ contract ProfileNFT is
         uint256 id
     ) public override whenNotPaused {
         super.transferFrom(from, to, id);
+    }
+
+    // @inheritdoc IProfileNFT
+    // sets a primary profile id for the user
+    function setPrimaryProfile(address user, uint256 profileId)
+        public
+        override
+        onlyEngine
+    {
+        _requireMinted(profileId);
+        _setPrimaryProfile(user, profileId);
+    }
+
+    function _setPrimaryProfile(address user, uint256 profileId) internal {
+        _addressToPrimaryProfile[user] = profileId;
+    }
+
+    // @inheritdoc IProfileNFT
+    // returns the primary profile id associated with the user
+    function getPrimaryProfile(address user)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return _addressToPrimaryProfile[user];
     }
 }

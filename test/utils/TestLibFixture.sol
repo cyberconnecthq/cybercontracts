@@ -24,14 +24,21 @@ library TestLibFixture {
         authority.setUserRole(_GOV, Constants._ENGINE_GOV_ROLE, true);
     }
 
-    // Need to be called after auth
     function registerBobProfile(CyberEngine engine)
         internal
         returns (uint256 profileId)
     {
+        return registerBobProfile(engine, 0, "bob");
+    }
+
+    // Need to be called after auth
+    function registerBobProfile(
+        CyberEngine engine,
+        uint256 nonce,
+        string memory handle
+    ) internal returns (uint256 profileId) {
         uint256 bobPk = 1;
         address bob = vm.addr(bobPk);
-        string memory handle = "bob";
         // set signer
         vm.prank(_GOV);
         engine.setSigner(bob);
@@ -48,7 +55,7 @@ library TestLibFixture {
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
                     keccak256(bytes(metadata)),
-                    0,
+                    nonce,
                     deadline
                 )
             ),
@@ -57,13 +64,13 @@ library TestLibFixture {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-        require(engine.nonces(bob) == 0);
+        require(engine.nonces(bob) == nonce);
         profileId = engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
         // require(profileId == 1);
 
-        require(engine.nonces(bob) == 1);
+        require(engine.nonces(bob) == nonce + 1);
     }
 }

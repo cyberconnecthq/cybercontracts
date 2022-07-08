@@ -571,4 +571,39 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         engine.setSubscribeMw(profileId, mw);
         assertEq(engine.getSubscribeMw(profileId), mw);
     }
+
+    function testSetPrimary() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(bob)
+        );
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(
+                IProfileNFT.setPrimaryProfile.selector,
+                bob,
+                profileId
+            ),
+            abi.encode(0)
+        );
+
+        vm.prank(bob);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetPrimaryProfile(bob, profileId);
+        engine.setPrimaryProfile(profileId);
+    }
+
+    function testCannotSetPrimaryAsNonOwner() public {
+        vm.mockCall(
+            profileAddress,
+            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
+            abi.encode(alice)
+        );
+
+        vm.expectRevert("Only profile owner");
+        vm.prank(bob);
+        engine.setPrimaryProfile(profileId);
+    }
 }
