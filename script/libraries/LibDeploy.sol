@@ -46,7 +46,7 @@ library LibDeploy {
 
     struct Box {
         ERC1967Proxy boxProxy;
-        BoxNFT boxImpl;
+        CyberBoxNFT boxImpl;
     }
 
     struct Subscribe {
@@ -249,7 +249,8 @@ library LibDeploy {
             box.boxProxy = new ERC1967Proxy(
                 address(box.boxImpl),
                 abi.encodeWithSelector(
-                    BoxNFT.initialize.selector,
+                    CyberBoxNFT.initialize.selector,
+                    deployer,
                     "CyberBox",
                     "CYBER_BOX"
                 )
@@ -316,8 +317,8 @@ library LibDeploy {
             CyberEngine(address(engineProxy)),
             deployer,
             authority,
-            ProfileNFT(address(profileProxy)),
-            CyberBoxNFT(address(boxProxy))
+            ProfileNFT(address(profile.profileProxy)),
+            CyberBoxNFT(address(box.boxProxy))
         );
 
         // 12. register a profile for testing
