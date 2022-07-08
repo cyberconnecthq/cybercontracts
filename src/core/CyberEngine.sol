@@ -497,6 +497,14 @@ contract CyberEngine is
     }
 
     /**
+     * @param user the user address
+     * @return uint256 the primary profile id
+     */
+    function getPrimaryProfile(address user) external view returns (uint256) {
+        return IProfileNFT(profileAddress).getPrimaryProfile(user);
+    }
+
+    /**
      * @notice Sets the Profile NFT avatar.
      *
      * @param profileId The profile ID.

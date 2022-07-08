@@ -84,6 +84,7 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
         );
         assertEq(profileNFT.tokenURI(bobProfileId), bobUri);
         assertEq(profileNFT.getPrimaryProfile(bob), bobProfileId);
+        assertEq(engine.getPrimaryProfile(bob), bobProfileId);
 
         // register second time will not set primary profile
         uint256 secondId = TestLibFixture.registerBobProfile(
@@ -95,5 +96,6 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
 
         // primary profile is still 2
         assertEq(profileNFT.getPrimaryProfile(bob), 2);
+        assertEq(engine.getPrimaryProfile(bob), 2);
     }
 }
