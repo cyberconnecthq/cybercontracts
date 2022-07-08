@@ -2,12 +2,15 @@
 
 pragma solidity 0.8.14;
 
-import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
-import { LibString } from "../libraries/LibString.sol";
 import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
+
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
+
 import { CyberEngine } from "../core/CyberEngine.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
+
+import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
+import { LibString } from "../libraries/LibString.sol";
 
 /**
  * @title Profile NFT Descriptor
