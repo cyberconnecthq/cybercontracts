@@ -105,6 +105,13 @@ interface ICyberEngineEvents {
     event SetMetadata(uint256 indexed profileId, string newMetadata);
 
     /**
+     * @notice Emitted when a primary profile has been set.
+     *
+     * @param profileId The profile id.
+     */
+    event SetPrimaryProfile(address indexed user, uint256 indexed profileId);
+
+    /**
      * @notice Emitted when a new avatar has been set to a profile.
      *
      * @param profileId The profile id.
