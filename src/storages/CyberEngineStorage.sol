@@ -21,4 +21,8 @@ abstract contract CyberEngineStorage {
     address public subscribeNFTBeacon;
     mapping(DataTypes.Tier => uint256) public feeMapping;
     mapping(address => bool) internal _subscribeMwAllowlist;
+    address public essenceNFTBeacon;
+    mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
+        internal _essenceByIdByProfileId;
+    mapping(address => bool) internal _essenceMwAllowlist;
 }

@@ -21,6 +21,12 @@ library DataTypes {
         string tokenURI;
     }
 
+    struct EssenceStruct {
+        address essenceNFT;
+        address essenceMw;
+        string tokenURI;
+    }
+
     struct EIP712Signature {
         uint8 v;
         bytes32 r;

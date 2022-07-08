@@ -70,6 +70,12 @@ contract Roles is RolesAuthority {
         setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             engine,
+            CyberEngine.allowEssenceMw.selector,
+            true
+        );
+        setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            engine,
             CyberEngine.upgradeProfile.selector,
             true
         );

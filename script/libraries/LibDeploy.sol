@@ -192,6 +192,7 @@ library LibDeploy {
             address(profileProxy),
             address(boxProxy),
             address(subscribeBeacon),
+            address(0),
             address(authority)
         );
         engineProxy = new ERC1967Proxy(address(engineImpl), data);
