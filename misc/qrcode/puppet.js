@@ -26,10 +26,8 @@ import { Cluster } from "puppeteer-cluster";
     await page.goto(url);
   });
   for (let i = 0; i < files.length; i++) {
-    const f = `file:${path.join(
-      "/Users/ryanli/Documents/Code/cybercontracts/misc/qrcode/html",
-      files[i]
-    )}`;
+    const dirUrl = new URL(".", import.meta.url);
+    const f = dirUrl.href + "html/" + files[i];
     cluster.queue(f);
   }
 
