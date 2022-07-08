@@ -1007,7 +1007,14 @@
                     .html(() => {
                         if (!name) return;
                         const fontSize = computeFontSize("propNametag", 26, 0, 227);
-                        const output = `<span style="font-size: ${fontSize}px">${nameType === "ENS" ? name.slice(0, -4) : name}</span><span style="font-size: ${fontSize}px">${nameType === "ENS" ? ".eth" : ""}</span>`;
+                        let displayName = name;
+                        let displayEns = "";
+                        if(nameType === "ENS") {
+                            const idx = name.indexOf(".");
+                            displayName = name.slice(0, idx);
+                            displayEns = name.slice(idx);
+                        }
+                        const output = `<span style="font-size: ${fontSize}px">${displayName}</span><span style="font-size: ${fontSize}px">${displayEns}</span>`;
                         return output;
                     });
 
