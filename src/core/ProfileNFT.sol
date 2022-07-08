@@ -164,13 +164,6 @@ contract ProfileNFT is
                                 LibString.toString(subscribers),
                                 formattedName
                             ),
-                            // ',"qr_code":"',
-                            // QRSVG.generateQRCode(
-                            //     string(
-                            //         abi.encodePacked("https://link3.to", handle)
-                            //     )
-                            // ),
-                            // '"}'
                             "}"
                         )
                     )
@@ -359,27 +352,27 @@ contract ProfileNFT is
 
     // @inheritdoc IProfileNFT
     // sets a primary profile id for the user
-    function setPrimaryProfile(address to, uint256 profileId)
+    function setPrimaryProfile(address user, uint256 profileId)
         public
         override
         onlyEngine
     {
         _requireMinted(profileId);
-        _setPrimaryProfile(to, profileId);
+        _setPrimaryProfile(user, profileId);
     }
 
-    function _setPrimaryProfile(address to, uint256 profileId) internal {
-        _addressToPrimaryProfile[to] = profileId;
+    function _setPrimaryProfile(address user, uint256 profileId) internal {
+        _addressToPrimaryProfile[user] = profileId;
     }
 
     // @inheritdoc IProfileNFT
     // returns the primary profile id associated with the user
-    function getPrimaryProfile(address to)
+    function getPrimaryProfile(address user)
         external
         view
         override
         returns (uint256)
     {
-        return _addressToPrimaryProfile[to];
+        return _addressToPrimaryProfile[user];
     }
 }
