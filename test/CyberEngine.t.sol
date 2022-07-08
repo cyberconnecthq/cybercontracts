@@ -98,12 +98,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.setBoxAddress(alice);
     }
 
-    function testCannotSetEssenceBeaconAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        vm.prank(alice);
-        engine.setEssenceNFTBeacon(alice);
-    }
-
     function testCannotSetFeeAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
@@ -150,16 +144,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         emit SetBoxAddress(boxAddress, alice);
 
         engine.setBoxAddress(alice);
-    }
-
-    function testSetEssenceBeaconGov() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-
-        vm.expectEmit(true, true, false, true);
-        emit SetEssenceNFTBeacon(essenceBeacon, alice);
-
-        engine.setEssenceNFTBeacon(alice);
     }
 
     function testSetFeeGov() public {

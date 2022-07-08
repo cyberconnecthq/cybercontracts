@@ -118,23 +118,6 @@ contract CyberEngine is
     }
 
     /**
-     * @notice Sets the new essence beacon address.
-     *
-     * @param _essenceNFTBeacon The essence beacon address.
-     * @dev The address can not be zero address.
-     */
-    function setEssenceNFTBeacon(address _essenceNFTBeacon)
-        external
-        requiresAuth
-    {
-        require(_essenceNFTBeacon != address(0), "zero address essence beacon");
-        address preEssenceNFTBeacon = essenceNFTBeacon;
-        essenceNFTBeacon = _essenceNFTBeacon;
-
-        emit SetEssenceNFTBeacon(preEssenceNFTBeacon, _essenceNFTBeacon);
-    }
-
-    /**
      * @notice Sets the fee for tiers.
      *
      * @param tier The tier number.

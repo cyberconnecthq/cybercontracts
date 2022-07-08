@@ -53,17 +53,6 @@ interface ICyberEngineEvents {
     );
 
     /**
-     * @dev Emitted when a new essence beacon address has been set.
-     *
-     * @param preEssenceNFTBeacon The previous essence beacon address.
-     * @param newEssenceNFTBeacon The newly set essence beacon address.
-     */
-    event SetEssenceNFTBeacon(
-        address indexed preEssenceNFTBeacon,
-        address indexed newEssenceNFTBeacon
-    );
-
-    /**
      * @notice Emitted when a new fee for tiers has been set.
      *
      * @param tier The tier number.
