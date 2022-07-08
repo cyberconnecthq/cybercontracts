@@ -119,36 +119,6 @@ library LibDeploy {
         }
     }
 
-    // function deployDescriptor(
-    //     address deployer,
-    //     uint256 nonce,
-    //     address engineAddr
-    // ) internal returns (address) {
-    //     ProfileNFTDescriptor profileNFTDescriptorImpl = new ProfileNFTDescriptor(
-    //             engineAddr
-    //         );
-    //     _requiresContractAddress(
-    //         deployer,
-    //         nonce + 2,
-    //         address(profileNFTDescriptorImpl)
-    //     );
-    //     bytes memory descriptorInitData = abi.encodeWithSelector(
-    //         ProfileNFTDescriptor.initialize.selector,
-    //         templateURL
-    //     );
-    //     ERC1967Proxy profileDescriptorProxy = new ERC1967Proxy(
-    //         address(profileNFTDescriptorImpl),
-    //         descriptorInitData
-    //     );
-    //     _requiresContractAddress(
-    //         deployer,
-    //         nonce + 3,
-    //         address(profileDescriptorProxy)
-    //     );
-
-    //     return address(profileDescriptorProxy);
-    // }
-
     function deploy(
         address deployer,
         uint256 nonce,
