@@ -191,7 +191,9 @@ contract CyberEngine is
 
         _requireEnoughFee(params.handle, msg.value);
 
-        uint256 profileId = IProfileNFT(profileAddress).createProfile(params);
+        (uint256 profileId, bool primaryProfileSet) = IProfileNFT(
+            profileAddress
+        ).createProfile(params);
         emit Register(
             params.to,
             profileId,
@@ -199,6 +201,9 @@ contract CyberEngine is
             params.avatar,
             params.metadata
         );
+        if (primaryProfileSet) {
+            emit SetPrimaryProfile(params.to, profileId);
+        }
 
         return profileId;
     }
@@ -481,15 +486,14 @@ contract CyberEngine is
      * @notice Sets the primary profile id for the user
      *
      * @param profileId The profile ID.
-     * @param user The address of the user.
      */
-    function setPrimaryProfile(uint256 profileId, address user)
+    function setPrimaryProfile(uint256 profileId)
         external
-        onlyOwnerOrOperator(profileId)
+        onlyProfileOwner(profileId)
     {
-        IProfileNFT(profileAddress).setPrimaryProfile(profileId, msg.sender);
+        IProfileNFT(profileAddress).setPrimaryProfile(msg.sender, profileId);
 
-        emit SetPrimaryProfile(profileId, user);
+        emit SetPrimaryProfile(msg.sender, profileId);
     }
 
     /**

@@ -22,7 +22,7 @@ interface IProfileNFT {
      */
     function createProfile(DataTypes.CreateProfileParams calldata params)
         external
-        returns (uint256);
+        returns (uint256, bool);
 
     /**
      * @notice Gets the profile handle by ID.
@@ -123,10 +123,10 @@ interface IProfileNFT {
     /**
      * @notice Sets the primary profile for the user
      *
-     * @param profileId The profile ID that is set to be primary
      * @param user The address of the user
+     * @param profileId The profile ID that is set to be primary
      */
-    function setPrimaryProfile(uint256 profileId, address user) external;
+    function setPrimaryProfile(address user, uint256 profileId) external;
 
     /**
      * @notice Gets the primary profile of the user

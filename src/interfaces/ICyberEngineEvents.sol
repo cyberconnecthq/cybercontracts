@@ -109,7 +109,7 @@ interface ICyberEngineEvents {
      *
      * @param profileId The profile id.
      */
-    event SetPrimaryProfile(uint256 indexed profileId, address indexed user);
+    event SetPrimaryProfile(address indexed user, uint256 indexed profileId);
 
     /**
      * @notice Emitted when a new avatar has been set to a profile.

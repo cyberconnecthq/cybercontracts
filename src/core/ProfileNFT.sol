@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 pragma solidity 0.8.14;
 
@@ -30,7 +30,7 @@ contract ProfileNFT is
     IProfileNFT
 {
     // Immutable
-    address public immutable ENGINE;
+    address public immutable ENGINE; // solhint-disable-line
 
     modifier onlyEngine() {
         require(msg.sender == address(ENGINE), "Only Engine");
@@ -69,14 +69,14 @@ contract ProfileNFT is
         external
         override
         onlyEngine
-        returns (uint256)
+        returns (uint256 id, bool primaryProfileSet)
     {
         _requiresValidHandle(params.handle);
 
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
-        uint256 id = _mint(params.to);
+        id = _mint(params.to);
 
         _profileById[_totalCount] = DataTypes.ProfileStruct({
             handle: params.handle,
@@ -87,10 +87,9 @@ contract ProfileNFT is
         _metadataById[_totalCount] = params.metadata;
 
         if (_addressToPrimaryProfile[params.to] == 0) {
-            setPrimaryProfile(id, params.to);
+            _setPrimaryProfile(params.to, id);
+            primaryProfileSet = true;
         }
-
-        return id;
     }
 
     /// @inheritdoc IProfileNFT
@@ -360,12 +359,16 @@ contract ProfileNFT is
 
     // @inheritdoc IProfileNFT
     // sets a primary profile id for the user
-    function setPrimaryProfile(uint256 profileId, address to)
+    function setPrimaryProfile(address to, uint256 profileId)
         public
         override
         onlyEngine
     {
         _requireMinted(profileId);
+        _setPrimaryProfile(to, profileId);
+    }
+
+    function _setPrimaryProfile(address to, uint256 profileId) internal {
         _addressToPrimaryProfile[to] = profileId;
     }
 
@@ -377,7 +380,6 @@ contract ProfileNFT is
         override
         returns (uint256)
     {
-        uint256 primaryProfile = _addressToPrimaryProfile[to];
-        return primaryProfile;
+        return _addressToPrimaryProfile[to];
     }
 }

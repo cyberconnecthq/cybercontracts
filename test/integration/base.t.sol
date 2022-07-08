@@ -13,7 +13,7 @@ import { Base64 } from "../../src/dependencies/openzeppelin/Base64.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
 import { StaticNFTSVG } from "../../src/libraries/StaticNFTSVG.sol";
 
-contract BaseTest is Test, ICyberEngineEvents {
+contract IntegrationBaseTest is Test, ICyberEngineEvents {
     CyberEngine engine;
     ProfileNFT profileNFT;
     RolesAuthority authority;
@@ -39,6 +39,8 @@ contract BaseTest is Test, ICyberEngineEvents {
 
     function testRegistration() public {
         // Register bob profile
+        vm.expectEmit(true, true, false, true);
+        emit SetPrimaryProfile(bob, 2); // hardcode profileid
         bobProfileId = TestLibFixture.registerBobProfile(engine);
 
         // check bob profile details
@@ -81,5 +83,17 @@ contract BaseTest is Test, ICyberEngineEvents {
             )
         );
         assertEq(profileNFT.tokenURI(bobProfileId), bobUri);
+        assertEq(profileNFT.getPrimaryProfile(bob), bobProfileId);
+
+        // register second time will not set primary profile
+        uint256 secondId = TestLibFixture.registerBobProfile(
+            engine,
+            1,
+            "handle2"
+        );
+        assertEq(secondId, 3);
+
+        // primary profile is still 2
+        assertEq(profileNFT.getPrimaryProfile(bob), 2);
     }
 }
