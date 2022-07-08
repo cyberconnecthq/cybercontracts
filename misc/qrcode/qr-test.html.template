@@ -14,13 +14,16 @@
       src="REPLACE_ME"
     />
     <script type="module">
-      function main() {
-        var qr = new QrcodeDecoder();
+      async function main() {
+        try {
+          var qr = new QrcodeDecoder();
 
-        var img1 = document.querySelector("#image");
-        qr.decodeFromImage(img1).then((code) => {
-          console.log(code.data);
-        });
+          var img1 = document.querySelector("#image");
+          const code = await qr.decodeFromImage(img1);
+          console.log(code.data)
+        } catch(e) {
+          console.error("error")
+        }
       }
       window.onload = () => {
         main();
