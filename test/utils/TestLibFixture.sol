@@ -6,7 +6,6 @@ import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../../src/libraries/Constants.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
-import { IBoxNFT } from "../../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../../src/interfaces/IProfileNFT.sol";
 import { TestLib712 } from "./TestLib712.sol";
 import "forge-std/Vm.sol";

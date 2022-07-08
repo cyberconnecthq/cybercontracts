@@ -7,12 +7,10 @@ import "forge-std/console2.sol";
 import { MockEngine } from "./utils/MockEngine.sol";
 import { CyberEngine } from "../src/core/CyberEngine.sol";
 import { Constants } from "../src/libraries/Constants.sol";
-import { IBoxNFT } from "../src/interfaces/IBoxNFT.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Roles } from "../src/core/Roles.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
-import { BoxNFT } from "../src/periphery/BoxNFT.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
@@ -26,7 +24,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     MockEngine internal engine;
     RolesAuthority internal rolesAuthority;
     address internal profileAddress = address(0xA);
-    address internal boxAddress = address(0xB);
     address internal essenceBeacon = address(0xC);
     address internal subscribeBeacon;
 
@@ -42,14 +39,12 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         uint256 nonce = vm.getNonce(address(this));
         address engineAddr = LibDeploy._calcContractAddress(
             address(this),
-            nonce + 5
+            nonce + 4
         );
         rolesAuthority = new Roles(address(this), engineAddr);
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
         bytes memory code = address(new ProfileNFT(engineAddr)).code;
         vm.etch(profileAddress, code);
-        bytes memory boxCode = address(new BoxNFT(engineAddr)).code;
-        vm.etch(boxAddress, boxCode);
         vm.label(engineAddr, "eng proxy");
         address impl = address(new SubscribeNFT(engineAddr, profileAddress));
         subscribeBeacon = address(new UpgradeableBeacon(impl, address(engine)));
@@ -58,7 +53,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
             CyberEngine.initialize.selector,
             address(0),
             profileAddress,
-            boxAddress,
             subscribeBeacon,
             essenceBeacon,
             rolesAuthority
@@ -70,7 +64,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
 
     function testBasic() public {
         assertEq(engine.profileAddress(), profileAddress);
-        assertEq(engine.boxAddress(), boxAddress);
         assertEq(
             uint256(engine.getState()),
             uint256(DataTypes.State.Operational)
@@ -91,12 +84,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
         engine.setProfileAddress(alice);
-    }
-
-    function testCannotSetBoxAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        vm.prank(alice);
-        engine.setBoxAddress(alice);
     }
 
     function testCannotSetFeeAsNonGov() public {
@@ -135,16 +122,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         emit SetProfileAddress(profileAddress, alice);
 
         engine.setProfileAddress(alice);
-    }
-
-    function testSetBoxGov() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-
-        vm.expectEmit(true, true, false, true);
-        emit SetBoxAddress(boxAddress, alice);
-
-        engine.setBoxAddress(alice);
     }
 
     function testSetFeeGov() public {
@@ -491,61 +468,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
     }
 
-    function testClaimBox() public {
-        address charlie = vm.addr(1);
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-        engine.setSigner(charlie);
-
-        // change block timestamp to make deadline valid
-        vm.warp(50);
-        uint256 deadline = 100;
-        bytes32 digest = engine.hashTypedDataV4(
-            keccak256(
-                abi.encode(Constants._CLAIM_BOX_TYPEHASH, bob, 0, deadline)
-            )
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-
-        vm.mockCall(
-            boxAddress,
-            abi.encodeWithSelector(IBoxNFT.mint.selector, address(bob)),
-            abi.encode(1)
-        );
-        assertEq(engine.nonces(bob), 0);
-
-        vm.expectEmit(true, true, false, true);
-        emit ClaimBox(bob, 1);
-
-        assertEq(
-            engine.claimBox(bob, DataTypes.EIP712Signature(v, r, s, deadline)),
-            1
-        );
-        assertEq(engine.nonces(bob), 1);
-    }
-
-    function testCannotClaimInvalidSig() public {
-        // set charlie as signer
-        address charlie = vm.addr(1);
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-        engine.setSigner(charlie);
-
-        // change block timestamp to make deadline valid
-        vm.warp(50);
-        uint256 deadline = 100;
-        bytes32 digest = engine.hashTypedDataV4(
-            keccak256(
-                abi.encode(Constants._CLAIM_BOX_TYPEHASH, bob, 0, deadline)
-            )
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-
-        // charlie signed the box to bob, but register with a different address(alice).
-        vm.expectRevert("Invalid signature");
-        engine.claimBox(alice, DataTypes.EIP712Signature(v, r, s, deadline));
-    }
-
     function testSetState() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
@@ -652,13 +574,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.pauseProfile(true);
     }
 
-    // we can't pause from an unauthorized account
-    function testCannotPauseBoxAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        vm.prank(alice);
-        engine.pauseBox(true);
-    }
-
     // Profile can be paused
     // need to use mockcall
     function testPauseProfile() public {
@@ -675,18 +590,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
         engine.pauseProfile(true);
-    }
-
-    // Box can be paused
-    function testPauseBox() public {
-        vm.mockCall(
-            boxAddress,
-            abi.encodeWithSelector(BoxNFT.pause.selector, true),
-            abi.encode(0)
-        );
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-        engine.pauseBox(true);
     }
 
     // TODO: etch is not working well with mockCall
