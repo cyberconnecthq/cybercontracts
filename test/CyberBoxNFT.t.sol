@@ -35,6 +35,34 @@ contract BoxNFTTest is Test, ICyberBoxEvents {
         assertEq(token.paused(), true);
     }
 
+    function testCannotSetSignerNonOwner() public {
+        vm.expectRevert("Only Owner");
+        vm.prank(address(0));
+        token.setSigner(alice);
+    }
+
+    function testCannotSetOwnerNonOwner() public {
+        vm.expectRevert("Only Owner");
+        vm.prank(address(0));
+        token.setSigner(alice);
+    }
+
+    function testSetSignerNonOwner() public {
+        vm.prank(owner);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetSigner(owner, alice);
+        token.setSigner(alice);
+    }
+
+    function testSetOwnerNonOwner() public {
+        vm.prank(owner);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetOwner(owner, alice);
+        token.setOwner(alice);
+    }
+
     // set prank as non engine, then try to pause, should be reverted
     function testCannotPauseFromNonOwner() public {
         vm.expectRevert("Only Owner");
@@ -88,7 +116,7 @@ contract BoxNFTTest is Test, ICyberBoxEvents {
                 abi.encode(Constants._CLAIM_BOX_TYPEHASH, bob, 0, deadline)
             ),
             "TestBox",
-            "TB"
+            "1"
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
         assertEq(token.nonces(bob), 0);
@@ -119,7 +147,7 @@ contract BoxNFTTest is Test, ICyberBoxEvents {
                 abi.encode(Constants._CLAIM_BOX_TYPEHASH, bob, 0, deadline)
             ),
             "TestBox",
-            "TB"
+            "1"
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 

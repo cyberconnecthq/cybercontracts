@@ -39,7 +39,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         uint256 nonce = vm.getNonce(address(this));
         address engineAddr = LibDeploy._calcContractAddress(
             address(this),
-            nonce + 5
+            nonce + 4
         );
         rolesAuthority = new Roles(address(this), engineAddr);
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
@@ -123,7 +123,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
 
         engine.setProfileAddress(alice);
     }
-
 
     function testSetFeeGov() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
@@ -469,7 +468,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
     }
 
-
     function testSetState() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
@@ -593,7 +591,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         vm.prank(alice);
         engine.pauseProfile(true);
     }
-
 
     // TODO: etch is not working well with mockCall
     // function testRegisterTwiceWillNotChangePrimaryProfile() public {
