@@ -13,9 +13,9 @@ library Constants {
         keccak256(
             "permit(address spender,uint256 tokenId,uint256 nonce,uint256 deadline)"
         );
-    bytes32 internal constant _REGISTER_TYPEHASH =
+    bytes32 internal constant _CREATE_PROFILE_TYPEHASH =
         keccak256(
-            "register(address to,string handle,string avatar,string metadata,uint256 nonce,uint256 deadline)"
+            "createProfile(address to,string handle,string avatar,string metadata,uint256 nonce,uint256 deadline)"
         );
     bytes32 internal constant _SUBSCRIBE_TYPEHASH =
         keccak256(

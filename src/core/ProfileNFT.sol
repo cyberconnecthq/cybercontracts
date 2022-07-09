@@ -83,7 +83,7 @@ contract ProfileNFT is
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
-                        Constants._REGISTER_TYPEHASH,
+                        Constants._CREATE_PROFILE_TYPEHASH,
                         params.to,
                         keccak256(bytes(params.handle)),
                         keccak256(bytes(params.avatar)),
@@ -143,7 +143,6 @@ contract ProfileNFT is
         override
         returns (string memory)
     {
-        // TODO: requires vs require
         _requireMinted(profileId);
         return _profileById[profileId].handle;
     }
@@ -184,7 +183,7 @@ contract ProfileNFT is
 
         return
             IProfileNFTDescriptor(_profileNFTDescriptor).tokenURI(
-                IProfileNFTDescriptor.ConstructTokenURIParams({
+                DataTypes.ConstructTokenURIParams({
                     tokenId: tokenId,
                     handle: handle,
                     subscribers: subscribers

@@ -21,7 +21,7 @@ import { Roles } from "../src/core/Roles.sol";
 
 // For tests that requires a profile to start with.
 contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
-    MockProfile internal engine;
+    MockProfile internal profile;
     RolesAuthority internal authority;
     address internal subscribeBeacon;
     address internal gov = address(0xCCC);
@@ -34,20 +34,22 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
     function setUp() public {
         address fakeImpl = address(new SubscribeNFT(address(0xdead)));
         subscribeBeacon = address(
-            new UpgradeableBeacon(fakeImpl, address(engine))
+            new UpgradeableBeacon(fakeImpl, address(profile))
         );
-        MockProfile engineImpl = new MockProfile(subscribeBeacon, address(0));
+        MockProfile profileImpl = new MockProfile(subscribeBeacon, address(0));
         uint256 nonce = vm.getNonce(address(this));
-        address engineAddr = LibDeploy._calcContractAddress(
+        address profileAddr = LibDeploy._calcContractAddress(
             address(this),
             nonce + 3
         );
-        authority = new Roles(address(this), engineAddr);
+        authority = new Roles(address(this), profileAddr);
 
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
 
-        address impl = address(new SubscribeNFT(engineAddr));
-        subscribeBeacon = address(new UpgradeableBeacon(impl, address(engine)));
+        address impl = address(new SubscribeNFT(profileAddr));
+        subscribeBeacon = address(
+            new UpgradeableBeacon(impl, address(profile))
+        );
         address essenceBeacon = address(0);
 
         bytes memory data = abi.encodeWithSelector(
@@ -58,16 +60,19 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
             address(0x233),
             authority
         );
-        ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
-        assertEq(address(engineProxy), engineAddr);
-        engine = MockProfile(address(engineProxy));
-        vm.label(address(engine), "EngineProxy");
+        ERC1967Proxy profileProxy = new ERC1967Proxy(
+            address(profileImpl),
+            data
+        );
+        assertEq(address(profileProxy), profileAddr);
+        profile = MockProfile(address(profileProxy));
+        vm.label(address(profile), "profileProxy");
         vm.label(address(this), "Tester");
         vm.label(bob, "Bob");
 
         authority.setUserRole(address(gov), Constants._PROFILE_GOV_ROLE, true);
         vm.prank(gov);
-        engine.setSigner(bob);
+        profile.setSigner(bob);
 
         // register "bob"
         string memory handle = "bob";
@@ -75,10 +80,10 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         string memory metadata = "metadata";
 
         uint256 deadline = 100;
-        bytes32 digest = engine.hashTypedDataV4(
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
-                    Constants._REGISTER_TYPEHASH,
+                    Constants._CREATE_PROFILE_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
@@ -90,26 +95,28 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
-        assertEq(engine.nonces(bob), 0);
-        profileId = engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
+        assertEq(profile.nonces(bob), 0);
+        profileId = profile.createProfile{
+            value: Constants._INITIAL_FEE_TIER2
+        }(
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
         assertEq(profileId, 1);
 
-        assertEq(engine.nonces(bob), 1);
+        assertEq(profile.nonces(bob), 1);
 
         vm.prank(gov);
-        engine.allowSubscribeMw(mw, true);
+        profile.allowSubscribeMw(mw, true);
 
-        assertEq(engine.isSubscribeMwAllowed(mw), true);
+        assertEq(profile.isSubscribeMwAllowed(mw), true);
     }
 
     function testCannotSubscribeEmptyList() public {
         vm.expectRevert("No profile ids provided");
         uint256[] memory empty;
         bytes[] memory data;
-        engine.subscribe(empty, data);
+        profile.subscribe(empty, data);
     }
 
     function testSubscribe() public {
@@ -118,7 +125,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         ids[0] = 1;
         bytes[] memory datas = new bytes[](1);
 
-        engine.setSubscribeNFTAddress(1, subscribeProxy);
+        profile.setSubscribeNFTAddress(1, subscribeProxy);
         uint256 result = 100;
         vm.mockCall(
             subscribeProxy,
@@ -131,7 +138,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         vm.expectEmit(true, false, false, true);
         emit Subscribe(address(this), ids, datas);
 
-        uint256[] memory called = engine.subscribe(ids, datas);
+        uint256[] memory called = profile.subscribe(ids, datas);
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
     }
@@ -144,9 +151,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         uint256 result = 100;
 
         // Assuming the newly deployed subscribe proxy is always at the same address;
-        uint256 nonce = vm.getNonce(address(engine));
+        uint256 nonce = vm.getNonce(address(profile));
         address subscribeProxy = LibDeploy._calcContractAddress(
-            address(engine),
+            address(profile),
             nonce
         );
         address proxy = address(subscribeProxy);
@@ -158,12 +165,12 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
 
         uint256[] memory expected = new uint256[](1);
         expected[0] = result;
-        uint256[] memory called = engine.subscribe(ids, datas);
+        uint256[] memory called = profile.subscribe(ids, datas);
 
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
 
-        assertEq(engine.getSubscribeNFT(1), proxy);
+        assertEq(profile.getSubscribeNFT(1), proxy);
     }
 
     // TODO: add test for subscribe to multiple profiles
@@ -171,7 +178,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
     // TODO: use integration test instead of mock
     function testCannotSetOperatorIfNotOwner() public {
         vm.expectRevert("ONLY_PROFILE_OWNER");
-        engine.setOperatorApproval(profileId, address(0), true);
+        profile.setOperatorApproval(profileId, address(0), true);
     }
 
     function testSetOperatorAsOwner() public {
@@ -179,7 +186,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
 
         vm.expectEmit(true, true, true, true);
         emit SetOperatorApproval(profileId, gov, false, true);
-        engine.setOperatorApproval(profileId, gov, true);
+        profile.setOperatorApproval(profileId, gov, true);
     }
 
     function testSetMetadataAsOwner() public {
@@ -187,7 +194,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
 
         vm.expectEmit(true, false, false, true);
         emit SetMetadata(profileId, "ipfs");
-        engine.setMetadata(profileId, "ipfs");
+        profile.setMetadata(profileId, "ipfs");
     }
 
     function testSetMetadataWithSig() public {
@@ -197,9 +204,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         string memory metadata = "ipfs";
         vm.warp(50);
         uint256 deadline = 100;
-        assertEq(engine.nonces(bob), 1);
+        assertEq(profile.nonces(bob), 1);
 
-        bytes32 digest = engine.hashTypedDataV4(
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._SET_METADATA_TYPEHASH,
@@ -214,7 +221,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
 
         vm.expectEmit(true, false, false, true);
         emit SetMetadata(profileId, metadata);
-        engine.setMetadataWithSig(
+        profile.setMetadataWithSig(
             profileId,
             metadata,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -238,7 +245,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         vm.warp(50);
         uint256 deadline = 100;
 
-        bytes32 digest = engine.hashTypedDataV4(
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._SUBSCRIBE_TYPEHASH,
@@ -253,9 +260,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
 
         // Assuming the newly deployed subscribe proxy is always at the same address;
-        uint256 nonce = vm.getNonce(address(engine));
+        uint256 nonce = vm.getNonce(address(profile));
         address subscribeProxy = LibDeploy._calcContractAddress(
-            address(engine),
+            address(profile),
             nonce
         );
         address proxy = address(subscribeProxy);
@@ -269,7 +276,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         vm.expectEmit(true, false, false, true);
         emit Subscribe(charlie, profileIds, subDatas);
 
-        engine.subscribeWithSig(
+        profile.subscribeWithSig(
             profileIds,
             subDatas,
             charlie,
@@ -287,8 +294,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         vm.warp(50);
         uint256 deadline = 100;
 
-        assertEq(engine.nonces(bob), 1);
-        bytes32 digest = engine.hashTypedDataV4(
+        assertEq(profile.nonces(bob), 1);
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
@@ -306,7 +313,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         vm.expectEmit(true, false, false, true);
         emit SetOperatorApproval(profileId, gov, false, approved);
 
-        engine.setOperatorApprovalWithSig(
+        profile.setOperatorApprovalWithSig(
             profileId,
             gov,
             approved,
@@ -321,7 +328,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         string memory metadata = "ipfs";
         vm.warp(50);
         uint256 deadline = 100;
-        bytes32 digest = engine.hashTypedDataV4(
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._SET_METADATA_TYPEHASH,
@@ -337,7 +344,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
         vm.expectRevert("INVALID_SIGNATURE");
-        engine.setMetadataWithSig(
+        profile.setMetadataWithSig(
             profileId,
             metadata,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -346,52 +353,52 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
 
     function testCannotSetMetadataAsNonOwnerAndOperator() public {
         vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
-        engine.setMetadata(profileId, "ipfs");
+        profile.setMetadata(profileId, "ipfs");
     }
 
     function testSetMetadataAsOperator() public {
         string memory metadata = "ipfs";
         vm.prank(bob);
-        engine.setOperatorApproval(profileId, alice, true);
+        profile.setOperatorApproval(profileId, alice, true);
         vm.prank(alice);
-        engine.setMetadata(profileId, metadata);
+        profile.setMetadata(profileId, metadata);
     }
 
     function testSetAvatarAsOwner() public {
         vm.prank(bob);
-        engine.setAvatar(profileId, "avatar");
+        profile.setAvatar(profileId, "avatar");
     }
 
     function testCannotSetAvatarAsNonOwnerAndOperator() public {
         vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
-        engine.setAvatar(profileId, "avatar");
+        profile.setAvatar(profileId, "avatar");
     }
 
     function testSetAvatarAsOperator() public {
         string memory avatar = "avatar";
         vm.prank(bob);
-        engine.setOperatorApproval(profileId, alice, true);
+        profile.setOperatorApproval(profileId, alice, true);
         vm.prank(alice);
-        engine.setAvatar(profileId, avatar);
+        profile.setAvatar(profileId, avatar);
     }
 
     function testCannotSetSubscribeMwIfNotOwner() public {
         vm.expectRevert("ONLY_PROFILE_OWNER");
-        engine.setSubscribeMw(profileId, mw);
+        profile.setSubscribeMw(profileId, mw);
     }
 
     function testCannotSetSubscribeMwIfNotAllowed() public {
         vm.expectRevert("SUB_MW_NOT_ALLOWED");
         address notMw = address(0xDEEAAAD);
         vm.prank(bob);
-        engine.setSubscribeMw(profileId, notMw);
-        assertEq(engine.getSubscribeMw(profileId), address(0));
+        profile.setSubscribeMw(profileId, notMw);
+        assertEq(profile.getSubscribeMw(profileId), address(0));
     }
 
     function testSetSubscribeMw() public {
         vm.prank(bob);
-        engine.setSubscribeMw(profileId, mw);
-        assertEq(engine.getSubscribeMw(profileId), mw);
+        profile.setSubscribeMw(profileId, mw);
+        assertEq(profile.getSubscribeMw(profileId), mw);
     }
 
     function testSetPrimary() public {
@@ -399,11 +406,11 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
 
         vm.expectEmit(true, true, false, true);
         emit SetPrimaryProfile(bob, profileId);
-        engine.setPrimaryProfile(profileId);
+        profile.setPrimaryProfile(profileId);
     }
 
     function testCannotSetPrimaryAsNonOwner() public {
         vm.expectRevert("ONLY_PROFILE_OWNER");
-        engine.setPrimaryProfile(profileId);
+        profile.setPrimaryProfile(profileId);
     }
 }

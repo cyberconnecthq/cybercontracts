@@ -405,7 +405,7 @@ library LibDeploy {
             address(profile),
             keccak256(
                 abi.encode(
-                    Constants._REGISTER_TYPEHASH,
+                    Constants._CREATE_PROFILE_TYPEHASH,
                     ENGINE_SIGNER,
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
