@@ -5,8 +5,13 @@ pragma solidity 0.8.14;
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
+import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
 
-contract MockProfile is ProfileNFT(address(0), address(0)) {
+contract MockProfile is ProfileNFT {
+    constructor(address _subBeacon, address _essenceBeacon)
+        ProfileNFT(_subBeacon, _essenceBeacon)
+    {}
+
     function verifySignature(
         bytes32 digest,
         DataTypes.EIP712Signature calldata sig
@@ -45,5 +50,13 @@ contract MockProfile is ProfileNFT(address(0), address(0)) {
         returns (string memory)
     {
         return LibString.toString(profileId);
+    }
+
+    // by pass sig check for testing
+    function createProfile(DataTypes.CreateProfileParams calldata params)
+        external
+        returns (uint256)
+    {
+        return _createProfile(params);
     }
 }

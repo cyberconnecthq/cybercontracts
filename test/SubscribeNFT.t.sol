@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.14;
 import "forge-std/Test.sol";
-import { ICyberEngine } from "../src/interfaces/ICyberEngine.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
@@ -17,7 +16,6 @@ contract SubscribeNFTTest is Test {
     SubscribeNFT internal impl;
     BeaconProxy internal proxy;
     MockProfile internal engine;
-    address internal profile = address(0xDEAD);
 
     RolesAuthority internal rolesAuthority;
     SubscribeNFT internal c;
@@ -32,8 +30,8 @@ contract SubscribeNFTTest is Test {
             Authority(address(0))
         );
 
-        engine = new MockProfile();
-        impl = new SubscribeNFT(address(engine), profile);
+        engine = new MockProfile(address(0), address(0));
+        impl = new SubscribeNFT(address(engine));
         beacon = new UpgradeableBeacon(address(impl), address(engine));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
@@ -64,7 +62,7 @@ contract SubscribeNFTTest is Test {
 
     function testName() public {
         vm.mockCall(
-            profile,
+            address(engine),
             abi.encodeWithSelector(
                 IProfileNFT.getHandleByProfileId.selector,
                 1
@@ -76,7 +74,7 @@ contract SubscribeNFTTest is Test {
 
     function testSymbol() public {
         vm.mockCall(
-            profile,
+            address(engine),
             abi.encodeWithSelector(
                 IProfileNFT.getHandleByProfileId.selector,
                 1

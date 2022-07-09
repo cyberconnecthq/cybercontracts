@@ -8,7 +8,6 @@ import { Initializable } from "../upgradeability/Initializable.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
-import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { ProfileNFT } from "./ProfileNFT.sol";
 import { Auth } from "../dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
@@ -28,8 +27,7 @@ contract CyberEngine is
     Auth,
     UUPSUpgradeable,
     CyberEngineStorage,
-    IUpgradeable,
-    ICyberEngine
+    IUpgradeable
 {
     constructor() {
         _disableInitializers();
@@ -47,7 +45,6 @@ contract CyberEngine is
     {
         Auth.__Auth_Init(_owner, _rolesAuthority);
     }
-
 
     /**
      * @notice Contract version number.

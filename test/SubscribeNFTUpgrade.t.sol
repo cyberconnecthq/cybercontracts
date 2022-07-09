@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.14;
 import "forge-std/Test.sol";
-import { ICyberEngine } from "../src/interfaces/ICyberEngine.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
@@ -18,14 +17,13 @@ contract SubscribeNFTUpgradeTest is Test {
     BeaconProxy internal proxy;
     BeaconProxy internal proxyB;
     MockProfile internal engine;
-    address internal profile = address(0xDEAD);
 
     uint256 internal profileId = 1;
     address constant alice = address(0xA11CE);
 
     function setUp() public {
-        engine = new MockProfile();
-        impl = new SubscribeNFT(address(engine), profile);
+        engine = new MockProfile(address(0), address(0));
+        impl = new SubscribeNFT(address(engine));
         beacon = new UpgradeableBeacon(address(impl), address(engine));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
@@ -36,14 +34,11 @@ contract SubscribeNFTUpgradeTest is Test {
     }
 
     function testAuth() public {
-        assertEq(beacon.ENGINE(), address(engine));
+        assertEq(beacon.OWNER(), address(engine));
     }
 
     function testUpgrade() public {
-        MockSubscribeNFTV2 implB = new MockSubscribeNFTV2(
-            address(engine),
-            profile
-        );
+        MockSubscribeNFTV2 implB = new MockSubscribeNFTV2(address(engine));
 
         assertEq(SubscribeNFT(address(proxy)).version(), 1);
         assertEq(SubscribeNFT(address(proxyB)).version(), 1);

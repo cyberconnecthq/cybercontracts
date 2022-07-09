@@ -4,7 +4,7 @@ pragma solidity 0.8.14;
 import "forge-std/Test.sol";
 import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
 import { CyberNFTBase } from "../../src/base/CyberNFTBase.sol";
-import { CyberEngine } from "../../src/core/CyberEngine.sol";
+import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { IProfileNFTEvents } from "../../src/interfaces/IProfileNFTEvents.sol";
@@ -15,7 +15,6 @@ import { LibString } from "../../src/libraries/LibString.sol";
 import { ERC721 } from "../../src/dependencies/solmate/ERC721.sol";
 
 contract SubscribeTest is Test, IProfileNFTEvents {
-    CyberEngine engine;
     RolesAuthority authority;
     address boxAddress;
     address profileAddress;
@@ -24,6 +23,7 @@ contract SubscribeTest is Test, IProfileNFTEvents {
     address bob = vm.addr(bobPk);
     uint256 bobProfileId;
     address profileDescriptorAddress;
+    ProfileNFT profile;
 
     function setUp() public {
         uint256 nonce = vm.getNonce(address(this));
@@ -40,8 +40,8 @@ contract SubscribeTest is Test, IProfileNFTEvents {
             "https://animation.example.com"
         );
         TestLibFixture.auth(authority);
-        engine = CyberEngine(address(proxy));
-        bobProfileId = TestLibFixture.registerBobProfile(engine);
+        profile = ProfileNFT(address(profileAddress));
+        bobProfileId = TestLibFixture.registerBobProfile(profile);
         TestLibFixture.auth(authority);
     }
 
@@ -51,19 +51,21 @@ contract SubscribeTest is Test, IProfileNFTEvents {
         ids[0] = bobProfileId;
         bytes[] memory data = new bytes[](1);
 
+        uint256 nonce = vm.getNonce(address(profile));
+        address subscribeProxy = LibDeploy._calcContractAddress(
+            address(profile),
+            nonce
+        );
         // alice subscribes to bob
         vm.expectEmit(true, true, false, true);
-        emit DeploySubscribeNFT(
-            ids[0],
-            address(0xF5ACE15da8E86BC4366CA0cD34e23230fbee44c2)
-        );
+        emit DeploySubscribeNFT(ids[0], subscribeProxy);
         vm.expectEmit(true, false, false, true);
         emit Subscribe(alice, ids, data);
         vm.prank(alice);
-        uint256 nftid = engine.subscribe(ids, data)[0];
+        uint256 nftid = profile.subscribe(ids, data)[0];
 
         // check bob sub nft supply
-        address bobSubNFT = engine.getSubscribeNFT(bobProfileId);
+        address bobSubNFT = profile.getSubscribeNFT(bobProfileId);
         assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 1);
 
         // check ownership of first sub nft
@@ -73,7 +75,7 @@ contract SubscribeTest is Test, IProfileNFTEvents {
         vm.expectEmit(true, false, false, true);
         emit Subscribe(alice, ids, data);
         vm.prank(alice);
-        nftid = engine.subscribe(ids, data)[0];
+        nftid = profile.subscribe(ids, data)[0];
 
         // check bob sub nft supply
         assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 2);

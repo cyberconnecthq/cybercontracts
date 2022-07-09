@@ -101,7 +101,7 @@ contract CyberNFTBaseTest is Test {
             "1"
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
-        vm.expectRevert("Invalid signature");
+        vm.expectRevert("INVALID_SIGNATURE");
         token.permit(alice, 1, DataTypes.EIP712Signature(v, r, s, deadline));
     }
 

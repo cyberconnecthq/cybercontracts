@@ -19,6 +19,7 @@ import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+import "forge-std/console.sol";
 
 /**
  * @title Profile NFT
@@ -35,8 +36,8 @@ contract ProfileNFT is
     IUpgradeable,
     IProfileNFT
 {
-    address immutable subscribeNFTBeacon;
-    address immutable essenceNFTBeacon;
+    address public immutable subscribeNFTBeacon;
+    address public immutable essenceNFTBeacon;
 
     constructor(address _subBeacon, address _essenceBeacon) {
         subscribeNFTBeacon = _subBeacon;
@@ -97,7 +98,21 @@ contract ProfileNFT is
         );
 
         _requiresEnoughFee(params.handle, msg.value);
+        uint256 id = _createProfile(params);
+        emit Register(
+            params.to,
+            id,
+            params.handle,
+            params.avatar,
+            params.metadata
+        );
+        return id;
+    }
 
+    function _createProfile(DataTypes.CreateProfileParams calldata params)
+        internal
+        returns (uint256)
+    {
         // create
         _requiresValidHandle(params.handle);
 
@@ -118,13 +133,6 @@ contract ProfileNFT is
             _setPrimaryProfile(params.to, id);
             emit SetPrimaryProfile(params.to, id);
         }
-        emit Register(
-            params.to,
-            id,
-            params.handle,
-            params.avatar,
-            params.metadata
-        );
         return id;
     }
 
@@ -135,7 +143,8 @@ contract ProfileNFT is
         override
         returns (string memory)
     {
-        require(_exists(profileId), "ERC721: invalid token ID");
+        // TODO: requires vs require
+        _requireMinted(profileId);
         return _profileById[profileId].handle;
     }
 
@@ -376,6 +385,8 @@ contract ProfileNFT is
         external
         requiresAuth
     {
+        console.log(_profileNFTDescriptor);
+        console.log(template);
         IProfileNFTDescriptor(_profileNFTDescriptor).setAnimationTemplate(
             template
         );

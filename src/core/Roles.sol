@@ -13,70 +13,70 @@ import { ProfileNFT } from "./ProfileNFT.sol";
  * @notice This contract is used to set roles.
  */
 contract Roles is RolesAuthority {
-    constructor(address owner, address engine)
+    constructor(address owner, address profile)
         RolesAuthority(owner, Authority(address(0)))
     {
-        _initSetup(engine);
+        _initSetup(profile);
     }
 
     /**
      * @notice Initializes the roles.
      *
-     * @param engine The engine address
+     * @param profile The profile address
      */
-    function _initSetup(address engine) internal {
+    function _initSetup(address profile) internal {
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
-            engine,
+            profile,
             ProfileNFT.setSigner.selector,
             true
         );
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
-            engine,
+            profile,
             ProfileNFT.setFeeByTier.selector,
             true
         );
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
-            engine,
+            profile,
             ProfileNFT.withdraw.selector,
             true
         );
 
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
-            engine,
+            profile,
             ProfileNFT.allowSubscribeMw.selector,
             true
         );
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
-            engine,
+            profile,
             ProfileNFT.allowEssenceMw.selector,
             true
         );
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
-            engine,
+            profile,
             Constants._AUTHORIZE_UPGRADE,
             true
         );
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
-            engine,
+            profile,
             ProfileNFT.setAnimationTemplate.selector,
             true
         );
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
-            engine,
+            profile,
             ProfileNFT.setProfileNFTDescriptor.selector,
             true
         );
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
-            engine,
+            profile,
             ProfileNFT.pause.selector,
             true
         );

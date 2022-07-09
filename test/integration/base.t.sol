@@ -15,7 +15,6 @@ import { StaticNFTSVG } from "../../src/libraries/StaticNFTSVG.sol";
 import { ProfileNFTDescriptor } from "../../src/periphery/ProfileNFTDescriptor.sol";
 
 contract IntegrationBaseTest is Test, IProfileNFTEvents {
-    CyberEngine engine;
     ProfileNFT profileNFT;
     ProfileNFTDescriptor profileDescriptor;
     RolesAuthority authority;
@@ -41,7 +40,6 @@ contract IntegrationBaseTest is Test, IProfileNFTEvents {
             nonce,
             "https://animation.example.com"
         );
-        engine = CyberEngine(proxy);
         profileNFT = ProfileNFT(profileAddress);
         profileDescriptor = ProfileNFTDescriptor(profileDescriptorAddress);
         TestLibFixture.auth(authority);
@@ -51,7 +49,7 @@ contract IntegrationBaseTest is Test, IProfileNFTEvents {
         // Register bob profile
         vm.expectEmit(true, true, false, true);
         emit SetPrimaryProfile(bob, 2); // hardcode profileid
-        bobProfileId = TestLibFixture.registerBobProfile(engine);
+        bobProfileId = TestLibFixture.registerBobProfile(profileNFT);
 
         // check bob profile details
         string memory handle = profileNFT.getHandleByProfileId(bobProfileId);
@@ -98,11 +96,11 @@ contract IntegrationBaseTest is Test, IProfileNFTEvents {
         );
         assertEq(profileNFT.tokenURI(bobProfileId), bobUri);
         assertEq(profileNFT.getPrimaryProfile(bob), bobProfileId);
-        assertEq(engine.getPrimaryProfile(bob), bobProfileId);
+        assertEq(profileNFT.getPrimaryProfile(bob), bobProfileId);
 
         // register second time will not set primary profile
         uint256 secondId = TestLibFixture.registerBobProfile(
-            engine,
+            profileNFT,
             1,
             "handle2"
         );
@@ -110,6 +108,6 @@ contract IntegrationBaseTest is Test, IProfileNFTEvents {
 
         // primary profile is still 2
         assertEq(profileNFT.getPrimaryProfile(bob), 2);
-        assertEq(engine.getPrimaryProfile(bob), 2);
+        assertEq(profileNFT.getPrimaryProfile(bob), 2);
     }
 }
