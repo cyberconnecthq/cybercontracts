@@ -11,7 +11,7 @@ import { ICyberBoxEvents } from "../src/interfaces/ICyberBoxEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 
-contract BoxNFTTest is Test, ICyberBoxEvents {
+contract CyberBoxNFTTest is Test, ICyberBoxEvents {
     CyberBoxNFT internal token;
     address constant alice = address(0xA11CE);
     address constant bob = address(0xB0B);
@@ -152,7 +152,7 @@ contract BoxNFTTest is Test, ICyberBoxEvents {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         // charlie signed the box to bob, but register with a different address(alice).
-        vm.expectRevert("Invalid signature");
+        vm.expectRevert("INVALID_SIGNATURE");
         token.claimBox(alice, DataTypes.EIP712Signature(v, r, s, deadline));
     }
 }

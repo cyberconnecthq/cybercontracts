@@ -4,8 +4,7 @@ pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import { MockEngine } from "./utils/MockEngine.sol";
-import { CyberEngine } from "../src/core/CyberEngine.sol";
+import { MockProfile } from "./utils/MockProfile.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
@@ -16,16 +15,15 @@ import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
-import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
+import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 import { IProfileNFTDescriptor } from "../src/interfaces/IProfileNFTDescriptor.sol";
 import { ProfileNFTDescriptor } from "../src/periphery/ProfileNFTDescriptor.sol";
 
-contract CyberEngineTest is Test, ICyberEngineEvents {
-    MockEngine internal engine;
+contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
+    MockProfile internal engine;
     RolesAuthority internal rolesAuthority;
-    address internal profileAddress = address(0xA);
     address internal essenceBeacon = address(0xC);
     address internal profileNFTDescriptor = address(0xD);
     address internal subscribeBeacon;
@@ -36,42 +34,40 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     string constant handle2 = "handle2";
     string constant avatar = "avatar";
     string constant metadata = "metadata";
+    event Transfer(
+        address indexed from,
+        address indexed to,
+        uint256 indexed id
+    );
+    address descriptor = address(0x233);
 
     function setUp() public {
-        MockEngine engineImpl = new MockEngine();
+        MockProfile engineImpl = new MockProfile(address(0), address(0));
         uint256 nonce = vm.getNonce(address(this));
         address engineAddr = LibDeploy._calcContractAddress(
             address(this),
-            nonce + 4
+            nonce + 3
         );
         rolesAuthority = new Roles(address(this), engineAddr);
 
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
-        bytes memory code = address(new ProfileNFT(engineAddr)).code;
-        vm.etch(profileAddress, code);
         vm.label(engineAddr, "eng proxy");
-        address impl = address(new SubscribeNFT(engineAddr, profileAddress));
+        address impl = address(new SubscribeNFT(engineAddr));
         subscribeBeacon = address(new UpgradeableBeacon(impl, address(engine)));
 
+        vm.etch(descriptor, address(this).code);
+
         bytes memory data = abi.encodeWithSelector(
-            CyberEngine.initialize.selector,
+            ProfileNFT.initialize.selector,
             address(0),
-            profileAddress,
-            subscribeBeacon,
-            essenceBeacon,
+            "Name",
+            "Symbol",
+            descriptor,
             rolesAuthority
         );
         ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
         assertEq(address(engineProxy), engineAddr);
-        engine = MockEngine(address(engineProxy));
-    }
-
-    function testBasic() public {
-        assertEq(engine.profileAddress(), profileAddress);
-        assertEq(
-            uint256(engine.getState()),
-            uint256(DataTypes.State.Operational)
-        );
+        engine = MockProfile(address(engineProxy));
     }
 
     function testAuth() public {
@@ -82,12 +78,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
         engine.setSigner(alice);
-    }
-
-    function testCannotSetProfileAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        vm.prank(alice);
-        engine.setProfileAddress(alice);
     }
 
     function testCannotSetFeeAsNonGov() public {
@@ -109,7 +99,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     }
 
     function testSetSignerAsGov() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
 
         vm.expectEmit(true, true, false, true);
@@ -118,18 +108,8 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.setSigner(alice);
     }
 
-    function testSetProfileAsGov() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-
-        vm.expectEmit(true, true, false, true);
-        emit SetProfileAddress(profileAddress, alice);
-
-        engine.setProfileAddress(alice);
-    }
-
     function testSetFeeGov() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
 
         vm.expectEmit(true, true, true, true);
@@ -146,7 +126,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     function testVerify() public {
         // set charlie as signer
         address charlie = vm.addr(1);
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setSigner(charlie);
 
@@ -192,7 +172,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-        vm.expectRevert("Invalid signature");
+        vm.expectRevert("INVALID_SIGNATURE");
         engine.verifySignature(
             digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -218,7 +198,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-        vm.expectRevert("Deadline expired");
+        vm.expectRevert("DEADLINE_EXCEEDED");
         engine.verifySignature(
             digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -307,7 +287,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     }
 
     function testWithdraw() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.deal(address(engine), 2);
         assertEq(address(engine).balance, 2);
         assertEq(alice.balance, 0);
@@ -322,7 +302,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     }
 
     function testCannotWithdrawInsufficientBal() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
 
         vm.expectRevert("Insufficient balance");
@@ -336,7 +316,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
 
     function testRegister() public {
         address charlie = vm.addr(1);
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setSigner(charlie);
 
@@ -358,34 +338,18 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.createProfile.selector,
-                DataTypes.CreateProfileParams(bob, handle, "", "")
-            ),
-            abi.encode(1, true)
-        );
         assertEq(engine.nonces(bob), 0);
-
-        vm.expectEmit(true, true, false, true);
-        emit Register(bob, 1, handle, avatar, metadata);
-
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.setPrimaryProfile.selector,
-                bob,
-                1
-            ),
-            abi.encode(0)
-        );
+        vm.expectEmit(true, true, true, true);
+        emit Transfer(address(0), bob, 1);
 
         vm.expectEmit(true, true, false, true);
         emit SetPrimaryProfile(bob, 1);
 
+        vm.expectEmit(true, true, false, true);
+        emit Register(bob, 1, handle, avatar, metadata);
+
         assertEq(
-            engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+            engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
                 DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
                 DataTypes.EIP712Signature(v, r, s, deadline)
             ),
@@ -397,7 +361,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     function testCannotRegisterInvalidSig() public {
         // set charlie as signer
         address charlie = vm.addr(1);
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setSigner(charlie);
 
@@ -420,8 +384,8 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         // charlie signed the handle to bob, but register with a different address(alice).
-        vm.expectRevert("Invalid signature");
-        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+        vm.expectRevert("INVALID_SIGNATURE");
+        engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
             DataTypes.CreateProfileParams(alice, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
@@ -430,7 +394,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     function testCannotRegisterReplay() public {
         // set charlie as signer
         address charlie = vm.addr(1);
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
         engine.setSigner(charlie);
 
@@ -451,56 +415,16 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
             )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.createProfile.selector,
-                DataTypes.CreateProfileParams(bob, handle, "", "")
-            ),
-            abi.encode(1)
-        );
-
-        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+        engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
 
-        vm.expectRevert("Invalid signature");
-        engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+        vm.expectRevert("INVALID_SIGNATURE");
+        engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
-    }
-
-    function testSetState() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-
-        vm.expectEmit(true, true, false, true);
-        emit SetState(DataTypes.State.Operational, DataTypes.State.Paused);
-
-        engine.setState(DataTypes.State.Paused);
-        assertEq(uint256(engine.getState()), uint256(DataTypes.State.Paused));
-    }
-
-    function testCannotSetStateWithoutAuth() public {
-        vm.expectRevert("UNAUTHORIZED");
-        engine.setState(DataTypes.State.Paused);
-        assertEq(
-            uint256(engine.getState()),
-            uint256(DataTypes.State.Operational)
-        );
-    }
-
-    function testCannotSubscribeWhenStateIsPaused() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-        engine.setState(DataTypes.State.Paused);
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
-        bytes[] memory datas = new bytes[](1);
-        vm.expectRevert("Contract is paused");
-        engine.subscribe(ids, datas);
     }
 
     function testCannotAllowSubscribeMwAsNonGov() public {
@@ -515,7 +439,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
 
     function testAllowSubscribeMwAsGov() public {
         address mw = address(0xCA11);
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
         vm.expectEmit(true, true, true, true);
         emit AllowSubscribeMw(mw, false, true);
@@ -526,7 +450,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
 
     function testAllowEssenceMwAsGov() public {
         address mw = address(0xCA11);
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
         vm.expectEmit(true, true, true, true);
         emit AllowEssenceMw(mw, false, true);
@@ -536,15 +460,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     }
 
     function testSetProfileNFTDescriptorGov() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.setProfileNFTDescriptor.selector,
-                profileNFTDescriptor
-            ),
-            abi.encode(0)
-        );
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
 
         vm.prank(alice);
         vm.expectEmit(true, false, false, true);
@@ -554,61 +470,28 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     }
 
     function testSetAnimationTemplateGov() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        string memory template = "new_ani_template";
         vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.getProfileNFTDescriptor.selector
-            ),
-            abi.encode(profileAddress)
-        );
-
-        vm.mockCall(
-            profileAddress,
+            engine.getProfileNFTDescriptor(),
             abi.encodeWithSelector(
                 IProfileNFTDescriptor.setAnimationTemplate.selector,
-                "new_ani_template"
+                template
             ),
-            abi.encode(0)
+            abi.encode(1)
         );
-
-        vm.prank(alice);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.expectEmit(true, false, false, true);
-        emit SetAnimationTemplate("new_ani_template");
+        emit SetAnimationTemplate(template);
 
-        engine.setAnimationTemplate("new_ani_template");
-    }
-
-    // we can't pause from an unauthorized account
-    function testCannotPauseProfileAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.pauseProfile(true);
-    }
-
-    // Profile can be paused
-    // need to use mockcall
-    function testPauseProfile() public {
-        // contract only care about themselves, this is to set when an address
-        // calls ProfileNFT, the pause(function inside) should return a value
-        // the selector part is grammar
-        // then we give alice an auth position
-        // then we call pause
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ProfileNFT.pause.selector, true),
-            abi.encode(0)
-        );
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.prank(alice);
-        engine.pauseProfile(true);
+        engine.setAnimationTemplate(template);
     }
 
     // TODO: etch is not working well with mockCall
     // function testRegisterTwiceWillNotChangePrimaryProfile() public {
     //     // register first time
     //     address charlie = vm.addr(1);
-    //     rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+    //     rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
     //     vm.prank(alice);
     //     engine.setSigner(charlie);
 

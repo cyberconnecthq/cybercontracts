@@ -37,13 +37,13 @@ contract UpgradeableBeaconTest is Test {
     }
 
     function testCannotUpgradeByNonContract() public {
-        vm.expectRevert("Only Engine");
+        vm.expectRevert("ONLY_OWNER");
         beacon.upgradeTo(other);
     }
 
     function testCannotUpgradeByOtherAccount() public {
         Implementation2 v2 = new Implementation2();
-        vm.expectRevert("Only Engine");
+        vm.expectRevert("ONLY_OWNER");
         beacon.upgradeTo(address(v2));
     }
 }

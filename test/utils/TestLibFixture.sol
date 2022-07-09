@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import { CyberEngine } from "../../src/core/CyberEngine.sol";
+import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../../src/libraries/Constants.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
@@ -21,10 +21,10 @@ library TestLibFixture {
     Vm public constant vm = Vm(VM_ADDRESS);
 
     function auth(RolesAuthority authority) internal {
-        authority.setUserRole(_GOV, Constants._ENGINE_GOV_ROLE, true);
+        authority.setUserRole(_GOV, Constants._PROFILE_GOV_ROLE, true);
     }
 
-    function registerBobProfile(CyberEngine engine)
+    function registerBobProfile(ProfileNFT engine)
         internal
         returns (uint256 profileId)
     {
@@ -33,7 +33,7 @@ library TestLibFixture {
 
     // Need to be called after auth
     function registerBobProfile(
-        CyberEngine engine,
+        ProfileNFT engine,
         uint256 nonce,
         string memory handle
     ) internal returns (uint256 profileId) {
@@ -59,13 +59,13 @@ library TestLibFixture {
                     deadline
                 )
             ),
-            "CyberEngine",
+            "Link3 Profile",
             "1"
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         require(engine.nonces(bob) == nonce);
-        profileId = engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+        profileId = engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );

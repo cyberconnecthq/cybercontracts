@@ -17,7 +17,7 @@ import "openzeppelin-contracts/contracts/utils/Address.sol";
  */
 contract UpgradeableBeacon is IBeacon {
     address private _implementation;
-    address public immutable ENGINE;
+    address public immutable OWNER;
 
     /**
      * @dev Emitted when the implementation returned by the beacon is changed.
@@ -28,9 +28,9 @@ contract UpgradeableBeacon is IBeacon {
      * @dev Sets the address of the initial implementation, and the deployer account as the owner who can upgrade the
      * beacon.
      */
-    constructor(address implementation_, address engine) {
+    constructor(address implementation_, address owner) {
         _setImplementation(implementation_);
-        ENGINE = engine;
+        OWNER = owner;
     }
 
     /**
@@ -51,7 +51,7 @@ contract UpgradeableBeacon is IBeacon {
      * - `newImplementation` must be a contract.
      */
     function upgradeTo(address newImplementation) public virtual {
-        require(msg.sender == address(ENGINE), "Only Engine");
+        require(msg.sender == address(OWNER), "ONLY_OWNER");
         _setImplementation(newImplementation);
         emit Upgraded(newImplementation);
     }

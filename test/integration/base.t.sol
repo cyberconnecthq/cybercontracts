@@ -6,7 +6,7 @@ import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { ICyberEngineEvents } from "../../src/interfaces/ICyberEngineEvents.sol";
+import { IProfileNFTEvents } from "../../src/interfaces/IProfileNFTEvents.sol";
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { TestLibFixture } from "../utils/TestLibFixture.sol";
 import { Base64 } from "../../src/dependencies/openzeppelin/Base64.sol";
@@ -14,8 +14,7 @@ import { LibString } from "../../src/libraries/LibString.sol";
 import { StaticNFTSVG } from "../../src/libraries/StaticNFTSVG.sol";
 import { ProfileNFTDescriptor } from "../../src/periphery/ProfileNFTDescriptor.sol";
 
-contract IntegrationBaseTest is Test, ICyberEngineEvents {
-    CyberEngine engine;
+contract IntegrationBaseTest is Test, IProfileNFTEvents {
     ProfileNFT profileNFT;
     ProfileNFTDescriptor profileDescriptor;
     RolesAuthority authority;
@@ -41,7 +40,6 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
             nonce,
             "https://animation.example.com"
         );
-        engine = CyberEngine(proxy);
         profileNFT = ProfileNFT(profileAddress);
         profileDescriptor = ProfileNFTDescriptor(profileDescriptorAddress);
         TestLibFixture.auth(authority);
@@ -51,7 +49,7 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
         // Register bob profile
         vm.expectEmit(true, true, false, true);
         emit SetPrimaryProfile(bob, 2); // hardcode profileid
-        bobProfileId = TestLibFixture.registerBobProfile(engine);
+        bobProfileId = TestLibFixture.registerBobProfile(profileNFT);
 
         // check bob profile details
         string memory handle = profileNFT.getHandleByProfileId(bobProfileId);
@@ -98,11 +96,11 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
         );
         assertEq(profileNFT.tokenURI(bobProfileId), bobUri);
         assertEq(profileNFT.getPrimaryProfile(bob), bobProfileId);
-        assertEq(engine.getPrimaryProfile(bob), bobProfileId);
+        assertEq(profileNFT.getPrimaryProfile(bob), bobProfileId);
 
         // register second time will not set primary profile
         uint256 secondId = TestLibFixture.registerBobProfile(
-            engine,
+            profileNFT,
             1,
             "handle2"
         );
@@ -110,6 +108,6 @@ contract IntegrationBaseTest is Test, ICyberEngineEvents {
 
         // primary profile is still 2
         assertEq(profileNFT.getPrimaryProfile(bob), 2);
-        assertEq(engine.getPrimaryProfile(bob), 2);
+        assertEq(profileNFT.getPrimaryProfile(bob), 2);
     }
 }

@@ -6,7 +6,6 @@ import { StaticNFTSVG } from "../libraries/StaticNFTSVG.sol";
 import { LibString } from "../libraries/LibString.sol";
 import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
-import { CyberEngine } from "../core/CyberEngine.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 
 /**
@@ -15,17 +14,12 @@ import { Initializable } from "../upgradeability/Initializable.sol";
  * @notice This contract is used to create profile NFT token uri.
  */
 contract ProfileNFTDescriptor is IProfileNFTDescriptor, Initializable {
-    address public immutable ENGINE;
+    address public immutable PROFILE; // solhint-disable-line
     string public animationTemplate;
 
-    modifier onlyEngine() {
-        require(msg.sender == address(ENGINE), "Only Engine");
-        _;
-    }
-
-    constructor(address engine) {
-        require(engine != address(0), "Engine address cannot be 0");
-        ENGINE = engine;
+    constructor(address profile) {
+        require(profile != address(0), "PROFILE_ADDRESS_CANNOT_BE_0");
+        PROFILE = profile;
         _disableInitializers();
     }
 
@@ -42,11 +36,8 @@ contract ProfileNFTDescriptor is IProfileNFTDescriptor, Initializable {
     }
 
     /// @inheritdoc IProfileNFTDescriptor
-    function setAnimationTemplate(string calldata template)
-        external
-        override
-        onlyEngine
-    {
+    function setAnimationTemplate(string calldata template) external override {
+        require(msg.sender == PROFILE, "ONLY_PROFILE");
         animationTemplate = template;
     }
 

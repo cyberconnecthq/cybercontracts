@@ -4,21 +4,13 @@ pragma solidity 0.8.14;
 
 import { DataTypes } from "../libraries/DataTypes.sol";
 
-interface ICyberEngineEvents {
+interface IProfileNFTEvents {
     /**
      * @dev Emitted when the CyberEngine is initialized.
      *
      * @param owner Owner to set for CyberEngine.
-     * @param profileAddress Profile address to set for CyberEngine.
-     * @param subscribeNFTBeacon Subscribe NFT beacon to set for CyberEngine.
-     * @param essenceNFTBeacon Essence NFT beacon to set for CyberEngine.
      */
-    event Initialize(
-        address indexed owner,
-        address profileAddress,
-        address subscribeNFTBeacon,
-        address essenceNFTBeacon
-    );
+    event Initialize(address indexed owner);
 
     /**
      * @dev Emitted when a new signer has been set.
@@ -27,17 +19,6 @@ interface ICyberEngineEvents {
      * @param newSigner The newly set signer address.
      */
     event SetSigner(address indexed preSigner, address indexed newSigner);
-
-    /**
-     * @dev Emitted when a new profile address has been set.
-     *
-     * @param preProfileAddr The previous profile address.
-     * @param newProfileAddr The newly set profile address.
-     */
-    event SetProfileAddress(
-        address indexed preProfileAddr,
-        address indexed newProfileAddr
-    );
 
     /**
      * @dev Emitted when a new box address has been set.
@@ -61,17 +42,6 @@ interface ICyberEngineEvents {
         DataTypes.Tier indexed tier,
         uint256 indexed preAmount,
         uint256 indexed newAmount
-    );
-
-    /**
-     * @notice Emitted when a new state has been set.
-     *
-     * @param preState The previous state.
-     * @param newState The newly set state.
-     */
-    event SetState(
-        DataTypes.State indexed preState,
-        DataTypes.State indexed newState
     );
 
     /**
@@ -116,12 +86,14 @@ interface ICyberEngineEvents {
      *
      * @param profileId The profile id.
      * @param operator The operator address.
+     * @param prevApproved The previously set bool value for operator approval.
      * @param approved The newly set bool value for operator approval.
      */
     event SetOperatorApproval(
         uint256 indexed profileId,
         address indexed operator,
-        bool indexed approved
+        bool prevApproved,
+        bool approved
     );
 
     /**

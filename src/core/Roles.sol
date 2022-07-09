@@ -5,7 +5,7 @@ pragma solidity 0.8.14;
 import { Authority } from "../dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../libraries/Constants.sol";
-import { CyberEngine } from "./CyberEngine.sol";
+import { ProfileNFT } from "./ProfileNFT.sol";
 
 /**
  * @title Roles
@@ -13,88 +13,71 @@ import { CyberEngine } from "./CyberEngine.sol";
  * @notice This contract is used to set roles.
  */
 contract Roles is RolesAuthority {
-    constructor(address owner, address engine)
+    constructor(address owner, address profile)
         RolesAuthority(owner, Authority(address(0)))
     {
-        _initSetup(engine);
+        _initSetup(profile);
     }
 
     /**
      * @notice Initializes the roles.
      *
-     * @param engine The engine address
+     * @param profile The profile address
      */
-    function _initSetup(address engine) internal {
+    function _initSetup(address profile) internal {
         setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.setSigner.selector,
+            Constants._PROFILE_GOV_ROLE,
+            profile,
+            ProfileNFT.setSigner.selector,
             true
         );
         setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.setProfileAddress.selector,
+            Constants._PROFILE_GOV_ROLE,
+            profile,
+            ProfileNFT.setFeeByTier.selector,
             true
         );
         setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.setFeeByTier.selector,
+            Constants._PROFILE_GOV_ROLE,
+            profile,
+            ProfileNFT.withdraw.selector,
+            true
+        );
+
+        setRoleCapability(
+            Constants._PROFILE_GOV_ROLE,
+            profile,
+            ProfileNFT.allowSubscribeMw.selector,
             true
         );
         setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.withdraw.selector,
+            Constants._PROFILE_GOV_ROLE,
+            profile,
+            ProfileNFT.allowEssenceMw.selector,
             true
         );
         setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.setState.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.allowSubscribeMw.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.allowEssenceMw.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.upgradeProfile.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
+            Constants._PROFILE_GOV_ROLE,
+            profile,
             Constants._AUTHORIZE_UPGRADE,
             true
         );
         setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.setAnimationTemplate.selector,
+            Constants._PROFILE_GOV_ROLE,
+            profile,
+            ProfileNFT.setAnimationTemplate.selector,
             true
         );
         setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.setProfileNFTDescriptor.selector,
+            Constants._PROFILE_GOV_ROLE,
+            profile,
+            ProfileNFT.setProfileNFTDescriptor.selector,
             true
         );
         setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            engine,
-            CyberEngine.pauseProfile.selector,
+            Constants._PROFILE_GOV_ROLE,
+            profile,
+            ProfileNFT.pause.selector,
             true
         );
     }

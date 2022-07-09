@@ -4,15 +4,14 @@ pragma solidity 0.8.14;
 import "forge-std/Test.sol";
 import { LibDeploy } from "../../../../script/libraries/LibDeploy.sol";
 import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
-import { CyberEngine } from "../../../../src/core/CyberEngine.sol";
 import { RolesAuthority } from "../../../../src/dependencies/solmate/RolesAuthority.sol";
 import { SubscribeOnlyOnceMw } from "../../../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
 import { Constants } from "../../../../src/libraries/Constants.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { ICyberEngineEvents } from "../../../../src/interfaces/ICyberEngineEvents.sol";
+import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
+import { ProfileNFT } from "../../../../src/core/ProfileNFT.sol";
 
-contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
-    CyberEngine engine;
+contract SubscribeOnlyOnceMwTest is Test, IProfileNFTEvents {
     SubscribeOnlyOnceMw mw;
     RolesAuthority authority;
     address boxAddress;
@@ -22,6 +21,13 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
     address bob = vm.addr(bobPk); // matches TestLibFixture
     uint256 bobProfileId;
     address profileDescriptorAddress;
+    ProfileNFT profileNFT;
+
+    event Transfer(
+        address indexed from,
+        address indexed to,
+        uint256 indexed id
+    );
 
     function setUp() public {
         mw = new SubscribeOnlyOnceMw();
@@ -39,15 +45,15 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
             nonce,
             "https://animation.example.com"
         );
-        engine = CyberEngine(address(proxy));
+        profileNFT = ProfileNFT(address(profileAddress));
 
         TestLibFixture.auth(authority);
         vm.prank(TestLibFixture._GOV);
-        engine.allowSubscribeMw(address(mw), true);
-        bobProfileId = TestLibFixture.registerBobProfile(engine);
+        profileNFT.allowSubscribeMw(address(mw), true);
+        bobProfileId = TestLibFixture.registerBobProfile(profileNFT);
         // set module
         vm.prank(bob);
-        engine.setSubscribeMw(bobProfileId, address(mw));
+        profileNFT.setSubscribeMw(bobProfileId, address(mw));
     }
 
     function testSubscribeOnlyOnce() public {
@@ -55,21 +61,27 @@ contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
         ids[0] = bobProfileId;
         bytes[] memory data = new bytes[](1);
 
-        vm.expectEmit(true, true, false, true);
-        emit DeploySubscribeNFT(
-            bobProfileId,
-            address(0x80fa3ce05Cca48fA7C0377acD80F065Ff24a67b8)
+        uint256 nonce = vm.getNonce(address(profileNFT));
+        address subscribeProxy = LibDeploy._calcContractAddress(
+            address(profileNFT),
+            nonce
         );
+
+        vm.expectEmit(true, true, false, true);
+        emit DeploySubscribeNFT(bobProfileId, address(subscribeProxy));
+
+        vm.expectEmit(true, true, true, true);
+        emit Transfer(address(0), alice, 1);
 
         vm.expectEmit(true, false, false, true);
         emit Subscribe(alice, ids, data);
 
         vm.prank(alice);
-        engine.subscribe(ids, data);
+        profileNFT.subscribe(ids, data);
 
         // Second subscribe will fail
         vm.expectRevert("Already subscribed");
         vm.prank(alice);
-        engine.subscribe(ids, data);
+        profileNFT.subscribe(ids, data);
     }
 }

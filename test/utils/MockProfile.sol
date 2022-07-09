@@ -2,11 +2,16 @@
 
 pragma solidity 0.8.14;
 
-import { CyberEngine } from "../../src/core/CyberEngine.sol";
+import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
+import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
 
-contract MockEngine is CyberEngine {
+contract MockProfile is ProfileNFT {
+    constructor(address _subBeacon, address _essenceBeacon)
+        ProfileNFT(_subBeacon, _essenceBeacon)
+    {}
+
     function verifySignature(
         bytes32 digest,
         DataTypes.EIP712Signature calldata sig
@@ -18,7 +23,7 @@ contract MockEngine is CyberEngine {
         public
         view
     {
-        super._requireEnoughFee(handle, amount);
+        _requiresEnoughFee(handle, amount);
     }
 
     // Expose for test
@@ -45,5 +50,13 @@ contract MockEngine is CyberEngine {
         returns (string memory)
     {
         return LibString.toString(profileId);
+    }
+
+    // by pass sig check for testing
+    function createProfile(DataTypes.CreateProfileParams calldata params)
+        external
+        returns (uint256)
+    {
+        return _createProfile(params);
     }
 }

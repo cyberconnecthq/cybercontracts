@@ -3,7 +3,6 @@
 pragma solidity 0.8.14;
 
 import { CyberNFTBase } from "../base/CyberNFTBase.sol";
-import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { Constants } from "../libraries/Constants.sol";
@@ -23,13 +22,10 @@ contract SubscribeNFT is
     IUpgradeable,
     ISubscribeNFT
 {
-    address public immutable ENGINE; // solhint-disable-line
     address public immutable PROFILE_NFT; // solhint-disable-line
 
-    constructor(address engine, address profileNFT) {
-        require(engine != address(0), "Engine address cannot be 0");
+    constructor(address profileNFT) {
         require(profileNFT != address(0), "Profile NFT address cannot be 0");
-        ENGINE = engine;
         PROFILE_NFT = profileNFT;
         _disableInitializers();
     }
@@ -42,7 +38,7 @@ contract SubscribeNFT is
 
     /// @inheritdoc ISubscribeNFT
     function mint(address to) external override returns (uint256) {
-        require(msg.sender == address(ENGINE), "Only Engine could mint");
+        require(msg.sender == address(PROFILE_NFT), "Only Engine could mint");
         return super._mint(to);
     }
 
@@ -103,7 +99,7 @@ contract SubscribeNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
-        return ICyberEngine(ENGINE).getSubscribeNFTTokenURI(_profileId);
+        return IProfileNFT(PROFILE_NFT).getSubscribeNFTTokenURI(_profileId);
     }
 
     /**

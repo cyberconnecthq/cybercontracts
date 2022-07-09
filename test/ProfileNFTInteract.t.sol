@@ -3,7 +3,7 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
-import { MockEngine } from "./utils/MockEngine.sol";
+import { MockProfile } from "./utils/MockProfile.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
@@ -12,18 +12,17 @@ import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
-import { CyberEngine } from "../src/core/CyberEngine.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
-import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
+import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
+import { Roles } from "../src/core/Roles.sol";
 
 // For tests that requires a profile to start with.
-contract CyberEngineInteractTest is Test, ICyberEngineEvents {
-    MockEngine internal engine;
+contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
+    MockProfile internal engine;
     RolesAuthority internal authority;
-    address internal profileAddress = address(0xA);
     address internal subscribeBeacon;
     address internal gov = address(0xCCC);
     uint256 internal bobPk = 10000;
@@ -33,49 +32,40 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     address mw = address(0xCA11);
 
     function setUp() public {
-        authority = new RolesAuthority(address(this), Authority(address(0)));
-        MockEngine engineImpl = new MockEngine();
+        address fakeImpl = address(new SubscribeNFT(address(0xdead)));
+        subscribeBeacon = address(
+            new UpgradeableBeacon(fakeImpl, address(engine))
+        );
+        MockProfile engineImpl = new MockProfile(subscribeBeacon, address(0));
         uint256 nonce = vm.getNonce(address(this));
         address engineAddr = LibDeploy._calcContractAddress(
             address(this),
             nonce + 3
         );
-        // Need beacon proxy to work, must set up fake beacon with fake impl contract
-        bytes memory code = address(new ProfileNFT(engineAddr)).code;
-        vm.etch(profileAddress, code);
+        authority = new Roles(address(this), engineAddr);
 
-        address impl = address(new SubscribeNFT(engineAddr, profileAddress));
+        // Need beacon proxy to work, must set up fake beacon with fake impl contract
+
+        address impl = address(new SubscribeNFT(engineAddr));
         subscribeBeacon = address(new UpgradeableBeacon(impl, address(engine)));
         address essenceBeacon = address(0);
 
         bytes memory data = abi.encodeWithSelector(
-            CyberEngine.initialize.selector,
+            ProfileNFT.initialize.selector,
             address(0),
-            profileAddress,
-            subscribeBeacon,
-            essenceBeacon,
+            "Name",
+            "Symbol",
+            address(0x233),
             authority
         );
         ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
         assertEq(address(engineProxy), engineAddr);
-        engine = MockEngine(address(engineProxy));
+        engine = MockProfile(address(engineProxy));
         vm.label(address(engine), "EngineProxy");
         vm.label(address(this), "Tester");
         vm.label(bob, "Bob");
 
-        authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(engine),
-            CyberEngine.setSigner.selector,
-            true
-        );
-        authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            address(engine),
-            CyberEngine.allowSubscribeMw.selector,
-            true
-        );
-        authority.setUserRole(gov, Constants._ENGINE_GOV_ROLE, true);
+        authority.setUserRole(address(gov), Constants._PROFILE_GOV_ROLE, true);
         vm.prank(gov);
         engine.setSigner(bob);
 
@@ -100,17 +90,8 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.createProfile.selector,
-                DataTypes.CreateProfileParams(bob, handle, "", "")
-            ),
-            abi.encode(1)
-        );
-
         assertEq(engine.nonces(bob), 0);
-        profileId = engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+        profileId = engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
@@ -163,7 +144,12 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         uint256 result = 100;
 
         // Assuming the newly deployed subscribe proxy is always at the same address;
-        address proxy = address(0x93474D608089d9Fa2347A19A0a85EdC8ce562FeA);
+        uint256 nonce = vm.getNonce(address(engine));
+        address subscribeProxy = LibDeploy._calcContractAddress(
+            address(engine),
+            nonce
+        );
+        address proxy = address(subscribeProxy);
         vm.mockCall(
             proxy,
             abi.encodeWithSelector(ISubscribeNFT.mint.selector, address(this)),
@@ -184,35 +170,20 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
 
     // TODO: use integration test instead of mock
     function testCannotSetOperatorIfNotOwner() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(address(0xDEAD))
-        );
-        vm.expectRevert("Only profile owner");
+        vm.expectRevert("ONLY_PROFILE_OWNER");
         engine.setOperatorApproval(profileId, address(0), true);
     }
 
     function testSetOperatorAsOwner() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(alice)
-        );
-        vm.prank(alice);
+        vm.prank(bob);
 
         vm.expectEmit(true, true, true, true);
-        emit SetOperatorApproval(profileId, gov, true);
+        emit SetOperatorApproval(profileId, gov, false, true);
         engine.setOperatorApproval(profileId, gov, true);
     }
 
     function testSetMetadataAsOwner() public {
         vm.prank(bob);
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(bob)
-        );
 
         vm.expectEmit(true, false, false, true);
         emit SetMetadata(profileId, "ipfs");
@@ -223,30 +194,23 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         // set all subsequent calls' from bob (but signer/owner is charlie).
         vm.startPrank(bob);
 
-        uint256 charliePk = 100;
-        address charlie = vm.addr(charliePk);
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(charlie)
-        );
-        assertEq(ERC721(profileAddress).ownerOf(profileId), charlie);
-
         string memory metadata = "ipfs";
         vm.warp(50);
         uint256 deadline = 100;
+        assertEq(engine.nonces(bob), 1);
+
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(
                 abi.encode(
                     Constants._SET_METADATA_TYPEHASH,
                     profileId,
                     keccak256(bytes(metadata)),
-                    0,
+                    1,
                     deadline
                 )
             )
         );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
         vm.expectEmit(true, false, false, true);
         emit SetMetadata(profileId, metadata);
@@ -263,14 +227,6 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
 
         uint256 charliePk = 100;
         address charlie = vm.addr(charliePk);
-
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, 1),
-            abi.encode(charlie)
-        );
-
-        assertEq(ERC721(profileAddress).ownerOf(1), charlie);
 
         uint256[] memory profileIds = new uint256[](1);
         bytes[] memory subDatas = new bytes[](1);
@@ -296,6 +252,20 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
 
+        // Assuming the newly deployed subscribe proxy is always at the same address;
+        uint256 nonce = vm.getNonce(address(engine));
+        address subscribeProxy = LibDeploy._calcContractAddress(
+            address(engine),
+            nonce
+        );
+        address proxy = address(subscribeProxy);
+
+        vm.mockCall(
+            proxy,
+            abi.encodeWithSelector(ISubscribeNFT.mint.selector, charlie),
+            abi.encode(1)
+        );
+
         vm.expectEmit(true, false, false, true);
         emit Subscribe(charlie, profileIds, subDatas);
 
@@ -310,17 +280,6 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     function testSetOperatorApprovalWithSig() public {
         vm.startPrank(alice);
 
-        uint256 charliePk = 100;
-        address charlie = vm.addr(charliePk);
-
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, 1),
-            abi.encode(charlie)
-        );
-
-        assertEq(ERC721(profileAddress).ownerOf(1), charlie);
-
         bytes[] memory subDatas = new bytes[](1);
         subDatas[0] = bytes("simple subdata");
         bool approved = true;
@@ -328,6 +287,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         vm.warp(50);
         uint256 deadline = 100;
 
+        assertEq(engine.nonces(bob), 1);
         bytes32 digest = engine.hashTypedDataV4(
             keccak256(
                 abi.encode(
@@ -335,16 +295,16 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
                     profileId,
                     gov,
                     approved,
-                    0,
+                    1,
                     deadline
                 )
             )
         );
 
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
         vm.expectEmit(true, false, false, true);
-        emit SetOperatorApproval(profileId, gov, approved);
+        emit SetOperatorApproval(profileId, gov, false, approved);
 
         engine.setOperatorApprovalWithSig(
             profileId,
@@ -357,15 +317,6 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     function testCannotSetMetadataWithSigInvalidSig() public {
         // set all subsequent calls' from bob
         vm.startPrank(bob);
-
-        uint256 charliePk = 100;
-        address charlie = vm.addr(charliePk);
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(charlie)
-        );
-        assertEq(ERC721(profileAddress).ownerOf(profileId), charlie);
 
         string memory metadata = "ipfs";
         vm.warp(50);
@@ -385,7 +336,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         // signer is bob, however owner is charlie
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
-        vm.expectRevert("Invalid signature");
+        vm.expectRevert("INVALID_SIGNATURE");
         engine.setMetadataWithSig(
             profileId,
             metadata,
@@ -394,158 +345,43 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     }
 
     function testCannotSetMetadataAsNonOwnerAndOperator() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(address(0xDEAD))
-        );
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.getOperatorApproval.selector,
-                profileId,
-                address(this)
-            ),
-            abi.encode(false)
-        );
-        assertEq(ERC721(profileAddress).ownerOf(profileId), address(0xDEAD));
-        assertEq(
-            IProfileNFT(profileAddress).getOperatorApproval(
-                profileId,
-                address(this)
-            ),
-            false
-        );
-        vm.expectRevert("Only profile owner or operator");
+        vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
         engine.setMetadata(profileId, "ipfs");
     }
 
     function testSetMetadataAsOperator() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(address(0xDEAD))
-        );
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.getOperatorApproval.selector,
-                profileId,
-                address(this)
-            ),
-            abi.encode(true)
-        );
-        assertEq(ERC721(profileAddress).ownerOf(profileId), address(0xDEAD));
-        assertEq(
-            IProfileNFT(profileAddress).getOperatorApproval(
-                profileId,
-                address(this)
-            ),
-            true
-        );
         string memory metadata = "ipfs";
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.setMetadata.selector,
-                profileId,
-                metadata
-            ),
-            abi.encode(0)
-        );
+        vm.prank(bob);
+        engine.setOperatorApproval(profileId, alice, true);
+        vm.prank(alice);
         engine.setMetadata(profileId, metadata);
     }
 
     function testSetAvatarAsOwner() public {
         vm.prank(bob);
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(bob)
-        );
         engine.setAvatar(profileId, "avatar");
     }
 
     function testCannotSetAvatarAsNonOwnerAndOperator() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(address(0xDEAD))
-        );
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.getOperatorApproval.selector,
-                profileId,
-                address(this)
-            ),
-            abi.encode(false)
-        );
-        assertEq(ERC721(profileAddress).ownerOf(profileId), address(0xDEAD));
-        assertEq(
-            IProfileNFT(profileAddress).getOperatorApproval(
-                profileId,
-                address(this)
-            ),
-            false
-        );
-        vm.expectRevert("Only profile owner or operator");
+        vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
         engine.setAvatar(profileId, "avatar");
     }
 
     function testSetAvatarAsOperator() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(address(0xDEAD))
-        );
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.getOperatorApproval.selector,
-                profileId,
-                address(this)
-            ),
-            abi.encode(true)
-        );
-        assertEq(ERC721(profileAddress).ownerOf(profileId), address(0xDEAD));
-        assertEq(
-            IProfileNFT(profileAddress).getOperatorApproval(
-                profileId,
-                address(this)
-            ),
-            true
-        );
         string memory avatar = "avatar";
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.setAvatar.selector,
-                profileId,
-                avatar
-            ),
-            abi.encode(0)
-        );
+        vm.prank(bob);
+        engine.setOperatorApproval(profileId, alice, true);
+        vm.prank(alice);
         engine.setAvatar(profileId, avatar);
     }
 
     function testCannotSetSubscribeMwIfNotOwner() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(address(0xDEAD))
-        );
-        vm.expectRevert("Only profile owner");
+        vm.expectRevert("ONLY_PROFILE_OWNER");
         engine.setSubscribeMw(profileId, mw);
     }
 
     function testCannotSetSubscribeMwIfNotAllowed() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(bob)
-        );
-        vm.expectRevert("Subscribe middleware not allowed");
+        vm.expectRevert("SUB_MW_NOT_ALLOWED");
         address notMw = address(0xDEEAAAD);
         vm.prank(bob);
         engine.setSubscribeMw(profileId, notMw);
@@ -553,32 +389,12 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     }
 
     function testSetSubscribeMw() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(bob)
-        );
         vm.prank(bob);
         engine.setSubscribeMw(profileId, mw);
         assertEq(engine.getSubscribeMw(profileId), mw);
     }
 
     function testSetPrimary() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(bob)
-        );
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(
-                IProfileNFT.setPrimaryProfile.selector,
-                bob,
-                profileId
-            ),
-            abi.encode(0)
-        );
-
         vm.prank(bob);
 
         vm.expectEmit(true, true, false, true);
@@ -587,14 +403,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
     }
 
     function testCannotSetPrimaryAsNonOwner() public {
-        vm.mockCall(
-            profileAddress,
-            abi.encodeWithSelector(ERC721.ownerOf.selector, profileId),
-            abi.encode(alice)
-        );
-
-        vm.expectRevert("Only profile owner");
-        vm.prank(bob);
+        vm.expectRevert("ONLY_PROFILE_OWNER");
         engine.setPrimaryProfile(profileId);
     }
 }

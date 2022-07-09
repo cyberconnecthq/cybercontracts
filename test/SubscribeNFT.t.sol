@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.14;
 import "forge-std/Test.sol";
-import { ICyberEngine } from "../src/interfaces/ICyberEngine.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
@@ -10,14 +9,13 @@ import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/Beaco
 import { Constants } from "../src/libraries/Constants.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
-import { MockEngine } from "./utils/MockEngine.sol";
+import { MockProfile } from "./utils/MockProfile.sol";
 
 contract SubscribeNFTTest is Test {
     UpgradeableBeacon internal beacon;
     SubscribeNFT internal impl;
     BeaconProxy internal proxy;
-    MockEngine internal engine;
-    address internal profile = address(0xDEAD);
+    MockProfile internal engine;
 
     RolesAuthority internal rolesAuthority;
     SubscribeNFT internal c;
@@ -32,8 +30,8 @@ contract SubscribeNFTTest is Test {
             Authority(address(0))
         );
 
-        engine = new MockEngine();
-        impl = new SubscribeNFT(address(engine), profile);
+        engine = new MockProfile(address(0), address(0));
+        impl = new SubscribeNFT(address(engine));
         beacon = new UpgradeableBeacon(address(impl), address(engine));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
@@ -42,7 +40,7 @@ contract SubscribeNFTTest is Test {
         proxy = new BeaconProxy(address(beacon), functionData);
 
         rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
+            Constants._PROFILE_GOV_ROLE,
             address(beacon),
             Constants._BEACON_UPGRADE_TO,
             true
@@ -64,7 +62,7 @@ contract SubscribeNFTTest is Test {
 
     function testName() public {
         vm.mockCall(
-            profile,
+            address(engine),
             abi.encodeWithSelector(
                 IProfileNFT.getHandleByProfileId.selector,
                 1
@@ -76,7 +74,7 @@ contract SubscribeNFTTest is Test {
 
     function testSymbol() public {
         vm.mockCall(
-            profile,
+            address(engine),
             abi.encodeWithSelector(
                 IProfileNFT.getHandleByProfileId.selector,
                 1
