@@ -3,7 +3,7 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
-import { MockEngine } from "./utils/MockEngine.sol";
+import { MockProfile } from "./utils/MockProfile.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
@@ -15,13 +15,13 @@ import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { CyberEngine } from "../src/core/CyberEngine.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
-import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
+import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 
 // For tests that requires a profile to start with.
-contract CyberEngineInteractTest is Test, ICyberEngineEvents {
-    MockEngine internal engine;
+contract CyberEngineInteractTest is Test, IProfileNFTEvents {
+    MockProfile internal engine;
     RolesAuthority internal authority;
     address internal profileAddress = address(0xA);
     address internal subscribeBeacon;
@@ -34,7 +34,7 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
 
     function setUp() public {
         authority = new RolesAuthority(address(this), Authority(address(0)));
-        MockEngine engineImpl = new MockEngine();
+        MockProfile engineImpl = new MockProfile();
         uint256 nonce = vm.getNonce(address(this));
         address engineAddr = LibDeploy._calcContractAddress(
             address(this),
@@ -58,24 +58,24 @@ contract CyberEngineInteractTest is Test, ICyberEngineEvents {
         );
         ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
         assertEq(address(engineProxy), engineAddr);
-        engine = MockEngine(address(engineProxy));
+        engine = MockProfile(address(engineProxy));
         vm.label(address(engine), "EngineProxy");
         vm.label(address(this), "Tester");
         vm.label(bob, "Bob");
 
         authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
+            Constants._PROFILE_GOV_ROLE,
             address(engine),
             CyberEngine.setSigner.selector,
             true
         );
         authority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
+            Constants._PROFILE_GOV_ROLE,
             address(engine),
             CyberEngine.allowSubscribeMw.selector,
             true
         );
-        authority.setUserRole(gov, Constants._ENGINE_GOV_ROLE, true);
+        authority.setUserRole(gov, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(gov);
         engine.setSigner(bob);
 

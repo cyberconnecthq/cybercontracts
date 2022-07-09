@@ -34,12 +34,6 @@ library DataTypes {
         uint256 deadline;
     }
 
-    enum State {
-        Operational, // green light, all running
-        EssensePaused, // cannot issue new essense, TODO: maybe remove for now
-        Paused // everything paused
-    }
-
     enum Tier {
         Tier0,
         Tier1,

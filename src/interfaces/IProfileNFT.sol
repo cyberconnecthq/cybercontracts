@@ -3,12 +3,14 @@
 pragma solidity 0.8.14;
 
 import { DataTypes } from "../libraries/DataTypes.sol";
+import { IProfileNFTEvents } from "./IProfileNFTEvents.sol";
 
-interface IProfileNFT {
+interface IProfileNFT is IProfileNFTEvents {
     /**
      * @notice Creates a profile and mints it to the recipient address.
      *
      * @param params contains the recipient, handle, avatar and metadata.
+     * @param sig The EIP712 signature.
      * @return uint256 profile id of the newly minted profile.
      *
      * @dev The current function validates the caller address and the handle before minting
@@ -20,9 +22,10 @@ interface IProfileNFT {
      * - The handle must not be longer than 27 bytes.
      * - The handle must not be empty.
      */
-    function createProfile(DataTypes.CreateProfileParams calldata params)
-        external
-        returns (uint256, bool);
+    function createProfile(
+        DataTypes.CreateProfileParams calldata params,
+        DataTypes.EIP712Signature calldata sig
+    ) external payable returns (uint256);
 
     /**
      * @notice Gets the profile handle by ID.
@@ -88,6 +91,13 @@ interface IProfileNFT {
     function getProfileNFTDescriptor() external view returns (address);
 
     /**
+     * @notice Sets the profile NFT animation template.
+     *
+     * @param template The new template.
+     */
+    function setAnimationTemplate(string calldata template) external;
+
+    /**
      * @notice Gets the profile avatar.
      *
      * @param profileId The profile ID.
@@ -123,10 +133,9 @@ interface IProfileNFT {
     /**
      * @notice Sets the primary profile for the user.
      *
-     * @param user The address of the user.
      * @param profileId The profile ID that is set to be primary.
      */
-    function setPrimaryProfile(address user, uint256 profileId) external;
+    function setPrimaryProfile(uint256 profileId) external;
 
     /**
      * @notice Gets the primary profile of the user.
@@ -138,4 +147,23 @@ interface IProfileNFT {
         external
         view
         returns (uint256 profileId);
+
+    /**
+     * @notice Gets the Subscribe NFT token URI.
+     *
+     * @param profileId The profile ID.
+     * @return memory The Subscribe NFT token URI.
+     */
+    function getSubscribeNFTTokenURI(uint256 profileId)
+        external
+        view
+        returns (string memory);
+
+    /**
+     * @notice Gets the Subscribe NFT address.
+     *
+     * @param profileId The profile ID.
+     * @return address The Subscribe NFT address.
+     */
+    function getSubscribeNFT(uint256 profileId) external view returns (address);
 }

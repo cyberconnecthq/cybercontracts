@@ -10,13 +10,13 @@ import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/Beaco
 import { Constants } from "../src/libraries/Constants.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
-import { MockEngine } from "./utils/MockEngine.sol";
+import { MockProfile } from "./utils/MockProfile.sol";
 
 contract SubscribeNFTTest is Test {
     UpgradeableBeacon internal beacon;
     SubscribeNFT internal impl;
     BeaconProxy internal proxy;
-    MockEngine internal engine;
+    MockProfile internal engine;
     address internal profile = address(0xDEAD);
 
     RolesAuthority internal rolesAuthority;
@@ -32,7 +32,7 @@ contract SubscribeNFTTest is Test {
             Authority(address(0))
         );
 
-        engine = new MockEngine();
+        engine = new MockProfile();
         impl = new SubscribeNFT(address(engine), profile);
         beacon = new UpgradeableBeacon(address(impl), address(engine));
         bytes memory functionData = abi.encodeWithSelector(
@@ -42,7 +42,7 @@ contract SubscribeNFTTest is Test {
         proxy = new BeaconProxy(address(beacon), functionData);
 
         rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
+            Constants._PROFILE_GOV_ROLE,
             address(beacon),
             Constants._BEACON_UPGRADE_TO,
             true

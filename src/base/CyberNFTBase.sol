@@ -53,9 +53,9 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
         address expectedSigner,
         DataTypes.EIP712Signature calldata sig
     ) internal view {
-        require(sig.deadline >= block.timestamp, "Deadline expired");
+        require(sig.deadline >= block.timestamp, "DEADLINE_EXCEEDED");
         address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
-        require(recoveredAddress == expectedSigner, "Invalid signature");
+        require(recoveredAddress == expectedSigner, "INVALID_SIGNATURE");
     }
 
     // Permit

@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.14;
 
-import { CyberEngine } from "../../src/core/CyberEngine.sol";
+import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
 
-contract MockEngine is CyberEngine {
+contract MockProfile is ProfileNFT(address(0), address(0)) {
     function verifySignature(
         bytes32 digest,
         DataTypes.EIP712Signature calldata sig
@@ -18,7 +18,7 @@ contract MockEngine is CyberEngine {
         public
         view
     {
-        super._requireEnoughFee(handle, amount);
+        _requiresEnoughFee(handle, amount);
     }
 
     // Expose for test

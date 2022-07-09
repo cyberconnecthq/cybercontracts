@@ -9,9 +9,9 @@ import { RolesAuthority } from "../../../../src/dependencies/solmate/RolesAuthor
 import { SubscribeOnlyOnceMw } from "../../../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
 import { Constants } from "../../../../src/libraries/Constants.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { ICyberEngineEvents } from "../../../../src/interfaces/ICyberEngineEvents.sol";
+import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
 
-contract SubscribeOnlyOnceMwTest is Test, ICyberEngineEvents {
+contract SubscribeOnlyOnceMwTest is Test, IProfileNFTEvents {
     CyberEngine engine;
     SubscribeOnlyOnceMw mw;
     RolesAuthority authority;

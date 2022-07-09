@@ -21,7 +21,7 @@ library TestLibFixture {
     Vm public constant vm = Vm(VM_ADDRESS);
 
     function auth(RolesAuthority authority) internal {
-        authority.setUserRole(_GOV, Constants._ENGINE_GOV_ROLE, true);
+        authority.setUserRole(_GOV, Constants._PROFILE_GOV_ROLE, true);
     }
 
     function registerBobProfile(CyberEngine engine)

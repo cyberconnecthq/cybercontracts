@@ -7,14 +7,14 @@ import { CyberNFTBase } from "../../src/base/CyberNFTBase.sol";
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { ICyberEngineEvents } from "../../src/interfaces/ICyberEngineEvents.sol";
+import { IProfileNFTEvents } from "../../src/interfaces/IProfileNFTEvents.sol";
 import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
 import { TestLibFixture } from "../utils/TestLibFixture.sol";
 import { Base64 } from "../../src/dependencies/openzeppelin/Base64.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
 import { ERC721 } from "../../src/dependencies/solmate/ERC721.sol";
 
-contract SubscribeTest is Test, ICyberEngineEvents {
+contract SubscribeTest is Test, IProfileNFTEvents {
     CyberEngine engine;
     RolesAuthority authority;
     address boxAddress;

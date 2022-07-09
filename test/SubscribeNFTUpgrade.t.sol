@@ -10,21 +10,21 @@ import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/Beaco
 import { LibString } from "../src/libraries/LibString.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { MockSubscribeNFTV2 } from "./utils/MockSubscribeNFTV2.sol";
-import { MockEngine } from "./utils/MockEngine.sol";
+import { MockProfile } from "./utils/MockProfile.sol";
 
 contract SubscribeNFTUpgradeTest is Test {
     UpgradeableBeacon internal beacon;
     SubscribeNFT internal impl;
     BeaconProxy internal proxy;
     BeaconProxy internal proxyB;
-    MockEngine internal engine;
+    MockProfile internal engine;
     address internal profile = address(0xDEAD);
 
     uint256 internal profileId = 1;
     address constant alice = address(0xA11CE);
 
     function setUp() public {
-        engine = new MockEngine();
+        engine = new MockProfile();
         impl = new SubscribeNFT(address(engine), profile);
         beacon = new UpgradeableBeacon(address(impl), address(engine));
         bytes memory functionData = abi.encodeWithSelector(

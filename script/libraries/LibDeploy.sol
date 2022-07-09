@@ -351,7 +351,7 @@ library LibDeploy {
             "CyberEngine Owner can set Signer"
         );
         require(
-            authority.doesUserHaveRole(deployer, Constants._ENGINE_GOV_ROLE),
+            authority.doesUserHaveRole(deployer, Constants._PROFILE_GOV_ROLE),
             "Governance address is not set"
         );
         require(profile.paused(), "ProfileNFT is not paused");
@@ -365,7 +365,7 @@ library LibDeploy {
         address deployer,
         RolesAuthority authority
     ) internal {
-        authority.setUserRole(deployer, Constants._ENGINE_GOV_ROLE, true);
+        authority.setUserRole(deployer, Constants._PROFILE_GOV_ROLE, true);
 
         // change user from deployer to governance
         engine.setSigner(ENGINE_SIGNER);

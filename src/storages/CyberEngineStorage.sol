@@ -9,20 +9,5 @@ abstract contract CyberEngineStorage {
     uint256 internal constant _VERSION = 1;
 
     // storage
-    DataTypes.State internal _state;
     address public profileAddress;
-    address public boxAddress;
-    address public signer;
-
-    // Shared between register and other withSig functions. Always query onchain to get the current nounce
-    mapping(uint256 => DataTypes.SubscribeStruct)
-        internal _subscribeByProfileId;
-    mapping(address => uint256) public nonces;
-    address public subscribeNFTBeacon;
-    mapping(DataTypes.Tier => uint256) public feeMapping;
-    mapping(address => bool) internal _subscribeMwAllowlist;
-    address public essenceNFTBeacon;
-    mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
-        internal _essenceByIdByProfileId;
-    mapping(address => bool) internal _essenceMwAllowlist;
 }

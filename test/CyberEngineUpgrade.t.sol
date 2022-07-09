@@ -40,13 +40,13 @@ contract CyberEngineUpgradeTest is Test {
         );
         proxy = new ERC1967Proxy(address(impl), functionData);
         rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
+            Constants._PROFILE_GOV_ROLE,
             address(proxy),
             Constants._AUTHORIZE_UPGRADE,
             true
         );
         rolesAuthority.setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
+            Constants._PROFILE_GOV_ROLE,
             address(proxy),
             CyberEngine.upgradeProfile.selector,
             true
@@ -70,7 +70,7 @@ contract CyberEngineUpgradeTest is Test {
         assertEq(CyberEngine(address(proxy)).version(), 1);
         MockEngineV2 implV2 = new MockEngineV2();
 
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
 
         CyberEngine(address(proxy)).upgradeToAndCall(
@@ -84,7 +84,7 @@ contract CyberEngineUpgradeTest is Test {
         assertEq(CyberEngine(address(proxy)).version(), 1);
         MockEngineV2 implV2 = new MockEngineV2();
 
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
 
         CyberEngine(address(proxy)).upgradeTo(address(implV2));
@@ -109,7 +109,7 @@ contract CyberEngineUpgradeTest is Test {
 
     // TODO: run this in an integration test
     function testUpgradeProfile() public {
-        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         address v2 = address(0xC0DE);
         vm.mockCall(
             profile,
