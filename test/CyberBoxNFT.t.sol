@@ -63,21 +63,18 @@ contract CyberBoxNFTTest is Test, ICyberBoxEvents {
         token.setOwner(alice);
     }
 
-    // set prank as non engine, then try to pause, should be reverted
     function testCannotPauseFromNonOwner() public {
         vm.expectRevert("Only Owner");
         vm.prank(address(0));
         token.pause(true);
     }
 
-    // set prank as owner, then try to pause again, since it was paused already(from initialization), it can't pause again
     function testCannotPauseWhenAlreadyPaused() public {
         vm.prank(owner);
         vm.expectRevert("Pausable: paused");
         token.pause(true);
     }
 
-    // we first unpause, verify, then we unpause, then verify, we can't unpause when already unpaused
     function testCannotUnpauseWhenAlreadyUnpaused() public {
         vm.startPrank(owner);
         token.pause(false);
@@ -85,7 +82,6 @@ contract CyberBoxNFTTest is Test, ICyberBoxEvents {
         token.pause(false);
     }
 
-    // we first unpause, verify, then we unpause, then verify
     function testPause() public {
         vm.startPrank(owner);
         token.pause(false);
@@ -94,7 +90,6 @@ contract CyberBoxNFTTest is Test, ICyberBoxEvents {
         assertEq(token.paused(), true);
     }
 
-    // we first verify that the contracy is paused, then unpause, and verify
     function testUnpause() public {
         vm.startPrank(owner);
         assertEq(token.paused(), true);

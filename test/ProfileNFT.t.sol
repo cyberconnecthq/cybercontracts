@@ -12,7 +12,6 @@ import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { StaticNFTSVG } from "../src/libraries/StaticNFTSVG.sol";
 import { LibString } from "../src/libraries/LibString.sol";
 import { ProfileNFTDescriptor } from "../src/periphery/ProfileNFTDescriptor.sol";
 import { MockProfileBypassSig } from "./utils/MockProfileBypassSig.sol";
@@ -26,7 +25,6 @@ contract ProfileNFTTest is Test {
     address constant alice = address(0xA11CE);
     address constant bob = address(0xA12CE);
     address constant minter = address(0xB0B);
-    address constant engine = address(0xE);
     string constant imageUri = "https://example.com/image.png";
     address constant subscribeMw = address(0xD);
     address constant gov = address(0x8888);
@@ -37,37 +35,6 @@ contract ProfileNFTTest is Test {
             "https://example.com/alice.jpg",
             "metadata"
         );
-
-    function getMetaData(string memory handle, string memory subscribers)
-        public
-        returns (string memory)
-    {
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;base64,",
-                    Base64.encode(
-                        abi.encodePacked(
-                            '{"name":"@',
-                            handle,
-                            '","description":"CyberConnect profile for @',
-                            handle,
-                            '","image":"',
-                            StaticNFTSVG.draw(handle),
-                            '","animation_url":"?handle=alice","attributes":[{"trait_type":"id","value":"1"},{"trait_type":"length","value":"',
-                            LibString.toString(bytes(handle).length),
-                            '"},{"trait_type":"subscribers","value":"',
-                            subscribers,
-                            '"},{"trait_type":"handle","value":"@',
-                            handle,
-                            '"}]}'
-                        )
-                    )
-                )
-            );
-    }
-
-    string aliceMetadata = getMetaData("alice", "0");
 
     DataTypes.CreateProfileParams internal createProfileDataBob =
         DataTypes.CreateProfileParams(
@@ -89,12 +56,12 @@ contract ProfileNFTTest is Test {
     function setUp() public {
         MockProfileBypassSig tokenImpl = new MockProfileBypassSig();
         uint256 nonce = vm.getNonce(address(this));
-        address engineAddr = LibDeploy._calcContractAddress(
+        address profileAddr = LibDeploy._calcContractAddress(
             address(this),
             nonce + 2
         );
-        rolesAuthority = new Roles(address(this), engineAddr);
-        descriptor = new ProfileNFTDescriptor(engine);
+        rolesAuthority = new Roles(address(this), profileAddr);
+        descriptor = new ProfileNFTDescriptor(profileAddr);
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             address(0),
@@ -103,8 +70,8 @@ contract ProfileNFTTest is Test {
             address(descriptor),
             rolesAuthority
         );
-        ERC1967Proxy engineProxy = new ERC1967Proxy(address(tokenImpl), data);
-        token = MockProfileBypassSig(address(engineProxy));
+        ERC1967Proxy profileProxy = new ERC1967Proxy(address(tokenImpl), data);
+        token = MockProfileBypassSig(address(profileProxy));
         rolesAuthority.setUserRole(
             address(gov),
             Constants._PROFILE_GOV_ROLE,
@@ -125,39 +92,28 @@ contract ProfileNFTTest is Test {
         token.tokenURI(0);
     }
 
-    function testTokenURI() public {
-        vm.prank(engine);
-        token.createProfile(createProfileDataAlice);
-        assertEq(token.tokenURI(1), aliceMetadata);
-    }
-
     // TODO: add this back or maybe test this in subscribe nft test / integration test
     // function testTokenURISubscriber() public {
     // }
 
     function test() public {
-        vm.prank(engine);
         token.createProfile(createProfileDataAlice);
         assertEq(token.getHandleByProfileId(1), "alice");
     }
 
     function testGetProfileIdByHandle() public {
-        vm.prank(engine);
         token.createProfile(createProfileDataAlice);
         assertEq(token.getProfileIdByHandle("alice"), 1);
     }
 
     function testCannotCreateProfileWithHandleTaken() public {
-        vm.prank(engine);
         token.createProfile(createProfileDataAlice);
         vm.expectRevert("Handle taken");
-        vm.prank(engine);
         token.createProfile(createProfileDataAlice);
     }
 
     function testCannotCreateProfileLongerThanMaxHandleLength() public {
         vm.expectRevert("Handle has invalid length");
-        vm.prank(engine);
         token.createProfile(
             DataTypes.CreateProfileParams(
                 alice,
@@ -170,7 +126,6 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithAnInvalidCharacter() public {
         vm.expectRevert("Handle has invalid character");
-        vm.prank(engine);
         token.createProfile(
             DataTypes.CreateProfileParams(
                 alice,
@@ -183,7 +138,6 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWith0LenthHandle() public {
         vm.expectRevert("Handle has invalid length");
-        vm.prank(engine);
         token.createProfile(
             DataTypes.CreateProfileParams(alice, "", imageUri, "metadata")
         );
@@ -191,7 +145,6 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithACapitalLetter() public {
         vm.expectRevert("Handle has invalid character");
-        vm.prank(engine);
         token.createProfile(
             DataTypes.CreateProfileParams(alice, "Test", imageUri, "metadata")
         );
@@ -199,7 +152,6 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithBlankSpace() public {
         vm.expectRevert("Handle has invalid character");
-        vm.prank(engine);
         token.createProfile(
             DataTypes.CreateProfileParams(alice, " ", imageUri, "metadata")
         );
@@ -207,7 +159,6 @@ contract ProfileNFTTest is Test {
 
     // operator
     function testGetOperatorApproval() public {
-        vm.prank(engine);
         uint256 id = token.createProfile(createProfileDataAlice);
         assertEq(token.getOperatorApproval(id, address(0)), false);
     }
@@ -269,14 +220,12 @@ contract ProfileNFTTest is Test {
         token.setAvatar(id, string(longAvatar));
     }
 
-    // set prank as engine, then try to pause again, since it was paused already(from initialization), it can't pause again
     function testCannotPauseWhenAlreadyPaused() public {
         vm.prank(gov);
         vm.expectRevert("Pausable: paused");
         token.pause(true);
     }
 
-    // we first unpause, verify, then we unpause, then verify, we can't unpause when already unpaused
     function testCannotUnpauseWhenAlreadyUnpaused() public {
         vm.startPrank(gov);
         token.pause(false);
@@ -284,7 +233,6 @@ contract ProfileNFTTest is Test {
         token.pause(false);
     }
 
-    // we first unpause, verify, then we unpause, then verify
     function testPause() public {
         vm.startPrank(gov);
         token.pause(false);
@@ -293,7 +241,6 @@ contract ProfileNFTTest is Test {
         assertEq(token.paused(), true);
     }
 
-    // we first verify that the contracy is paused, then unpause, and verify
     function testUnpause() public {
         vm.startPrank(gov);
         assertEq(token.paused(), true);
@@ -301,14 +248,11 @@ contract ProfileNFTTest is Test {
         assertEq(token.paused(), false);
     }
 
-    // to set a primary profile id, the id has to exist
     function testCannotSetProfileIdForNonexistentProfile() public {
         vm.expectRevert("NOT_MINTED");
         token.setPrimaryProfile(0);
     }
 
-    // we create two profile ids, then switch to a new profile id
-    // the function returns the correct primary id associated with the address
     function testReturnProfileId() public {
         vm.startPrank(alice);
         // creates 2 profiles, bob's profile is automatically set as default

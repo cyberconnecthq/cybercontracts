@@ -24,16 +24,16 @@ library TestLibFixture {
         authority.setUserRole(_GOV, Constants._PROFILE_GOV_ROLE, true);
     }
 
-    function registerBobProfile(ProfileNFT engine)
+    function registerBobProfile(ProfileNFT profile)
         internal
         returns (uint256 profileId)
     {
-        return registerBobProfile(engine, 0, "bob");
+        return registerBobProfile(profile, 0, "bob");
     }
 
     // Need to be called after auth
     function registerBobProfile(
-        ProfileNFT engine,
+        ProfileNFT profile,
         uint256 nonce,
         string memory handle
     ) internal returns (uint256 profileId) {
@@ -41,16 +41,16 @@ library TestLibFixture {
         address bob = vm.addr(bobPk);
         // set signer
         vm.prank(_GOV);
-        engine.setSigner(bob);
+        profile.setSigner(bob);
 
         uint256 deadline = 100;
         string memory avatar = "avatar";
         string memory metadata = "metadata";
         bytes32 digest = TestLib712.hashTypedDataV4(
-            address(engine),
+            address(profile),
             keccak256(
                 abi.encode(
-                    Constants._REGISTER_TYPEHASH,
+                    Constants._CREATE_PROFILE_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
@@ -64,13 +64,15 @@ library TestLibFixture {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-        require(engine.nonces(bob) == nonce);
-        profileId = engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
+        require(profile.nonces(bob) == nonce);
+        profileId = profile.createProfile{
+            value: Constants._INITIAL_FEE_TIER2
+        }(
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
         // require(profileId == 1);
 
-        require(engine.nonces(bob) == nonce + 1);
+        require(profile.nonces(bob) == nonce + 1);
     }
 }

@@ -2,13 +2,9 @@
 
 pragma solidity 0.8.14;
 
-interface IProfileNFTDescriptor {
-    struct ConstructTokenURIParams {
-        uint256 tokenId;
-        string handle;
-        uint256 subscribers;
-    }
+import { DataTypes } from "../libraries/DataTypes.sol";
 
+interface IProfileNFTDescriptor {
     function setAnimationTemplate(string calldata template) external;
 
     /**
@@ -17,7 +13,7 @@ interface IProfileNFTDescriptor {
      * @param params The dependences of token URI.
      * @return string The token URI.
      */
-    function tokenURI(ConstructTokenURIParams calldata params)
+    function tokenURI(DataTypes.ConstructTokenURIParams calldata params)
         external
         view
         returns (string memory);

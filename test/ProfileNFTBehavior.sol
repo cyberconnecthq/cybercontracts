@@ -22,7 +22,7 @@ import { IProfileNFTDescriptor } from "../src/interfaces/IProfileNFTDescriptor.s
 import { ProfileNFTDescriptor } from "../src/periphery/ProfileNFTDescriptor.sol";
 
 contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
-    MockProfile internal engine;
+    MockProfile internal profile;
     RolesAuthority internal rolesAuthority;
     address internal essenceBeacon = address(0xC);
     address internal profileNFTDescriptor = address(0xD);
@@ -42,18 +42,20 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
     address descriptor = address(0x233);
 
     function setUp() public {
-        MockProfile engineImpl = new MockProfile(address(0), address(0));
+        MockProfile profileImpl = new MockProfile(address(0), address(0));
         uint256 nonce = vm.getNonce(address(this));
-        address engineAddr = LibDeploy._calcContractAddress(
+        address profileAddr = LibDeploy._calcContractAddress(
             address(this),
             nonce + 3
         );
-        rolesAuthority = new Roles(address(this), engineAddr);
+        rolesAuthority = new Roles(address(this), profileAddr);
 
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
-        vm.label(engineAddr, "eng proxy");
-        address impl = address(new SubscribeNFT(engineAddr));
-        subscribeBeacon = address(new UpgradeableBeacon(impl, address(engine)));
+        vm.label(profileAddr, "profile proxy");
+        address impl = address(new SubscribeNFT(profileAddr));
+        subscribeBeacon = address(
+            new UpgradeableBeacon(impl, address(profile))
+        );
 
         vm.etch(descriptor, address(this).code);
 
@@ -65,37 +67,40 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
             descriptor,
             rolesAuthority
         );
-        ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
-        assertEq(address(engineProxy), engineAddr);
-        engine = MockProfile(address(engineProxy));
+        ERC1967Proxy profileProxy = new ERC1967Proxy(
+            address(profileImpl),
+            data
+        );
+        assertEq(address(profileProxy), profileAddr);
+        profile = MockProfile(address(profileProxy));
     }
 
     function testAuth() public {
-        assertEq(address(engine.authority()), address(rolesAuthority));
+        assertEq(address(profile.authority()), address(rolesAuthority));
     }
 
     function testCannotSetSignerAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setSigner(alice);
+        profile.setSigner(alice);
     }
 
     function testCannotSetFeeAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
+        profile.setFeeByTier(DataTypes.Tier.Tier0, 1);
     }
 
     function testCannotSetProfileNFTDescriptorAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setProfileNFTDescriptor(profileNFTDescriptor);
+        profile.setProfileNFTDescriptor(profileNFTDescriptor);
     }
 
     function testCannotSetAnimationTemplateAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        engine.setAnimationTemplate("new_ani_template");
+        profile.setAnimationTemplate("new_ani_template");
     }
 
     function testSetSignerAsGov() public {
@@ -105,7 +110,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         vm.expectEmit(true, true, false, true);
         emit SetSigner(address(0), alice);
 
-        engine.setSigner(alice);
+        profile.setSigner(alice);
     }
 
     function testSetFeeGov() public {
@@ -119,8 +124,8 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
             1
         );
 
-        engine.setFeeByTier(DataTypes.Tier.Tier0, 1);
-        assertEq(engine.feeMapping(DataTypes.Tier.Tier0), 1);
+        profile.setFeeByTier(DataTypes.Tier.Tier0, 1);
+        assertEq(profile.feeMapping(DataTypes.Tier.Tier0), 1);
     }
 
     function testVerify() public {
@@ -128,15 +133,15 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         address charlie = vm.addr(1);
         rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setSigner(charlie);
+        profile.setSigner(charlie);
 
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-        bytes32 digest = engine.hashTypedDataV4(
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
-                    Constants._REGISTER_TYPEHASH,
+                    Constants._CREATE_PROFILE_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
@@ -147,7 +152,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
             )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-        engine.verifySignature(
+        profile.verifySignature(
             digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
@@ -157,10 +162,10 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-        bytes32 digest = engine.hashTypedDataV4(
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
-                    Constants._REGISTER_TYPEHASH,
+                    Constants._CREATE_PROFILE_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
@@ -173,7 +178,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         vm.expectRevert("INVALID_SIGNATURE");
-        engine.verifySignature(
+        profile.verifySignature(
             digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
@@ -183,10 +188,10 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         // change block timestamp to make deadline invalid
         vm.warp(150);
         uint256 deadline = 100;
-        bytes32 digest = engine.hashTypedDataV4(
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
-                    Constants._REGISTER_TYPEHASH,
+                    Constants._CREATE_PROFILE_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
@@ -199,7 +204,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
         vm.expectRevert("DEADLINE_EXCEEDED");
-        engine.verifySignature(
+        profile.verifySignature(
             digest,
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
@@ -207,97 +212,97 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
 
     function testInitialFees() public {
         assertEq(
-            engine.feeMapping(DataTypes.Tier.Tier0),
+            profile.feeMapping(DataTypes.Tier.Tier0),
             Constants._INITIAL_FEE_TIER0
         );
         assertEq(
-            engine.feeMapping(DataTypes.Tier.Tier1),
+            profile.feeMapping(DataTypes.Tier.Tier1),
             Constants._INITIAL_FEE_TIER1
         );
         assertEq(
-            engine.feeMapping(DataTypes.Tier.Tier2),
+            profile.feeMapping(DataTypes.Tier.Tier2),
             Constants._INITIAL_FEE_TIER2
         );
         assertEq(
-            engine.feeMapping(DataTypes.Tier.Tier3),
+            profile.feeMapping(DataTypes.Tier.Tier3),
             Constants._INITIAL_FEE_TIER3
         );
         assertEq(
-            engine.feeMapping(DataTypes.Tier.Tier4),
+            profile.feeMapping(DataTypes.Tier.Tier4),
             Constants._INITIAL_FEE_TIER4
         );
         assertEq(
-            engine.feeMapping(DataTypes.Tier.Tier5),
+            profile.feeMapping(DataTypes.Tier.Tier5),
             Constants._INITIAL_FEE_TIER5
         );
     }
 
     function testRequireEnoughFeeTier0() public view {
-        engine.requireEnoughFee("A", Constants._INITIAL_FEE_TIER0);
+        profile.requireEnoughFee("A", Constants._INITIAL_FEE_TIER0);
     }
 
     function testCannotMeetFeeRequirement0() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("A", Constants._INITIAL_FEE_TIER0 - 1);
+        profile.requireEnoughFee("A", Constants._INITIAL_FEE_TIER0 - 1);
     }
 
     function testRequireEnoughFeeTier1() public view {
-        engine.requireEnoughFee("AB", Constants._INITIAL_FEE_TIER1);
+        profile.requireEnoughFee("AB", Constants._INITIAL_FEE_TIER1);
     }
 
     function testCannotMeetFeeRequirement1() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("AB", Constants._INITIAL_FEE_TIER1 - 1);
+        profile.requireEnoughFee("AB", Constants._INITIAL_FEE_TIER1 - 1);
     }
 
     function testRequireEnoughFeeTier2() public view {
-        engine.requireEnoughFee("ABC", Constants._INITIAL_FEE_TIER2);
+        profile.requireEnoughFee("ABC", Constants._INITIAL_FEE_TIER2);
     }
 
     function testCannotMeetFeeRequirement2() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("ABC", Constants._INITIAL_FEE_TIER2 - 1);
+        profile.requireEnoughFee("ABC", Constants._INITIAL_FEE_TIER2 - 1);
     }
 
     function testRequireEnoughFeeTier3() public view {
-        engine.requireEnoughFee("ABCD", Constants._INITIAL_FEE_TIER3);
+        profile.requireEnoughFee("ABCD", Constants._INITIAL_FEE_TIER3);
     }
 
     function testCannotMeetFeeRequirement3() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("ABCD", Constants._INITIAL_FEE_TIER3 - 1);
+        profile.requireEnoughFee("ABCD", Constants._INITIAL_FEE_TIER3 - 1);
     }
 
     function testRequireEnoughFeeTier4() public view {
-        engine.requireEnoughFee("ABCDE", Constants._INITIAL_FEE_TIER4);
+        profile.requireEnoughFee("ABCDE", Constants._INITIAL_FEE_TIER4);
     }
 
     function testCannotMeetFeeRequirement4() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("ABCDE", Constants._INITIAL_FEE_TIER4 - 1);
+        profile.requireEnoughFee("ABCDE", Constants._INITIAL_FEE_TIER4 - 1);
     }
 
     function testRequireEnoughFeeTier5() public view {
-        engine.requireEnoughFee("ABCDEFG", Constants._INITIAL_FEE_TIER5);
+        profile.requireEnoughFee("ABCDEFG", Constants._INITIAL_FEE_TIER5);
     }
 
     function testCannotMeetFeeRequirement5() public {
         vm.expectRevert("Insufficient fee");
-        engine.requireEnoughFee("ABCDEFG", Constants._INITIAL_FEE_TIER5 - 1);
+        profile.requireEnoughFee("ABCDEFG", Constants._INITIAL_FEE_TIER5 - 1);
     }
 
     function testWithdraw() public {
         rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
-        vm.deal(address(engine), 2);
-        assertEq(address(engine).balance, 2);
+        vm.deal(address(profile), 2);
+        assertEq(address(profile).balance, 2);
         assertEq(alice.balance, 0);
 
         vm.prank(alice);
         vm.expectEmit(true, true, false, true);
         emit Withdraw(alice, 1);
 
-        engine.withdraw(alice, 1);
-        assertEq(address(engine).balance, 1);
+        profile.withdraw(alice, 1);
+        assertEq(address(profile).balance, 1);
         assertEq(alice.balance, 1);
     }
 
@@ -306,27 +311,27 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         vm.prank(alice);
 
         vm.expectRevert("Insufficient balance");
-        engine.withdraw(alice, 1);
+        profile.withdraw(alice, 1);
     }
 
     function testCannotWithdrawAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
-        engine.withdraw(alice, 1);
+        profile.withdraw(alice, 1);
     }
 
     function testRegister() public {
         address charlie = vm.addr(1);
         rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setSigner(charlie);
+        profile.setSigner(charlie);
 
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-        bytes32 digest = engine.hashTypedDataV4(
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
-                    Constants._REGISTER_TYPEHASH,
+                    Constants._CREATE_PROFILE_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
@@ -338,7 +343,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 
-        assertEq(engine.nonces(bob), 0);
+        assertEq(profile.nonces(bob), 0);
         vm.expectEmit(true, true, true, true);
         emit Transfer(address(0), bob, 1);
 
@@ -349,13 +354,13 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         emit Register(bob, 1, handle, avatar, metadata);
 
         assertEq(
-            engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
+            profile.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
                 DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
                 DataTypes.EIP712Signature(v, r, s, deadline)
             ),
             1
         );
-        assertEq(engine.nonces(bob), 1);
+        assertEq(profile.nonces(bob), 1);
     }
 
     function testCannotRegisterInvalidSig() public {
@@ -363,15 +368,15 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         address charlie = vm.addr(1);
         rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setSigner(charlie);
+        profile.setSigner(charlie);
 
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-        bytes32 digest = engine.hashTypedDataV4(
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
-                    Constants._REGISTER_TYPEHASH,
+                    Constants._CREATE_PROFILE_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
@@ -385,7 +390,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
 
         // charlie signed the handle to bob, but register with a different address(alice).
         vm.expectRevert("INVALID_SIGNATURE");
-        engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
+        profile.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
             DataTypes.CreateProfileParams(alice, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
@@ -396,15 +401,15 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         address charlie = vm.addr(1);
         rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
-        engine.setSigner(charlie);
+        profile.setSigner(charlie);
 
         // change block timestamp to make deadline valid
         vm.warp(50);
         uint256 deadline = 100;
-        bytes32 digest = engine.hashTypedDataV4(
+        bytes32 digest = profile.hashTypedDataV4(
             keccak256(
                 abi.encode(
-                    Constants._REGISTER_TYPEHASH,
+                    Constants._CREATE_PROFILE_TYPEHASH,
                     bob,
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
@@ -415,13 +420,13 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
             )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-        engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
+        profile.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
 
         vm.expectRevert("INVALID_SIGNATURE");
-        engine.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
+        profile.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
@@ -429,12 +434,12 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
 
     function testCannotAllowSubscribeMwAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
-        engine.allowSubscribeMw(address(0), true);
+        profile.allowSubscribeMw(address(0), true);
     }
 
     function testCannotAllowEssenceMwAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
-        engine.allowEssenceMw(address(0), true);
+        profile.allowEssenceMw(address(0), true);
     }
 
     function testAllowSubscribeMwAsGov() public {
@@ -443,9 +448,9 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         vm.prank(alice);
         vm.expectEmit(true, true, true, true);
         emit AllowSubscribeMw(mw, false, true);
-        engine.allowSubscribeMw(mw, true);
+        profile.allowSubscribeMw(mw, true);
 
-        assertEq(engine.isSubscribeMwAllowed(mw), true);
+        assertEq(profile.isSubscribeMwAllowed(mw), true);
     }
 
     function testAllowEssenceMwAsGov() public {
@@ -454,9 +459,9 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         vm.prank(alice);
         vm.expectEmit(true, true, true, true);
         emit AllowEssenceMw(mw, false, true);
-        engine.allowEssenceMw(mw, true);
+        profile.allowEssenceMw(mw, true);
 
-        assertEq(engine.isEssenceMwAllowed(mw), true);
+        assertEq(profile.isEssenceMwAllowed(mw), true);
     }
 
     function testSetProfileNFTDescriptorGov() public {
@@ -466,13 +471,13 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         vm.expectEmit(true, false, false, true);
         emit SetProfileNFTDescriptor(profileNFTDescriptor);
 
-        engine.setProfileNFTDescriptor(profileNFTDescriptor);
+        profile.setProfileNFTDescriptor(profileNFTDescriptor);
     }
 
     function testSetAnimationTemplateGov() public {
         string memory template = "new_ani_template";
         vm.mockCall(
-            engine.getProfileNFTDescriptor(),
+            profile.getProfileNFTDescriptor(),
             abi.encodeWithSelector(
                 IProfileNFTDescriptor.setAnimationTemplate.selector,
                 template
@@ -484,7 +489,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         emit SetAnimationTemplate(template);
 
         vm.prank(alice);
-        engine.setAnimationTemplate(template);
+        profile.setAnimationTemplate(template);
     }
 
     // TODO: etch is not working well with mockCall
@@ -493,15 +498,15 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
     //     address charlie = vm.addr(1);
     //     rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
     //     vm.prank(alice);
-    //     engine.setSigner(charlie);
+    //     profile.setSigner(charlie);
 
     //     // change block timestamp to make deadline valid
     //     vm.warp(50);
     //     uint256 deadline = 100;
-    //     bytes32 digest = engine.hashTypedDataV4(
+    //     bytes32 digest = profile.hashTypedDataV4(
     //         keccak256(
     //             abi.encode(
-    //                 Constants._REGISTER_TYPEHASH,
+    //                 Constants._CREATE_PROFILE_TYPEHASH,
     //                 bob,
     //                 keccak256(bytes(handle)),
     //                 keccak256(bytes(avatar)),
@@ -531,7 +536,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
     //         ),
     //         abi.encode(0)
     //     );
-    //     assertEq(engine.nonces(bob), 0);
+    //     assertEq(profile.nonces(bob), 0);
 
     //     vm.expectEmit(true, true, false, true);
     //     emit Register(bob, 1, handle, avatar, metadata);
@@ -540,12 +545,12 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
     //     emit SetPrimaryProfile(bob, 1);
 
     //     assertEq(
-    //         engine.register{ value: Constants._INITIAL_FEE_TIER2 }(
+    //         profile.register{ value: Constants._INITIAL_FEE_TIER2 }(
     //             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
     //             DataTypes.EIP712Signature(v, r, s, deadline)
     //         ),
     //         1
     //     );
-    //     assertEq(engine.nonces(bob), 1);
+    //     assertEq(profile.nonces(bob), 1);
     // }
 }

@@ -16,15 +16,15 @@ contract SubscribeNFTUpgradeTest is Test {
     SubscribeNFT internal impl;
     BeaconProxy internal proxy;
     BeaconProxy internal proxyB;
-    MockProfile internal engine;
+    MockProfile internal profile;
 
     uint256 internal profileId = 1;
     address constant alice = address(0xA11CE);
 
     function setUp() public {
-        engine = new MockProfile(address(0), address(0));
-        impl = new SubscribeNFT(address(engine));
-        beacon = new UpgradeableBeacon(address(impl), address(engine));
+        profile = new MockProfile(address(0), address(0));
+        impl = new SubscribeNFT(address(profile));
+        beacon = new UpgradeableBeacon(address(impl), address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
             profileId
@@ -34,16 +34,16 @@ contract SubscribeNFTUpgradeTest is Test {
     }
 
     function testAuth() public {
-        assertEq(beacon.OWNER(), address(engine));
+        assertEq(beacon.OWNER(), address(profile));
     }
 
     function testUpgrade() public {
-        MockSubscribeNFTV2 implB = new MockSubscribeNFTV2(address(engine));
+        MockSubscribeNFTV2 implB = new MockSubscribeNFTV2(address(profile));
 
         assertEq(SubscribeNFT(address(proxy)).version(), 1);
         assertEq(SubscribeNFT(address(proxyB)).version(), 1);
 
-        vm.prank(address(engine));
+        vm.prank(address(profile));
         beacon.upgradeTo(address(implB));
 
         MockSubscribeNFTV2 p = MockSubscribeNFTV2(address(proxy));

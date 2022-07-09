@@ -15,7 +15,7 @@ contract SubscribeNFTTest is Test {
     UpgradeableBeacon internal beacon;
     SubscribeNFT internal impl;
     BeaconProxy internal proxy;
-    MockProfile internal engine;
+    MockProfile internal profile;
 
     RolesAuthority internal rolesAuthority;
     SubscribeNFT internal c;
@@ -30,9 +30,9 @@ contract SubscribeNFTTest is Test {
             Authority(address(0))
         );
 
-        engine = new MockProfile(address(0), address(0));
-        impl = new SubscribeNFT(address(engine));
-        beacon = new UpgradeableBeacon(address(impl), address(engine));
+        profile = new MockProfile(address(0), address(0));
+        impl = new SubscribeNFT(address(profile));
+        beacon = new UpgradeableBeacon(address(impl), address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
             profileId
@@ -50,7 +50,7 @@ contract SubscribeNFTTest is Test {
     }
 
     function testBasic() public {
-        vm.prank(address(engine));
+        vm.prank(address(profile));
         assertEq(c.mint(alice), 1);
         assertEq(c.tokenURI(1), "1");
     }
@@ -62,7 +62,7 @@ contract SubscribeNFTTest is Test {
 
     function testName() public {
         vm.mockCall(
-            address(engine),
+            address(profile),
             abi.encodeWithSelector(
                 IProfileNFT.getHandleByProfileId.selector,
                 1
@@ -74,7 +74,7 @@ contract SubscribeNFTTest is Test {
 
     function testSymbol() public {
         vm.mockCall(
-            address(engine),
+            address(profile),
             abi.encodeWithSelector(
                 IProfileNFT.getHandleByProfileId.selector,
                 1
@@ -84,13 +84,13 @@ contract SubscribeNFTTest is Test {
         assertEq(c.symbol(), "ALICE_SUB");
     }
 
-    function testCannotMintFromNonEngine() public {
-        vm.expectRevert("Only Engine could mint");
+    function testCannotMintFromNonProfile() public {
+        vm.expectRevert("Only profile could mint");
         c.mint(alice);
     }
 
     function testTransferIsNotAllowed() public {
-        vm.prank(address(engine));
+        vm.prank(address(profile));
         c.mint(alice);
         vm.expectRevert("Transfer is not allowed");
         c.transferFrom(alice, bob, 1);
@@ -102,7 +102,7 @@ contract SubscribeNFTTest is Test {
 
     // should return token ID, should increment everytime we call
     function testReturnTokenId() public {
-        vm.startPrank(address(engine));
+        vm.startPrank(address(profile));
         assertEq(c.mint(alice), 1);
         assertEq(c.mint(alice), 2);
         assertEq(c.mint(alice), 3);

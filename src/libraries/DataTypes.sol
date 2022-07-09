@@ -34,6 +34,12 @@ library DataTypes {
         uint256 deadline;
     }
 
+    struct ConstructTokenURIParams {
+        uint256 tokenId;
+        string handle;
+        uint256 subscribers;
+    }
+
     enum Tier {
         Tier0,
         Tier1,
