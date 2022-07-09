@@ -44,7 +44,7 @@ contract CyberBoxNFTTest is Test, ICyberBoxEvents {
     function testCannotSetOwnerNonOwner() public {
         vm.expectRevert("Only Owner");
         vm.prank(address(0));
-        token.setSigner(alice);
+        token.setOwner(alice);
     }
 
     function testSetSignerNonOwner() public {
