@@ -27,6 +27,11 @@ library DataTypes {
         string tokenURI;
     }
 
+    struct NamespaceStruct {
+        address profileMw;
+        string name;
+    }
+
     struct EIP712Signature {
         uint8 v;
         bytes32 r;

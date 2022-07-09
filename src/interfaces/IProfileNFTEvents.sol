@@ -97,7 +97,7 @@ interface IProfileNFTEvents {
     );
 
     /**
-     * @notice Emitted when a new registration been created.
+     * @notice Emitted when a new profile been created.
      *
      * @param to The receiver address.
      * @param profileId The newly generated profile id.
@@ -105,7 +105,7 @@ interface IProfileNFTEvents {
      * @param avatar The newly set avatar.
      * @param metadata The newly set metadata.
      */
-    event Register(
+    event CreateProfile(
         address indexed to,
         uint256 indexed profileId,
         string handle,

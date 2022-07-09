@@ -4,7 +4,7 @@ pragma solidity 0.8.14;
 import "forge-std/console.sol";
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
-import { Roles } from "../../src/core/Roles.sol";
+import { ProfileRoles } from "../../src/core/ProfileRoles.sol";
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
 import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
@@ -151,7 +151,7 @@ library LibDeploy {
 
         // 1. authority
         // authority = new RolesAuthority(deployer, Authority(address(0)));
-        addrs.authority = new Roles(deployer, addrs.profileProxy);
+        addrs.authority = new ProfileRoles(deployer, addrs.profileProxy);
         _requiresContractAddress(deployer, nonce, address(addrs.authority));
 
         // 2. Deploy engine impl

@@ -8,7 +8,7 @@ import { MockProfile } from "./utils/MockProfile.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
-import { Roles } from "../src/core/Roles.sol";
+import { ProfileRoles } from "../src/core/ProfileRoles.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";

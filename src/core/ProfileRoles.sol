@@ -12,7 +12,7 @@ import { ProfileNFT } from "./ProfileNFT.sol";
  * @author CyberConnect
  * @notice This contract is used to set roles.
  */
-contract Roles is RolesAuthority {
+contract ProfileRoles is RolesAuthority {
     constructor(address owner, address profile)
         RolesAuthority(owner, Authority(address(0)))
     {

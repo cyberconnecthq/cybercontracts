@@ -17,7 +17,7 @@ import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
 import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
-import { Roles } from "../src/core/Roles.sol";
+import { ProfileRoles } from "../src/core/ProfileRoles.sol";
 
 // For tests that requires a profile to start with.
 contract ProfileNFTInteractTest is Test, IProfileNFTEvents {

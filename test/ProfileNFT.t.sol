@@ -16,7 +16,7 @@ import { LibString } from "../src/libraries/LibString.sol";
 import { ProfileNFTDescriptor } from "../src/periphery/ProfileNFTDescriptor.sol";
 import { MockProfileBypassSig } from "./utils/MockProfileBypassSig.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
-import { Roles } from "../src/core/Roles.sol";
+import { ProfileRoles } from "../src/core/ProfileRoles.sol";
 
 contract ProfileNFTTest is Test {
     MockProfileBypassSig internal token;
