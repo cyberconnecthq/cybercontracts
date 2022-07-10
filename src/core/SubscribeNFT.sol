@@ -22,11 +22,11 @@ contract SubscribeNFT is
     IUpgradeable,
     ISubscribeNFT
 {
-    address public immutable PROFILE_NFT; // solhint-disable-line
+    address public immutable PROFILE; // solhint-disable-line
 
-    constructor(address profileNFT) {
-        require(profileNFT != address(0), "Profile NFT address cannot be 0");
-        PROFILE_NFT = profileNFT;
+    constructor(address profile) {
+        require(profile != address(0), "ZERO_ADDRESS");
+        PROFILE = profile;
         _disableInitializers();
     }
 
@@ -42,7 +42,7 @@ contract SubscribeNFT is
 
     /// @inheritdoc ISubscribeNFT
     function mint(address to) external override returns (uint256) {
-        require(msg.sender == address(PROFILE_NFT), "Only profile could mint");
+        require(msg.sender == address(PROFILE), "Only profile could mint");
         return super._mint(to);
     }
 
@@ -70,7 +70,7 @@ contract SubscribeNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
-        return IProfileNFT(PROFILE_NFT).getSubscribeNFTTokenURI(_profileId);
+        return IProfileNFT(PROFILE).getSubscribeNFTTokenURI(_profileId);
     }
 
     /**
