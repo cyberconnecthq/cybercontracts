@@ -24,6 +24,8 @@ library DataTypes {
     struct EssenceStruct {
         address essenceNFT;
         address essenceMw;
+        string name;
+        string symbol;
         string tokenURI;
     }
 

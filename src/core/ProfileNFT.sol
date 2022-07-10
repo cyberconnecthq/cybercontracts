@@ -14,8 +14,10 @@ import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 import { Auth } from "../dependencies/solmate/Auth.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
+import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
+import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 
 /**
@@ -156,7 +158,7 @@ contract ProfileNFT is
      * @notice Generates the metadata json object.
      *
      * @param tokenId The profile NFT token ID.
-     * @return memory The metadata json object.
+     * @return string The metadata json object.
      * @dev It requires the tokenId to be already minted.
      */
     function tokenURI(uint256 tokenId)
@@ -548,50 +550,32 @@ contract ProfileNFT is
      *
      * @param sender The sender address.
      * @param profileIds The profile ids to subscribed to.
-     * @param subDatas The subscription data set.
-     * @return memory The subscription nft ids.
+     * @param preDatas The subscription data used in pre process.
+     * @param postDatas The subscription data used in post process.
+     * @return result The subscription nft ids.
      */
     function _subscribe(
         address sender,
         uint256[] calldata profileIds,
-        bytes[] calldata subDatas
-    ) internal returns (uint256[] memory) {
+        bytes[] calldata preDatas,
+        bytes[] calldata postDatas
+    ) internal returns (uint256[] memory result) {
         require(profileIds.length > 0, "NO_PROFILE_IDS");
-        require(profileIds.length == subDatas.length, "LENGTH_MISMATCH");
-        uint256[] memory result = new uint256[](profileIds.length);
+        require(
+            profileIds.length == preDatas.length &&
+                preDatas.length == postDatas.length,
+            "LENGTH_MISMATCH"
+        );
+        result = new uint256[](profileIds.length);
         for (uint256 i = 0; i < profileIds.length; i++) {
             _requireMinted(profileIds[i]);
             address subscribeNFT = _subscribeByProfileId[profileIds[i]]
                 .subscribeNFT;
             address subscribeMw = _subscribeByProfileId[profileIds[i]]
                 .subscribeMw;
-
             // lazy deploy subscribe NFT
             if (subscribeNFT == address(0)) {
-                bytes memory initData = abi.encodeWithSelector(
-                    ISubscribeNFT.initialize.selector,
-                    profileIds[i],
-                    string(
-                        abi.encodePacked(
-                            _profileById[profileIds[i]].handle,
-                            Constants._SUBSCRIBE_NFT_NAME_SUFFIX
-                        )
-                    ),
-                    string(
-                        abi.encodePacked(
-                            LibString.toUpper(
-                                _profileById[profileIds[i]].handle
-                            ),
-                            Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
-                        )
-                    )
-                );
-                subscribeNFT = address(
-                    new BeaconProxy(subscribeNFTBeacon, initData)
-                );
-                _subscribeByProfileId[profileIds[i]]
-                    .subscribeNFT = subscribeNFT;
-                emit DeploySubscribeNFT(profileIds[i], subscribeNFT);
+                subscribeNFT = _deploySubscribeNFT(profileIds[i]);
             }
             // run middleware before subscribe
             if (subscribeMw != address(0)) {
@@ -599,7 +583,7 @@ contract ProfileNFT is
                     profileIds[i],
                     sender,
                     subscribeNFT,
-                    subDatas[i]
+                    preDatas[i]
                 );
             }
             result[i] = ISubscribeNFT(subscribeNFT).mint(sender);
@@ -608,13 +592,40 @@ contract ProfileNFT is
                     profileIds[i],
                     sender,
                     subscribeNFT,
-                    subDatas[i]
+                    postDatas[i]
                 );
             }
         }
 
-        emit Subscribe(sender, profileIds, subDatas);
+        emit Subscribe(sender, profileIds, preDatas, postDatas);
         return result;
+    }
+
+    function _deploySubscribeNFT(uint256 profileId) internal returns (address) {
+        address subscribeNFT = address(
+            new BeaconProxy(
+                subscribeNFTBeacon,
+                abi.encodeWithSelector(
+                    ISubscribeNFT.initialize.selector,
+                    profileId,
+                    string(
+                        abi.encodePacked(
+                            _profileById[profileId].handle,
+                            Constants._SUBSCRIBE_NFT_NAME_SUFFIX
+                        )
+                    ),
+                    string(
+                        abi.encodePacked(
+                            LibString.toUpper(_profileById[profileId].handle),
+                            Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
+                        )
+                    )
+                )
+            )
+        );
+        _subscribeByProfileId[profileId].subscribeNFT = subscribeNFT;
+        emit DeploySubscribeNFT(profileId, subscribeNFT);
+        return subscribeNFT;
     }
 
     /**
@@ -622,21 +633,32 @@ contract ProfileNFT is
      *
      * @param sender The sender address.
      * @param profileIds The profile ids to subscribed to.
-     * @param subDatas The subscription data set.
+     * @param preDatas The subscription data for preprocess.
+     * @param postDatas The subscription data for postprocess.
      * @param sig The EIP712 signature.
      * @dev the function requires the stated to be not paused.
-     * @return memory The subscription nft ids.
+     * @return uint256[] The subscription nft ids.
      */
     function subscribeWithSig(
         uint256[] calldata profileIds,
-        bytes[] calldata subDatas,
+        bytes[] calldata preDatas,
+        bytes[] calldata postDatas,
         address sender,
         DataTypes.EIP712Signature calldata sig
     ) external returns (uint256[] memory) {
-        uint256 length = subDatas.length;
-        bytes32[] memory hashes = new bytes32[](length);
-        for (uint256 i = 0; i < length; ) {
-            hashes[i] = keccak256(subDatas[i]);
+        // let _subscribe handle length check
+        uint256 preLength = preDatas.length;
+        bytes32[] memory preHashes = new bytes32[](preLength);
+        for (uint256 i = 0; i < preLength; ) {
+            preHashes[i] = keccak256(preDatas[i]);
+            unchecked {
+                ++i;
+            }
+        }
+        uint256 postLength = postDatas.length;
+        bytes32[] memory postHashes = new bytes32[](postLength);
+        for (uint256 i = 0; i < postLength; ) {
+            postHashes[i] = keccak256(postDatas[i]);
             unchecked {
                 ++i;
             }
@@ -648,7 +670,8 @@ contract ProfileNFT is
                     abi.encode(
                         Constants._SUBSCRIBE_TYPEHASH,
                         keccak256(abi.encodePacked(profileIds)),
-                        keccak256(abi.encodePacked(hashes)),
+                        keccak256(abi.encodePacked(preHashes)),
+                        keccak256(abi.encodePacked(postHashes)),
                         nonces[sender]++,
                         sig.deadline
                     )
@@ -657,22 +680,118 @@ contract ProfileNFT is
             sender,
             sig
         );
-        return _subscribe(sender, profileIds, subDatas);
+        return _subscribe(sender, profileIds, preDatas, postDatas);
     }
 
     /**
      * @notice The subscription functionality.
      *
      * @param profileIds The profile ids to subscribed to.
-     * @param subDatas The subscription data set.
-     * @return memory The subscription nft ids.
+     * @param preDatas The subscription data for preprocess.
+     * @param postDatas The subscription data for postprocess.
+     * @return uint256[] The subscription nft ids.
      * @dev the function requires the stated to be not paused.
      */
-    function subscribe(uint256[] calldata profileIds, bytes[] calldata subDatas)
-        external
-        returns (uint256[] memory)
-    {
-        return _subscribe(msg.sender, profileIds, subDatas);
+    function subscribe(
+        uint256[] calldata profileIds,
+        bytes[] calldata preDatas,
+        bytes[] calldata postDatas
+    ) external returns (uint256[] memory) {
+        return _subscribe(msg.sender, profileIds, preDatas, postDatas);
+    }
+
+    function _collect(
+        address collector,
+        uint256 profileId,
+        uint256 essenceId,
+        bytes calldata preData,
+        bytes calldata postData
+    ) internal returns (uint256) {
+        _requireMinted(profileId);
+        require(
+            bytes(_essenceByIdByProfileId[profileId][essenceId].tokenURI)
+                .length != 0,
+            "ESSENCE_NOT_REGISTERED"
+        );
+        address essenceNFT = _essenceByIdByProfileId[profileId][essenceId]
+            .essenceNFT;
+        address essenceMw = _essenceByIdByProfileId[profileId][essenceId]
+            .essenceMw;
+
+        // lazy deploy essence NFT
+        if (essenceNFT == address(0)) {
+            bytes memory initData = abi.encodeWithSelector(
+                IEssenceNFT.initialize.selector,
+                profileId,
+                essenceId,
+                _essenceByIdByProfileId[profileId][essenceId].name,
+                _essenceByIdByProfileId[profileId][essenceId].symbol
+            );
+            essenceNFT = address(new BeaconProxy(subscribeNFTBeacon, initData));
+            _essenceByIdByProfileId[profileId][essenceId]
+                .essenceNFT = essenceNFT;
+            emit DeployEssenceNFT(profileId, essenceId, essenceNFT);
+        }
+        // run middleware before subscribe
+        if (essenceMw != address(0)) {
+            IEssenceMiddleware(essenceMw).preProcess(
+                profileId,
+                essenceId,
+                collector,
+                essenceNFT,
+                preData
+            );
+        }
+        uint256 tokenId = IEssenceNFT(essenceNFT).mint(collector);
+        if (essenceMw != address(0)) {
+            IEssenceMiddleware(essenceMw).postProcess(
+                profileId,
+                essenceId,
+                collector,
+                essenceNFT,
+                postData
+            );
+        }
+
+        emit CollectEssence(collector, profileId, preData, postData);
+        return tokenId;
+    }
+
+    function collect(
+        uint256 profileId,
+        uint256 essenceId,
+        bytes calldata preData,
+        bytes calldata postData
+    ) external returns (uint256 tokenId) {
+        return _collect(msg.sender, profileId, essenceId, preData, postData);
+    }
+
+    function collectWithSig(
+        uint256 profileId,
+        uint256 essenceId,
+        bytes calldata preData,
+        bytes calldata postData,
+        address sender,
+        DataTypes.EIP712Signature calldata sig
+    ) external returns (uint256 tokenId) {
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._COLLECT_TYPEHASH,
+                        profileId,
+                        essenceId,
+                        keccak256(preData),
+                        keccak256(postData),
+                        nonces[sender]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            sender,
+            sig
+        );
+        return _collect(sender, profileId, essenceId, preData, postData);
     }
 
     /**

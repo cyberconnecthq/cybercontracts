@@ -116,7 +116,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         vm.expectRevert("NO_PROFILE_IDS");
         uint256[] memory empty;
         bytes[] memory data;
-        profile.subscribe(empty, data);
+        profile.subscribe(empty, data, data);
     }
 
     function testCannotSubscribeNonExistsingProfile() public {
@@ -124,7 +124,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         uint256[] memory ids = new uint256[](1);
         ids[0] = 2;
         bytes[] memory data = new bytes[](1);
-        profile.subscribe(ids, data);
+        profile.subscribe(ids, data, data);
     }
 
     function testSubscribe() public {
@@ -144,9 +144,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         expected[0] = result;
 
         vm.expectEmit(true, false, false, true);
-        emit Subscribe(address(this), ids, datas);
+        emit Subscribe(address(this), ids, datas, datas);
 
-        uint256[] memory called = profile.subscribe(ids, datas);
+        uint256[] memory called = profile.subscribe(ids, datas, datas);
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
     }
@@ -173,7 +173,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
 
         uint256[] memory expected = new uint256[](1);
         expected[0] = result;
-        uint256[] memory called = profile.subscribe(ids, datas);
+        uint256[] memory called = profile.subscribe(ids, datas, datas);
 
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
@@ -259,6 +259,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
                     Constants._SUBSCRIBE_TYPEHASH,
                     keccak256(abi.encodePacked(profileIds)),
                     keccak256(abi.encodePacked(hashes)),
+                    keccak256(abi.encodePacked(hashes)),
                     0,
                     deadline
                 )
@@ -273,19 +274,19 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
             address(profile),
             nonce
         );
-        address proxy = address(subscribeProxy);
 
         vm.mockCall(
-            proxy,
+            subscribeProxy,
             abi.encodeWithSelector(ISubscribeNFT.mint.selector, charlie),
             abi.encode(1)
         );
 
         vm.expectEmit(true, false, false, true);
-        emit Subscribe(charlie, profileIds, subDatas);
+        emit Subscribe(charlie, profileIds, subDatas, subDatas);
 
         profile.subscribeWithSig(
             profileIds,
+            subDatas,
             subDatas,
             charlie,
             DataTypes.EIP712Signature(v, r, s, deadline)

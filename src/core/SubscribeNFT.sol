@@ -60,7 +60,7 @@ contract SubscribeNFT is
      * @notice Generates the metadata json object.
      *
      * @param tokenId The NFT token ID.
-     * @return memory The metadata json object.
+     * @return string The metadata json object.
      * @dev It requires the tokenId to be already minted.
      */
     function tokenURI(uint256 tokenId)
