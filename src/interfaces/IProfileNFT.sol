@@ -31,7 +31,7 @@ interface IProfileNFT is IProfileNFTEvents {
      * @notice Gets the profile handle by ID.
      *
      * @param profileId The profile ID.
-     * @return memory the profile handle.
+     * @return string the profile handle.
      */
     function getHandleByProfileId(uint256 profileId)
         external
@@ -42,7 +42,7 @@ interface IProfileNFT is IProfileNFTEvents {
      * @notice Gets the profile ID by handle.
      *
      * @param handle The profile handle.
-     * @return memory the profile ID.
+     * @return uint256 the profile ID.
      */
     function getProfileIdByHandle(string calldata handle)
         external
@@ -76,7 +76,7 @@ interface IProfileNFT is IProfileNFTEvents {
      * @notice Gets the profile metadata.
      *
      * @param profileId The profile ID.
-     * @return memory The metadata of the profile.
+     * @return string The metadata of the profile.
      */
     function getMetadata(uint256 profileId)
         external
@@ -84,9 +84,9 @@ interface IProfileNFT is IProfileNFTEvents {
         returns (string memory);
 
     /**
-     * @notice Gets the image template url.
+     * @notice Gets the profile NFT descriptor.
      *
-     * @return memory The image template url.
+     * @return address The descriptor address.
      */
     function getProfileNFTDescriptor() external view returns (address);
 
@@ -101,7 +101,7 @@ interface IProfileNFT is IProfileNFTEvents {
      * @notice Gets the profile avatar.
      *
      * @param profileId The profile ID.
-     * @return memory The avatar of the profile.
+     * @return string The avatar of the profile.
      */
     function getAvatar(uint256 profileId) external view returns (string memory);
 
@@ -152,7 +152,7 @@ interface IProfileNFT is IProfileNFTEvents {
      * @notice Gets the Subscribe NFT token URI.
      *
      * @param profileId The profile ID.
-     * @return memory The Subscribe NFT token URI.
+     * @return string The Subscribe NFT token URI.
      */
     function getSubscribeNFTTokenURI(uint256 profileId)
         external

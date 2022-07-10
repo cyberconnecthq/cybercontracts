@@ -74,14 +74,14 @@ contract SubscribeOnlyOnceMwTest is Test, IProfileNFTEvents {
         emit Transfer(address(0), alice, 1);
 
         vm.expectEmit(true, false, false, true);
-        emit Subscribe(alice, ids, data);
+        emit Subscribe(alice, ids, data, data);
 
         vm.prank(alice);
-        profileNFT.subscribe(ids, data);
+        profileNFT.subscribe(ids, data, data);
 
         // Second subscribe will fail
         vm.expectRevert("Already subscribed");
         vm.prank(alice);
-        profileNFT.subscribe(ids, data);
+        profileNFT.subscribe(ids, data, data);
     }
 }

@@ -126,12 +126,14 @@ interface IProfileNFTEvents {
      *
      * @param sender The sender address.
      * @param profileIds The profile ids subscribed to.
-     * @param subDatas The subscription data set.
+     * @param preDatas The subscription data for preprocess.
+     * @param postDatas The subscription data for postprocess.
      */
     event Subscribe(
         address indexed sender,
         uint256[] profileIds,
-        bytes[] subDatas
+        bytes[] preDatas,
+        bytes[] postDatas
     );
 
     /**
@@ -182,5 +184,32 @@ interface IProfileNFTEvents {
     event DeploySubscribeNFT(
         uint256 indexed profileId,
         address indexed subscribeNFT
+    );
+    /**
+     * @notice Emitted when a new essence nft has been deployed.
+     *
+     * @param profileId The profile id.
+     * @param essenceId The essence id.
+     * @param essenceNFT The newly deployed subscribe nft address.
+     */
+    event DeployEssenceNFT(
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        address indexed essenceNFT
+    );
+
+    /**
+     * @notice Emitted when a subscription has been created.
+     *
+     * @param collector The collector address.
+     * @param profileId The profile ids subscribed to.
+     * @param preData The subscription data for preprocess.
+     * @param postData The subscription data for postprocess.
+     */
+    event CollectEssence(
+        address indexed collector,
+        uint256 profileId,
+        bytes preData,
+        bytes postData
     );
 }
