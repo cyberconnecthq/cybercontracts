@@ -68,14 +68,14 @@ contract EssenceNFTTest is Test {
         vm.startPrank(address(profile));
         uint256 bobPk = 11111;
         address bobAddr = vm.addr(bobPk);
-        uint256 profileId = essence.mint(bobAddr);
+        uint256 tokenId = essence.mint(bobAddr);
         vm.warp(50);
         uint256 deadline = 100;
         bytes32 data = keccak256(
             abi.encode(
                 Constants._PERMIT_TYPEHASH,
                 alice,
-                profileId,
+                tokenId,
                 essence.nonces(bobAddr),
                 deadline
             )
@@ -88,7 +88,15 @@ contract EssenceNFTTest is Test {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
         vm.expectEmit(true, true, true, true);
-        emit Approval(bobAddr, alice, 1);
-        essence.permit(alice, 1, DataTypes.EIP712Signature(v, r, s, deadline));
+        emit Approval(bobAddr, alice, tokenId);
+        essence.permit(
+            alice,
+            tokenId,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+    }
+
+    function testVersion() public {
+        assertEq(essence.version(), 1);
     }
 }

@@ -22,9 +22,9 @@ contract EssenceNFT is CyberNFTBase, EssenceNFTStorage, IUpgradeable {
         string calldata name,
         string calldata symbol
     ) external initializer {
-        CyberNFTBase._initialize(name, symbol, _VERSION_STR);
         _profileId = profileId;
         _essenceId = essenceId;
+        CyberNFTBase._initialize(name, symbol);
     }
 
     function mint(address to) external returns (uint256) {
