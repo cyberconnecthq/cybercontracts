@@ -9,8 +9,15 @@ import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/Beaco
 import { Constants } from "../src/libraries/Constants.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
 import { MockProfile } from "./utils/MockProfile.sol";
+import { TestLib712 } from "./utils/TestLib712.sol";
+import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 contract SubscribeNFTTest is Test {
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 indexed id
+    );
     UpgradeableBeacon internal beacon;
     SubscribeNFT internal impl;
     BeaconProxy internal proxy;
@@ -77,23 +84,31 @@ contract SubscribeNFTTest is Test {
         assertEq(c.mint(alice), 3);
     }
 
-    // TODO: fix permit test
     function testPermit() public {
-        // vm.startPrank(address(profile));
-        // uint256 bobPk = 11111;
-        // address bobAddr = vm.addr(bobPk);
-        // uint256 profileId = c.mint(bobAddr);
-        //  vm.warp(50);
-        // uint256 deadline = 100;
-        // bytes32 data = keccak256(
-        //     abi.encode(Constants._PERMIT_TYPEHASH, alice, 1, 0, deadline)
-        // );
-        // bytes32 digest = TestLib712.hashTypedDataV4(
-        //     address(token),
-        //     data,
-        //     "TestNFT",
-        //     "1"
-        // );
-        // profile.permit(spender, tokenId, sig);
+        vm.startPrank(address(profile));
+        uint256 bobPk = 11111;
+        address bobAddr = vm.addr(bobPk);
+        uint256 tokenId = c.mint(bobAddr);
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 data = keccak256(
+            abi.encode(
+                Constants._PERMIT_TYPEHASH,
+                alice,
+                tokenId,
+                c.nonces(bobAddr),
+                deadline
+            )
+        );
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(c),
+            data,
+            name,
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+        vm.expectEmit(true, true, true, true);
+        emit Approval(bobAddr, alice, tokenId);
+        c.permit(alice, tokenId, DataTypes.EIP712Signature(v, r, s, deadline));
     }
 }
