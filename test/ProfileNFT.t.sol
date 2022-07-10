@@ -268,3 +268,5 @@ contract ProfileNFTTest is Test {
         assertEq(profileIdAlice2, primaryIdAlice2);
     }
 }
+
+// TODO: test permit

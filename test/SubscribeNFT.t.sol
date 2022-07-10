@@ -76,4 +76,24 @@ contract SubscribeNFTTest is Test {
         assertEq(c.mint(alice), 2);
         assertEq(c.mint(alice), 3);
     }
+
+    // TODO: fix permit test
+    function testPermit() public {
+        // vm.startPrank(address(profile));
+        // uint256 bobPk = 11111;
+        // address bobAddr = vm.addr(bobPk);
+        // uint256 profileId = c.mint(bobAddr);
+        //  vm.warp(50);
+        // uint256 deadline = 100;
+        // bytes32 data = keccak256(
+        //     abi.encode(Constants._PERMIT_TYPEHASH, alice, 1, 0, deadline)
+        // );
+        // bytes32 digest = TestLib712.hashTypedDataV4(
+        //     address(token),
+        //     data,
+        //     "TestNFT",
+        //     "1"
+        // );
+        // profile.permit(spender, tokenId, sig);
+    }
 }
