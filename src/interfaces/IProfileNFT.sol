@@ -166,4 +166,14 @@ interface IProfileNFT is IProfileNFTEvents {
      * @return address The Subscribe NFT address.
      */
     function getSubscribeNFT(uint256 profileId) external view returns (address);
+
+    function getEssenceNFTTokenURI(uint256 profileId, uint256 essenceId)
+        external
+        view
+        returns (string memory);
+
+    function getEssenceNFT(uint256 profileId, uint256 essenceId)
+        external
+        view
+        returns (address);
 }
