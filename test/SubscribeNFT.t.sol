@@ -7,7 +7,6 @@ import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { Constants } from "../src/libraries/Constants.sol";
-import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
 import { MockProfile } from "./utils/MockProfile.sol";
 
@@ -17,34 +16,26 @@ contract SubscribeNFTTest is Test {
     BeaconProxy internal proxy;
     MockProfile internal profile;
 
-    RolesAuthority internal rolesAuthority;
     SubscribeNFT internal c;
 
     uint256 internal profileId = 1;
     address constant alice = address(0xA11CE);
     address constant bob = address(0xB0B);
 
-    function setUp() public {
-        rolesAuthority = new RolesAuthority(
-            address(this),
-            Authority(address(0))
-        );
+    string constant name = "1890_subscriber";
+    string constant symbol = "1890_SUB";
 
+    function setUp() public {
         profile = new MockProfile(address(0), address(0));
         impl = new SubscribeNFT(address(profile));
         beacon = new UpgradeableBeacon(address(impl), address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
-            profileId
+            profileId,
+            name,
+            symbol
         );
         proxy = new BeaconProxy(address(beacon), functionData);
-
-        rolesAuthority.setRoleCapability(
-            Constants._PROFILE_GOV_ROLE,
-            address(beacon),
-            Constants._BEACON_UPGRADE_TO,
-            true
-        );
 
         c = SubscribeNFT(address(proxy));
     }
@@ -53,35 +44,13 @@ contract SubscribeNFTTest is Test {
         vm.prank(address(profile));
         assertEq(c.mint(alice), 1);
         assertEq(c.tokenURI(1), "1");
+        assertEq(c.name(), name);
+        assertEq(c.symbol(), symbol);
     }
 
     function testCannotReinitialize() public {
         vm.expectRevert("Contract already initialized");
-        c.initialize(2);
-    }
-
-    function testName() public {
-        vm.mockCall(
-            address(profile),
-            abi.encodeWithSelector(
-                IProfileNFT.getHandleByProfileId.selector,
-                1
-            ),
-            abi.encode("alice")
-        );
-        assertEq(c.name(), "alice_subscriber");
-    }
-
-    function testSymbol() public {
-        vm.mockCall(
-            address(profile),
-            abi.encodeWithSelector(
-                IProfileNFT.getHandleByProfileId.selector,
-                1
-            ),
-            abi.encode("alice")
-        );
-        assertEq(c.symbol(), "ALICE_SUB");
+        c.initialize(2, name, symbol);
     }
 
     function testCannotMintFromNonProfile() public {

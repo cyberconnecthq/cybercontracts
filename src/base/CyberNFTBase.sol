@@ -3,9 +3,7 @@
 pragma solidity 0.8.14;
 
 import { ERC721 } from "../dependencies/solmate/ERC721.sol";
-import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
-import { ERC721 } from "../dependencies/solmate/ERC721.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
@@ -13,7 +11,9 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 // TODO: Put EIP712 permit logic here
 // TODO: Might need to fork ERC721 for to store startTimeStamp like
 // https://github.com/chiru-labs/ERC721A/blob/538817040d98c6464afa0be7cc625cef44776668/contracts/IERC721A.sol#L75
-abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
+abstract contract CyberNFTBase is Initializable, ERC721 {
+    bytes32 internal constant EIP712_REVISION_HASH = keccak256("1");
+
     uint256 internal _totalCount = 0;
     mapping(address => uint256) public nonces;
 
@@ -25,13 +25,11 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
         return _totalCount;
     }
 
-    function _initialize(
-        string calldata _name,
-        string calldata _symbol,
-        string memory _version
-    ) internal onlyInitializing {
+    function _initialize(string calldata _name, string calldata _symbol)
+        internal
+        onlyInitializing
+    {
         ERC721.__ERC721_Init(_name, _symbol);
-        EIP712.__EIP712_Init(_name, _version);
     }
 
     function _mint(address _to) internal virtual returns (uint256) {
@@ -59,9 +57,19 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
     }
 
     // Permit
-    function DOMAIN_SEPARATOR() external view returns (bytes32) {
-        // solhint-disable-line
-        return _domainSeparatorV4();
+    function DOMAIN_SEPARATOR() public view returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    keccak256(
+                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                    ),
+                    keccak256(bytes(_name)),
+                    EIP712_REVISION_HASH,
+                    block.chainid,
+                    address(this)
+                )
+            );
     }
 
     // Permit
@@ -90,5 +98,18 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
         // approve and emit
         getApproved[tokenId] = spender;
         emit Approval(owner, spender, tokenId);
+    }
+
+    // 712
+    function _hashTypedDataV4(bytes32 structHash)
+        internal
+        view
+        virtual
+        returns (bytes32)
+    {
+        return
+            keccak256(
+                abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR(), structHash)
+            );
     }
 }
