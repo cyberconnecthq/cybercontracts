@@ -43,15 +43,6 @@ contract MockProfile is ProfileNFT {
         _subscribeByProfileId[profileId].subscribeNFT = subscribeAddr;
     }
 
-    function getSubscribeNFTTokenURI(uint256 profileId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return LibString.toString(profileId);
-    }
-
     // by pass sig check for testing
     function createProfile(DataTypes.CreateProfileParams calldata params)
         external

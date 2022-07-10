@@ -11,6 +11,7 @@ import { EssenceNFT } from "../src/core/EssenceNFT.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
+import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 
 contract EssenceNFTTest is Test {
     event Approval(
@@ -98,5 +99,21 @@ contract EssenceNFTTest is Test {
 
     function testVersion() public {
         assertEq(essence.version(), 1);
+    }
+
+    function testTokenURI() public {
+        vm.prank(address(profile));
+        assertEq(essence.mint(alice), 1);
+        string memory tokenUri = "https://1890.com";
+        vm.mockCall(
+            address(profile),
+            abi.encodeWithSelector(
+                IProfileNFT.getEssenceNFTTokenURI.selector,
+                profileId,
+                essenceId
+            ),
+            abi.encode(tokenUri)
+        );
+        assertEq(essence.tokenURI(1), tokenUri);
     }
 }

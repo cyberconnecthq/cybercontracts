@@ -510,6 +510,7 @@ contract ProfileNFT is
     function getSubscribeNFT(uint256 profileId)
         external
         view
+        override
         returns (address)
     {
         return _subscribeByProfileId[profileId].subscribeNFT;
@@ -518,11 +519,28 @@ contract ProfileNFT is
     function getSubscribeNFTTokenURI(uint256 profileId)
         external
         view
-        virtual
         override
         returns (string memory)
     {
         return _subscribeByProfileId[profileId].tokenURI;
+    }
+
+    function getEssenceNFT(uint256 profileId, uint256 essenceId)
+        external
+        view
+        override
+        returns (address)
+    {
+        return _essenceByIdByProfileId[profileId][essenceId].essenceNFT;
+    }
+
+    function getEssenceNFTTokenURI(uint256 profileId, uint256 essenceId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        return _essenceByIdByProfileId[profileId][essenceId].tokenURI;
     }
 
     /**

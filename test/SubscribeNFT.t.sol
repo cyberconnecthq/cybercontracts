@@ -50,9 +50,23 @@ contract SubscribeNFTTest is Test {
     function testBasic() public {
         vm.prank(address(profile));
         assertEq(c.mint(alice), 1);
-        assertEq(c.tokenURI(1), "1");
         assertEq(c.name(), name);
         assertEq(c.symbol(), symbol);
+    }
+
+    function testTokenURI() public {
+        vm.prank(address(profile));
+        assertEq(c.mint(alice), 1);
+        string memory tokenUri = "https://subscriber.1890.com";
+        vm.mockCall(
+            address(profile),
+            abi.encodeWithSelector(
+                IProfileNFT.getSubscribeNFTTokenURI.selector,
+                profileId
+            ),
+            abi.encode(tokenUri)
+        );
+        assertEq(c.tokenURI(1), tokenUri);
     }
 
     function testCannotReinitialize() public {

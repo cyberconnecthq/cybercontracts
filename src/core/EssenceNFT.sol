@@ -32,14 +32,16 @@ contract EssenceNFT is CyberNFTBase, EssenceNFTStorage, IUpgradeable {
         return super._mint(to);
     }
 
-    function tokenURI(uint256 id)
+    function tokenURI(uint256 tokenId)
         public
         view
         virtual
         override
         returns (string memory)
     {
-        return "";
+        _requireMinted(tokenId);
+        return
+            IProfileNFT(PROFILE).getEssenceNFTTokenURI(_profileId, _essenceId);
     }
 
     function version() external pure override returns (uint256) {
