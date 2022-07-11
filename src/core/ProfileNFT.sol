@@ -725,12 +725,12 @@ contract ProfileNFT is
                 _essenceByIdByProfileId[profileId][essenceId].name,
                 _essenceByIdByProfileId[profileId][essenceId].symbol
             );
-            essenceNFT = address(new BeaconProxy(subscribeNFTBeacon, initData));
+            essenceNFT = address(new BeaconProxy(essenceNFTBeacon, initData));
             _essenceByIdByProfileId[profileId][essenceId]
                 .essenceNFT = essenceNFT;
             emit DeployEssenceNFT(profileId, essenceId, essenceNFT);
         }
-        // run middleware before subscribe
+        // run middleware before collectign essence
         if (essenceMw != address(0)) {
             IEssenceMiddleware(essenceMw).preProcess(
                 profileId,

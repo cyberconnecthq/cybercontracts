@@ -15,6 +15,7 @@ import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
+import { EssenceNFT } from "../src/core/EssenceNFT.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
 import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
@@ -33,6 +34,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
     MockProfile internal profile;
     RolesAuthority internal authority;
     address internal subscribeBeacon;
+    address internal essenceBeacon;
     address internal gov = address(0xCCC);
     uint256 internal bobPk = 10000;
     address internal bob = vm.addr(bobPk);
@@ -44,25 +46,27 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
     function setUp() public {
         vm.etch(subscribeMw, address(this).code);
         vm.etch(essenceMw, address(this).code);
+
+        // Need beacon proxy to work, must set up fake beacon with fake impl contract
         address fakeImpl = address(new SubscribeNFT(address(0xdead)));
         subscribeBeacon = address(
             new UpgradeableBeacon(fakeImpl, address(profile))
         );
-        MockProfile profileImpl = new MockProfile(subscribeBeacon, address(0));
+        address fakeEssence = address(new EssenceNFT(address(0xdead)));
+        essenceBeacon = address(
+            new UpgradeableBeacon(fakeEssence, address(profile))
+        );
+
+        MockProfile profileImpl = new MockProfile(
+            subscribeBeacon,
+            essenceBeacon
+        );
         uint256 nonce = vm.getNonce(address(this));
         address profileAddr = LibDeploy._calcContractAddress(
             address(this),
-            nonce + 3
+            nonce + 1
         );
         authority = new Roles(address(this), profileAddr);
-
-        // Need beacon proxy to work, must set up fake beacon with fake impl contract
-
-        address impl = address(new SubscribeNFT(profileAddr));
-        subscribeBeacon = address(
-            new UpgradeableBeacon(impl, address(profile))
-        );
-        address essenceBeacon = address(0);
 
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
@@ -171,9 +175,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
             address(profile),
             nonce
         );
-        address proxy = address(subscribeProxy);
         vm.mockCall(
-            proxy,
+            subscribeProxy,
             abi.encodeWithSelector(ISubscribeNFT.mint.selector, address(this)),
             abi.encode(result)
         );
@@ -185,7 +188,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
 
-        assertEq(profile.getSubscribeNFT(1), proxy);
+        assertEq(profile.getSubscribeNFT(1), subscribeProxy);
     }
 
     // TODO: add test for subscribe to multiple profiles
@@ -577,9 +580,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
     }
 
     function testCollectEssence() public {
-        vm.prank(gov);
-        profile.allowEssenceMw(essenceMw, true);
-
         vm.prank(bob);
         uint256 expectedEssenceId = 1;
 
@@ -614,5 +614,42 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         profile.collect(profileId, essenceId, new bytes(0), new bytes(0));
     }
 
-    function testCollectEssenceDeployEssenceNFT() public {}
+    function testCollectEssenceDeployEssenceNFT() public {
+        vm.prank(bob);
+        uint256 expectedEssenceId = 1;
+
+        // register without middleware
+        uint256 essenceId = profile.registerEssence(
+            profileId,
+            "name",
+            "symbol",
+            "uri",
+            address(0),
+            new bytes(0)
+        );
+        assertEq(essenceId, expectedEssenceId);
+
+        uint256 tokenId = 1890;
+
+        address minter = address(0x1890);
+        uint256 nonce = vm.getNonce(address(profile));
+        address essenceProxy = LibDeploy._calcContractAddress(
+            address(profile),
+            nonce
+        );
+        vm.mockCall(
+            essenceProxy,
+            abi.encodeWithSelector(IEssenceNFT.mint.selector, minter),
+            abi.encode(tokenId)
+        );
+
+        vm.expectEmit(true, true, false, true);
+        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
+
+        vm.expectEmit(true, false, false, true);
+        emit CollectEssence(minter, profileId, new bytes(0), new bytes(0));
+
+        vm.prank(minter);
+        profile.collect(profileId, essenceId, new bytes(0), new bytes(0));
+    }
 }
