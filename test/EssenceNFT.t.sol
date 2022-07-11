@@ -70,6 +70,7 @@ contract EssenceNFTTest is Test {
         uint256 bobPk = 11111;
         address bobAddr = vm.addr(bobPk);
         uint256 tokenId = essence.mint(bobAddr);
+        assertEq(essence.getApproved(tokenId), address(0));
         vm.warp(50);
         uint256 deadline = 100;
         bytes32 data = keccak256(
@@ -95,6 +96,7 @@ contract EssenceNFTTest is Test {
             tokenId,
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
+        assertEq(essence.getApproved(tokenId), alice);
     }
 
     function testVersion() public {

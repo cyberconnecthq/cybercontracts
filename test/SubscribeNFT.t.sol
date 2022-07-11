@@ -103,6 +103,7 @@ contract SubscribeNFTTest is Test {
         uint256 bobPk = 11111;
         address bobAddr = vm.addr(bobPk);
         uint256 tokenId = c.mint(bobAddr);
+        assertEq(c.getApproved(tokenId), address(0));
         vm.warp(50);
         uint256 deadline = 100;
         bytes32 data = keccak256(
@@ -124,5 +125,6 @@ contract SubscribeNFTTest is Test {
         vm.expectEmit(true, true, true, true);
         emit Approval(bobAddr, alice, tokenId);
         c.permit(alice, tokenId, DataTypes.EIP712Signature(v, r, s, deadline));
+        assertEq(c.getApproved(tokenId), alice);
     }
 }

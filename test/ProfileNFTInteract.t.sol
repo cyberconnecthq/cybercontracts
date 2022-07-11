@@ -31,6 +31,11 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         address indexed to,
         uint256 indexed id
     );
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 indexed id
+    );
 
     MockProfile internal profile;
     RolesAuthority internal authority;
@@ -724,5 +729,36 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
             bob,
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
+    }
+
+    function testPermit() public {
+        assertEq(profile.getApproved(profileId), address(0));
+
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 data = keccak256(
+            abi.encode(
+                Constants._PERMIT_TYPEHASH,
+                alice,
+                profileId,
+                profile.nonces(bob),
+                deadline
+            )
+        );
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(profile),
+            data,
+            profile.name(),
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+        vm.expectEmit(true, true, true, true);
+        emit Approval(bob, alice, profileId);
+        profile.permit(
+            alice,
+            profileId,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+        assertEq(profile.getApproved(profileId), alice);
     }
 }
