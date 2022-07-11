@@ -53,7 +53,7 @@ contract SubscribeOnlyOnceMwTest is Test, IProfileNFTEvents {
         bobProfileId = TestLibFixture.registerBobProfile(profileNFT);
         // set module
         vm.prank(bob);
-        profileNFT.setSubscribeMw(bobProfileId, address(mw));
+        profileNFT.setSubscribeMw(bobProfileId, address(mw), new bytes(0));
     }
 
     function testSubscribeOnlyOnce() public {

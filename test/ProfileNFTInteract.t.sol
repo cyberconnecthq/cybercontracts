@@ -8,6 +8,7 @@ import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { ISubscribeNFT } from "../src/interfaces/ISubscribeNFT.sol";
+import { ISubscribeMiddleware } from "../src/interfaces/ISubscribeMiddleware.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
@@ -32,6 +33,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
     address mw = address(0xCA11);
 
     function setUp() public {
+        vm.etch(mw, address(this).code);
         address fakeImpl = address(new SubscribeNFT(address(0xdead)));
         subscribeBeacon = address(
             new UpgradeableBeacon(fakeImpl, address(profile))
@@ -393,20 +395,34 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
 
     function testCannotSetSubscribeMwIfNotOwner() public {
         vm.expectRevert("ONLY_PROFILE_OWNER");
-        profile.setSubscribeMw(profileId, mw);
+        profile.setSubscribeMw(profileId, mw, new bytes(0));
     }
 
     function testCannotSetSubscribeMwIfNotAllowed() public {
         vm.expectRevert("SUB_MW_NOT_ALLOWED");
         address notMw = address(0xDEEAAAD);
         vm.prank(bob);
-        profile.setSubscribeMw(profileId, notMw);
+        profile.setSubscribeMw(profileId, notMw, new bytes(0));
         assertEq(profile.getSubscribeMw(profileId), address(0));
     }
 
     function testSetSubscribeMw() public {
+        bytes memory data = new bytes(0);
+        bytes memory returnData = new bytes(111);
+        vm.mockCall(
+            mw,
+            abi.encodeWithSelector(
+                ISubscribeMiddleware.prepare.selector,
+                profileId,
+                data
+            ),
+            abi.encode(returnData)
+        );
+        vm.expectEmit(true, false, false, true);
+        emit SetSubscribeMw(profileId, mw, returnData);
         vm.prank(bob);
-        profile.setSubscribeMw(profileId, mw);
+        profile.setSubscribeMw(profileId, mw, data);
+
         assertEq(profile.getSubscribeMw(profileId), mw);
     }
 

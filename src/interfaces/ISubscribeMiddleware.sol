@@ -32,4 +32,8 @@ interface ISubscribeMiddleware {
         address subscrbeNFT,
         bytes calldata data
     ) external;
+
+    function prepare(uint256 profileId, bytes calldata prepareReturnData)
+        external
+        returns (bytes memory);
 }

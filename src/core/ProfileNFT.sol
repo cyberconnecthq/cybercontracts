@@ -117,10 +117,8 @@ contract ProfileNFT is
 
         uint256 id = _mint(params.to);
 
-        _profileById[_totalCount] = DataTypes.ProfileStruct({
-            handle: params.handle,
-            avatar: params.avatar
-        });
+        _profileById[_totalCount].handle = params.handle;
+        _profileById[_totalCount].avatar = params.avatar;
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         _metadataById[_totalCount] = params.metadata;
@@ -794,6 +792,59 @@ contract ProfileNFT is
         return _collect(sender, profileId, essenceId, preData, postData);
     }
 
+    // TODO: test
+    function registerEssence(
+        uint256 profileId,
+        string calldata name,
+        string calldata symbol,
+        string calldata essenceTokenURI,
+        address essenceMw,
+        bytes calldata initData
+    ) external onlyProfileOwnerOrOperator(profileId) returns (uint256) {
+        return
+            _registerEssence(
+                profileId,
+                name,
+                symbol,
+                essenceTokenURI,
+                essenceMw,
+                initData
+            );
+    }
+
+    function _registerEssence(
+        uint256 profileId,
+        string calldata name,
+        string calldata symbol,
+        string calldata essenceTokenURI,
+        address essenceMw,
+        bytes calldata prepareData
+    ) internal returns (uint256) {
+        require(_essenceMwAllowlist[essenceMw], "ESSENCE_MW_NOT_ALLOWED");
+        uint256 id = ++_profileById[profileId].essenceCount;
+        _essenceByIdByProfileId[profileId][id].essenceMw = essenceMw;
+        _essenceByIdByProfileId[profileId][id].name = name;
+        _essenceByIdByProfileId[profileId][id].symbol = symbol;
+        _essenceByIdByProfileId[profileId][id].tokenURI = essenceTokenURI;
+        bytes memory returnData;
+        if (essenceMw != address(0)) {
+            returnData = IEssenceMiddleware(essenceMw).prepare(
+                profileId,
+                id,
+                prepareData
+            );
+        }
+        emit RegisterEssence(
+            profileId,
+            id,
+            name,
+            symbol,
+            essenceTokenURI,
+            essenceMw,
+            returnData
+        );
+    }
+
     /**
      * @notice Gets a profile subscribe middleware address.
      *
@@ -805,14 +856,31 @@ contract ProfileNFT is
     }
 
     // TODO: withSig
-    function setSubscribeMw(uint256 profileId, address mw)
-        external
-        onlyProfileOwner(profileId)
-    {
+    function setSubscribeMw(
+        uint256 profileId,
+        address mw,
+        bytes calldata prepareData
+    ) external onlyProfileOwner(profileId) {
         require(_subscribeMwAllowlist[mw], "SUB_MW_NOT_ALLOWED");
-        address preMw = _subscribeByProfileId[profileId].subscribeMw;
         _subscribeByProfileId[profileId].subscribeMw = mw;
-        emit SetSubscribeMw(profileId, preMw, mw);
+        bytes memory returnData;
+        if (mw != address(0)) {
+            returnData = ISubscribeMiddleware(mw).prepare(
+                profileId,
+                prepareData
+            );
+        }
+        emit SetSubscribeMw(profileId, mw, returnData);
+    }
+
+    // TODO: withSig
+    // TODO: integration test
+    function setSubscribeTokenURI(
+        uint256 profileId,
+        string calldata subscribeTokenURI
+    ) external onlyProfileOwnerOrOperator(profileId) {
+        _subscribeByProfileId[profileId].tokenURI = subscribeTokenURI;
+        emit SetSubscribeTokenURI(profileId, subscribeTokenURI);
     }
 
     /**
