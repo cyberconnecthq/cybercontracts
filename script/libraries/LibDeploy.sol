@@ -12,7 +12,6 @@ import { Authority } from "../../src/dependencies/solmate/Auth.sol";
 import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { Constants } from "../../src/libraries/Constants.sol";
-import { ECDSA } from "../../src/dependencies/openzeppelin/ECDSA.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { ProfileNFTDescriptor } from "../../src/periphery/ProfileNFTDescriptor.sol";
 import { TestLib712 } from "../../test/utils/TestLib712.sol";

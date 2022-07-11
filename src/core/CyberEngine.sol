@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
+import { EIP712 } from "../base/EIP712.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
@@ -13,7 +13,6 @@ import { Auth } from "../dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { Constants } from "../libraries/Constants.sol";
-import { ERC721 } from "../dependencies/solmate/ERC721.sol";
 import { CyberEngineStorage } from "../storages/CyberEngineStorage.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 

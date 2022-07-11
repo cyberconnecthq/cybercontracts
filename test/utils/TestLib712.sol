@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.14;
 
-import { ECDSA } from "../../src/dependencies/openzeppelin/ECDSA.sol";
-
 library TestLib712 {
     bytes32 private constant _TYPE_HASH =
         keccak256(
@@ -26,6 +24,9 @@ library TestLib712 {
                 addr
             )
         );
-        return ECDSA.toTypedDataHash(domainSeparator, structHash);
+        return
+            keccak256(
+                abi.encodePacked("\x19\x01", domainSeparator, structHash)
+            );
     }
 }
