@@ -2,30 +2,32 @@
 
 pragma solidity 0.8.14;
 
+import { Auth } from "../dependencies/solmate/Auth.sol";
+import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
+import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
+
+import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
+import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
+import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
+import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
-import { CyberNFTBase } from "../base/CyberNFTBase.sol";
+import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
+
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { LibString } from "../libraries/LibString.sol";
-import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+
+import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
-import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
-import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
-import { Auth } from "../dependencies/solmate/Auth.sol";
-import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
-import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
-import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
-import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
-import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
-import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 
 /**
  * @title Profile NFT
  * @author CyberConnect
  * @notice This contract is used to create a profile NFT.
  */
-
 contract ProfileNFT is
     Pausable,
     Auth,
