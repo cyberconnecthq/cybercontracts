@@ -14,7 +14,6 @@ import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
-import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
@@ -242,7 +241,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
     }
 
     function testCannotMeetFeeRequirement0() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("INSUFFICIENT_FEE");
         profile.requireEnoughFee("A", Constants._INITIAL_FEE_TIER0 - 1);
     }
 
@@ -251,7 +250,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
     }
 
     function testCannotMeetFeeRequirement1() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("INSUFFICIENT_FEE");
         profile.requireEnoughFee("AB", Constants._INITIAL_FEE_TIER1 - 1);
     }
 
@@ -260,7 +259,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
     }
 
     function testCannotMeetFeeRequirement2() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("INSUFFICIENT_FEE");
         profile.requireEnoughFee("ABC", Constants._INITIAL_FEE_TIER2 - 1);
     }
 
@@ -269,7 +268,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
     }
 
     function testCannotMeetFeeRequirement3() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("INSUFFICIENT_FEE");
         profile.requireEnoughFee("ABCD", Constants._INITIAL_FEE_TIER3 - 1);
     }
 
@@ -278,7 +277,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
     }
 
     function testCannotMeetFeeRequirement4() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("INSUFFICIENT_FEE");
         profile.requireEnoughFee("ABCDE", Constants._INITIAL_FEE_TIER4 - 1);
     }
 
@@ -287,7 +286,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
     }
 
     function testCannotMeetFeeRequirement5() public {
-        vm.expectRevert("Insufficient fee");
+        vm.expectRevert("INSUFFICIENT_FEE");
         profile.requireEnoughFee("ABCDEFG", Constants._INITIAL_FEE_TIER5 - 1);
     }
 
@@ -310,7 +309,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents {
         rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.prank(alice);
 
-        vm.expectRevert("Insufficient balance");
+        vm.expectRevert("INSUFFICIENT_BALANCE");
         profile.withdraw(alice, 1);
     }
 

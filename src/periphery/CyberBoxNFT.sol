@@ -44,7 +44,7 @@ contract CyberBoxNFT is
         string calldata _name_,
         string calldata _symbol_
     ) external initializer {
-        CyberNFTBase._initialize(_name_, _symbol_, _VERSION_STR);
+        CyberNFTBase._initialize(_name_, _symbol_);
         signer = _owner;
         owner = _owner;
         // start with paused
@@ -55,7 +55,7 @@ contract CyberBoxNFT is
      * @notice Generates the metadata json object.
      *
      * @param tokenId The profile NFT token ID.
-     * @return memory The metadata json object.
+     * @return string The metadata json object.
      * @dev It requires the tokenId to be already minted.
      */
     function tokenURI(uint256 tokenId)

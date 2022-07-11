@@ -12,6 +12,7 @@ contract MockProfile is ProfileNFT {
         ProfileNFT(_subBeacon, _essenceBeacon)
     {}
 
+    // for testing
     function verifySignature(
         bytes32 digest,
         DataTypes.EIP712Signature calldata sig
@@ -19,6 +20,7 @@ contract MockProfile is ProfileNFT {
         _requiresExpectedSigner(digest, signer, sig);
     }
 
+    // for testing
     function requireEnoughFee(string calldata handle, uint256 amount)
         public
         view
@@ -26,7 +28,7 @@ contract MockProfile is ProfileNFT {
         _requiresEnoughFee(handle, amount);
     }
 
-    // Expose for test
+    // for testing
     function hashTypedDataV4(bytes32 structHash)
         public
         view
@@ -36,20 +38,20 @@ contract MockProfile is ProfileNFT {
         return super._hashTypedDataV4(structHash);
     }
 
-    // for testing
+    // set internal states for testing
     function setSubscribeNFTAddress(uint256 profileId, address subscribeAddr)
         external
     {
         _subscribeByProfileId[profileId].subscribeNFT = subscribeAddr;
     }
 
-    function getSubscribeNFTTokenURI(uint256 profileId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return LibString.toString(profileId);
+    // set internal states for testing
+    function setEssenceNFTAddress(
+        uint256 profileId,
+        uint256 essenceId,
+        address essenceAddr
+    ) external {
+        _essenceByIdByProfileId[profileId][essenceId].essenceNFT = essenceAddr;
     }
 
     // by pass sig check for testing

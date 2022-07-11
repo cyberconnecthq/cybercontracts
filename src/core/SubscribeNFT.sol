@@ -22,57 +22,28 @@ contract SubscribeNFT is
     IUpgradeable,
     ISubscribeNFT
 {
-    address public immutable PROFILE_NFT; // solhint-disable-line
+    address public immutable PROFILE; // solhint-disable-line
 
-    constructor(address profileNFT) {
-        require(profileNFT != address(0), "Profile NFT address cannot be 0");
-        PROFILE_NFT = profileNFT;
+    constructor(address profile) {
+        require(profile != address(0), "ZERO_ADDRESS");
+        PROFILE = profile;
         _disableInitializers();
     }
 
     /// @inheritdoc ISubscribeNFT
-    function initialize(uint256 profileId) external override initializer {
+    function initialize(
+        uint256 profileId,
+        string calldata name,
+        string calldata symbol
+    ) external override initializer {
         _profileId = profileId;
-        // Don't need to initialize CyberNFTBase with name and symbol since they are dynamic
+        CyberNFTBase._initialize(name, symbol);
     }
 
     /// @inheritdoc ISubscribeNFT
     function mint(address to) external override returns (uint256) {
-        require(msg.sender == address(PROFILE_NFT), "Only profile could mint");
+        require(msg.sender == address(PROFILE), "Only profile could mint");
         return super._mint(to);
-    }
-
-    /**
-     * @notice Gets the subscribe NFT name.
-     *
-     * @return memory The subscribe NFT name.
-     */
-    function name() external view override returns (string memory) {
-        string memory handle = IProfileNFT(PROFILE_NFT).getHandleByProfileId(
-            _profileId
-        );
-        return
-            string(
-                abi.encodePacked(handle, Constants._SUBSCRIBE_NFT_NAME_SUFFIX)
-            );
-    }
-
-    /**
-     * @notice Gets the subscribe NFT symbol.
-     *
-     * @return memory The subscribe NFT symbol.
-     */
-    function symbol() external view override returns (string memory) {
-        string memory handle = IProfileNFT(PROFILE_NFT).getHandleByProfileId(
-            _profileId
-        );
-        return
-            string(
-                abi.encodePacked(
-                    LibString.toUpper(handle),
-                    Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
-                )
-            );
     }
 
     /**
@@ -89,7 +60,7 @@ contract SubscribeNFT is
      * @notice Generates the metadata json object.
      *
      * @param tokenId The NFT token ID.
-     * @return memory The metadata json object.
+     * @return string The metadata json object.
      * @dev It requires the tokenId to be already minted.
      */
     function tokenURI(uint256 tokenId)
@@ -99,7 +70,7 @@ contract SubscribeNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
-        return IProfileNFT(PROFILE_NFT).getSubscribeNFTTokenURI(_profileId);
+        return IProfileNFT(PROFILE).getSubscribeNFTTokenURI(_profileId);
     }
 
     /**

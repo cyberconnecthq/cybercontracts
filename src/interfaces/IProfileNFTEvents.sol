@@ -113,12 +113,14 @@ interface IProfileNFTEvents {
      *
      * @param sender The sender address.
      * @param profileIds The profile ids subscribed to.
-     * @param subDatas The subscription data set.
+     * @param preDatas The subscription data for preprocess.
+     * @param postDatas The subscription data for postprocess.
      */
     event Subscribe(
         address indexed sender,
         uint256[] profileIds,
-        bytes[] subDatas
+        bytes[] preDatas,
+        bytes[] postDatas
     );
 
     /**
@@ -151,13 +153,24 @@ interface IProfileNFTEvents {
      * @notice Emitted when a subscription middleware has been set to a profile.
      *
      * @param profileId The profile id.
-     * @param preMw The previous middleware.
-     * @param newMw The newly set middleware.
+     * @param mw The new middleware.
+     * @param prepareReturnData The data used to prepare middleware.
      */
     event SetSubscribeMw(
         uint256 indexed profileId,
-        address preMw,
-        address newMw
+        address mw,
+        bytes prepareReturnData
+    );
+
+    /**
+     * @notice Emitted when a subscription middleware has been set to a profile.
+     *
+     * @param profileId The profile id.
+     * @param subscribeTokenURI The token URI for subscribe NFT.
+     */
+    event SetSubscribeTokenURI(
+        uint256 indexed profileId,
+        string subscribeTokenURI
     );
 
     /**
@@ -169,5 +182,42 @@ interface IProfileNFTEvents {
     event DeploySubscribeNFT(
         uint256 indexed profileId,
         address indexed subscribeNFT
+    );
+    /**
+     * @notice Emitted when a new essence nft has been deployed.
+     *
+     * @param profileId The profile id.
+     * @param essenceId The essence id.
+     * @param essenceNFT The newly deployed subscribe nft address.
+     */
+    event DeployEssenceNFT(
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        address indexed essenceNFT
+    );
+
+    /**
+     * @notice Emitted when a subscription has been created.
+     *
+     * @param collector The collector address.
+     * @param profileId The profile ids subscribed to.
+     * @param preData The subscription data for preprocess.
+     * @param postData The subscription data for postprocess.
+     */
+    event CollectEssence(
+        address indexed collector,
+        uint256 profileId,
+        bytes preData,
+        bytes postData
+    );
+
+    event RegisterEssence(
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        string name,
+        string symbol,
+        string essenceTokenURI,
+        address essenceMw,
+        bytes prepareReturnData
     );
 }

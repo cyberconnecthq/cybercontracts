@@ -60,9 +60,9 @@ contract SubscribeTest is Test, IProfileNFTEvents {
         vm.expectEmit(true, true, false, true);
         emit DeploySubscribeNFT(ids[0], subscribeProxy);
         vm.expectEmit(true, false, false, true);
-        emit Subscribe(alice, ids, data);
+        emit Subscribe(alice, ids, data, data);
         vm.prank(alice);
-        uint256 nftid = profile.subscribe(ids, data)[0];
+        uint256 nftid = profile.subscribe(ids, data, data)[0];
 
         // check bob sub nft supply
         address bobSubNFT = profile.getSubscribeNFT(bobProfileId);
@@ -73,9 +73,9 @@ contract SubscribeTest is Test, IProfileNFTEvents {
 
         // alice subscribes again to bob
         vm.expectEmit(true, false, false, true);
-        emit Subscribe(alice, ids, data);
+        emit Subscribe(alice, ids, data, data);
         vm.prank(alice);
-        nftid = profile.subscribe(ids, data)[0];
+        nftid = profile.subscribe(ids, data, data)[0];
 
         // check bob sub nft supply
         assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 2);

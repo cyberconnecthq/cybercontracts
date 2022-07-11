@@ -17,6 +17,7 @@ import { ProfileNFTDescriptor } from "../src/periphery/ProfileNFTDescriptor.sol"
 import { MockProfileBypassSig } from "./utils/MockProfileBypassSig.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 import { ProfileRoles } from "../src/core/ProfileRoles.sol";
+import { Base64 } from "../src/dependencies/openzeppelin/Base64.sol";
 
 contract ProfileNFTTest is Test {
     MockProfileBypassSig internal token;
@@ -96,7 +97,7 @@ contract ProfileNFTTest is Test {
     // function testTokenURISubscriber() public {
     // }
 
-    function test() public {
+    function testGetHandleByProfileId() public {
         token.createProfile(createProfileDataAlice);
         assertEq(token.getHandleByProfileId(1), "alice");
     }
@@ -108,12 +109,12 @@ contract ProfileNFTTest is Test {
 
     function testCannotCreateProfileWithHandleTaken() public {
         token.createProfile(createProfileDataAlice);
-        vm.expectRevert("Handle taken");
+        vm.expectRevert("HANDLE_TAKEN");
         token.createProfile(createProfileDataAlice);
     }
 
     function testCannotCreateProfileLongerThanMaxHandleLength() public {
-        vm.expectRevert("Handle has invalid length");
+        vm.expectRevert("HANDLE_INVALID_LENGTH");
         token.createProfile(
             DataTypes.CreateProfileParams(
                 alice,
@@ -125,7 +126,7 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileWithAnInvalidCharacter() public {
-        vm.expectRevert("Handle has invalid character");
+        vm.expectRevert("HANDLE_INVALID_CHARACTER");
         token.createProfile(
             DataTypes.CreateProfileParams(
                 alice,
@@ -137,21 +138,21 @@ contract ProfileNFTTest is Test {
     }
 
     function testCannotCreateProfileWith0LenthHandle() public {
-        vm.expectRevert("Handle has invalid length");
+        vm.expectRevert("HANDLE_INVALID_LENGTH");
         token.createProfile(
             DataTypes.CreateProfileParams(alice, "", imageUri, "metadata")
         );
     }
 
     function testCannotCreateProfileWithACapitalLetter() public {
-        vm.expectRevert("Handle has invalid character");
+        vm.expectRevert("HANDLE_INVALID_CHARACTER");
         token.createProfile(
             DataTypes.CreateProfileParams(alice, "Test", imageUri, "metadata")
         );
     }
 
     function testCannotCreateProfileWithBlankSpace() public {
-        vm.expectRevert("Handle has invalid character");
+        vm.expectRevert("HANDLE_INVALID_CHARACTER");
         token.createProfile(
             DataTypes.CreateProfileParams(alice, " ", imageUri, "metadata")
         );
@@ -171,7 +172,7 @@ contract ProfileNFTTest is Test {
     function testCannotSetOperatorToZeroAddress() public {
         uint256 id = token.createProfile(createProfileDataAlice);
         vm.prank(alice);
-        vm.expectRevert("Operator address cannot be 0");
+        vm.expectRevert("ZERO_ADDRESS");
         token.setOperatorApproval(id, address(0), true);
     }
 
@@ -181,7 +182,7 @@ contract ProfileNFTTest is Test {
         bytes memory longMetadata = new bytes(Constants._MAX_URI_LENGTH + 1);
         vm.prank(alice);
 
-        vm.expectRevert("Metadata has invalid length");
+        vm.expectRevert("METADATA_INVALID_LENGTH");
         token.setMetadata(id, string(longMetadata));
     }
 
@@ -215,7 +216,7 @@ contract ProfileNFTTest is Test {
 
         bytes memory longAvatar = new bytes(Constants._MAX_URI_LENGTH + 1);
 
-        vm.expectRevert("Avatar has invalid length");
+        vm.expectRevert("AVATAR_INVALID_LENGTH");
         vm.prank(alice);
         token.setAvatar(id, string(longAvatar));
     }

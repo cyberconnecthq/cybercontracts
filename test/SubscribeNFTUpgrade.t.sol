@@ -27,7 +27,9 @@ contract SubscribeNFTUpgradeTest is Test {
         beacon = new UpgradeableBeacon(address(impl), address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
-            profileId
+            profileId,
+            "name",
+            "SYMBOL"
         );
         proxy = new BeaconProxy(address(beacon), functionData);
         proxyB = new BeaconProxy(address(beacon), functionData);
