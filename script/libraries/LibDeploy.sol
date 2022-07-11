@@ -1,22 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 pragma solidity 0.8.14;
-import "forge-std/console.sol";
-import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
-import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
-import { Roles } from "../../src/core/Roles.sol";
-import { CyberEngine } from "../../src/core/CyberEngine.sol";
-import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
-import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
-import { Authority } from "../../src/dependencies/solmate/Auth.sol";
-import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
-import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { Constants } from "../../src/libraries/Constants.sol";
-import { DataTypes } from "../../src/libraries/DataTypes.sol";
-import { ProfileNFTDescriptor } from "../../src/periphery/ProfileNFTDescriptor.sol";
-import { TestLib712 } from "../../test/utils/TestLib712.sol";
 
 import "forge-std/Vm.sol";
+import "forge-std/console.sol";
+import { Authority } from "../../src/dependencies/solmate/Auth.sol";
+import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
+import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
+import { Roles } from "../../src/core/Roles.sol";
+import { CyberEngine } from "../../src/core/CyberEngine.sol";
+import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
+import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
+import { ProfileNFTDescriptor } from "../../src/periphery/ProfileNFTDescriptor.sol";
+import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
+
+import { Constants } from "../../src/libraries/Constants.sol";
+import { DataTypes } from "../../src/libraries/DataTypes.sol";
+
+import { TestLib712 } from "../../test/utils/TestLib712.sol";
 
 // TODO: deploy with salt
 library LibDeploy {
