@@ -6,43 +6,43 @@ import { ITreasury } from "../../interfaces/ITreasury.sol";
 import { Constants } from "../../libraries/Constants.sol";
 
 contract Treasury is ITreasury {
-    address public gov;
-    address public treasuryAddress;
-    uint16 public treasuryFee;
+    address internal _gov;
+    address internal _treasuryAddress;
+    uint16 internal _treasuryFee;
 
     modifier onlyGov() {
-        require(gov == msg.sender, "NON_GOV_ADDRESS");
+        require(_gov == msg.sender, "NON_GOV_ADDRESS");
         _;
     }
 
     constructor(
-        address _gov,
-        address _treasuryAddress,
-        uint16 _treasuryFee
+        address gov,
+        address treasuryAddress,
+        uint16 treasuryFee
     ) {
-        setGovernance(_gov);
-        setTreasuryAddress(_treasuryAddress);
-        setTreasuryFee(_treasuryFee);
+        _gov = gov;
+        _treasuryAddress = treasuryAddress;
+        _treasuryFee = treasuryFee;
     }
 
-    function setGovernance(address _gov) public onlyGov {
-        gov = _gov;
+    function setGovernance(address gov) external onlyGov {
+        _gov = gov;
     }
 
-    function setTreasuryAddress(address _treasuryAddress) public onlyGov {
-        treasuryAddress = _treasuryAddress;
+    function setTreasuryAddress(address treasuryAddress) external onlyGov {
+        _treasuryAddress = treasuryAddress;
     }
 
-    function setTreasuryFee(uint16 _treasuryFee) public onlyGov {
+    function setTreasuryFee(uint16 treasuryFee) external onlyGov {
         require(_treasuryFee <= Constants._MAX_BPS, "INVALID_TREASURY_FEE");
-        treasuryFee = _treasuryFee;
+        _treasuryFee = treasuryFee;
     }
 
     function getTreasuryAddress() external view override returns (address) {
-        return treasuryAddress;
+        return _treasuryAddress;
     }
 
     function getTreasuryFee() external view override returns (uint16) {
-        return treasuryFee;
+        return _treasuryFee;
     }
 }
