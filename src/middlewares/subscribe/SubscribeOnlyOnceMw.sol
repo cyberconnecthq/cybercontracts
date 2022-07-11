@@ -2,8 +2,9 @@
 
 pragma solidity 0.8.14;
 
-import { ISubscribeMiddleware } from "../../interfaces/ISubscribeMiddleware.sol";
 import { ERC721 } from "../../dependencies/solmate/ERC721.sol";
+
+import { ISubscribeMiddleware } from "../../interfaces/ISubscribeMiddleware.sol";
 
 /**
  * @title Subscribe Only Once Middleware
