@@ -820,14 +820,17 @@ contract ProfileNFT is
         address essenceMw,
         bytes calldata prepareData
     ) internal returns (uint256) {
-        require(_essenceMwAllowlist[essenceMw], "ESSENCE_MW_NOT_ALLOWED");
+        require(
+            essenceMw == address(0) || _essenceMwAllowlist[essenceMw],
+            "ESSENCE_MW_NOT_ALLOWED"
+        );
         uint256 id = ++_profileById[profileId].essenceCount;
-        _essenceByIdByProfileId[profileId][id].essenceMw = essenceMw;
         _essenceByIdByProfileId[profileId][id].name = name;
         _essenceByIdByProfileId[profileId][id].symbol = symbol;
         _essenceByIdByProfileId[profileId][id].tokenURI = essenceTokenURI;
         bytes memory returnData;
         if (essenceMw != address(0)) {
+            _essenceByIdByProfileId[profileId][id].essenceMw = essenceMw;
             returnData = IEssenceMiddleware(essenceMw).prepare(
                 profileId,
                 id,
@@ -843,6 +846,7 @@ contract ProfileNFT is
             essenceMw,
             returnData
         );
+        return id;
     }
 
     /**
@@ -861,7 +865,10 @@ contract ProfileNFT is
         address mw,
         bytes calldata prepareData
     ) external onlyProfileOwner(profileId) {
-        require(_subscribeMwAllowlist[mw], "SUB_MW_NOT_ALLOWED");
+        require(
+            mw == address(0) || _subscribeMwAllowlist[mw],
+            "SUB_MW_NOT_ALLOWED"
+        );
         _subscribeByProfileId[profileId].subscribeMw = mw;
         bytes memory returnData;
         if (mw != address(0)) {

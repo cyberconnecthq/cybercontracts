@@ -8,7 +8,9 @@ import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { ISubscribeNFT } from "../src/interfaces/ISubscribeNFT.sol";
+import { IEssenceNFT } from "../src/interfaces/IEssenceNFT.sol";
 import { ISubscribeMiddleware } from "../src/interfaces/ISubscribeMiddleware.sol";
+import { IEssenceMiddleware } from "../src/interfaces/IEssenceMiddleware.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
@@ -22,6 +24,12 @@ import { Roles } from "../src/core/Roles.sol";
 
 // For tests that requires a profile to start with.
 contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
+    event Transfer(
+        address indexed from,
+        address indexed to,
+        uint256 indexed id
+    );
+
     MockProfile internal profile;
     RolesAuthority internal authority;
     address internal subscribeBeacon;
@@ -30,10 +38,12 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
     address internal bob = vm.addr(bobPk);
     uint256 internal profileId;
     address internal alice = address(0xA11CE);
-    address mw = address(0xCA11);
+    address subscribeMw = address(0xCA11);
+    address essenceMw = address(0xCA112);
 
     function setUp() public {
-        vm.etch(mw, address(this).code);
+        vm.etch(subscribeMw, address(this).code);
+        vm.etch(essenceMw, address(this).code);
         address fakeImpl = address(new SubscribeNFT(address(0xdead)));
         subscribeBeacon = address(
             new UpgradeableBeacon(fakeImpl, address(profile))
@@ -107,11 +117,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         assertEq(profileId, 1);
 
         assertEq(profile.nonces(bob), 1);
-
-        vm.prank(gov);
-        profile.allowSubscribeMw(mw, true);
-
-        assertEq(profile.isSubscribeMwAllowed(mw), true);
     }
 
     function testCannotSubscribeEmptyList() public {
@@ -393,9 +398,21 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         profile.setAvatar(profileId, avatar);
     }
 
+    function testCannotAllowSubscribeMwIfNotGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        profile.allowSubscribeMw(subscribeMw, false);
+    }
+
+    function testAllowSubscribeMw() public {
+        vm.prank(gov);
+        profile.allowSubscribeMw(subscribeMw, true);
+
+        assertEq(profile.isSubscribeMwAllowed(subscribeMw), true);
+    }
+
     function testCannotSetSubscribeMwIfNotOwner() public {
         vm.expectRevert("ONLY_PROFILE_OWNER");
-        profile.setSubscribeMw(profileId, mw, new bytes(0));
+        profile.setSubscribeMw(profileId, subscribeMw, new bytes(0));
     }
 
     function testCannotSetSubscribeMwIfNotAllowed() public {
@@ -407,10 +424,16 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
     }
 
     function testSetSubscribeMw() public {
+        // allow subscribeMw
+        vm.prank(gov);
+        profile.allowSubscribeMw(subscribeMw, true);
+
+        assertEq(profile.isSubscribeMwAllowed(subscribeMw), true);
+
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(111);
         vm.mockCall(
-            mw,
+            subscribeMw,
             abi.encodeWithSelector(
                 ISubscribeMiddleware.prepare.selector,
                 profileId,
@@ -419,11 +442,23 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
             abi.encode(returnData)
         );
         vm.expectEmit(true, false, false, true);
-        emit SetSubscribeMw(profileId, mw, returnData);
+        emit SetSubscribeMw(profileId, subscribeMw, returnData);
         vm.prank(bob);
-        profile.setSubscribeMw(profileId, mw, data);
+        profile.setSubscribeMw(profileId, subscribeMw, data);
 
-        assertEq(profile.getSubscribeMw(profileId), mw);
+        assertEq(profile.getSubscribeMw(profileId), subscribeMw);
+    }
+
+    function testSetSubscribeMwZeroAddress() public {
+        address zeroAddress = address(0);
+
+        bytes memory data = new bytes(0);
+        vm.expectEmit(true, false, false, true);
+        emit SetSubscribeMw(profileId, zeroAddress, new bytes(0));
+        vm.prank(bob);
+        profile.setSubscribeMw(profileId, zeroAddress, data);
+
+        assertEq(profile.getSubscribeMw(profileId), zeroAddress);
     }
 
     function testSetPrimary() public {
@@ -438,4 +473,146 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         vm.expectRevert("ONLY_PROFILE_OWNER");
         profile.setPrimaryProfile(profileId);
     }
+
+    function testCannotAllowEssenceMwAsNonGov() public {
+        vm.expectRevert("UNAUTHORIZED");
+        profile.allowEssenceMw(essenceMw, false);
+    }
+
+    function testAllowEssenceMw() public {
+        vm.prank(gov);
+        profile.allowEssenceMw(essenceMw, true);
+
+        assertEq(profile.isEssenceMwAllowed(essenceMw), true);
+    }
+
+    function testCannotRegisterEssenceIfProfileNotMinted() public {
+        vm.expectRevert("NOT_MINTED");
+        uint256 nonExistentProfileId = 8888;
+        profile.registerEssence(
+            nonExistentProfileId,
+            "name",
+            "symbol",
+            "uri",
+            essenceMw,
+            new bytes(0)
+        );
+    }
+
+    function testCannotRegisterEssenceIfNotOwnerOrOperator() public {
+        address charlie = address(0xDEEAAAD);
+        vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
+        vm.prank(charlie);
+        profile.registerEssence(
+            profileId,
+            "name",
+            "symbol",
+            "uri",
+            essenceMw,
+            new bytes(0)
+        );
+    }
+
+    function testCannotRegisterEssenceWithEssenceMwNotAllowed() public {
+        vm.expectRevert("ESSENCE_MW_NOT_ALLOWED");
+        address notMw = address(0xDEEAAAD);
+        vm.prank(bob);
+        profile.registerEssence(
+            profileId,
+            "name",
+            "symbol",
+            "uri",
+            notMw,
+            new bytes(0)
+        );
+    }
+
+    function testRegisterEssenceAsProfileOwner() public {
+        vm.prank(gov);
+        profile.allowEssenceMw(essenceMw, true);
+
+        assertEq(profile.isEssenceMwAllowed(essenceMw), true);
+
+        vm.prank(bob);
+        uint256 expectedEssenceId = 1;
+        bytes memory returnData = new bytes(111);
+        vm.mockCall(
+            essenceMw,
+            abi.encodeWithSelector(
+                IEssenceMiddleware.prepare.selector,
+                profileId,
+                expectedEssenceId,
+                new bytes(0)
+            ),
+            abi.encode(returnData)
+        );
+        vm.expectEmit(true, true, false, false);
+        string memory name = "name";
+        string memory symbol = "symbol";
+        string memory uri = "uri";
+
+        emit RegisterEssence(
+            profileId,
+            expectedEssenceId,
+            name,
+            symbol,
+            uri,
+            essenceMw,
+            returnData
+        );
+        uint256 essenceId = profile.registerEssence(
+            profileId,
+            name,
+            symbol,
+            uri,
+            essenceMw,
+            new bytes(0)
+        );
+        assertEq(essenceId, expectedEssenceId);
+    }
+
+    function testCannotCollectEssenceIfNotRegistered() public {
+        vm.expectRevert("ESSENCE_NOT_REGISTERED");
+        profile.collect(profileId, 1, new bytes(0), new bytes(0));
+    }
+
+    function testCollectEssence() public {
+        vm.prank(gov);
+        profile.allowEssenceMw(essenceMw, true);
+
+        vm.prank(bob);
+        uint256 expectedEssenceId = 1;
+
+        // register without middleware
+        uint256 essenceId = profile.registerEssence(
+            profileId,
+            "name",
+            "symbol",
+            "uri",
+            address(0),
+            new bytes(0)
+        );
+        assertEq(essenceId, expectedEssenceId);
+
+        // privilege access
+        address essenceProxy = address(0x01111);
+        profile.setEssenceNFTAddress(profileId, essenceId, essenceProxy);
+
+        uint256 tokenId = 1890;
+
+        address minter = address(0x1890);
+        vm.mockCall(
+            essenceProxy,
+            abi.encodeWithSelector(IEssenceNFT.mint.selector, minter),
+            abi.encode(tokenId)
+        );
+
+        vm.expectEmit(true, false, false, true);
+        emit CollectEssence(minter, profileId, new bytes(0), new bytes(0));
+
+        vm.prank(minter);
+        profile.collect(profileId, essenceId, new bytes(0), new bytes(0));
+    }
+
+    function testCollectEssenceDeployEssenceNFT() public {}
 }
