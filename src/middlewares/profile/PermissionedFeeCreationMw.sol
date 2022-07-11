@@ -88,6 +88,8 @@ contract PermissionedFeeCreationMw is
 
         mwDataByNamespace[namespace].signer = signer;
         mwDataByNamespace[namespace].recipient = recipient;
+
+        return data;
     }
 
     function _setFeeByTier(
