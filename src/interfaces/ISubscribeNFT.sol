@@ -16,5 +16,9 @@ interface ISubscribeNFT {
      *
      * @param profileId The profile ID to set for the Subscribe NFT.
      */
-    function initialize(uint256 profileId) external;
+    function initialize(
+        uint256 profileId,
+        string calldata name,
+        string calldata symbol
+    ) external;
 }

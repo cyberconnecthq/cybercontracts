@@ -31,48 +31,19 @@ contract SubscribeNFT is
     }
 
     /// @inheritdoc ISubscribeNFT
-    function initialize(uint256 profileId) external override initializer {
+    function initialize(
+        uint256 profileId,
+        string calldata name,
+        string calldata symbol
+    ) external override initializer {
         _profileId = profileId;
-        // Don't need to initialize CyberNFTBase with name and symbol since they are dynamic
+        CyberNFTBase._initialize(name, symbol);
     }
 
     /// @inheritdoc ISubscribeNFT
     function mint(address to) external override returns (uint256) {
         require(msg.sender == address(PROFILE_NFT), "Only profile could mint");
         return super._mint(to);
-    }
-
-    /**
-     * @notice Gets the subscribe NFT name.
-     *
-     * @return memory The subscribe NFT name.
-     */
-    function name() external view override returns (string memory) {
-        string memory handle = IProfileNFT(PROFILE_NFT).getHandleByProfileId(
-            _profileId
-        );
-        return
-            string(
-                abi.encodePacked(handle, Constants._SUBSCRIBE_NFT_NAME_SUFFIX)
-            );
-    }
-
-    /**
-     * @notice Gets the subscribe NFT symbol.
-     *
-     * @return memory The subscribe NFT symbol.
-     */
-    function symbol() external view override returns (string memory) {
-        string memory handle = IProfileNFT(PROFILE_NFT).getHandleByProfileId(
-            _profileId
-        );
-        return
-            string(
-                abi.encodePacked(
-                    LibString.toUpper(handle),
-                    Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
-                )
-            );
     }
 
     /**

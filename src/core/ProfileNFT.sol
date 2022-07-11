@@ -8,18 +8,15 @@ import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { LibString } from "../libraries/LibString.sol";
-import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
-import { CyberEngine } from "./CyberEngine.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 import { Auth } from "../dependencies/solmate/Auth.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
-import "forge-std/console.sol";
 
 /**
  * @title Profile NFT
@@ -59,11 +56,8 @@ contract ProfileNFT is
         address profileNFTDescriptor,
         RolesAuthority _rolesAuthority
     ) external initializer {
-        require(
-            profileNFTDescriptor != address(0),
-            "Descriptor address cannot be 0"
-        );
-        CyberNFTBase._initialize(name, symbol, _VERSION_STR);
+        require(profileNFTDescriptor != address(0), "ZERO_ADDRESS");
+        CyberNFTBase._initialize(name, symbol);
         Auth.__Auth_Init(_owner, _rolesAuthority);
 
         _profileNFTDescriptor = profileNFTDescriptor;
@@ -117,7 +111,7 @@ contract ProfileNFT is
         _requiresValidHandle(params.handle);
 
         bytes32 handleHash = keccak256(bytes(params.handle));
-        require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
+        require(!_exists(_profileIdByHandleHash[handleHash]), "HANDLE_TAKEN");
 
         uint256 id = _mint(params.to);
 
@@ -178,6 +172,7 @@ contract ProfileNFT is
         if (subscribeNFT == address(0)) {
             subscribers = 0;
         } else {
+            // TODO: maybe replace with interface to save gas
             subscribers = CyberNFTBase(subscribeNFT).totalSupply();
         }
 
@@ -205,7 +200,7 @@ contract ProfileNFT is
         require(
             byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
                 byteHandle.length > 0,
-            "Handle has invalid length"
+            "HANDLE_INVALID_LENGTH"
         );
 
         uint256 byteHandleLength = byteHandle.length;
@@ -213,7 +208,7 @@ contract ProfileNFT is
             bytes1 b = byteHandle[i];
             require(
                 (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
-                "Handle has invalid character"
+                "HANDLE_INVALID_CHARACTER"
             );
             // optimation
             unchecked {
@@ -247,7 +242,7 @@ contract ProfileNFT is
         address operator,
         bool approved
     ) internal {
-        require(operator != address(0), "Operator address cannot be 0");
+        require(operator != address(0), "ZERO_ADDRESS");
         bool prev = _operatorApproval[profileId][operator];
         _operatorApproval[profileId][operator] = approved;
         emit SetOperatorApproval(profileId, operator, prev, approved);
@@ -301,7 +296,7 @@ contract ProfileNFT is
     {
         require(
             bytes(metadata).length <= Constants._MAX_URI_LENGTH,
-            "Metadata has invalid length"
+            "METADATA_INVALID_LENGTH"
         );
         _metadataById[profileId] = metadata;
         emit SetMetadata(profileId, metadata);
@@ -384,8 +379,6 @@ contract ProfileNFT is
         external
         requiresAuth
     {
-        console.log(_profileNFTDescriptor);
-        console.log(template);
         IProfileNFTDescriptor(_profileNFTDescriptor).setAnimationTemplate(
             template
         );
@@ -401,7 +394,7 @@ contract ProfileNFT is
     {
         require(
             bytes(avatar).length <= Constants._MAX_URI_LENGTH,
-            "Avatar has invalid length"
+            "AVATAR_INVALID_LENGTH"
         );
         _profileById[profileId].avatar = avatar;
         emit SetAvatar(profileId, avatar);
@@ -451,7 +444,7 @@ contract ProfileNFT is
 
     /// @inheritdoc IProfileNFT
     function setPrimaryProfile(uint256 profileId)
-        public
+        external
         override
         onlyProfileOwner(profileId)
     {
@@ -507,14 +500,18 @@ contract ProfileNFT is
         bytes memory byteHandle = bytes(handle);
         uint256 fee = feeMapping[DataTypes.Tier.Tier5];
 
-        require(byteHandle.length >= 1, "Invalid handle length");
+        require(byteHandle.length >= 1, "ZERO_LENGTH");
         if (byteHandle.length < 6) {
             fee = feeMapping[DataTypes.Tier(byteHandle.length - 1)];
         }
-        require(amount >= fee, "Insufficient fee");
+        require(amount >= fee, "INSUFFICIENT_FEE");
     }
 
-    function getSubscribeNFT(uint256 profileId) public view returns (address) {
+    function getSubscribeNFT(uint256 profileId)
+        external
+        view
+        returns (address)
+    {
         return _subscribeByProfileId[profileId].subscribeNFT;
     }
 
@@ -541,13 +538,11 @@ contract ProfileNFT is
         uint256[] calldata profileIds,
         bytes[] calldata subDatas
     ) internal returns (uint256[] memory) {
-        require(profileIds.length > 0, "No profile ids provided");
-        require(
-            profileIds.length == subDatas.length,
-            "Length missmatch ids & sub datas"
-        );
+        require(profileIds.length > 0, "NO_PROFILE_IDS");
+        require(profileIds.length == subDatas.length, "LENGTH_MISMATCH");
         uint256[] memory result = new uint256[](profileIds.length);
         for (uint256 i = 0; i < profileIds.length; i++) {
+            _requireMinted(profileIds[i]);
             address subscribeNFT = _subscribeByProfileId[profileIds[i]]
                 .subscribeNFT;
             address subscribeMw = _subscribeByProfileId[profileIds[i]]
@@ -557,7 +552,21 @@ contract ProfileNFT is
             if (subscribeNFT == address(0)) {
                 bytes memory initData = abi.encodeWithSelector(
                     ISubscribeNFT.initialize.selector,
-                    profileIds[i]
+                    profileIds[i],
+                    string(
+                        abi.encodePacked(
+                            _profileById[profileIds[i]].handle,
+                            Constants._SUBSCRIBE_NFT_NAME_SUFFIX
+                        )
+                    ),
+                    string(
+                        abi.encodePacked(
+                            LibString.toUpper(
+                                _profileById[profileIds[i]].handle
+                            ),
+                            Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
+                        )
+                    )
                 );
                 subscribeNFT = address(
                     new BeaconProxy(subscribeNFTBeacon, initData)
@@ -720,9 +729,9 @@ contract ProfileNFT is
      * @param amount The amount sent.
      */
     function withdraw(address to, uint256 amount) external requiresAuth {
-        require(to != address(0), "withdraw to the zero address");
+        require(to != address(0), "ZERO_ADDRESS");
         uint256 balance = address(this).balance;
-        require(balance >= amount, "Insufficient balance");
+        require(balance >= amount, "INSUFFICIENT_BALANCE");
         emit Withdraw(to, amount);
         payable(to).transfer(amount);
     }
@@ -772,7 +781,7 @@ contract ProfileNFT is
      * @dev The address can not be zero address.
      */
     function setSigner(address _signer) external requiresAuth {
-        require(_signer != address(0), "zero address signer");
+        require(_signer != address(0), "ZERO_ADDRESS");
         address preSigner = signer;
         signer = _signer;
 

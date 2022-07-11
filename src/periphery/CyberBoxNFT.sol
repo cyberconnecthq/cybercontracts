@@ -44,7 +44,7 @@ contract CyberBoxNFT is
         string calldata _name_,
         string calldata _symbol_
     ) external initializer {
-        CyberNFTBase._initialize(_name_, _symbol_, _VERSION_STR);
+        CyberNFTBase._initialize(_name_, _symbol_);
         signer = _owner;
         owner = _owner;
         // start with paused

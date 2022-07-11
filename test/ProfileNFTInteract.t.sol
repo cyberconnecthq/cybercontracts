@@ -113,10 +113,18 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
     }
 
     function testCannotSubscribeEmptyList() public {
-        vm.expectRevert("No profile ids provided");
+        vm.expectRevert("NO_PROFILE_IDS");
         uint256[] memory empty;
         bytes[] memory data;
         profile.subscribe(empty, data);
+    }
+
+    function testCannotSubscribeNonExistsingProfile() public {
+        vm.expectRevert("NOT_MINTED");
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 2;
+        bytes[] memory data = new bytes[](1);
+        profile.subscribe(ids, data);
     }
 
     function testSubscribe() public {
