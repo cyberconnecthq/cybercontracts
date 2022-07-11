@@ -3,11 +3,27 @@
 pragma solidity 0.8.14;
 
 library DataTypes {
+    struct EIP712Signature {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+        uint256 deadline;
+    }
+
     struct CreateProfileParams {
         address to;
         string handle;
         string avatar;
         string metadata;
+        EIP712Signature sig;
+    }
+
+    struct CreateNamespaceParams {
+        string name;
+        string symbol;
+        address mw;
+        address owner;
+        address descriptor;
     }
 
     struct ProfileStruct {
@@ -28,15 +44,9 @@ library DataTypes {
     }
 
     struct NamespaceStruct {
+        address owner;
         address profileMw;
         string name;
-    }
-
-    struct EIP712Signature {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-        uint256 deadline;
     }
 
     struct ConstructTokenURIParams {

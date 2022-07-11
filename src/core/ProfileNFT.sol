@@ -82,18 +82,19 @@ contract ProfileNFT is
 
     // TODO move sig into params as optional input since other mw may not need it
     /// @inheritdoc IProfileNFT
-    function createProfile(
-        DataTypes.CreateProfileParams calldata params,
-        DataTypes.EIP712Signature calldata sig
-    ) external payable override returns (uint256) {
+    function createProfile(DataTypes.CreateProfileParams calldata params)
+        external
+        payable
+        override
+        returns (uint256)
+    {
         string memory namespace = ICyberEngine(ENGINE)
             .getNamespaceByProfileAddr(address(this));
 
         if (namespace.profileMw != address(0)) {
             IProfileMiddleware(namespace.profileMw).preProcess(
                 msg.value,
-                params,
-                sig
+                params
             );
         }
 
@@ -108,8 +109,7 @@ contract ProfileNFT is
         if (namespace.profileMw != address(0)) {
             IProfileMiddleware(namespace.profileMw).postProcess(
                 msg.value,
-                params,
-                sig
+                params
             );
         }
         return id;
@@ -697,19 +697,5 @@ contract ProfileNFT is
      */
     function isEssenceMwAllowed(address mw) external view returns (bool) {
         return _essenceMwAllowlist[mw];
-    }
-
-    /**
-     * @notice Withdraw to an address.
-     *
-     * @param to The receiver address.
-     * @param amount The amount sent.
-     */
-    function withdraw(address to, uint256 amount) external requiresAuth {
-        require(to != address(0), "withdraw to the zero address");
-        uint256 balance = address(this).balance;
-        require(balance >= amount, "Insufficient balance");
-        emit Withdraw(to, amount);
-        payable(to).transfer(amount);
     }
 }

@@ -83,17 +83,15 @@ contract CyberEngine is
         emit AllowProfileMw(mw, preAllowed, allowed);
     }
 
-    function createNamespace(
-        string name,
-        string symbol,
-        address mw,
-        address descriptor
-    ) external requiresAuth {
-        bytes memory byteName = bytes(name);
-        bytes memory byteSymbol = bytes(symbol);
+    function createNamespace(DataTypes.CreateNamespaceParams calldata params)
+        external
+        requiresAuth
+    {
+        bytes memory byteName = bytes(params.name);
+        bytes memory byteSymbol = bytes(params.symbol);
 
         require(
-            _profileMwAllowlist[mw] || mw == address(0),
+            _profileMwAllowlist[params.mw] || params.mw == address(0),
             "PROFILE_MW_NOT_ALLOWED"
         );
         require(
@@ -107,7 +105,7 @@ contract CyberEngine is
 
         // TODO delete and re-think about our proxy addreess calulation logic
         address profileProxy = address(this);
-        address authority = new ProfileRoles(address(this), profileProxy);
+        address authority = new ProfileRoles(params.owner, profileProxy);
         address subscribeImpl = new SubscribeNFT(profileProxy);
         address subscribeBeacon = new UpgradeableBeacon(
             subscribeImpl,
@@ -126,15 +124,16 @@ contract CyberEngine is
             abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
                 address(0),
-                name,
-                symbol,
-                descriptor,
+                params.name,
+                params.symbol,
+                params.descriptor,
                 authority
             )
         );
 
-        _namespaceByProfileAddr[profileProxy].name = name;
-        _namespaceByProfileAddr[profileProxy].profileMw = mw;
+        _namespaceByProfileAddr[profileProxy].name = params.name;
+        _namespaceByProfileAddr[profileProxy].profileMw = params.mw;
+        _namespaceByProfileAddr[profileProxy].owner = params.owner;
 
         // TODO emit event
     }

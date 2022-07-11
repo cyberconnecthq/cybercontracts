@@ -7,13 +7,11 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 interface IProfileMiddleware {
     function preProcess(
         uint256 fee,
-        DataTypes.CreateProfileParams calldata params,
-        DataTypes.EIP712Signature calldata sig
+        DataTypes.CreateProfileParams calldata params
     ) external;
 
     function postProcess(
         uint256 fee,
-        DataTypes.CreateProfileParams calldata params,
-        DataTypes.EIP712Signature calldata sig
+        DataTypes.CreateProfileParams calldata params
     ) external;
 }
