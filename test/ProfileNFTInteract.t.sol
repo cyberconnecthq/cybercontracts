@@ -22,6 +22,7 @@ import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 import { Roles } from "../src/core/Roles.sol";
+import { TestLib712 } from "./utils/TestLib712.sol";
 
 // For tests that requires a profile to start with.
 contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
@@ -263,7 +264,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         vm.warp(50);
         uint256 deadline = 100;
 
-        bytes32 digest = profile.hashTypedDataV4(
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(profile),
             keccak256(
                 abi.encode(
                     Constants._SUBSCRIBE_TYPEHASH,
@@ -273,7 +275,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
                     0,
                     deadline
                 )
-            )
+            ),
+            profile.name(),
+            "1"
         );
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
@@ -651,5 +655,74 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
 
         vm.prank(minter);
         profile.collect(profileId, essenceId, new bytes(0), new bytes(0));
+    }
+
+    function testCollectEssenceWithSig() public {
+        vm.prank(bob);
+        uint256 expectedEssenceId = 1;
+
+        // register without middleware
+        uint256 essenceId = profile.registerEssence(
+            profileId,
+            "name",
+            "symbol",
+            "uri",
+            address(0),
+            new bytes(0)
+        );
+        assertEq(essenceId, expectedEssenceId);
+
+        uint256 tokenId = 1890;
+
+        address minter = bob;
+        uint256 nonce = vm.getNonce(address(profile));
+        address essenceProxy = LibDeploy._calcContractAddress(
+            address(profile),
+            nonce
+        );
+        vm.mockCall(
+            essenceProxy,
+            abi.encodeWithSelector(IEssenceNFT.mint.selector, minter),
+            abi.encode(tokenId)
+        );
+
+        vm.expectEmit(true, true, false, true);
+        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
+
+        bytes memory preData = new bytes(0);
+        bytes memory postData = new bytes(0);
+
+        vm.expectEmit(true, false, false, true);
+        emit CollectEssence(minter, profileId, preData, postData);
+
+        // sign
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(profile),
+            keccak256(
+                abi.encode(
+                    Constants._COLLECT_TYPEHASH,
+                    profileId,
+                    essenceId,
+                    keccak256(preData),
+                    keccak256(postData),
+                    1,
+                    deadline
+                )
+            ),
+            profile.name(),
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+
+        profile.collectWithSig(
+            profileId,
+            essenceId,
+            preData,
+            postData,
+            bob,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
     }
 }
