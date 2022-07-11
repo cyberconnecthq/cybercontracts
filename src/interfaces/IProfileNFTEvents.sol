@@ -166,13 +166,24 @@ interface IProfileNFTEvents {
      * @notice Emitted when a subscription middleware has been set to a profile.
      *
      * @param profileId The profile id.
-     * @param preMw The previous middleware.
-     * @param newMw The newly set middleware.
+     * @param mw The new middleware.
+     * @param prepareReturnData The data used to prepare middleware.
      */
     event SetSubscribeMw(
         uint256 indexed profileId,
-        address preMw,
-        address newMw
+        address mw,
+        bytes prepareReturnData
+    );
+
+    /**
+     * @notice Emitted when a subscription middleware has been set to a profile.
+     *
+     * @param profileId The profile id.
+     * @param subscribeTokenURI The token URI for subscribe NFT.
+     */
+    event SetSubscribeTokenURI(
+        uint256 indexed profileId,
+        string subscribeTokenURI
     );
 
     /**
@@ -211,5 +222,15 @@ interface IProfileNFTEvents {
         uint256 profileId,
         bytes preData,
         bytes postData
+    );
+
+    event RegisterEssence(
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        string name,
+        string symbol,
+        string essenceTokenURI,
+        address essenceMw,
+        bytes prepareReturnData
     );
 }

@@ -13,6 +13,7 @@ library DataTypes {
     struct ProfileStruct {
         string handle;
         string avatar;
+        uint256 essenceCount;
     }
 
     struct SubscribeStruct {

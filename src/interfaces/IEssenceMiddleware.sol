@@ -36,4 +36,10 @@ interface IEssenceMiddleware {
         address essenceNFT,
         bytes calldata data
     ) external;
+
+    function prepare(
+        uint256 profileId,
+        uint256 essenceId,
+        bytes calldata prepareData
+    ) external returns (bytes memory);
 }
