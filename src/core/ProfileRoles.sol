@@ -28,25 +28,6 @@ contract ProfileRoles is RolesAuthority {
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
             profile,
-            ProfileNFT.setSigner.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._PROFILE_GOV_ROLE,
-            profile,
-            ProfileNFT.setFeeByTier.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._PROFILE_GOV_ROLE,
-            profile,
-            ProfileNFT.withdraw.selector,
-            true
-        );
-
-        setRoleCapability(
-            Constants._PROFILE_GOV_ROLE,
-            profile,
             ProfileNFT.allowSubscribeMw.selector,
             true
         );

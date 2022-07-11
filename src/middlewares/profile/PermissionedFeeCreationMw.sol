@@ -7,7 +7,7 @@ import { PermissionedMw } from "../base/PermissionedMw.sol";
 import { FeeMw } from "../base/FeeMw.sol";
 import { Constants } from "../../libraries/Constants.sol";
 import { DataTypes } from "../../libraries/DataTypes.sol";
-import { EIP712 } from "../../dependencies/openzeppelin/EIP712.sol";
+import { EIP712 } from "../../base/EIP712.sol";
 
 contract PermissionedFeeCreationMw is
     IProfileMiddleware,
@@ -34,8 +34,8 @@ contract PermissionedFeeCreationMw is
     mapping(address => MiddlewareData) public mwDataByNamespace;
 
     modifier onlyValidNamespace(address namespace) {
-        string memory mwData = mwDataByNamespace[namespace];
-        require(mwData.recipient != address(0), "INVALID_NAMESPACE");
+        address mwData = mwDataByNamespace[namespace].recipient;
+        require(mwData != address(0), "INVALID_NAMESPACE");
         _;
     }
 
@@ -160,7 +160,7 @@ contract PermissionedFeeCreationMw is
         DataTypes.CreateProfileParams params,
         bytes calldata data
     ) external payable onlyValidNamespace(msg.sender) {
-        address memory namespace = msg.sender;
+        address namespace = msg.sender;
         uint256 fee = msg.value;
         MiddlewareData memory mwData = mwDataByNamespace[namespace];
 

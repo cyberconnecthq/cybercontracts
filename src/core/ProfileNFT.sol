@@ -21,6 +21,7 @@ import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
 
 /**
  * @title Profile NFT
@@ -30,6 +31,7 @@ import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 
 contract ProfileNFT is
     Pausable,
+    ReentrancyGuard,
     Auth,
     CyberNFTBase,
     UUPSUpgradeable,
@@ -37,8 +39,8 @@ contract ProfileNFT is
     IUpgradeable,
     IProfileNFT
 {
-    address public immutable subscribeNFTBeacon;
-    address public immutable essenceNFTBeacon;
+    address public immutable SUBSCRIBE_BEACON;
+    address public immutable ESSENCE_BEACON;
     address public immutable ENGINE;
 
     constructor(
@@ -46,8 +48,8 @@ contract ProfileNFT is
         address _essenceBeacon,
         address _engine
     ) {
-        subscribeNFTBeacon = _subBeacon;
-        essenceNFTBeacon = _essenceBeacon;
+        SUBSCRIBE_BEACON = _subBeacon;
+        ESSENCE_BEACON = _essenceBeacon;
         ENGINE = _engine;
         _disableInitializers();
     }
@@ -69,7 +71,7 @@ contract ProfileNFT is
         require(profileNFTDescriptor != address(0), "ZERO_ADDRESS");
         CyberNFTBase._initialize(name, symbol);
         Auth.__Auth_Init(_owner, _rolesAuthority);
-
+        ReentrancyGuard.__ReentrancyGuard_init();
         _profileNFTDescriptor = profileNFTDescriptor;
 
         emit Initialize(_owner);
@@ -81,7 +83,7 @@ contract ProfileNFT is
     function createProfile(
         DataTypes.CreateProfileParams params,
         bytes calldata data
-    ) external payable override returns (uint256) {
+    ) external payable override nonReentrant returns (uint256) {
         string memory namespaceData = ICyberEngine(ENGINE).getNamespaceData(
             address(this)
         );
@@ -546,7 +548,7 @@ contract ProfileNFT is
     function _deploySubscribeNFT(uint256 profileId) internal returns (address) {
         address subscribeNFT = address(
             new BeaconProxy(
-                subscribeNFTBeacon,
+                SUBSCRIBE_BEACON,
                 abi.encodeWithSelector(
                     ISubscribeNFT.initialize.selector,
                     profileId,
@@ -669,7 +671,7 @@ contract ProfileNFT is
                 _essenceByIdByProfileId[profileId][essenceId].name,
                 _essenceByIdByProfileId[profileId][essenceId].symbol
             );
-            essenceNFT = address(new BeaconProxy(essenceNFTBeacon, initData));
+            essenceNFT = address(new BeaconProxy(ESSENCE_BEACON, initData));
             _essenceByIdByProfileId[profileId][essenceId]
                 .essenceNFT = essenceNFT;
             emit DeployEssenceNFT(profileId, essenceId, essenceNFT);

@@ -6,7 +6,7 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 import { ICyberEngineEvents } from "../interfaces/ICyberEngineEvents.sol";
 
 interface ICyberEngine is ICyberEngineEvents {
-    function getNamespaceByProfileAddr(address profileAddr)
+    function getNamespaceData(address namespace)
         external
         view
         returns (DataTypes.NamespaceStruct memory);

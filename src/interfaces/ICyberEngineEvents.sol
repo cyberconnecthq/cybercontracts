@@ -13,7 +13,7 @@ interface ICyberEngineEvents {
 
     event SetProfileMw(
         address indexed profileAddress,
-        address preMw,
-        address newMw
+        address mw,
+        bytes returnData
     );
 }

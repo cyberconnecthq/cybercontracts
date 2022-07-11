@@ -8,8 +8,9 @@ import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { ProfileNFT } from "./ProfileNFT.sol";
 import { SubscribeNFT } from "./SubscribeNFT.sol";
+import { EssenceNFT } from "./EssenceNFT.sol";
 import { ProfileRoles } from "./ProfileRoles.sol";
-import { Auth } from "../dependencies/solmate/Auth.sol";
+import { Auth, Authority } from "../dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { Constants } from "../libraries/Constants.sol";
@@ -49,14 +50,22 @@ contract CyberEngine is
         Auth.__Auth_Init(_owner, _rolesAuthority);
     }
 
-    function setProfileMw(address profileAddress, address mw)
-        external
-        requiresAuth
-    {
+    function setProfileMw(
+        address namespace,
+        address mw,
+        bytes calldata data
+    ) external requiresAuth {
         require(_profileMwAllowlist[mw], "PROFILE_MW_NOT_ALLOWED");
-        address preMw = _namespaceInfo[profileAddress].profileMw;
-        _namespaceInfo[profileAddress].profileMw = mw;
-        emit SetProfileMw(profileAddress, preMw, mw);
+        address preMw = _namespaceInfo[namespace].profileMw;
+        _namespaceInfo[namespace].profileMw = mw;
+        bytes memory returnData;
+        if (mw != address(0)) {
+            returnData = IProfileMiddleware(mw).setProfileMwData(
+                namespace,
+                data
+            );
+        }
+        emit SetProfileMw(namespace, mw, returnData);
     }
 
     function isProfileMwAllowed(address mw) external view returns (bool) {
@@ -104,17 +113,25 @@ contract CyberEngine is
         );
 
         // TODO delete and re-think about our proxy addreess calulation logic
-        address profileProxy = address(this);
-        address authority = new ProfileRoles(params.owner, profileProxy);
+        // bytes data = 
+        address profileProxy = _computeAddress(
+            abi.encode(type(ERC1967Proxy).creationCode),
+            _salt
+        );
+        address authority = new RolesAuthority(
+            params.owner,
+            Authority(address(0))
+        );
         address subscribeImpl = new SubscribeNFT(profileProxy);
+        address essenceImpl = new EssenceNFT(profileProxy);
         address subscribeBeacon = new UpgradeableBeacon(
             subscribeImpl,
-            profileProxy
+            params.owner
         );
 
         address essenceBeacon = new UpgradeableBeacon(
             subscribeImpl,
-            profileProxy
+            params.owner
         );
 
         address profileImpl = new ProfileNFT(subscribeBeacon, essenceBeacon);
@@ -123,7 +140,7 @@ contract CyberEngine is
             profileImpl,
             abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
-                params.owner,
+                address(0),
                 params.name,
                 params.symbol,
                 params.descriptor,
@@ -136,14 +153,6 @@ contract CyberEngine is
         _namespaceInfo[profileProxy].owner = params.owner;
 
         // TODO emit event
-    }
-
-    function setProfileMwData(
-        address mw,
-        address namespace,
-        bytes calldata data
-    ) external requiresAuth returns (bytes memory) {
-        return IProfileMiddleware(mw).setProfileMwData(namespace, data);
     }
 
     /**
@@ -169,5 +178,21 @@ contract CyberEngine is
         );
 
         _;
+    }
+
+    function _computeAddress(bytes memory _byteCode, uint256 _salt)
+        internal
+        view
+        returns (address)
+    {
+        bytes32 hash_ = keccak256(
+            abi.encodePacked(
+                bytes1(0xff),
+                address(this),
+                _salt,
+                keccak256(_byteCode)
+            )
+        );
+        return address(uint160(uint256(hash_)));
     }
 }
