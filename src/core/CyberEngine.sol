@@ -2,19 +2,24 @@
 
 pragma solidity 0.8.14;
 
+import { ERC721 } from "../dependencies/solmate/ERC721.sol";
+import { Auth } from "../dependencies/solmate/Auth.sol";
+import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+import { Auth } from "../dependencies/solmate/Auth.sol";
+import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
-import { Initializable } from "../upgradeability/Initializable.sol";
+
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
-import { ProfileNFT } from "./ProfileNFT.sol";
-import { Auth } from "../dependencies/solmate/Auth.sol";
-import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
+
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { Constants } from "../libraries/Constants.sol";
-import { ERC721 } from "../dependencies/solmate/ERC721.sol";
+
+import { ProfileNFT } from "./ProfileNFT.sol";
 import { CyberEngineStorage } from "../storages/CyberEngineStorage.sol";
-import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
+import { Initializable } from "../upgradeability/Initializable.sol";
 
 /**
  * @title CyberEngine
