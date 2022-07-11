@@ -2,121 +2,120 @@
 
 pragma solidity 0.8.14;
 
-import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-
 import { IProfileMiddleware } from "../../interfaces/IProfileMiddleware.sol";
 import { PermissionedMw } from "../base/PermissionedMw.sol";
-import { PaymentMw } from "../base/PaymentMw.sol";
-import { DataTypes } from "../../libraries/DataTypes.sol";
+import { FeeMw } from "../base/FeeMw.sol";
 import { Constants } from "../../libraries/Constants.sol";
+import { DataTypes } from "../../libraries/DataTypes.sol";
 import { EIP712 } from "../../dependencies/openzeppelin/EIP712.sol";
 
-/**
- * @title Profile Fee Creation Middleware
- * @author Link3
- * @notice This contract is a middleware to allow one address to create profile with certain fees.
- */
 contract PermissionedFeeCreationMw is
     IProfileMiddleware,
     EIP712,
     PermissionedMw,
-    PaymentMw
+    FeeMw
 {
-    using SafeERC20 for IERC20;
-
-    constructor(address engine) PermissionedMw(engine) {}
-
-    // TODO re-think put all under same strcut & inernal?
-    mapping(address => mapping(address => uint256)) public noncesByNamespace;
-    mapping(address => mapping(DataTypes.Tier => uint256))
-        public feeMappingByNamespace;
-    mapping(address => address) public signerByNamespace;
-
-    // TODO more generic way to express this
-    uint256 internal constant _INITIAL_FEE_TIER0 = 10 ether;
-    uint256 internal constant _INITIAL_FEE_TIER1 = 2 ether;
-    uint256 internal constant _INITIAL_FEE_TIER2 = 1 ether;
-    uint256 internal constant _INITIAL_FEE_TIER3 = 0.5 ether;
-    uint256 internal constant _INITIAL_FEE_TIER4 = 0.1 ether;
-    uint256 internal constant _INITIAL_FEE_TIER5 = 0.01 ether;
-
-    // TODO maybe pass in initial call data?
-    // initialize the middlware for a given namespace
-    function initializeMw(
-        address profileAddr,
-        address currency,
-        address recipient
-    ) external onlyNamespaceOwner(profileAddr) {
-        require(recipient != address(0), "ZERO_RECIPENT_ADDRESS");
-
-        // TODO think how we manage currency whitelist
-        //require(currencyWhitelisted(currency), "INVALID_CURRENCY");
-        _setPaymentMethod(profileAddr, currency, recipient);
-
-        _setFeeByTier(profileAddr, DataTypes.Tier.Tier0, _INITIAL_FEE_TIER0);
-        _setFeeByTier(profileAddr, DataTypes.Tier.Tier1, _INITIAL_FEE_TIER1);
-        _setFeeByTier(profileAddr, DataTypes.Tier.Tier2, _INITIAL_FEE_TIER2);
-        _setFeeByTier(profileAddr, DataTypes.Tier.Tier3, _INITIAL_FEE_TIER3);
-        _setFeeByTier(profileAddr, DataTypes.Tier.Tier4, _INITIAL_FEE_TIER4);
-        _setFeeByTier(profileAddr, DataTypes.Tier.Tier5, _INITIAL_FEE_TIER5);
+    struct MiddlewareData {
+        address signer;
+        address recipient;
+        mapping(address => uint256) nonces;
+        mapping(Tier => uint256) feeMapping;
     }
 
-    /**
-     * @notice Sets the tier fee.
-     *
-     * @param tier The tier number.
-     * @param amount The fee amount.
-     */
-    function setFeeByTier(
-        address profileAddr,
-        DataTypes.Tier tier,
-        uint256 amount
-    ) external onlyNamespaceOwner(profileAddr) {
-        _setFeeByTier(profileAddr, tier, amount);
+    enum Tier {
+        Tier0,
+        Tier1,
+        Tier2,
+        Tier3,
+        Tier4,
+        Tier5
     }
 
-    /**
-     * @notice Sets the new signer address.
-     *
-     * @param signer The signer address.
-     * @dev The address can not be zero address.
-     */
-    function setSigner(address profileAddr, address signer)
+    mapping(address => MiddlewareData) public mwDataByNamespace;
+
+    modifier onlyValidNamespace(address namespace) {
+        string memory mwData = mwDataByNamespace[namespace];
+        require(mwData.recipient != address(0), "INVALID_NAMESPACE");
+        _;
+    }
+
+    constructor(address engine, address treasury)
+        PermissionedMw(engine)
+        FeeMw(treasury)
+    {}
+
+    function setProfileMwData(address namespace, bytes calldata data)
         external
-        onlyNamespaceOwner(profileAddr)
+        override
+        onlyEngine
+        returns (bytes memory)
     {
-        require(signer != address(0), "ZERO_SIGNER_ADDRESS");
-        address preSigner = signerByNamespace[profileAddr];
-        signerByNamespace[profileAddr] = signer;
+        (
+            address signer,
+            address recipient,
+            uint256 tier0Fee,
+            uint256 tier1Fee,
+            uint256 tier2Fee,
+            uint256 tier3Fee,
+            uint256 tier4Fee,
+            uint256 tier5Fee,
 
-        //emit SetSigner(preSigner, signer);
+        ) = abi.decode(
+                data,
+                (
+                    address,
+                    address,
+                    uint256,
+                    uint256,
+                    uint256,
+                    uint256,
+                    uint256,
+                    uint256
+                )
+            );
+
+        require(
+            signer != address(0) && recipient != address(0),
+            "ZERO_INPUT_ADDRESS"
+        );
+
+        _setFeeByTier(namespace, Tier.Tier0, tier0Fee);
+        _setFeeByTier(namespace, Tier.Tier1, tier1Fee);
+        _setFeeByTier(namespace, Tier.Tier2, tier2Fee);
+        _setFeeByTier(namespace, Tier.Tier3, tier3Fee);
+        _setFeeByTier(namespace, Tier.Tier4, tier4Fee);
+        _setFeeByTier(namespace, Tier.Tier5, tier5Fee);
+
+        mwDataByNamespace[namespace].signer = signer;
+        mwDataByNamespace[namespace].recipient = recipient;
     }
 
     function _setFeeByTier(
-        address profileAddr,
-        DataTypes.Tier tier,
+        address namespace,
+        Tier tier,
         uint256 amount
     ) internal {
-        uint256 preAmount = feeMappingByNamespace[profileAddr][tier];
-        feeMappingByNamespace[profileAddr][tier] = amount;
+        MiddlewareData memory mwData = mwDataByNamespace[namespace];
+        uint256 preAmount = mwData.feeMapping[tier];
+        mwData.feeMapping[tier] = amount;
 
         //emit SetFeeByTier(tier, preAmount, amount);
     }
 
     function _requiresEnoughFee(
-        address profileAddr,
+        address namespace,
         string calldata handle,
         uint256 amount
     ) internal view {
         bytes memory byteHandle = bytes(handle);
-        uint256 fee = feeMappingByNamespace[DataTypes.Tier.Tier5];
+        MiddlewareData memory mwData = mwDataByNamespace[namespace];
+        uint256 fee = mwData.feeMapping[Tier.Tier5];
 
-        require(byteHandle.length >= 1, "Invalid handle length");
+        require(byteHandle.length >= 1, "INVALID_HANDLE_LENGTH");
         if (byteHandle.length < 6) {
-            fee = feeMappingByNamespace[DataTypes.Tier(byteHandle.length - 1)];
+            fee = mwData.feeMapping[Tier(byteHandle.length - 1)];
         }
-        require(amount >= fee, "Insufficient fee");
+        require(amount >= fee, "INSUFFICIENT_FEE");
     }
 
     function _requiresExpectedSigner(
@@ -129,16 +128,47 @@ contract PermissionedFeeCreationMw is
         require(recoveredAddress == expectedSigner, "INVALID_SIGNATURE");
     }
 
+    // TODO consider move it to a spearate mw
+    function _requiresValidHandle(string calldata handle) internal pure {
+        bytes memory byteHandle = bytes(handle);
+        require(
+            byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
+                byteHandle.length > 0,
+            "Handle has invalid length"
+        );
+
+        uint256 byteHandleLength = byteHandle.length;
+        for (uint256 i = 0; i < byteHandleLength; ) {
+            bytes1 b = byteHandle[i];
+            require(
+                (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
+                "Handle has invalid character"
+            );
+            // optimation
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     /**
      * @inheritdoc IProfileMiddleware
      */
     function preProcess(
-        uint256 fee,
-        DataTypes.CreateProfileParams calldata params
-    ) external {
-        // TODO: check if safe use msg.sender, do we need onlyProfile?
-        address memory profileAddr = msg.sender;
-        _requiresEnoughFee(profileAddr, params.handle, fee);
+        DataTypes.CreateProfileParams params,
+        bytes calldata data
+    ) external payable onlyValidNamespace(msg.sender) {
+        address memory namespace = msg.sender;
+        uint256 fee = msg.value;
+        MiddlewareData memory mwData = mwDataByNamespace[namespace];
+
+        (uint8 v, bytes32 r, bytes32 s, uint256 deadline, ) = abi.decode(
+            data,
+            (uint8, bytes32, bytes32, uint256)
+        );
+
+        _requiresValidHandle(params.handle);
+        _requiresEnoughFee(namespace, params.handle, fee);
         _requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
@@ -148,27 +178,28 @@ contract PermissionedFeeCreationMw is
                         keccak256(bytes(params.handle)),
                         keccak256(bytes(params.avatar)),
                         keccak256(bytes(params.metadata)),
-                        noncesByNamespace[profileAddr][params.to]++,
-                        params.sig.deadline
+                        mwData.nonces[params.to]++,
+                        deadline
                     )
                 )
             ),
-            signerByNamespace[profileAddr],
-            params.sig
+            mwData.signer,
+            DataTypes.EIP712Signature(v, r, s, deadline)
         );
 
-        string memory payment = _getPaymentMethod(profileAddr);
-        IERC20(payment.currency).safeTransferFrom(
-            profileAddr,
-            payment.recipient,
-            fee
-        );
+        uint256 treasuryCollected = (fee * _treasuryFee()) / Constants._MAX_BPS;
+        uint256 actualCollected = fee - treasuryCollected;
+
+        payable(mwData.recipient).transfer(actualCollected);
+        if (treasuryCollected > 0) {
+            payable(_treasuryAddress()).transfer(treasuryCollected);
+        }
     }
 
     /// @inheritdoc IProfileMiddleware
     function postProcess(
-        uint256 fee,
-        DataTypes.CreateProfileParams calldata params
+        DataTypes.CreateProfileParams params,
+        bytes calldata data
     ) external {
         // do nothing
     }

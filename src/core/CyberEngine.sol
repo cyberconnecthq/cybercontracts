@@ -6,6 +6,7 @@ import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
+import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { ProfileNFT } from "./ProfileNFT.sol";
 import { SubscribeNFT } from "./SubscribeNFT.sol";
 import { ProfileRoles } from "./ProfileRoles.sol";
@@ -54,8 +55,8 @@ contract CyberEngine is
         requiresAuth
     {
         require(_profileMwAllowlist[mw], "PROFILE_MW_NOT_ALLOWED");
-        address preMw = _namespaceByProfileAddr[profileAddress].profileMw;
-        _namespaceByProfileAddr[profileAddress].profileMw = mw;
+        address preMw = _namespaceInfo[profileAddress].profileMw;
+        _namespaceInfo[profileAddress].profileMw = mw;
         emit SetProfileMw(profileAddress, preMw, mw);
     }
 
@@ -63,12 +64,12 @@ contract CyberEngine is
         return _profileMwAllowlist[mw];
     }
 
-    function getNamespaceByProfileAddr(address profileAddr)
+    function getNamespaceData(address namespace)
         external
         view
         returns (DataTypes.NamespaceStruct memory)
     {
-        return _namespaceByProfileAddr[profileAddr];
+        return _namespaceInfo[namespace];
     }
 
     /**
@@ -123,7 +124,7 @@ contract CyberEngine is
             profileImpl,
             abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
-                address(0),
+                params.owner,
                 params.name,
                 params.symbol,
                 params.descriptor,
@@ -131,11 +132,19 @@ contract CyberEngine is
             )
         );
 
-        _namespaceByProfileAddr[profileProxy].name = params.name;
-        _namespaceByProfileAddr[profileProxy].profileMw = params.mw;
-        _namespaceByProfileAddr[profileProxy].owner = params.owner;
+        _namespaceInfo[profileProxy].name = params.name;
+        _namespaceInfo[profileProxy].profileMw = params.mw;
+        _namespaceInfo[profileProxy].owner = params.owner;
 
         // TODO emit event
+    }
+
+    function setProfileMwData(
+        address mw,
+        address namespace,
+        bytes calldata data
+    ) external requiresAuth returns (bytes memory) {
+        return IProfileMiddleware(mw).setProfileMwData(namespace, data);
     }
 
     /**

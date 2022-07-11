@@ -80,36 +80,27 @@ contract ProfileNFT is
         _pause();
     }
 
-    // TODO move sig into params as optional input since other mw may not need it
     /// @inheritdoc IProfileNFT
-    function createProfile(DataTypes.CreateProfileParams calldata params)
-        external
-        payable
-        override
-        returns (uint256)
-    {
-        string memory namespace = ICyberEngine(ENGINE)
-            .getNamespaceByProfileAddr(address(this));
+    function createProfile(
+        DataTypes.CreateProfileParams params,
+        bytes calldata data
+    ) external payable override returns (uint256) {
+        string memory namespaceData = ICyberEngine(ENGINE).getNamespaceData(
+            address(this)
+        );
 
-        if (namespace.profileMw != address(0)) {
-            IProfileMiddleware(namespace.profileMw).preProcess(
-                msg.value,
-                params
-            );
+        if (namespaceData.profileMw != address(0)) {
+            IProfileMiddleware(namespaceData.profileMw).preProcess(
+                params,
+                data
+            ){ value: msg.value };
         }
 
         uint256 id = _createProfile(params);
-        emit CreateProfile(
-            params.to,
-            id,
-            params.handle,
-            params.avatar,
-            params.metadata
-        );
-        if (namespace.profileMw != address(0)) {
-            IProfileMiddleware(namespace.profileMw).postProcess(
-                msg.value,
-                params
+        if (namespaceData.profileMw != address(0)) {
+            IProfileMiddleware(namespaceData.profileMw).postProcess(
+                params,
+                data
             );
         }
         return id;
@@ -119,9 +110,6 @@ contract ProfileNFT is
         internal
         returns (uint256)
     {
-        // create
-        _requiresValidHandle(params.handle);
-
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "Handle taken");
 
@@ -195,37 +183,6 @@ contract ProfileNFT is
                     subscribers: subscribers
                 })
             );
-    }
-
-    /**
-     * @notice Verifies a handle for length and invalid characters.
-     *
-     * @param handle The handle to verify.
-     * @dev Throws if:
-     * - handle is empty
-     * - handle is too long
-     * - handle contains invalid characters
-     */
-    function _requiresValidHandle(string calldata handle) internal pure {
-        bytes memory byteHandle = bytes(handle);
-        require(
-            byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
-                byteHandle.length > 0,
-            "Handle has invalid length"
-        );
-
-        uint256 byteHandleLength = byteHandle.length;
-        for (uint256 i = 0; i < byteHandleLength; ) {
-            bytes1 b = byteHandle[i];
-            require(
-                (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
-                "Handle has invalid character"
-            );
-            // optimation
-            unchecked {
-                ++i;
-            }
-        }
     }
 
     /// @inheritdoc IProfileNFT

@@ -9,9 +9,7 @@ interface IProfileNFT is IProfileNFTEvents {
     /**
      * @notice Creates a profile and mints it to the recipient address.
      *
-     * @param params contains the recipient, handle, avatar and metadata.
-     * @param sig The EIP712 signature.
-     * @return uint256 profile id of the newly minted profile.
+     * @param data contains all params.
      *
      * @dev The current function validates the caller address and the handle before minting
      * and the following conditions must be met:
@@ -22,10 +20,10 @@ interface IProfileNFT is IProfileNFTEvents {
      * - The handle must not be longer than 27 bytes.
      * - The handle must not be empty.
      */
-    function createProfile(
-        DataTypes.CreateProfileParams calldata params,
-        DataTypes.EIP712Signature calldata sig
-    ) external payable returns (uint256);
+    function createProfile(bytes calldata data)
+        external
+        payable
+        returns (uint256);
 
     /**
      * @notice Gets the profile handle by ID.

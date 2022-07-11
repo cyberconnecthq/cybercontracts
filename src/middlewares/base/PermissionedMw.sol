@@ -7,10 +7,8 @@ import { ICyberEngine } from "../../interfaces/ICyberEngine.sol";
 abstract contract PermissionedMw {
     address public immutable ENGINE;
 
-    modifier onlyNamespaceOwner(address profileAddress) {
-        string memory namespace = ICyberEngine(ENGINE)
-            .getNamespaceByProfileAddr(profileAddress);
-        require(namespace.owner == msg.sender, "NON_NAMESPACE_OWNER");
+    modifier onlyEngine() {
+        require(ENGINE == msg.sender, "NON_ENGINE_ADDRESS");
         _;
     }
 

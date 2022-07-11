@@ -32,19 +32,6 @@ interface IProfileNFTEvents {
     );
 
     /**
-     * @notice Emitted when a new fee for tiers has been set.
-     *
-     * @param tier The tier number.
-     * @param preAmount The previous fee amount.
-     * @param newAmount The newly set fee amount.
-     */
-    event SetFeeByTier(
-        DataTypes.Tier indexed tier,
-        uint256 indexed preAmount,
-        uint256 indexed newAmount
-    );
-
-    /**
      * @notice Emitted when a new Profile NFT Descriptor has been set.
      *
      * @param newDescriptor The newly set descriptor address.

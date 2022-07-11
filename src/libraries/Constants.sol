@@ -38,6 +38,7 @@ library Constants {
     uint8 internal constant _MAX_NAMESPACE_LENGTH = 20;
     uint8 internal constant _MAX_SYMBOL_LENGTH = 20;
     uint16 internal constant _MAX_URI_LENGTH = 2000;
+    uint16 internal constant _MAX_BPS = 10000;
 
     // Access Control for UpgradeableBeacon
     bytes4 internal constant _BEACON_UPGRADE_TO =

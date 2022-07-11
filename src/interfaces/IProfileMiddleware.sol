@@ -5,13 +5,17 @@ pragma solidity 0.8.14;
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 interface IProfileMiddleware {
+    function setProfileMwData(address namespace, bytes calldata data)
+        external
+        returns (bytes memory);
+
     function preProcess(
-        uint256 fee,
-        DataTypes.CreateProfileParams calldata params
-    ) external;
+        DataTypes.CreateProfileParams params,
+        bytes calldata data
+    ) external payable;
 
     function postProcess(
-        uint256 fee,
-        DataTypes.CreateProfileParams calldata params
+        DataTypes.CreateProfileParams params,
+        bytes calldata data
     ) external;
 }

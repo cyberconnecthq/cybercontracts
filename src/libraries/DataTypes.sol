@@ -15,7 +15,6 @@ library DataTypes {
         string handle;
         string avatar;
         string metadata;
-        EIP712Signature sig;
     }
 
     struct CreateNamespaceParams {
@@ -53,14 +52,5 @@ library DataTypes {
         uint256 tokenId;
         string handle;
         uint256 subscribers;
-    }
-
-    enum Tier {
-        Tier0,
-        Tier1,
-        Tier2,
-        Tier3,
-        Tier4,
-        Tier5
     }
 }
