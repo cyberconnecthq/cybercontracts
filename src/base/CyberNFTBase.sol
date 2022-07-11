@@ -6,12 +6,13 @@ import { ERC721 } from "../dependencies/solmate/ERC721.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
+import { EIP712 } from "./EIP712.sol";
 
 // Sequential mint ERC721
 // TODO: Put EIP712 permit logic here
 // TODO: Might need to fork ERC721 for to store startTimeStamp like
 // https://github.com/chiru-labs/ERC721A/blob/538817040d98c6464afa0be7cc625cef44776668/contracts/IERC721A.sol#L75
-abstract contract CyberNFTBase is Initializable, ERC721 {
+abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
     bytes32 internal constant EIP712_REVISION_HASH = keccak256("1");
 
     uint256 internal _totalCount = 0;
@@ -46,33 +47,6 @@ abstract contract CyberNFTBase is Initializable, ERC721 {
     }
 
     // Permit
-    function _requiresExpectedSigner(
-        bytes32 digest,
-        address expectedSigner,
-        DataTypes.EIP712Signature calldata sig
-    ) internal view {
-        require(sig.deadline >= block.timestamp, "DEADLINE_EXCEEDED");
-        address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
-        require(recoveredAddress == expectedSigner, "INVALID_SIGNATURE");
-    }
-
-    // Permit
-    function DOMAIN_SEPARATOR() public view returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    keccak256(
-                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                    ),
-                    keccak256(bytes(_name)),
-                    EIP712_REVISION_HASH,
-                    block.chainid,
-                    address(this)
-                )
-            );
-    }
-
-    // Permit
     function permit(
         address spender,
         uint256 tokenId,
@@ -100,16 +74,13 @@ abstract contract CyberNFTBase is Initializable, ERC721 {
         emit Approval(owner, spender, tokenId);
     }
 
-    // 712
-    function _hashTypedDataV4(bytes32 structHash)
+    function _domainSeperatorName()
         internal
         view
         virtual
-        returns (bytes32)
+        override
+        returns (string memory)
     {
-        return
-            keccak256(
-                abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR(), structHash)
-            );
+        return _name;
     }
 }

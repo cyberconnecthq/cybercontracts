@@ -14,7 +14,6 @@ import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
-import { ECDSA } from "../src/dependencies/openzeppelin/ECDSA.sol";
 import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";

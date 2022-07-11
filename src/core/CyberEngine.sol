@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.14;
 
-import { EIP712 } from "../dependencies/openzeppelin/EIP712.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
