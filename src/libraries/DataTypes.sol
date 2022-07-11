@@ -13,6 +13,7 @@ library DataTypes {
     struct ProfileStruct {
         string handle;
         string avatar;
+        uint256 essenceCount;
     }
 
     struct SubscribeStruct {
@@ -24,6 +25,8 @@ library DataTypes {
     struct EssenceStruct {
         address essenceNFT;
         address essenceMw;
+        string name;
+        string symbol;
         string tokenURI;
     }
 

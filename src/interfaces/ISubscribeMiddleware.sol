@@ -9,7 +9,7 @@ interface ISubscribeMiddleware {
      * @param profileId The profile Id.
      * @param subscriber The subscriber address.
      * @param subscrbeNFT The subscribe nft address.
-     * @param data The subscription data.
+     * @param data Extra data to process.
      */
     function preProcess(
         uint256 profileId,
@@ -24,7 +24,7 @@ interface ISubscribeMiddleware {
      * @param profileId The profile Id.
      * @param subscriber The subscriber address.
      * @param subscrbeNFT The subscribe nft address.
-     * @param data The subscription data.
+     * @param data Extra data to process.
      */
     function postProcess(
         uint256 profileId,
@@ -32,4 +32,8 @@ interface ISubscribeMiddleware {
         address subscrbeNFT,
         bytes calldata data
     ) external;
+
+    function prepare(uint256 profileId, bytes calldata prepareReturnData)
+        external
+        returns (bytes memory);
 }
