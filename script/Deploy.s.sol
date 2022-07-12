@@ -6,20 +6,21 @@ pragma solidity ^0.8.13;
 import "forge-std/Script.sol";
 import { LibDeploy } from "./libraries/LibDeploy.sol";
 
+// 16 Transaction + 3 Transaction to mint a test profile
 contract DeployScript is Script {
     function run() external {
-        // HACK: https://github.com/foundry-rs/foundry/issues/2110
+        // TODO: this is Rinkeby address, change for prod
+        address deployerContract = 0x84aE5cA42f688d08F9E8cC0dB18e09Fe91f90bAc;
+        if (block.chainid == 31337) {
+            deployerContract = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+        }
         uint256 nonce = vm.getNonce(msg.sender);
         console.log("vm.getNonce", vm.getNonce(msg.sender));
         vm.startBroadcast();
-
-        address profileProxy = address(
-            0x1E9eb6311E54acF922badC20B0564ffa2c549bBF
-        );
         string
-            memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreid6ny6ihdezwqylwongnchdvgkuo5y4q6fylxfzmor4luyelndb5e";
+            memory templateURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreic7v6ca23rht5pudfqneoftw4dlnw3gy7dvv6fojwerfjm2hii5dy";
 
-        LibDeploy.deploy(msg.sender, nonce, templateURL);
+        LibDeploy.deploy(vm, msg.sender, nonce, templateURL, deployerContract);
         // TODO: set correct role capacity
         // TODO: do a health check. verify everything
         vm.stopBroadcast();

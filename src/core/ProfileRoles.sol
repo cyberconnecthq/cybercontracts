@@ -52,7 +52,7 @@ contract ProfileRoles is RolesAuthority {
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
             profile,
-            ProfileNFT.setLink3ProfileDescriptor.selector,
+            ProfileNFT.setNFTDescriptor.selector,
             true
         );
         setRoleCapability(

@@ -53,7 +53,7 @@ interface IProfileNFT is IProfileNFTEvents {
      *
      * @param descriptor The new descriptor address to set.
      */
-    function setLink3ProfileDescriptor(address descriptor) external;
+    function setNFTDescriptor(address descriptor) external;
 
     /**
      * @notice Sets the NFT metadata as IPFS hash.
@@ -87,7 +87,7 @@ interface IProfileNFT is IProfileNFTEvents {
      *
      * @return address The descriptor address.
      */
-    function getLink3ProfileDescriptor() external view returns (address);
+    function getNFTDescriptor() external view returns (address);
 
     /**
      * @notice Sets the profile NFT animation template.

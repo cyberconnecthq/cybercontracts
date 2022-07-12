@@ -9,7 +9,7 @@ abstract contract ProfileNFTStorage {
     uint256 internal constant _VERSION = 1;
 
     // storage
-    address internal _Link3ProfileDescriptor;
+    address internal _nftDescriptor;
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
     mapping(uint256 => string) internal _metadataById;

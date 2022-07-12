@@ -39,6 +39,7 @@ abstract contract EIP712 {
         );
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() public view returns (bytes32) {
         return
             keccak256(

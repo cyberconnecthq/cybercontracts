@@ -25,7 +25,6 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     MockProfile internal profile;
     RolesAuthority internal rolesAuthority;
     address internal essenceBeacon = address(0xC);
-    address internal Link3ProfileDescriptor = address(0xD);
     address internal subscribeBeacon;
 
     address constant alice = address(0xA11CE);
@@ -93,10 +92,10 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     //     profile.setFeeByTier(DataTypes.Tier.Tier0, 1);
     // }
 
-    function testCannotSetLink3ProfileDescriptorAsNonGov() public {
+    function testCannotSetNFTDescriptorAsNonGov() public {
         vm.expectRevert("UNAUTHORIZED");
         vm.prank(alice);
-        profile.setLink3ProfileDescriptor(Link3ProfileDescriptor);
+        profile.setNFTDescriptor(descriptor);
     }
 
     function testCannotSetAnimationTemplateAsNonGov() public {
@@ -471,15 +470,15 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
 
         vm.prank(alice);
         vm.expectEmit(true, false, false, true);
-        emit SetLink3ProfileDescriptor(Link3ProfileDescriptor);
+        emit SetNFTDescriptor(descriptor);
 
-        profile.setLink3ProfileDescriptor(Link3ProfileDescriptor);
+        profile.setNFTDescriptor(descriptor);
     }
 
     function testSetAnimationTemplateGov() public {
         string memory template = "new_ani_template";
         vm.mockCall(
-            profile.getLink3ProfileDescriptor(),
+            profile.getNFTDescriptor(),
             abi.encodeWithSelector(
                 IProfileNFTDescriptor.setAnimationTemplate.selector,
                 template
