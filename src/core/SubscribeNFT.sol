@@ -2,14 +2,16 @@
 
 pragma solidity 0.8.14;
 
-import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
-import { Constants } from "../libraries/Constants.sol";
-import { LibString } from "../libraries/LibString.sol";
-import { SubscribeNFTStorage } from "../storages/SubscribeNFTStorage.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
+
+import { Constants } from "../libraries/Constants.sol";
+import { LibString } from "../libraries/LibString.sol";
+
+import { CyberNFTBase } from "../base/CyberNFTBase.sol";
+import { SubscribeNFTStorage } from "../storages/SubscribeNFTStorage.sol";
 
 /**
  * @title Subscribe NFT
