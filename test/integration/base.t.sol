@@ -34,12 +34,7 @@ contract IntegrationBaseTest is Test, IProfileNFTEvents {
             boxAddress,
             profileAddress,
             profileDescriptorAddress
-        ) = LibDeploy.deploy(
-            vm,
-            address(this),
-            nonce,
-            "https://animation.example.com"
-        );
+        ) = LibDeploy.deployInTest(vm, address(this), nonce);
         authority = RolesAuthority(auth);
         profileNFT = ProfileNFT(profileAddress);
         profileDescriptor = Link3ProfileDescriptor(profileDescriptorAddress);

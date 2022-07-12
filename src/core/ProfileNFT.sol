@@ -14,7 +14,7 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
-import { Auth } from "../dependencies/solmate/Auth.sol";
+import { Auth, Authority } from "../dependencies/solmate/Auth.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
@@ -64,20 +64,17 @@ contract ProfileNFT is
      *
      * @param name Name to set for the Profile NFT.
      * @param symbol Symbol to set for the Profile NFT.
-     * @param nftDescriptor The profile NFT descriptor address to set for the Profile NFT.
+     *
      */
     function initialize(
         address _owner,
         string calldata name,
         string calldata symbol,
-        address nftDescriptor,
-        RolesAuthority _rolesAuthority
+        address _rolesAuthority
     ) external initializer {
-        require(nftDescriptor != address(0), "ZERO_ADDRESS");
         CyberNFTBase._initialize(name, symbol);
-        Auth.__Auth_Init(_owner, _rolesAuthority);
+        Auth.__Auth_Init(_owner, Authority(_rolesAuthority));
         ReentrancyGuard.__ReentrancyGuard_init();
-        _nftDescriptor = nftDescriptor;
 
         emit Initialize(_owner);
         // start with paused

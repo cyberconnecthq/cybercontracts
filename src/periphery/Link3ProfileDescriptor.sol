@@ -21,7 +21,7 @@ contract Link3ProfileDescriptor is IProfileNFTDescriptor, Initializable {
     string internal constant BASE_URL = "https://link3.to/";
 
     constructor(address owner) {
-        require(owner != address(0), "PROFILE_ADDRESS_CANNOT_BE_0");
+        require(owner != address(0), "ZERO_ADDRESS");
         OWNER = owner;
         _disableInitializers();
     }
@@ -40,7 +40,7 @@ contract Link3ProfileDescriptor is IProfileNFTDescriptor, Initializable {
 
     /// @inheritdoc IProfileNFTDescriptor
     function setAnimationTemplate(string calldata template) external override {
-        require(msg.sender == OWNER, "ONLY_PROFILE");
+        require(msg.sender == OWNER, "ONLY_OWNER");
         animationTemplate = template;
     }
 

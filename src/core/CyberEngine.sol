@@ -147,7 +147,7 @@ contract CyberEngine is
             address(0),
             params.name,
             params.symbol,
-            params.descriptor,
+            address(0), // set later
             authority
         );
 
@@ -172,14 +172,14 @@ contract CyberEngine is
         addrs.subscribeBeacon = _computeAddress(
             abi.encodePacked(
                 type(UpgradeableBeacon).creationCode,
-                abi.encode(addrs.subscribeImpl, params.owner)
+                abi.encode(addrs.subscribeImpl, addrs.profileProxy)
             ),
             salt
         );
         addrs.essenceBeacon = _computeAddress(
             abi.encodePacked(
                 type(UpgradeableBeacon).creationCode,
-                abi.encode(addrs.essenceImpl, params.owner)
+                abi.encode(addrs.essenceImpl, addrs.profileProxy)
             ),
             salt
         );
@@ -192,8 +192,14 @@ contract CyberEngine is
 
         new SubscribeNFT{ salt: salt }();
         new EssenceNFT{ salt: salt }();
-        new UpgradeableBeacon{ salt: salt }(addrs.subscribeImpl, params.owner);
-        new UpgradeableBeacon{ salt: salt }(addrs.essenceImpl, params.owner);
+        new UpgradeableBeacon{ salt: salt }(
+            addrs.subscribeImpl,
+            addrs.profileProxy
+        );
+        new UpgradeableBeacon{ salt: salt }(
+            addrs.essenceImpl,
+            addrs.profileProxy
+        );
         new ProfileNFT{ salt: salt }();
         address profileProxy = address(
             new ERC1967Proxy{ salt: salt }(addrs.profileImpl, data)

@@ -17,23 +17,24 @@ import { TestLib712 } from "../../test/utils/TestLib712.sol";
 import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import { Create2Deployer } from "./Create2Deployer.sol";
+import { LibString } from "../../src/libraries/LibString.sol";
 
 import "forge-std/Vm.sol";
 
 // TODO: deploy with salt
 library LibDeploy {
-    // address private constant VM_ADDRESS =
-    //     address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
-    // Vm public constant vm = Vm(VM_ADDRESS);
-
+    address private constant VM_ADDRESS =
+        address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
+    Vm public constant vm = Vm(VM_ADDRESS);
+    string internal constant OUTPUT_FILE = "docs/deploy/";
     string internal constant PROFILE_NAME = "Link3";
     string internal constant PROFILE_SYMBOL = "LINK3";
     // TODO: Fix engine owner, use 0 address for integration test.
     // have to be different from deployer to make tests useful
     address internal constant ENGINE_OWNER = address(0);
-    // TODO
+    // TODO: change for prod. need access
     address internal constant LINK3_OWNER =
-        0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
+        0x927f355117721e0E8A7b5eA20002b65B8a551890;
 
     address internal constant LINK3_SIGNER =
         0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
@@ -76,6 +77,29 @@ library LibDeploy {
         address link3ProfileMw;
         address calcEngineImpl;
         address calcEngineProxy;
+    }
+
+    function special(
+        bytes memory _byteCode,
+        bytes32 _salt,
+        address deployer
+    ) internal returns (address) {
+        console.log("byteCode", vm.toString(_byteCode));
+        // console.log("dc", address(dc));
+        console.log("salt", uint256(_salt));
+        console.log("deployer", deployer);
+        console.log("keccak256", uint256(keccak256(_byteCode)));
+        bytes32 hash_ = keccak256(
+            abi.encodePacked(
+                bytes1(0xff),
+                deployer,
+                _salt,
+                keccak256(_byteCode)
+            )
+        );
+        console.log("hash", uint256(hash_));
+        console.log("address", address(uint160(uint256(hash_))));
+        return address(uint160(uint256(hash_)));
     }
 
     // create2
@@ -165,12 +189,11 @@ library LibDeploy {
         }
     }
 
-    // for testing
-    function deploy(
+    // for testing, deploy a new deployer contract
+    function deployInTest(
         Vm vm,
         address deployer,
-        uint256 nonce,
-        string memory templateURL
+        uint256 nonce
     )
         internal
         returns (
@@ -181,15 +204,112 @@ library LibDeploy {
             address
         )
     {
-        return deploy(vm, deployer, nonce, templateURL, address(0));
+        return deploy(vm, deployer, nonce, address(0), false);
+    }
+
+    function _fileName() internal view returns (string memory) {
+        uint256 chainId = block.chainid;
+        string memory chainName;
+        if (chainId == 1) chainName = "mainnet";
+        else if (chainId == 3) chainName = "ropsten";
+        else if (chainId == 4) chainName = "rinkeby";
+        else if (chainId == 5) chainName = "goerli";
+        else if (chainId == 42) chainName = "kovan";
+        else if (chainId == 31337) chainName = "anvil";
+        else chainName = "unknown";
+        return
+            string(
+                abi.encodePacked(
+                    OUTPUT_FILE,
+                    string(
+                        abi.encodePacked(
+                            chainName,
+                            "-",
+                            LibString.toString(chainId)
+                        )
+                    ),
+                    "/contract"
+                )
+            );
+    }
+
+    function _fileNameMd() internal view returns (string memory) {
+        return string(abi.encodePacked(_fileName(), ".md"));
+    }
+
+    function _fileNameJson() internal view returns (string memory) {
+        return string(abi.encodePacked(_fileName(), ".json"));
+    }
+
+    function _prepareToWrite(Vm vm) internal {
+        vm.removeFile(_fileNameMd());
+        vm.removeFile(_fileNameJson());
+    }
+
+    function _writeText(
+        Vm vm,
+        string memory fileName,
+        string memory text
+    ) internal {
+        vm.writeLine(fileName, text);
+    }
+
+    function _writeHelper(
+        Vm vm,
+        string memory name,
+        address addr,
+        bool lastLine
+    ) internal {
+        _writeText(
+            vm,
+            _fileNameMd(),
+            string(
+                abi.encodePacked(
+                    "|",
+                    name,
+                    "|",
+                    LibString.toHexString(addr),
+                    "|"
+                )
+            )
+        );
+        _writeText(
+            vm,
+            _fileNameJson(),
+            string(
+                abi.encodePacked(
+                    '  "',
+                    name,
+                    '": "',
+                    LibString.toHexString(addr),
+                    lastLine ? '"' : '",'
+                )
+            )
+        );
+    }
+
+    function _write(
+        Vm vm,
+        string memory name,
+        address addr
+    ) internal {
+        _writeHelper(vm, name, addr, false);
+    }
+
+    function _writeLastLine(
+        Vm vm,
+        string memory name,
+        address addr
+    ) internal {
+        _writeHelper(vm, name, addr, true);
     }
 
     function deploy(
         Vm vm,
         address deployer,
         uint256 nonce,
-        string memory templateURL,
-        address _deployerContract
+        address _deployerContract,
+        bool writeFile
     )
         internal
         returns (
@@ -200,6 +320,12 @@ library LibDeploy {
             address
         )
     {
+        if (writeFile) {
+            _prepareToWrite(vm);
+            _writeText(vm, _fileNameJson(), "{");
+            _writeText(vm, _fileNameMd(), "|Contract|Address|");
+            _writeText(vm, _fileNameMd(), "|-|-|");
+        }
         console.log("starting nonce", nonce);
         console.log("deployer address", deployer);
         // TODO: emergency admin
@@ -211,6 +337,9 @@ library LibDeploy {
         if (_deployerContract == address(0)) {
             _deployerContract = deployer;
             dc = new Create2Deployer(); // for running test
+            if (writeFile) {
+                _write(vm, "Create2Deployer", address(dc));
+            }
         } else {
             dc = Create2Deployer(_deployerContract); // for deployment
         }
@@ -223,6 +352,10 @@ library LibDeploy {
             ),
             salt
         );
+        if (writeFile) {
+            _write(vm, "RolesAuthority", addrs.authority);
+        }
+
         // addrs.authority = new RolesAuthority{ salt: salt }(
         //     deployer,
         //     Authority(address(0))
@@ -234,7 +367,7 @@ library LibDeploy {
             address(addrs.authority)
         );
 
-        addrs.calcEngineImpl = _computeAddress(
+        addrs.calcEngineImpl = special(
             type(CyberEngine).creationCode,
             salt,
             address(dc)
@@ -251,6 +384,9 @@ library LibDeploy {
 
         // 1. Deploy Engine Impl
         addrs.engineImpl = dc.deploy(type(CyberEngine).creationCode, salt);
+        if (writeFile) {
+            _write(vm, "EngineImpl", addrs.engineImpl);
+        }
         // addrs.engineImpl = new CyberEngine{ salt: salt }();
 
         require(
@@ -266,6 +402,10 @@ library LibDeploy {
             ),
             salt
         );
+        if (writeFile) {
+            _write(vm, "EngineProxy", addrs.engineProxyAddress);
+        }
+
         // addrs.engineProxyAddress = address(
         //     new ERC1967Proxy{ salt: salt }(address(addrs.engineImpl), data)
         // );
@@ -275,32 +415,9 @@ library LibDeploy {
             "ENGINE_PROXY_MISMATCH"
         );
 
-        // 3. Deploy Link3 Descriptor Impl
-        addrs.descriptorImpl = dc.deploy(
-            abi.encodePacked(
-                type(Link3ProfileDescriptor).creationCode,
-                abi.encode(LINK3_OWNER)
-            ),
-            salt
-        );
-        // addrs.descriptorImpl = address(
-        //     new Link3ProfileDescriptor{ salt: link3Salt }(LINK3_OWNER)
-        // );
-
-        // 4. Deploy Link3 Descriptor Proxy
-        addrs.descriptorProxy = dc.deploy(
-            abi.encodePacked(
-                type(ERC1967Proxy).creationCode,
-                abi.encode(
-                    addrs.descriptorImpl,
-                    abi.encodeWithSelector(
-                        Link3ProfileDescriptor.initialize.selector,
-                        templateURL
-                    )
-                )
-            ),
-            salt
-        );
+        if (writeFile) {
+            _write(vm, "Link3 Descriptor (Proxy)", addrs.descriptorProxy);
+        }
 
         // addrs.descriptorProxy = address(
         //     new ERC1967Proxy(
@@ -338,17 +455,20 @@ library LibDeploy {
             true
         );
 
-        // 9
         // 6. Deploy Link3
         addrs.link3Profile = CyberEngine(addrs.engineProxyAddress)
             .createNamespace(
                 DataTypes.CreateNamespaceParams(
                     PROFILE_NAME,
                     PROFILE_SYMBOL,
-                    address(0),
+                    LINK3_OWNER, // governance of profile role auth
                     addrs.descriptorProxy
                 )
             );
+
+        if (writeFile) {
+            _write(vm, "Link3 Profile", addrs.link3Profile);
+        }
 
         // 7. Deploy Protocol Treasury
         addrs.cyberTreasury = dc.deploy(
@@ -358,6 +478,9 @@ library LibDeploy {
             ),
             salt
         );
+        if (writeFile) {
+            _write(vm, "CyberConnect Treasury", addrs.cyberTreasury);
+        }
         // addrs.cyberTreasury = address(
         //     new Treasury{ salt: salt }(ENGINE_GOV, ENGINE_TREASURY, 250)
         // );
@@ -370,6 +493,14 @@ library LibDeploy {
             ),
             salt
         );
+        if (writeFile) {
+            _write(
+                vm,
+                "Link3 Profile MW (PermissionedFeeCreationMw)",
+                addrs.link3ProfileMw
+            );
+        }
+
         // addrs.link3ProfileMw = address(
         //     new PermissionedFeeCreationMw{ salt: link3Salt }(
         //         addrs.engineProxyAddress,
@@ -404,6 +535,9 @@ library LibDeploy {
             // scope to avoid stack too deep error
             // 11. Deploy BoxNFT Impl
             addrs.boxImpl = dc.deploy(type(CyberBoxNFT).creationCode, salt);
+            if (writeFile) {
+                _write(vm, "CyberBoxNFT (Impl)", addrs.boxImpl);
+            }
             // addrs.boxImpl = address(new CyberBoxNFT{ salt: salt }());
 
             // 12. Deploy Proxy for BoxNFT
@@ -420,6 +554,9 @@ library LibDeploy {
                 ),
                 salt
             );
+            if (writeFile) {
+                _write(vm, "CyberBoxNFT (Proxy)", addrs.boxProxy);
+            }
             // addrs.boxProxy = address(
             //     new ERC1967Proxy{ salt: salt }(
             //         address(addrs.boxImpl),
@@ -453,11 +590,39 @@ library LibDeploy {
             register(
                 vm,
                 ProfileNFT(addrs.link3Profile),
-                deployer,
                 CyberEngine(addrs.engineProxyAddress),
                 PermissionedFeeCreationMw(addrs.link3ProfileMw)
             );
         }
+        if (writeFile) {
+            _writeText(vm, _fileNameJson(), "}");
+        }
+
+        // deployLink3Descriptor(vm, address(dc), writeFile, "", addrs.link3Profile);
+
+        // address impl = dc.deploy(
+        //     abi.encodePacked(
+        //         type(Link3ProfileDescriptor).creationCode,
+        //         abi.encode(addrs.link3Profile)
+        //     ),
+        //     salt
+        // );
+        // address proxy = dc.deploy(
+        //     abi.encodePacked(
+        //         type(ERC1967Proxy).creationCode,
+        //         abi.encode(
+        //             impl,
+        //             abi.encodeWithSelector(
+        //                 Link3ProfileDescriptor.initialize.selector,
+        //                 ""
+        //             )
+        //         )
+        //     ),
+        //     salt
+        // );
+        // ProfileNFT(addrs.link3Profile).setNFTDescriptor(proxy);
+
+
         // TODO: fix return
         return (
             addrs.engineProxyAddress,
@@ -466,6 +631,46 @@ library LibDeploy {
             addrs.link3Profile,
             address(addrs.descriptorProxy)
         );
+    }
+
+    function deployLink3Descriptor(
+        Vm vm,
+        address _dc,
+        bool writeFile,
+        string memory animationUrl,
+        address link3Profile
+    ) internal {
+        Create2Deployer dc = Create2Deployer(_dc);
+        address impl = dc.deploy(
+            abi.encodePacked(
+                type(Link3ProfileDescriptor).creationCode,
+                abi.encode(link3Profile)
+            ),
+            salt
+        );
+        if (writeFile) {
+            _write(vm, "Link3 Descriptor (Impl)", impl);
+        }
+
+        address proxy = dc.deploy(
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(
+                    impl,
+                    abi.encodeWithSelector(
+                        Link3ProfileDescriptor.initialize.selector,
+                        animationUrl
+                    )
+                )
+            ),
+            salt
+        );
+        if (writeFile) {
+            _writeLastLine(vm, "Link3 Descriptor (Proxy)", proxy);
+        }
+
+        // Need to have access to LINK3 OWNER
+        ProfileNFT(link3Profile).setNFTDescriptor(proxy);
     }
 
     function healthCheck(
@@ -531,7 +736,6 @@ library LibDeploy {
     function register(
         Vm vm,
         ProfileNFT profile,
-        address deployer,
         CyberEngine engine,
         PermissionedFeeCreationMw mw
     ) internal {
