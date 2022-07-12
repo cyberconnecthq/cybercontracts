@@ -2,27 +2,30 @@
 
 pragma solidity 0.8.14;
 
+import { Auth } from "../dependencies/solmate/Auth.sol";
+import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
+import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
+import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
+import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+
+import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
-import { CyberNFTBase } from "../base/CyberNFTBase.sol";
+import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
+import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
+import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
+import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
+import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
+import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
+
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { LibString } from "../libraries/LibString.sol";
-import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+
+import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
-import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
-import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
-import { Auth } from "../dependencies/solmate/Auth.sol";
-import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
-import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
-import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
-import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
-import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
-import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
-import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
-import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
-import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
 
 /**
  * @title Profile NFT
@@ -192,12 +195,7 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function getNFTDescriptor()
-        external
-        view
-        override
-        returns (address)
-    {
+    function getNFTDescriptor() external view override returns (address) {
         return _nftDescriptor;
     }
 
@@ -353,9 +351,7 @@ contract ProfileNFT is
         external
         requiresAuth
     {
-        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(
-            template
-        );
+        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
 
         emit SetAnimationTemplate(template);
     }
