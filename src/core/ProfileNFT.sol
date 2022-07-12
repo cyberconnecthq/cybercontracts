@@ -116,6 +116,13 @@ contract ProfileNFT is
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         _metadataById[_totalCount] = params.metadata;
+        emit CreateProfile(
+            params.to,
+            id,
+            params.handle,
+            params.avatar,
+            params.metadata
+        );
 
         if (_addressToPrimaryProfile[params.to] == 0) {
             _setPrimaryProfile(params.to, id);

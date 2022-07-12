@@ -25,7 +25,7 @@ library LibDeploy {
         address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
     Vm public constant vm = Vm(VM_ADDRESS);
 
-    string internal constant PROFILE_NAME = "Link3 Profile";
+    string internal constant PROFILE_NAME = "Link3";
     string internal constant PROFILE_SYMBOL = "LINK3";
     // TODO: Fix engine owner, use 0 address for integration test.
     // have to be different from deployer to make tests useful
@@ -76,16 +76,16 @@ library LibDeploy {
     }
 
     // create2
-    function _computeAddress(bytes memory _byteCode, bytes32 salt)
-        internal
-        view
-        returns (address)
-    {
+    function _computeAddress(
+        bytes memory _byteCode,
+        bytes32 _salt,
+        address deployer
+    ) internal view returns (address) {
         bytes32 hash_ = keccak256(
             abi.encodePacked(
                 bytes1(0xff),
-                address(this),
-                salt,
+                deployer,
+                _salt,
                 keccak256(_byteCode)
             )
         );
@@ -195,7 +195,8 @@ library LibDeploy {
 
         address engineImpl = _computeAddress(
             type(CyberEngine).creationCode,
-            salt
+            salt,
+            deployer
         );
 
         address engineProxy = _computeAddress(
@@ -203,11 +204,18 @@ library LibDeploy {
                 type(ERC1967Proxy).creationCode,
                 abi.encode(engineImpl, data)
             ),
-            salt
+            salt,
+            deployer
         );
 
         // 1. Deploy Engine Impl
         addrs.engineImpl = new CyberEngine{ salt: salt }();
+        console.log(address(addrs.engineImpl));
+        console.log(engineImpl);
+        require(
+            address(addrs.engineImpl) == engineImpl,
+            "ENGINE_IMPL_MISMATCH"
+        );
 
         // 3. Deploy Engine Proxy
         addrs.engineProxyAddress = address(
