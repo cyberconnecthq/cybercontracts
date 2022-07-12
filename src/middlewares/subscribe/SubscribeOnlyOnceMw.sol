@@ -38,7 +38,7 @@ contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
         // do nothing
     }
 
-    function prepare(uint256 profileId, bytes calldata prepareReturnData)
+    function prepare(uint256, bytes calldata)
         external
         pure
         override

@@ -119,7 +119,7 @@ contract PermissionedFeeCreationMw is
         uint256 amount
     ) internal {
         MiddlewareData storage mwData = mwDataByNamespace[namespace];
-        uint256 preAmount = mwData.feeMapping[tier];
+        // uint256 preAmount = mwData.feeMapping[tier];
         mwData.feeMapping[tier] = amount;
 
         //emit SetFeeByTier(tier, preAmount, amount);

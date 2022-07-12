@@ -5,7 +5,7 @@ pragma solidity 0.8.14;
 import { ITreasury } from "../../interfaces/ITreasury.sol";
 
 abstract contract FeeMw {
-    address public immutable TREASURY;
+    address public immutable TREASURY; // solhint-disable-line
 
     constructor(address treasury) {
         require(treasury != address(0), "ZERO_TREASURY_ADDRESS");
