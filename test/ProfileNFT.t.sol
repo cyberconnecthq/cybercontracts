@@ -194,8 +194,8 @@ contract ProfileNFTTest is Test, TestDeployer {
 
     function testSetDescriptorAsGov() public {
         vm.prank(gov);
-        token.setLink3ProfileDescriptor(address(descriptor));
-        assertEq(token.getLink3ProfileDescriptor(), address(descriptor));
+        token.setNFTDescriptor(address(descriptor));
+        assertEq(token.getNFTDescriptor(), address(descriptor));
     }
 
     // avatar
