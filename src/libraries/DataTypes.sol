@@ -3,11 +3,31 @@
 pragma solidity 0.8.14;
 
 library DataTypes {
+    struct DeployParameters {
+        address engine;
+        address profileProxy;
+        address subBeacon;
+        address essenceBeacon;
+    }
+    struct EIP712Signature {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+        uint256 deadline;
+    }
+
     struct CreateProfileParams {
         address to;
         string handle;
         string avatar;
         string metadata;
+    }
+
+    struct CreateNamespaceParams {
+        string name;
+        string symbol;
+        address owner;
+        address descriptor;
     }
 
     struct ProfileStruct {
@@ -30,25 +50,15 @@ library DataTypes {
         string tokenURI;
     }
 
-    struct EIP712Signature {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-        uint256 deadline;
+    struct NamespaceStruct {
+        address owner;
+        address profileMw;
+        string name;
     }
 
     struct ConstructTokenURIParams {
         uint256 tokenId;
         string handle;
         uint256 subscribers;
-    }
-
-    enum Tier {
-        Tier0,
-        Tier1,
-        Tier2,
-        Tier3,
-        Tier4,
-        Tier5
     }
 }

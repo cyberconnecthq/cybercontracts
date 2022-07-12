@@ -25,62 +25,62 @@ contract SubscribeTest is Test, IProfileNFTEvents {
     address profileDescriptorAddress;
     ProfileNFT profile;
 
-    function setUp() public {
-        uint256 nonce = vm.getNonce(address(this));
-        address proxy;
-        (
-            proxy,
-            authority,
-            boxAddress,
-            profileAddress,
-            profileDescriptorAddress
-        ) = LibDeploy.deploy(
-            address(this),
-            nonce,
-            "https://animation.example.com"
-        );
-        TestLibFixture.auth(authority);
-        profile = ProfileNFT(address(profileAddress));
-        bobProfileId = TestLibFixture.registerBobProfile(profile);
-        TestLibFixture.auth(authority);
-    }
+    // function setUp() public {
+    //     uint256 nonce = vm.getNonce(address(this));
+    //     address proxy;
+    //     (
+    //         proxy,
+    //         authority,
+    //         boxAddress,
+    //         profileAddress,
+    //         profileDescriptorAddress
+    //     ) = LibDeploy.deploy(
+    //         address(this),
+    //         nonce,
+    //         "https://animation.example.com"
+    //     );
+    //     TestLibFixture.auth(authority);
+    //     profile = ProfileNFT(address(profileAddress));
+    //     bobProfileId = TestLibFixture.registerBobProfile(profile);
+    //     TestLibFixture.auth(authority);
+    // }
 
-    // test sub without sub only once mw
-    function testSubscription() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = bobProfileId;
-        bytes[] memory data = new bytes[](1);
+    // // test sub without sub only once mw
+    // function testSubscription() public {
+    //     uint256[] memory ids = new uint256[](1);
+    //     ids[0] = bobProfileId;
+    //     bytes[] memory data = new bytes[](1);
 
-        uint256 nonce = vm.getNonce(address(profile));
-        address subscribeProxy = LibDeploy._calcContractAddress(
-            address(profile),
-            nonce
-        );
-        // alice subscribes to bob
-        vm.expectEmit(true, true, false, true);
-        emit DeploySubscribeNFT(ids[0], subscribeProxy);
-        vm.expectEmit(true, false, false, true);
-        emit Subscribe(alice, ids, data, data);
-        vm.prank(alice);
-        uint256 nftid = profile.subscribe(ids, data, data)[0];
+    //     uint256 nonce = vm.getNonce(address(profile));
+    //     address subscribeProxy = LibDeploy._calcContractAddress(
+    //         address(profile),
+    //         nonce
+    //     );
+    //     // alice subscribes to bob
+    //     vm.expectEmit(true, true, false, true);
+    //     emit DeploySubscribeNFT(ids[0], subscribeProxy);
+    //     vm.expectEmit(true, false, false, true);
+    //     emit Subscribe(alice, ids, data, data);
+    //     vm.prank(alice);
+    //     uint256 nftid = profile.subscribe(ids, data, data)[0];
 
-        // check bob sub nft supply
-        address bobSubNFT = profile.getSubscribeNFT(bobProfileId);
-        assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 1);
+    //     // check bob sub nft supply
+    //     address bobSubNFT = profile.getSubscribeNFT(bobProfileId);
+    //     assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 1);
 
-        // check ownership of first sub nft
-        assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(alice));
+    //     // check ownership of first sub nft
+    //     assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(alice));
 
-        // alice subscribes again to bob
-        vm.expectEmit(true, false, false, true);
-        emit Subscribe(alice, ids, data, data);
-        vm.prank(alice);
-        nftid = profile.subscribe(ids, data, data)[0];
+    //     // alice subscribes again to bob
+    //     vm.expectEmit(true, false, false, true);
+    //     emit Subscribe(alice, ids, data, data);
+    //     vm.prank(alice);
+    //     nftid = profile.subscribe(ids, data, data)[0];
 
-        // check bob sub nft supply
-        assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 2);
+    //     // check bob sub nft supply
+    //     assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 2);
 
-        // check ownership of second sub nft
-        assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(alice));
-    }
+    //     // check ownership of second sub nft
+    //     assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(alice));
+    // }
 }

@@ -27,13 +27,6 @@ abstract contract Pausable {
     bool private _paused;
 
     /**
-     * @dev Initializes the contract in unpaused state.
-     */
-    constructor() {
-        _paused = false;
-    }
-
-    /**
      * @dev Modifier to make a function callable only when the contract is not paused.
      *
      * Requirements:

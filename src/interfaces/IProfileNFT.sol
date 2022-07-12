@@ -9,9 +9,8 @@ interface IProfileNFT is IProfileNFTEvents {
     /**
      * @notice Creates a profile and mints it to the recipient address.
      *
-     * @param params contains the recipient, handle, avatar and metadata.
-     * @param sig The EIP712 signature.
-     * @return uint256 profile id of the newly minted profile.
+     * @param params contains all params.
+     * @param data contains extra data.
      *
      * @dev The current function validates the caller address and the handle before minting
      * and the following conditions must be met:
@@ -24,7 +23,7 @@ interface IProfileNFT is IProfileNFTEvents {
      */
     function createProfile(
         DataTypes.CreateProfileParams calldata params,
-        DataTypes.EIP712Signature calldata sig
+        bytes calldata data
     ) external payable returns (uint256);
 
     /**
@@ -54,7 +53,7 @@ interface IProfileNFT is IProfileNFTEvents {
      *
      * @param descriptor The new descriptor address to set.
      */
-    function setProfileNFTDescriptor(address descriptor) external;
+    function setLink3ProfileDescriptor(address descriptor) external;
 
     /**
      * @notice Sets the NFT metadata as IPFS hash.
@@ -88,7 +87,7 @@ interface IProfileNFT is IProfileNFTEvents {
      *
      * @return address The descriptor address.
      */
-    function getProfileNFTDescriptor() external view returns (address);
+    function getLink3ProfileDescriptor() external view returns (address);
 
     /**
      * @notice Sets the profile NFT animation template.

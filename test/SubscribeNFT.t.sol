@@ -10,9 +10,10 @@ import { Constants } from "../src/libraries/Constants.sol";
 import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
 import { MockProfile } from "./utils/MockProfile.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
+import { TestDeployer } from "./utils/TestDeployer.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 
-contract SubscribeNFTTest is Test {
+contract SubscribeNFTTest is Test, TestDeployer {
     event Approval(
         address indexed owner,
         address indexed spender,
@@ -33,8 +34,9 @@ contract SubscribeNFTTest is Test {
     string constant symbol = "1890_SUB";
 
     function setUp() public {
-        profile = new MockProfile(address(0), address(0));
-        impl = new SubscribeNFT(address(profile));
+        profile = new MockProfile();
+        setProfile(address(profile));
+        impl = new SubscribeNFT();
         beacon = new UpgradeableBeacon(address(impl), address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,

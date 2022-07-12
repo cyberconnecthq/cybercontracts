@@ -4,6 +4,7 @@ pragma solidity 0.8.14;
 
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
+import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
@@ -17,8 +18,11 @@ import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
+import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
+import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
 
 /**
  * @title Profile NFT
@@ -28,6 +32,7 @@ import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 
 contract ProfileNFT is
     Pausable,
+    ReentrancyGuard,
     Auth,
     CyberNFTBase,
     UUPSUpgradeable,
@@ -35,12 +40,17 @@ contract ProfileNFT is
     IUpgradeable,
     IProfileNFT
 {
-    address public immutable subscribeNFTBeacon;
-    address public immutable essenceNFTBeacon;
+    address public immutable SUBSCRIBE_BEACON;
+    address public immutable ESSENCE_BEACON;
+    address public immutable ENGINE;
 
-    constructor(address _subBeacon, address _essenceBeacon) {
-        subscribeNFTBeacon = _subBeacon;
-        essenceNFTBeacon = _essenceBeacon;
+    constructor() {
+        ENGINE = msg.sender;
+        (, , address subBeacon, address essenceBeacon) = IProfileDeployer(
+            msg.sender
+        ).parameters();
+        SUBSCRIBE_BEACON = subBeacon;
+        ESSENCE_BEACON = essenceBeacon;
         _disableInitializers();
     }
 
@@ -49,21 +59,20 @@ contract ProfileNFT is
      *
      * @param name Name to set for the Profile NFT.
      * @param symbol Symbol to set for the Profile NFT.
-     * @param profileNFTDescriptor The profile NFT descriptor address to set for the Profile NFT.
+     * @param Link3ProfileDescriptor The profile NFT descriptor address to set for the Profile NFT.
      */
     function initialize(
         address _owner,
         string calldata name,
         string calldata symbol,
-        address profileNFTDescriptor,
+        address Link3ProfileDescriptor,
         RolesAuthority _rolesAuthority
     ) external initializer {
-        require(profileNFTDescriptor != address(0), "ZERO_ADDRESS");
+        require(Link3ProfileDescriptor != address(0), "ZERO_ADDRESS");
         CyberNFTBase._initialize(name, symbol);
         Auth.__Auth_Init(_owner, _rolesAuthority);
-
-        _profileNFTDescriptor = profileNFTDescriptor;
-        _setInitialFees();
+        ReentrancyGuard.__ReentrancyGuard_init();
+        _Link3ProfileDescriptor = Link3ProfileDescriptor;
 
         emit Initialize(_owner);
         // start with paused
@@ -73,35 +82,23 @@ contract ProfileNFT is
     /// @inheritdoc IProfileNFT
     function createProfile(
         DataTypes.CreateProfileParams calldata params,
-        DataTypes.EIP712Signature calldata sig
-    ) external payable override returns (uint256) {
-        _requiresExpectedSigner(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        Constants._CREATE_PROFILE_TYPEHASH,
-                        params.to,
-                        keccak256(bytes(params.handle)),
-                        keccak256(bytes(params.avatar)),
-                        keccak256(bytes(params.metadata)),
-                        nonces[params.to]++,
-                        sig.deadline
-                    )
-                )
-            ),
-            signer,
-            sig
-        );
+        bytes calldata data
+    ) external payable override nonReentrant returns (uint256) {
+        address profileMw = ICyberEngine(ENGINE)
+            .getNamespaceData(address(this))
+            .profileMw;
 
-        _requiresEnoughFee(params.handle, msg.value);
+        if (profileMw != address(0)) {
+            IProfileMiddleware(profileMw).preProcess{ value: msg.value }(
+                params,
+                data
+            );
+        }
+
         uint256 id = _createProfile(params);
-        emit Register(
-            params.to,
-            id,
-            params.handle,
-            params.avatar,
-            params.metadata
-        );
+        if (profileMw != address(0)) {
+            IProfileMiddleware(profileMw).postProcess(params, data);
+        }
         return id;
     }
 
@@ -109,9 +106,6 @@ contract ProfileNFT is
         internal
         returns (uint256)
     {
-        // create
-        _requiresValidHandle(params.handle);
-
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "HANDLE_TAKEN");
 
@@ -122,6 +116,13 @@ contract ProfileNFT is
 
         _profileIdByHandleHash[handleHash] = _totalCount;
         _metadataById[_totalCount] = params.metadata;
+        emit CreateProfile(
+            params.to,
+            id,
+            params.handle,
+            params.avatar,
+            params.metadata
+        );
 
         if (_addressToPrimaryProfile[params.to] == 0) {
             _setPrimaryProfile(params.to, id);
@@ -177,7 +178,7 @@ contract ProfileNFT is
         }
 
         return
-            IProfileNFTDescriptor(_profileNFTDescriptor).tokenURI(
+            IProfileNFTDescriptor(_Link3ProfileDescriptor).tokenURI(
                 DataTypes.ConstructTokenURIParams({
                     tokenId: tokenId,
                     handle: handle,
@@ -186,45 +187,14 @@ contract ProfileNFT is
             );
     }
 
-    /**
-     * @notice Verifies a handle for length and invalid characters.
-     *
-     * @param handle The handle to verify.
-     * @dev Throws if:
-     * - handle is empty
-     * - handle is too long
-     * - handle contains invalid characters
-     */
-    function _requiresValidHandle(string calldata handle) internal pure {
-        bytes memory byteHandle = bytes(handle);
-        require(
-            byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
-                byteHandle.length > 0,
-            "HANDLE_INVALID_LENGTH"
-        );
-
-        uint256 byteHandleLength = byteHandle.length;
-        for (uint256 i = 0; i < byteHandleLength; ) {
-            bytes1 b = byteHandle[i];
-            require(
-                (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
-                "HANDLE_INVALID_CHARACTER"
-            );
-            // optimation
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
     /// @inheritdoc IProfileNFT
-    function getProfileNFTDescriptor()
+    function getLink3ProfileDescriptor()
         external
         view
         override
         returns (address)
     {
-        return _profileNFTDescriptor;
+        return _Link3ProfileDescriptor;
     }
 
     /// @inheritdoc IProfileNFT
@@ -366,20 +336,20 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function setProfileNFTDescriptor(address descriptor)
+    function setLink3ProfileDescriptor(address descriptor)
         external
         override
         requiresAuth
     {
-        _profileNFTDescriptor = descriptor;
-        emit SetProfileNFTDescriptor(descriptor);
+        _Link3ProfileDescriptor = descriptor;
+        emit SetLink3ProfileDescriptor(descriptor);
     }
 
     function setAnimationTemplate(string calldata template)
         external
         requiresAuth
     {
-        IProfileNFTDescriptor(_profileNFTDescriptor).setAnimationTemplate(
+        IProfileNFTDescriptor(_Link3ProfileDescriptor).setAnimationTemplate(
             template
         );
 
@@ -487,26 +457,6 @@ contract ProfileNFT is
         _;
     }
 
-    /**
-     * @notice Checks if the fee is enough.
-     *
-     * @param handle The profile handle.
-     * @param amount The msg value.
-     */
-    function _requiresEnoughFee(string calldata handle, uint256 amount)
-        internal
-        view
-    {
-        bytes memory byteHandle = bytes(handle);
-        uint256 fee = feeMapping[DataTypes.Tier.Tier5];
-
-        require(byteHandle.length >= 1, "ZERO_LENGTH");
-        if (byteHandle.length < 6) {
-            fee = feeMapping[DataTypes.Tier(byteHandle.length - 1)];
-        }
-        require(amount >= fee, "INSUFFICIENT_FEE");
-    }
-
     function getSubscribeNFT(uint256 profileId)
         external
         view
@@ -602,7 +552,7 @@ contract ProfileNFT is
     function _deploySubscribeNFT(uint256 profileId) internal returns (address) {
         address subscribeNFT = address(
             new BeaconProxy(
-                subscribeNFTBeacon,
+                SUBSCRIBE_BEACON,
                 abi.encodeWithSelector(
                     ISubscribeNFT.initialize.selector,
                     profileId,
@@ -725,7 +675,7 @@ contract ProfileNFT is
                 _essenceByIdByProfileId[profileId][essenceId].name,
                 _essenceByIdByProfileId[profileId][essenceId].symbol
             );
-            essenceNFT = address(new BeaconProxy(essenceNFTBeacon, initData));
+            essenceNFT = address(new BeaconProxy(ESSENCE_BEACON, initData));
             _essenceByIdByProfileId[profileId][essenceId]
                 .essenceNFT = essenceNFT;
             emit DeployEssenceNFT(profileId, essenceId, essenceNFT);
@@ -932,71 +882,5 @@ contract ProfileNFT is
      */
     function isEssenceMwAllowed(address mw) external view returns (bool) {
         return _essenceMwAllowlist[mw];
-    }
-
-    /**
-     * @notice Withdraw to an address.
-     *
-     * @param to The receiver address.
-     * @param amount The amount sent.
-     */
-    function withdraw(address to, uint256 amount) external requiresAuth {
-        require(to != address(0), "ZERO_ADDRESS");
-        uint256 balance = address(this).balance;
-        require(balance >= amount, "INSUFFICIENT_BALANCE");
-        emit Withdraw(to, amount);
-        payable(to).transfer(amount);
-    }
-
-    /**
-     * @notice Sets the fee for tiers.
-     *
-     * @param tier The tier number.
-     * @param amount The fee amount to set.
-     */
-    function setFeeByTier(DataTypes.Tier tier, uint256 amount)
-        external
-        requiresAuth
-    {
-        _setFeeByTier(tier, amount);
-    }
-
-    /**
-     * @notice Sets the tier fee.
-     *
-     * @param tier The tier number.
-     * @param amount The fee amount.
-     */
-    function _setFeeByTier(DataTypes.Tier tier, uint256 amount) internal {
-        uint256 preAmount = feeMapping[tier];
-        feeMapping[tier] = amount;
-
-        emit SetFeeByTier(tier, preAmount, amount);
-    }
-
-    /**
-     * @notice Sets the initial tier fee.
-     */
-    function _setInitialFees() internal {
-        _setFeeByTier(DataTypes.Tier.Tier0, Constants._INITIAL_FEE_TIER0);
-        _setFeeByTier(DataTypes.Tier.Tier1, Constants._INITIAL_FEE_TIER1);
-        _setFeeByTier(DataTypes.Tier.Tier2, Constants._INITIAL_FEE_TIER2);
-        _setFeeByTier(DataTypes.Tier.Tier3, Constants._INITIAL_FEE_TIER3);
-        _setFeeByTier(DataTypes.Tier.Tier4, Constants._INITIAL_FEE_TIER4);
-        _setFeeByTier(DataTypes.Tier.Tier5, Constants._INITIAL_FEE_TIER5);
-    }
-
-    /**
-     * @notice Sets the new signer address.
-     *
-     * @param _signer The signer address.
-     * @dev The address can not be zero address.
-     */
-    function setSigner(address _signer) external requiresAuth {
-        require(_signer != address(0), "ZERO_ADDRESS");
-        address preSigner = signer;
-        signer = _signer;
-
-        emit SetSigner(preSigner, _signer);
     }
 }

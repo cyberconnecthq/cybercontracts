@@ -12,7 +12,7 @@ import { ProfileNFT } from "./ProfileNFT.sol";
  * @author CyberConnect
  * @notice This contract is used to set roles.
  */
-contract Roles is RolesAuthority {
+contract ProfileRoles is RolesAuthority {
     constructor(address owner, address profile)
         RolesAuthority(owner, Authority(address(0)))
     {
@@ -25,25 +25,6 @@ contract Roles is RolesAuthority {
      * @param profile The profile address
      */
     function _initSetup(address profile) internal {
-        setRoleCapability(
-            Constants._PROFILE_GOV_ROLE,
-            profile,
-            ProfileNFT.setSigner.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._PROFILE_GOV_ROLE,
-            profile,
-            ProfileNFT.setFeeByTier.selector,
-            true
-        );
-        setRoleCapability(
-            Constants._PROFILE_GOV_ROLE,
-            profile,
-            ProfileNFT.withdraw.selector,
-            true
-        );
-
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
             profile,
@@ -71,7 +52,7 @@ contract Roles is RolesAuthority {
         setRoleCapability(
             Constants._PROFILE_GOV_ROLE,
             profile,
-            ProfileNFT.setProfileNFTDescriptor.selector,
+            ProfileNFT.setLink3ProfileDescriptor.selector,
             true
         );
         setRoleCapability(

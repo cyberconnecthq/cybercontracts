@@ -14,14 +14,15 @@ import { DataTypes } from "../libraries/DataTypes.sol";
  * @author CyberConnect
  * @notice This contract is used to create profile NFT token uri.
  */
-contract ProfileNFTDescriptor is IProfileNFTDescriptor, Initializable {
-    address public immutable PROFILE; // solhint-disable-line
+// TODO: storage
+contract Link3ProfileDescriptor is IProfileNFTDescriptor, Initializable {
+    address public immutable OWNER; // solhint-disable-line
     string public animationTemplate;
     string internal constant BASE_URL = "https://link3.to/";
 
-    constructor(address profile) {
-        require(profile != address(0), "PROFILE_ADDRESS_CANNOT_BE_0");
-        PROFILE = profile;
+    constructor(address owner) {
+        require(owner != address(0), "PROFILE_ADDRESS_CANNOT_BE_0");
+        OWNER = owner;
         _disableInitializers();
     }
 
@@ -39,7 +40,7 @@ contract ProfileNFTDescriptor is IProfileNFTDescriptor, Initializable {
 
     /// @inheritdoc IProfileNFTDescriptor
     function setAnimationTemplate(string calldata template) external override {
-        require(msg.sender == PROFILE, "ONLY_PROFILE");
+        require(msg.sender == OWNER, "ONLY_PROFILE");
         animationTemplate = template;
     }
 

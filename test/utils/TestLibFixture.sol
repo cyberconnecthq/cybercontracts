@@ -37,42 +37,39 @@ library TestLibFixture {
         uint256 nonce,
         string memory handle
     ) internal returns (uint256 profileId) {
-        uint256 bobPk = 1;
-        address bob = vm.addr(bobPk);
-        // set signer
-        vm.prank(_GOV);
-        profile.setSigner(bob);
-
-        uint256 deadline = 100;
-        string memory avatar = "avatar";
-        string memory metadata = "metadata";
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._CREATE_PROFILE_TYPEHASH,
-                    bob,
-                    keccak256(bytes(handle)),
-                    keccak256(bytes(avatar)),
-                    keccak256(bytes(metadata)),
-                    nonce,
-                    deadline
-                )
-            ),
-            "Link3 Profile",
-            "1"
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-
-        require(profile.nonces(bob) == nonce);
-        profileId = profile.createProfile{
-            value: Constants._INITIAL_FEE_TIER2
-        }(
-            DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
-            DataTypes.EIP712Signature(v, r, s, deadline)
-        );
-        // require(profileId == 1);
-
-        require(profile.nonces(bob) == nonce + 1);
+        // uint256 bobPk = 1;
+        // address bob = vm.addr(bobPk);
+        // // set signer
+        // vm.prank(_GOV);
+        // profile.setSigner(bob);
+        // uint256 deadline = 100;
+        // string memory avatar = "avatar";
+        // string memory metadata = "metadata";
+        // bytes32 digest = TestLib712.hashTypedDataV4(
+        //     address(profile),
+        //     keccak256(
+        //         abi.encode(
+        //             Constants._CREATE_PROFILE_TYPEHASH,
+        //             bob,
+        //             keccak256(bytes(handle)),
+        //             keccak256(bytes(avatar)),
+        //             keccak256(bytes(metadata)),
+        //             nonce,
+        //             deadline
+        //         )
+        //     ),
+        //     "Link3 Profile",
+        //     "1"
+        // );
+        // (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+        // require(profile.nonces(bob) == nonce);
+        // profileId = profile.createProfile{
+        //     value: Constants._INITIAL_FEE_TIER2
+        // }(
+        //     DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
+        //     DataTypes.EIP712Signature(v, r, s, deadline)
+        // );
+        // // require(profileId == 1);
+        // require(profile.nonces(bob) == nonce + 1);
     }
 }

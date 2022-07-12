@@ -9,8 +9,7 @@ abstract contract ProfileNFTStorage {
     uint256 internal constant _VERSION = 1;
 
     // storage
-    address public signer;
-    address internal _profileNFTDescriptor;
+    address internal _Link3ProfileDescriptor;
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
     mapping(uint256 => string) internal _metadataById;
@@ -18,7 +17,6 @@ abstract contract ProfileNFTStorage {
     mapping(address => uint256) internal _addressToPrimaryProfile;
     mapping(uint256 => DataTypes.SubscribeStruct)
         internal _subscribeByProfileId;
-    mapping(DataTypes.Tier => uint256) public feeMapping;
     mapping(address => bool) internal _subscribeMwAllowlist;
     mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
         internal _essenceByIdByProfileId;
