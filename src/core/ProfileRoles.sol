@@ -4,7 +4,9 @@ pragma solidity 0.8.14;
 
 import { Authority } from "../dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+
 import { Constants } from "../libraries/Constants.sol";
+
 import { ProfileNFT } from "./ProfileNFT.sol";
 
 /**
