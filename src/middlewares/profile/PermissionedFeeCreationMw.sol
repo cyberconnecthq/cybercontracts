@@ -2,13 +2,16 @@
 
 pragma solidity 0.8.14;
 
+import "forge-std/console.sol";
+
 import { IProfileMiddleware } from "../../interfaces/IProfileMiddleware.sol";
-import { PermissionedMw } from "../base/PermissionedMw.sol";
-import { FeeMw } from "../base/FeeMw.sol";
+
 import { Constants } from "../../libraries/Constants.sol";
 import { DataTypes } from "../../libraries/DataTypes.sol";
+
 import { EIP712 } from "../../base/EIP712.sol";
-import "forge-std/console.sol";
+import { FeeMw } from "../base/FeeMw.sol";
+import { PermissionedMw } from "../base/PermissionedMw.sol";
 
 contract PermissionedFeeCreationMw is
     IProfileMiddleware,
