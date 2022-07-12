@@ -21,6 +21,7 @@ import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
 import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
+import { ActionEvents } from "../src/libraries/ActionEvents.sol";
 import { ProfileRoles } from "../src/core/ProfileRoles.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
@@ -141,7 +142,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         expected[0] = result;
 
         vm.expectEmit(true, false, false, true);
-        emit Subscribe(address(this), ids, datas, datas);
+        emit ActionEvents.Subscribe(address(this), ids, datas, datas);
 
         uint256[] memory called = profile.subscribe(ids, datas, datas);
         assertEq(called.length, expected.length);
@@ -283,7 +284,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.expectEmit(true, false, false, true);
-        emit Subscribe(charlie, profileIds, subDatas, subDatas);
+        emit ActionEvents.Subscribe(charlie, profileIds, subDatas, subDatas);
 
         profile.subscribeWithSig(
             profileIds,
@@ -550,7 +551,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         string memory symbol = "symbol";
         string memory uri = "uri";
 
-        emit RegisterEssence(
+        emit ActionEvents.RegisterEssence(
             profileId,
             expectedEssenceId,
             name,
@@ -604,7 +605,12 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.expectEmit(true, false, false, true);
-        emit CollectEssence(minter, profileId, new bytes(0), new bytes(0));
+        emit ActionEvents.CollectEssence(
+            minter,
+            profileId,
+            new bytes(0),
+            new bytes(0)
+        );
 
         vm.prank(minter);
         profile.collect(profileId, essenceId, new bytes(0), new bytes(0));
@@ -640,10 +646,15 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.expectEmit(true, true, false, true);
-        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
+        emit ActionEvents.DeployEssenceNFT(profileId, essenceId, essenceProxy);
 
         vm.expectEmit(true, false, false, true);
-        emit CollectEssence(minter, profileId, new bytes(0), new bytes(0));
+        emit ActionEvents.CollectEssence(
+            minter,
+            profileId,
+            new bytes(0),
+            new bytes(0)
+        );
 
         vm.prank(minter);
         profile.collect(profileId, essenceId, new bytes(0), new bytes(0));
@@ -679,13 +690,13 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.expectEmit(true, true, false, true);
-        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
+        emit ActionEvents.DeployEssenceNFT(profileId, essenceId, essenceProxy);
 
         bytes memory preData = new bytes(0);
         bytes memory postData = new bytes(0);
 
         vm.expectEmit(true, false, false, true);
-        emit CollectEssence(minter, profileId, preData, postData);
+        emit ActionEvents.CollectEssence(minter, profileId, preData, postData);
 
         // sign
         vm.warp(50);

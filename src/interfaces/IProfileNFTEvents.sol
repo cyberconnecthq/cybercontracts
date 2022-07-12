@@ -13,14 +13,6 @@ interface IProfileNFTEvents {
     event Initialize(address indexed owner);
 
     /**
-     * @dev Emitted when a new signer has been set.
-     *
-     * @param preSigner The previous signer address.
-     * @param newSigner The newly set signer address.
-     */
-    event SetSigner(address indexed preSigner, address indexed newSigner);
-
-    /**
      * @dev Emitted when a new box address has been set.
      *
      * @param preBoxAddr The previous box address.
@@ -84,29 +76,6 @@ interface IProfileNFTEvents {
     );
 
     /**
-     * @notice Emitted when an address has withdrawed.
-     *
-     * @param to The receiver address.
-     * @param amount The amount sent.
-     */
-    event Withdraw(address indexed to, uint256 indexed amount);
-
-    /**
-     * @notice Emitted when a subscription has been created.
-     *
-     * @param sender The sender address.
-     * @param profileIds The profile ids subscribed to.
-     * @param preDatas The subscription data for preprocess.
-     * @param postDatas The subscription data for postprocess.
-     */
-    event Subscribe(
-        address indexed sender,
-        uint256[] profileIds,
-        bytes[] preDatas,
-        bytes[] postDatas
-    );
-
-    /**
      * @notice Emitted when a subscription middleware has been allowed.
      *
      * @param mw The middleware address.
@@ -154,53 +123,5 @@ interface IProfileNFTEvents {
     event SetSubscribeTokenURI(
         uint256 indexed profileId,
         string subscribeTokenURI
-    );
-
-    /**
-     * @notice Emitted when a new subscribe nft has been deployed.
-     *
-     * @param profileId The profile id.
-     * @param subscribeNFT The newly deployed subscribe nft address.
-     */
-    event DeploySubscribeNFT(
-        uint256 indexed profileId,
-        address indexed subscribeNFT
-    );
-    /**
-     * @notice Emitted when a new essence nft has been deployed.
-     *
-     * @param profileId The profile id.
-     * @param essenceId The essence id.
-     * @param essenceNFT The newly deployed subscribe nft address.
-     */
-    event DeployEssenceNFT(
-        uint256 indexed profileId,
-        uint256 indexed essenceId,
-        address indexed essenceNFT
-    );
-
-    /**
-     * @notice Emitted when a subscription has been created.
-     *
-     * @param collector The collector address.
-     * @param profileId The profile ids subscribed to.
-     * @param preData The subscription data for preprocess.
-     * @param postData The subscription data for postprocess.
-     */
-    event CollectEssence(
-        address indexed collector,
-        uint256 profileId,
-        bytes preData,
-        bytes postData
-    );
-
-    event RegisterEssence(
-        uint256 indexed profileId,
-        uint256 indexed essenceId,
-        string name,
-        string symbol,
-        string essenceTokenURI,
-        address essenceMw,
-        bytes prepareReturnData
     );
 }
