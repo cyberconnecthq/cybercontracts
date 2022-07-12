@@ -14,7 +14,7 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
-import { Auth } from "../dependencies/solmate/Auth.sol";
+import { Auth, Authority } from "../dependencies/solmate/Auth.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
@@ -22,7 +22,7 @@ import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
-import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+// import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
 
 /**
@@ -51,7 +51,7 @@ contract ProfileNFT is
 
     constructor() {
         ENGINE = msg.sender;
-        (, , address subBeacon, address essenceBeacon) = IProfileDeployer(
+        (address subBeacon, address essenceBeacon) = IProfileDeployer(
             msg.sender
         ).parameters();
         SUBSCRIBE_BEACON = subBeacon;
@@ -71,11 +71,11 @@ contract ProfileNFT is
         string calldata name,
         string calldata symbol,
         address nftDescriptor,
-        RolesAuthority _rolesAuthority
+        address _rolesAuthority
     ) external initializer {
         require(nftDescriptor != address(0), "ZERO_ADDRESS");
         CyberNFTBase._initialize(name, symbol);
-        Auth.__Auth_Init(_owner, _rolesAuthority);
+        Auth.__Auth_Init(_owner, Authority(_rolesAuthority));
         ReentrancyGuard.__ReentrancyGuard_init();
         _nftDescriptor = nftDescriptor;
 

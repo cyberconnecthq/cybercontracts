@@ -4,7 +4,7 @@ pragma solidity 0.8.14;
 
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
-import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
+import { IEssenceDeployer } from "../interfaces/IEssenceDeployer.sol";
 
 import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { EssenceNFTStorage } from "../storages/EssenceNFTStorage.sol";
@@ -13,8 +13,7 @@ contract EssenceNFT is CyberNFTBase, EssenceNFTStorage, IUpgradeable {
     address public immutable PROFILE; // solhint-disable-line
 
     constructor() {
-        (, address profileProxy, , ) = IProfileDeployer(msg.sender)
-            .parameters();
+        address profileProxy = IEssenceDeployer(msg.sender).parameters();
         require(profileProxy != address(0), "ZERO_ADDRESS");
         PROFILE = profileProxy;
         _disableInitializers();
