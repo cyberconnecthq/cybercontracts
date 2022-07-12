@@ -49,6 +49,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     address internal alice = address(0xA11CE);
     address subscribeMw = address(0xCA11);
     address essenceMw = address(0xCA112);
+    bytes internal profileData = "0x1";
 
     function setUp() public {
         vm.etch(subscribeMw, address(this).code);

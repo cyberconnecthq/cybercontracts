@@ -54,19 +54,19 @@ interface IProfileNFTEvents {
     event SetMetadata(uint256 indexed profileId, string newMetadata);
 
     /**
-     * @notice Emitted when a primary profile has been set.
-     *
-     * @param profileId The profile id.
-     */
-    event SetPrimaryProfile(address indexed user, uint256 indexed profileId);
-
-    /**
      * @notice Emitted when a new avatar has been set to a profile.
      *
      * @param profileId The profile id.
      * @param newAvatar The newly set avatar.
      */
     event SetAvatar(uint256 indexed profileId, string indexed newAvatar);
+
+    /**
+     * @notice Emitted when a primary profile has been set.
+     *
+     * @param profileId The profile id.
+     */
+    event SetPrimaryProfile(address indexed user, uint256 indexed profileId);
 
     /**
      * @notice Emitted when the operator approval has been set.
@@ -81,23 +81,6 @@ interface IProfileNFTEvents {
         address indexed operator,
         bool prevApproved,
         bool approved
-    );
-
-    /**
-     * @notice Emitted when a new profile been created.
-     *
-     * @param to The receiver address.
-     * @param profileId The newly generated profile id.
-     * @param handle The newly set handle.
-     * @param avatar The newly set avatar.
-     * @param metadata The newly set metadata.
-     */
-    event CreateProfile(
-        address indexed to,
-        uint256 indexed profileId,
-        string handle,
-        string avatar,
-        string metadata
     );
 
     /**

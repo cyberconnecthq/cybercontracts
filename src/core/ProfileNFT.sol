@@ -9,6 +9,7 @@ import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { LibString } from "../libraries/LibString.sol";
+import { Actions } from "../libraries/Actions.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
@@ -83,6 +84,10 @@ contract ProfileNFT is
         _pause();
     }
 
+    function _createProfileInternal(address to) internal returns (uint256) {
+        return _mint(to);
+    }
+
     /// @inheritdoc IProfileNFT
     function createProfile(
         DataTypes.CreateProfileParams calldata params,
@@ -99,38 +104,22 @@ contract ProfileNFT is
             );
         }
 
-        uint256 id = _createProfile(params);
-        if (profileMw != address(0)) {
-            IProfileMiddleware(profileMw).postProcess(params, data);
-        }
-        return id;
-    }
-
-    function _createProfile(DataTypes.CreateProfileParams calldata params)
-        internal
-        returns (uint256)
-    {
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "HANDLE_TAKEN");
 
         uint256 id = _mint(params.to);
-
-        _profileById[_totalCount].handle = params.handle;
-        _profileById[_totalCount].avatar = params.avatar;
-
-        _profileIdByHandleHash[handleHash] = _totalCount;
-        _metadataById[_totalCount] = params.metadata;
-        emit CreateProfile(
-            params.to,
+        Actions.createProfile(
             id,
-            params.handle,
-            params.avatar,
-            params.metadata
+            _totalCount,
+            params,
+            _profileById,
+            _profileIdByHandleHash,
+            _metadataById,
+            _addressToPrimaryProfile
         );
 
-        if (_addressToPrimaryProfile[params.to] == 0) {
-            _setPrimaryProfile(params.to, id);
-            emit SetPrimaryProfile(params.to, id);
+        if (profileMw != address(0)) {
+            IProfileMiddleware(profileMw).postProcess(params, data);
         }
         return id;
     }
