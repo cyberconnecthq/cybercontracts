@@ -46,6 +46,9 @@ Some opinionated design decisino:
 5. (optional) To run static analysis
    `slither src/`
 
+6. To see contract sizes
+   `yarn size`
+
 # Deployment:
 
 (Replace `rinkeby` with `anvil` or other supported network) 0. Create `.env.rinkeby` file with following env

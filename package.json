@@ -17,13 +17,17 @@
     "post_deploy": "node misc/post_deploy.js",
     "qrtest": "rm -rf ./test/qrcode ./misc/qrcode/html ./misc/qrcode/svg && node misc/qrcode/gen-sol.js && mkdir -pv misc/qrcode/svg && forge test --match-contract QRSVGIntegration -vvv && node misc/qrcode/gen-html.js  && node misc/qrcode/puppet.js",
     "deploy_deployer:rinkeby": "source .env.rinkeby && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
-    "deploy_deployer:anvil": "source .env.anvil && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv"
+    "deploy_deployer:anvil": "source .env.anvil && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
+    "size": "hardhat size-contracts"
   },
   "devDependencies": {
     "axios": "^0.27.2",
+    "chai": "^4.3.6",
     "dotenv": "^16.0.1",
     "ethers": "^5.6.9",
     "form-data": "^4.0.0",
+    "hardhat-contract-sizer": "^2.6.1",
+    "hardhat-preprocessor": "^0.1.4",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.1",
     "markdown-table": "^3.0.2",
@@ -33,8 +37,10 @@
     "puppeteer-cluster": "^0.23.0",
     "solhint": "^3.3.7",
     "solhint-plugin-prettier": "^0.0.5",
-    "ts-node": "^10.8.1",
-    "typescript": "^4.7.3"
+    "solidity-coverage": "^0.7.21",
+    "ts-node": "^10.8.2",
+    "typechain": "^8.1.0",
+    "typescript": "^4.7.4"
   },
   "lint-staged": {
     "*.{sol,js,md,html}": "prettier --write"
@@ -51,5 +57,8 @@
       }
     ]
   },
-  "type": "module"
+  "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "hardhat": "^2.10.0"
+  }
 }
