@@ -9,6 +9,7 @@ import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { LibString } from "../libraries/LibString.sol";
+import { Actions } from "../libraries/Actions.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
@@ -99,38 +100,22 @@ contract ProfileNFT is
             );
         }
 
-        uint256 id = _createProfile(params);
-        if (profileMw != address(0)) {
-            IProfileMiddleware(profileMw).postProcess(params, data);
-        }
-        return id;
-    }
-
-    function _createProfile(DataTypes.CreateProfileParams calldata params)
-        internal
-        returns (uint256)
-    {
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "HANDLE_TAKEN");
 
         uint256 id = _mint(params.to);
-
-        _profileById[_totalCount].handle = params.handle;
-        _profileById[_totalCount].avatar = params.avatar;
-
-        _profileIdByHandleHash[handleHash] = _totalCount;
-        _metadataById[_totalCount] = params.metadata;
-        emit CreateProfile(
-            params.to,
+        Actions.createProfile(
             id,
-            params.handle,
-            params.avatar,
-            params.metadata
+            _totalCount,
+            params,
+            _profileById,
+            _profileIdByHandleHash,
+            _metadataById,
+            _addressToPrimaryProfile
         );
 
-        if (_addressToPrimaryProfile[params.to] == 0) {
-            _setPrimaryProfile(params.to, id);
-            emit SetPrimaryProfile(params.to, id);
+        if (profileMw != address(0)) {
+            IProfileMiddleware(profileMw).postProcess(params, data);
         }
         return id;
     }
@@ -192,12 +177,7 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function getNFTDescriptor()
-        external
-        view
-        override
-        returns (address)
-    {
+    function getNFTDescriptor() external view override returns (address) {
         return _nftDescriptor;
     }
 
@@ -353,9 +333,7 @@ contract ProfileNFT is
         external
         requiresAuth
     {
-        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(
-            template
-        );
+        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
 
         emit SetAnimationTemplate(template);
     }
@@ -512,72 +490,22 @@ contract ProfileNFT is
         bytes[] calldata preDatas,
         bytes[] calldata postDatas
     ) internal returns (uint256[] memory result) {
-        require(profileIds.length > 0, "NO_PROFILE_IDS");
-        require(
-            profileIds.length == preDatas.length &&
-                preDatas.length == postDatas.length,
-            "LENGTH_MISMATCH"
-        );
-        result = new uint256[](profileIds.length);
         for (uint256 i = 0; i < profileIds.length; i++) {
             _requireMinted(profileIds[i]);
-            address subscribeNFT = _subscribeByProfileId[profileIds[i]]
-                .subscribeNFT;
-            address subscribeMw = _subscribeByProfileId[profileIds[i]]
-                .subscribeMw;
-            // lazy deploy subscribe NFT
-            if (subscribeNFT == address(0)) {
-                subscribeNFT = _deploySubscribeNFT(profileIds[i]);
-            }
-            // run middleware before subscribe
-            if (subscribeMw != address(0)) {
-                ISubscribeMiddleware(subscribeMw).preProcess(
-                    profileIds[i],
-                    sender,
-                    subscribeNFT,
-                    preDatas[i]
-                );
-            }
-            result[i] = ISubscribeNFT(subscribeNFT).mint(sender);
-            if (subscribeMw != address(0)) {
-                ISubscribeMiddleware(subscribeMw).postProcess(
-                    profileIds[i],
-                    sender,
-                    subscribeNFT,
-                    postDatas[i]
-                );
-            }
         }
 
-        emit Subscribe(sender, profileIds, preDatas, postDatas);
-        return result;
-    }
-
-    function _deploySubscribeNFT(uint256 profileId) internal returns (address) {
-        address subscribeNFT = address(
-            new BeaconProxy(
-                SUBSCRIBE_BEACON,
-                abi.encodeWithSelector(
-                    ISubscribeNFT.initialize.selector,
-                    profileId,
-                    string(
-                        abi.encodePacked(
-                            _profileById[profileId].handle,
-                            Constants._SUBSCRIBE_NFT_NAME_SUFFIX
-                        )
-                    ),
-                    string(
-                        abi.encodePacked(
-                            LibString.toUpper(_profileById[profileId].handle),
-                            Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
-                        )
-                    )
-                )
-            )
-        );
-        _subscribeByProfileId[profileId].subscribeNFT = subscribeNFT;
-        emit DeploySubscribeNFT(profileId, subscribeNFT);
-        return subscribeNFT;
+        return
+            Actions.subscribe(
+                DataTypes.SubscribeData(
+                    sender,
+                    profileIds,
+                    preDatas,
+                    postDatas,
+                    SUBSCRIBE_BEACON
+                ),
+                _subscribeByProfileId,
+                _profileById
+            );
     }
 
     /**
@@ -660,53 +588,19 @@ contract ProfileNFT is
         bytes calldata postData
     ) internal returns (uint256) {
         _requireMinted(profileId);
-        require(
-            bytes(_essenceByIdByProfileId[profileId][essenceId].tokenURI)
-                .length != 0,
-            "ESSENCE_NOT_REGISTERED"
-        );
-        address essenceNFT = _essenceByIdByProfileId[profileId][essenceId]
-            .essenceNFT;
-        address essenceMw = _essenceByIdByProfileId[profileId][essenceId]
-            .essenceMw;
 
-        // lazy deploy essence NFT
-        if (essenceNFT == address(0)) {
-            bytes memory initData = abi.encodeWithSelector(
-                IEssenceNFT.initialize.selector,
-                profileId,
-                essenceId,
-                _essenceByIdByProfileId[profileId][essenceId].name,
-                _essenceByIdByProfileId[profileId][essenceId].symbol
+        return
+            Actions.collect(
+                DataTypes.CollectData(
+                    collector,
+                    profileId,
+                    essenceId,
+                    preData,
+                    postData,
+                    ESSENCE_BEACON
+                ),
+                _essenceByIdByProfileId
             );
-            essenceNFT = address(new BeaconProxy(ESSENCE_BEACON, initData));
-            _essenceByIdByProfileId[profileId][essenceId]
-                .essenceNFT = essenceNFT;
-            emit DeployEssenceNFT(profileId, essenceId, essenceNFT);
-        }
-        // run middleware before collectign essence
-        if (essenceMw != address(0)) {
-            IEssenceMiddleware(essenceMw).preProcess(
-                profileId,
-                essenceId,
-                collector,
-                essenceNFT,
-                preData
-            );
-        }
-        uint256 tokenId = IEssenceNFT(essenceNFT).mint(collector);
-        if (essenceMw != address(0)) {
-            IEssenceMiddleware(essenceMw).postProcess(
-                profileId,
-                essenceId,
-                collector,
-                essenceNFT,
-                postData
-            );
-        }
-
-        emit CollectEssence(collector, profileId, preData, postData);
-        return tokenId;
     }
 
     function collect(
@@ -756,51 +650,19 @@ contract ProfileNFT is
         bytes calldata initData
     ) external onlyProfileOwnerOrOperator(profileId) returns (uint256) {
         return
-            _registerEssence(
-                profileId,
-                name,
-                symbol,
-                essenceTokenURI,
-                essenceMw,
-                initData
+            Actions.registerEssence(
+                DataTypes.RegisterEssenceData(
+                    profileId,
+                    name,
+                    symbol,
+                    essenceTokenURI,
+                    essenceMw,
+                    initData
+                ),
+                _profileById,
+                _essenceByIdByProfileId,
+                _essenceMwAllowlist
             );
-    }
-
-    function _registerEssence(
-        uint256 profileId,
-        string calldata name,
-        string calldata symbol,
-        string calldata essenceTokenURI,
-        address essenceMw,
-        bytes calldata prepareData
-    ) internal returns (uint256) {
-        require(
-            essenceMw == address(0) || _essenceMwAllowlist[essenceMw],
-            "ESSENCE_MW_NOT_ALLOWED"
-        );
-        uint256 id = ++_profileById[profileId].essenceCount;
-        _essenceByIdByProfileId[profileId][id].name = name;
-        _essenceByIdByProfileId[profileId][id].symbol = symbol;
-        _essenceByIdByProfileId[profileId][id].tokenURI = essenceTokenURI;
-        bytes memory returnData;
-        if (essenceMw != address(0)) {
-            _essenceByIdByProfileId[profileId][id].essenceMw = essenceMw;
-            returnData = IEssenceMiddleware(essenceMw).prepare(
-                profileId,
-                id,
-                prepareData
-            );
-        }
-        emit RegisterEssence(
-            profileId,
-            id,
-            name,
-            symbol,
-            essenceTokenURI,
-            essenceMw,
-            returnData
-        );
-        return id;
     }
 
     /**

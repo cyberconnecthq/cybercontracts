@@ -30,6 +30,32 @@ library DataTypes {
         address descriptor;
     }
 
+    struct SubscribeData {
+        address sender;
+        uint256[] profileIds;
+        bytes[] preDatas;
+        bytes[] postDatas;
+        address subBeacon;
+    }
+
+    struct CollectData {
+        address collector;
+        uint256 profileId;
+        uint256 essenceId;
+        bytes preData;
+        bytes postData;
+        address essBeacon;
+    }
+
+    struct RegisterEssenceData {
+        uint256 profileId;
+        string name;
+        string symbol;
+        string essenceTokenURI;
+        address essenceMw;
+        bytes prepareData;
+    }
+
     struct ProfileStruct {
         string handle;
         string avatar;

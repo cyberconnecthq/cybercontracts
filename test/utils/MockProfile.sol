@@ -4,6 +4,7 @@ pragma solidity 0.8.14;
 
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
+import { Actions } from "../../src/libraries/Actions.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
 import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
 
@@ -29,6 +30,16 @@ contract MockProfile is ProfileNFT {
         external
         returns (uint256)
     {
-        return _createProfile(params);
+        uint256 id = _mint(params.to);
+        Actions.createProfile(
+            id,
+            _totalCount,
+            params,
+            _profileById,
+            _profileIdByHandleHash,
+            _metadataById,
+            _addressToPrimaryProfile
+        );
+        return id;
     }
 }
