@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import "./LibString.sol";
-import "../dependencies/openzeppelin/Base64.sol";
 
 pragma solidity 0.8.14;
+
+import "../dependencies/openzeppelin/Base64.sol";
+
+import "./LibString.sol";
 
 library QRSVG {
     uint256 internal constant SIZE = 29;
