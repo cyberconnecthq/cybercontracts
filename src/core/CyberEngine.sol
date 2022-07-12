@@ -2,24 +2,28 @@
 
 pragma solidity 0.8.14;
 
+import { ERC721 } from "../dependencies/solmate/ERC721.sol";
+import { Auth, Authority } from "../dependencies/solmate/Auth.sol";
+import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
-import { Initializable } from "../upgradeability/Initializable.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
+import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
+import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
+
 import { ProfileNFT } from "./ProfileNFT.sol";
 import { SubscribeNFT } from "./SubscribeNFT.sol";
 import { EssenceNFT } from "./EssenceNFT.sol";
 import { ProfileRoles } from "./ProfileRoles.sol";
-import { Auth, Authority } from "../dependencies/solmate/Auth.sol";
-import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+
 import { DataTypes } from "../libraries/DataTypes.sol";
 import { Constants } from "../libraries/Constants.sol";
-import { ERC721 } from "../dependencies/solmate/ERC721.sol";
+
 import { CyberEngineStorage } from "../storages/CyberEngineStorage.sol";
-import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
+import { Initializable } from "../upgradeability/Initializable.sol";
 import { UpgradeableBeacon } from "../upgradeability/UpgradeableBeacon.sol";
-import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
 
 /**
  * @title CyberEngine
