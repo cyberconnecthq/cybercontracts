@@ -2,11 +2,12 @@
 
 pragma solidity 0.8.14;
 
-import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
-import { EssenceNFTStorage } from "../storages/EssenceNFTStorage.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
+
+import { CyberNFTBase } from "../base/CyberNFTBase.sol";
+import { EssenceNFTStorage } from "../storages/EssenceNFTStorage.sol";
 
 contract EssenceNFT is CyberNFTBase, EssenceNFTStorage, IUpgradeable {
     address public immutable PROFILE; // solhint-disable-line
