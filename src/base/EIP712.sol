@@ -14,6 +14,19 @@ abstract contract EIP712 {
     function _requiresExpectedSigner(
         bytes32 digest,
         address expectedSigner,
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        uint256 deadline
+    ) internal view {
+        require(deadline >= block.timestamp, "DEADLINE_EXCEEDED");
+        address recoveredAddress = ecrecover(digest, v, r, s);
+        require(recoveredAddress == expectedSigner, "INVALID_SIGNATURE");
+    }
+
+    function _requiresExpectedSigner(
+        bytes32 digest,
+        address expectedSigner,
         DataTypes.EIP712Signature calldata sig
     ) internal view {
         require(sig.deadline >= block.timestamp, "DEADLINE_EXCEEDED");

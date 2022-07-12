@@ -3,6 +3,12 @@
 pragma solidity 0.8.14;
 
 library DataTypes {
+    struct DeployParameters {
+        address engine;
+        address profileProxy;
+        address subBeacon;
+        address essenceBeacon;
+    }
     struct EIP712Signature {
         uint8 v;
         bytes32 r;

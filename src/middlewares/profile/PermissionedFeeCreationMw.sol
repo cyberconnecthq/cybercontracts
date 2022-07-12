@@ -15,6 +15,15 @@ contract PermissionedFeeCreationMw is
     PermissionedMw,
     FeeMw
 {
+    function _domainSeperatorName()
+        internal
+        view
+        override
+        returns (string memory)
+    {
+        return "PermissionedFeeCreationMw";
+    }
+
     struct MiddlewareData {
         address signer;
         address recipient;
@@ -58,8 +67,7 @@ contract PermissionedFeeCreationMw is
             uint256 tier2Fee,
             uint256 tier3Fee,
             uint256 tier4Fee,
-            uint256 tier5Fee,
-
+            uint256 tier5Fee
         ) = abi.decode(
                 data,
                 (
@@ -97,7 +105,7 @@ contract PermissionedFeeCreationMw is
         Tier tier,
         uint256 amount
     ) internal {
-        MiddlewareData memory mwData = mwDataByNamespace[namespace];
+        MiddlewareData storage mwData = mwDataByNamespace[namespace];
         uint256 preAmount = mwData.feeMapping[tier];
         mwData.feeMapping[tier] = amount;
 
@@ -110,7 +118,7 @@ contract PermissionedFeeCreationMw is
         uint256 amount
     ) internal view {
         bytes memory byteHandle = bytes(handle);
-        MiddlewareData memory mwData = mwDataByNamespace[namespace];
+        MiddlewareData storage mwData = mwDataByNamespace[namespace];
         uint256 fee = mwData.feeMapping[Tier.Tier5];
 
         require(byteHandle.length >= 1, "INVALID_HANDLE_LENGTH");
@@ -118,16 +126,6 @@ contract PermissionedFeeCreationMw is
             fee = mwData.feeMapping[Tier(byteHandle.length - 1)];
         }
         require(amount >= fee, "INSUFFICIENT_FEE");
-    }
-
-    function _requiresExpectedSigner(
-        bytes32 digest,
-        address expectedSigner,
-        DataTypes.EIP712Signature calldata sig
-    ) internal view {
-        require(sig.deadline >= block.timestamp, "DEADLINE_EXCEEDED");
-        address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
-        require(recoveredAddress == expectedSigner, "INVALID_SIGNATURE");
     }
 
     // TODO consider move it to a spearate mw
@@ -157,20 +155,38 @@ contract PermissionedFeeCreationMw is
      * @inheritdoc IProfileMiddleware
      */
     function preProcess(
-        DataTypes.CreateProfileParams params,
+        DataTypes.CreateProfileParams calldata params,
         bytes calldata data
     ) external payable onlyValidNamespace(msg.sender) {
-        address namespace = msg.sender;
-        uint256 fee = msg.value;
-        MiddlewareData memory mwData = mwDataByNamespace[namespace];
+        MiddlewareData storage mwData = mwDataByNamespace[msg.sender];
 
-        (uint8 v, bytes32 r, bytes32 s, uint256 deadline, ) = abi.decode(
+        (uint8 v, bytes32 r, bytes32 s, uint256 deadline) = abi.decode(
             data,
             (uint8, bytes32, bytes32, uint256)
         );
 
         _requiresValidHandle(params.handle);
-        _requiresEnoughFee(namespace, params.handle, fee);
+        _requiresEnoughFee(msg.sender, params.handle, msg.value);
+        _requiresValidSig(params, v, r, s, deadline, mwData);
+
+        uint256 treasuryCollected = (msg.value * _treasuryFee()) /
+            Constants._MAX_BPS;
+        uint256 actualCollected = msg.value - treasuryCollected;
+
+        payable(mwData.recipient).transfer(actualCollected);
+        if (treasuryCollected > 0) {
+            payable(_treasuryAddress()).transfer(treasuryCollected);
+        }
+    }
+
+    function _requiresValidSig(
+        DataTypes.CreateProfileParams calldata params,
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        uint256 deadline,
+        MiddlewareData storage mwData
+    ) internal {
         _requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
@@ -186,21 +202,16 @@ contract PermissionedFeeCreationMw is
                 )
             ),
             mwData.signer,
-            DataTypes.EIP712Signature(v, r, s, deadline)
+            v,
+            r,
+            s,
+            deadline
         );
-
-        uint256 treasuryCollected = (fee * _treasuryFee()) / Constants._MAX_BPS;
-        uint256 actualCollected = fee - treasuryCollected;
-
-        payable(mwData.recipient).transfer(actualCollected);
-        if (treasuryCollected > 0) {
-            payable(_treasuryAddress()).transfer(treasuryCollected);
-        }
     }
 
     /// @inheritdoc IProfileMiddleware
     function postProcess(
-        DataTypes.CreateProfileParams params,
+        DataTypes.CreateProfileParams calldata params,
         bytes calldata data
     ) external {
         // do nothing

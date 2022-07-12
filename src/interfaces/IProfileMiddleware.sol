@@ -10,12 +10,12 @@ interface IProfileMiddleware {
         returns (bytes memory);
 
     function preProcess(
-        DataTypes.CreateProfileParams params,
+        DataTypes.CreateProfileParams calldata params,
         bytes calldata data
     ) external payable;
 
     function postProcess(
-        DataTypes.CreateProfileParams params,
+        DataTypes.CreateProfileParams calldata params,
         bytes calldata data
     ) external;
 }

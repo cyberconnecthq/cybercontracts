@@ -13,15 +13,16 @@ import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibString } from "../src/libraries/LibString.sol";
-import { ProfileNFTDescriptor } from "../src/periphery/ProfileNFTDescriptor.sol";
-import { MockProfileBypassSig } from "./utils/MockProfileBypassSig.sol";
+import { Link3ProfileDescriptor } from "../src/periphery/Link3ProfileDescriptor.sol";
+import { MockProfile } from "./utils/MockProfile.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 import { ProfileRoles } from "../src/core/ProfileRoles.sol";
 import { Base64 } from "../src/dependencies/openzeppelin/Base64.sol";
+import { TestDeployer } from "./utils/TestDeployer.sol";
 
-contract ProfileNFTTest is Test {
-    MockProfileBypassSig internal token;
-    ProfileNFTDescriptor internal descriptor;
+contract ProfileNFTTest is Test, TestDeployer {
+    MockProfile internal token;
+    Link3ProfileDescriptor internal descriptor;
     RolesAuthority internal rolesAuthority;
     address constant alice = address(0xA11CE);
     address constant bob = address(0xA12CE);
@@ -55,14 +56,14 @@ contract ProfileNFTTest is Test {
         );
 
     function setUp() public {
-        MockProfileBypassSig tokenImpl = new MockProfileBypassSig();
+        MockProfile tokenImpl = new MockProfile();
         uint256 nonce = vm.getNonce(address(this));
         address profileAddr = LibDeploy._calcContractAddress(
             address(this),
             nonce + 2
         );
-        rolesAuthority = new Roles(address(this), profileAddr);
-        descriptor = new ProfileNFTDescriptor(profileAddr);
+        rolesAuthority = new ProfileRoles(address(this), profileAddr);
+        descriptor = new Link3ProfileDescriptor(profileAddr);
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             address(0),
@@ -72,7 +73,7 @@ contract ProfileNFTTest is Test {
             rolesAuthority
         );
         ERC1967Proxy profileProxy = new ERC1967Proxy(address(tokenImpl), data);
-        token = MockProfileBypassSig(address(profileProxy));
+        token = MockProfile(address(profileProxy));
         rolesAuthority.setUserRole(
             address(gov),
             Constants._PROFILE_GOV_ROLE,
@@ -84,8 +85,8 @@ contract ProfileNFTTest is Test {
         assertEq(token.name(), "TestProfile");
         assertEq(token.symbol(), "TP");
         assertEq(token.paused(), true);
-        assertEq(token.subscribeNFTBeacon(), address(0));
-        assertEq(token.essenceNFTBeacon(), address(0));
+        assertEq(token.SUBSCRIBE_BEACON(), address(0));
+        assertEq(token.ESSENCE_BEACON(), address(0));
     }
 
     function testCannotGetTokenURIOfUnmintted() public {
@@ -113,50 +114,50 @@ contract ProfileNFTTest is Test {
         token.createProfile(createProfileDataAlice);
     }
 
-    function testCannotCreateProfileLongerThanMaxHandleLength() public {
-        vm.expectRevert("HANDLE_INVALID_LENGTH");
-        token.createProfile(
-            DataTypes.CreateProfileParams(
-                alice,
-                "aliceandbobisareallylongname",
-                "https://example.com/alice.jpg",
-                "metadata"
-            )
-        );
-    }
+    // function testCannotCreateProfileLongerThanMaxHandleLength() public {
+    //     vm.expectRevert("HANDLE_INVALID_LENGTH");
+    //     token.createProfile(
+    //         DataTypes.CreateProfileParams(
+    //             alice,
+    //             "aliceandbobisareallylongname",
+    //             "https://example.com/alice.jpg",
+    //             "metadata"
+    //         )
+    //     );
+    // }
 
-    function testCannotCreateProfileWithAnInvalidCharacter() public {
-        vm.expectRevert("HANDLE_INVALID_CHARACTER");
-        token.createProfile(
-            DataTypes.CreateProfileParams(
-                alice,
-                "alice&bob",
-                imageUri,
-                "metadata"
-            )
-        );
-    }
+    // function testCannotCreateProfileWithAnInvalidCharacter() public {
+    //     vm.expectRevert("HANDLE_INVALID_CHARACTER");
+    //     token.createProfile(
+    //         DataTypes.CreateProfileParams(
+    //             alice,
+    //             "alice&bob",
+    //             imageUri,
+    //             "metadata"
+    //         )
+    //     );
+    // }
 
-    function testCannotCreateProfileWith0LenthHandle() public {
-        vm.expectRevert("HANDLE_INVALID_LENGTH");
-        token.createProfile(
-            DataTypes.CreateProfileParams(alice, "", imageUri, "metadata")
-        );
-    }
+    // function testCannotCreateProfileWith0LenthHandle() public {
+    //     vm.expectRevert("HANDLE_INVALID_LENGTH");
+    //     token.createProfile(
+    //         DataTypes.CreateProfileParams(alice, "", imageUri, "metadata")
+    //     );
+    // }
 
-    function testCannotCreateProfileWithACapitalLetter() public {
-        vm.expectRevert("HANDLE_INVALID_CHARACTER");
-        token.createProfile(
-            DataTypes.CreateProfileParams(alice, "Test", imageUri, "metadata")
-        );
-    }
+    // function testCannotCreateProfileWithACapitalLetter() public {
+    //     vm.expectRevert("HANDLE_INVALID_CHARACTER");
+    //     token.createProfile(
+    //         DataTypes.CreateProfileParams(alice, "Test", imageUri, "metadata")
+    //     );
+    // }
 
-    function testCannotCreateProfileWithBlankSpace() public {
-        vm.expectRevert("HANDLE_INVALID_CHARACTER");
-        token.createProfile(
-            DataTypes.CreateProfileParams(alice, " ", imageUri, "metadata")
-        );
-    }
+    // function testCannotCreateProfileWithBlankSpace() public {
+    //     vm.expectRevert("HANDLE_INVALID_CHARACTER");
+    //     token.createProfile(
+    //         DataTypes.CreateProfileParams(alice, " ", imageUri, "metadata")
+    //     );
+    // }
 
     // operator
     function testGetOperatorApproval() public {
@@ -193,8 +194,8 @@ contract ProfileNFTTest is Test {
 
     function testSetDescriptorAsGov() public {
         vm.prank(gov);
-        token.setProfileNFTDescriptor(address(descriptor));
-        assertEq(token.getProfileNFTDescriptor(), address(descriptor));
+        token.setLink3ProfileDescriptor(address(descriptor));
+        assertEq(token.getLink3ProfileDescriptor(), address(descriptor));
     }
 
     // avatar

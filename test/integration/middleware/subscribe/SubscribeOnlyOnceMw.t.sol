@@ -29,59 +29,59 @@ contract SubscribeOnlyOnceMwTest is Test, IProfileNFTEvents {
         uint256 indexed id
     );
 
-    function setUp() public {
-        mw = new SubscribeOnlyOnceMw();
-        vm.label(address(mw), "SubscribeMiddleware");
-        uint256 nonce = vm.getNonce(address(this));
-        address proxy;
-        (
-            proxy,
-            authority,
-            boxAddress,
-            profileAddress,
-            profileDescriptorAddress
-        ) = LibDeploy.deploy(
-            address(this),
-            nonce,
-            "https://animation.example.com"
-        );
-        profileNFT = ProfileNFT(address(profileAddress));
+    // function setUp() public {
+    //     mw = new SubscribeOnlyOnceMw();
+    //     vm.label(address(mw), "SubscribeMiddleware");
+    //     uint256 nonce = vm.getNonce(address(this));
+    //     address proxy;
+    //     (
+    //         proxy,
+    //         authority,
+    //         boxAddress,
+    //         profileAddress,
+    //         profileDescriptorAddress
+    //     ) = LibDeploy.deploy(
+    //         address(this),
+    //         nonce,
+    //         "https://animation.example.com"
+    //     );
+    //     profileNFT = ProfileNFT(address(profileAddress));
 
-        TestLibFixture.auth(authority);
-        vm.prank(TestLibFixture._GOV);
-        profileNFT.allowSubscribeMw(address(mw), true);
-        bobProfileId = TestLibFixture.registerBobProfile(profileNFT);
-        // set module
-        vm.prank(bob);
-        profileNFT.setSubscribeMw(bobProfileId, address(mw), new bytes(0));
-    }
+    //     TestLibFixture.auth(authority);
+    //     vm.prank(TestLibFixture._GOV);
+    //     profileNFT.allowSubscribeMw(address(mw), true);
+    //     bobProfileId = TestLibFixture.registerBobProfile(profileNFT);
+    //     // set module
+    //     vm.prank(bob);
+    //     profileNFT.setSubscribeMw(bobProfileId, address(mw), new bytes(0));
+    // }
 
-    function testSubscribeOnlyOnce() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = bobProfileId;
-        bytes[] memory data = new bytes[](1);
+    // function testSubscribeOnlyOnce() public {
+    //     uint256[] memory ids = new uint256[](1);
+    //     ids[0] = bobProfileId;
+    //     bytes[] memory data = new bytes[](1);
 
-        uint256 nonce = vm.getNonce(address(profileNFT));
-        address subscribeProxy = LibDeploy._calcContractAddress(
-            address(profileNFT),
-            nonce
-        );
+    //     uint256 nonce = vm.getNonce(address(profileNFT));
+    //     address subscribeProxy = LibDeploy._calcContractAddress(
+    //         address(profileNFT),
+    //         nonce
+    //     );
 
-        vm.expectEmit(true, true, false, true);
-        emit DeploySubscribeNFT(bobProfileId, address(subscribeProxy));
+    //     vm.expectEmit(true, true, false, true);
+    //     emit DeploySubscribeNFT(bobProfileId, address(subscribeProxy));
 
-        vm.expectEmit(true, true, true, true);
-        emit Transfer(address(0), alice, 1);
+    //     vm.expectEmit(true, true, true, true);
+    //     emit Transfer(address(0), alice, 1);
 
-        vm.expectEmit(true, false, false, true);
-        emit Subscribe(alice, ids, data, data);
+    //     vm.expectEmit(true, false, false, true);
+    //     emit Subscribe(alice, ids, data, data);
 
-        vm.prank(alice);
-        profileNFT.subscribe(ids, data, data);
+    //     vm.prank(alice);
+    //     profileNFT.subscribe(ids, data, data);
 
-        // Second subscribe will fail
-        vm.expectRevert("Already subscribed");
-        vm.prank(alice);
-        profileNFT.subscribe(ids, data, data);
-    }
+    //     // Second subscribe will fail
+    //     vm.expectRevert("Already subscribed");
+    //     vm.prank(alice);
+    //     profileNFT.subscribe(ids, data, data);
+    // }
 }

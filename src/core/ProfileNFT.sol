@@ -20,6 +20,7 @@ import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/Beaco
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
+import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
 
@@ -43,14 +44,13 @@ contract ProfileNFT is
     address public immutable ESSENCE_BEACON;
     address public immutable ENGINE;
 
-    constructor(
-        address _subBeacon,
-        address _essenceBeacon,
-        address _engine
-    ) {
-        SUBSCRIBE_BEACON = _subBeacon;
-        ESSENCE_BEACON = _essenceBeacon;
-        ENGINE = _engine;
+    constructor() {
+        ENGINE = msg.sender;
+        (, , address subBeacon, address essenceBeacon) = IProfileDeployer(
+            msg.sender
+        ).parameters();
+        SUBSCRIBE_BEACON = subBeacon;
+        ESSENCE_BEACON = essenceBeacon;
         _disableInitializers();
     }
 
@@ -59,20 +59,20 @@ contract ProfileNFT is
      *
      * @param name Name to set for the Profile NFT.
      * @param symbol Symbol to set for the Profile NFT.
-     * @param profileNFTDescriptor The profile NFT descriptor address to set for the Profile NFT.
+     * @param Link3ProfileDescriptor The profile NFT descriptor address to set for the Profile NFT.
      */
     function initialize(
         address _owner,
         string calldata name,
         string calldata symbol,
-        address profileNFTDescriptor,
+        address Link3ProfileDescriptor,
         RolesAuthority _rolesAuthority
     ) external initializer {
-        require(profileNFTDescriptor != address(0), "ZERO_ADDRESS");
+        require(Link3ProfileDescriptor != address(0), "ZERO_ADDRESS");
         CyberNFTBase._initialize(name, symbol);
         Auth.__Auth_Init(_owner, _rolesAuthority);
         ReentrancyGuard.__ReentrancyGuard_init();
-        _profileNFTDescriptor = profileNFTDescriptor;
+        _Link3ProfileDescriptor = Link3ProfileDescriptor;
 
         emit Initialize(_owner);
         // start with paused
@@ -81,26 +81,23 @@ contract ProfileNFT is
 
     /// @inheritdoc IProfileNFT
     function createProfile(
-        DataTypes.CreateProfileParams params,
+        DataTypes.CreateProfileParams calldata params,
         bytes calldata data
     ) external payable override nonReentrant returns (uint256) {
-        string memory namespaceData = ICyberEngine(ENGINE).getNamespaceData(
-            address(this)
-        );
+        address profileMw = ICyberEngine(ENGINE)
+            .getNamespaceData(address(this))
+            .profileMw;
 
-        if (namespaceData.profileMw != address(0)) {
-            IProfileMiddleware(namespaceData.profileMw).preProcess(
-                params,
-                data
-            ){ value: msg.value };
-        }
-
-        uint256 id = _createProfile(params);
-        if (namespaceData.profileMw != address(0)) {
-            IProfileMiddleware(namespaceData.profileMw).postProcess(
+        if (profileMw != address(0)) {
+            IProfileMiddleware(profileMw).preProcess{ value: msg.value }(
                 params,
                 data
             );
+        }
+
+        uint256 id = _createProfile(params);
+        if (profileMw != address(0)) {
+            IProfileMiddleware(profileMw).postProcess(params, data);
         }
         return id;
     }
@@ -174,7 +171,7 @@ contract ProfileNFT is
         }
 
         return
-            IProfileNFTDescriptor(_profileNFTDescriptor).tokenURI(
+            IProfileNFTDescriptor(_Link3ProfileDescriptor).tokenURI(
                 DataTypes.ConstructTokenURIParams({
                     tokenId: tokenId,
                     handle: handle,
@@ -184,13 +181,13 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function getProfileNFTDescriptor()
+    function getLink3ProfileDescriptor()
         external
         view
         override
         returns (address)
     {
-        return _profileNFTDescriptor;
+        return _Link3ProfileDescriptor;
     }
 
     /// @inheritdoc IProfileNFT
@@ -332,20 +329,20 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function setProfileNFTDescriptor(address descriptor)
+    function setLink3ProfileDescriptor(address descriptor)
         external
         override
         requiresAuth
     {
-        _profileNFTDescriptor = descriptor;
-        emit SetProfileNFTDescriptor(descriptor);
+        _Link3ProfileDescriptor = descriptor;
+        emit SetLink3ProfileDescriptor(descriptor);
     }
 
     function setAnimationTemplate(string calldata template)
         external
         requiresAuth
     {
-        IProfileNFTDescriptor(_profileNFTDescriptor).setAnimationTemplate(
+        IProfileNFTDescriptor(_Link3ProfileDescriptor).setAnimationTemplate(
             template
         );
 

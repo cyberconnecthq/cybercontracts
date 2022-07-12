@@ -12,8 +12,9 @@ import { Constants } from "../src/libraries/Constants.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
+import { TestDeployer } from "./utils/TestDeployer.sol";
 
-contract EssenceNFTTest is Test {
+contract EssenceNFTTest is Test, TestDeployer {
     event Approval(
         address indexed owner,
         address indexed spender,
@@ -36,8 +37,9 @@ contract EssenceNFTTest is Test {
     address constant bob = address(0xB0B);
 
     function setUp() public {
-        profile = new ProfileNFT(address(0), address(0));
-        impl = new EssenceNFT(address(profile));
+        profile = new ProfileNFT();
+        setProfile(address(profile));
+        impl = new EssenceNFT();
         beacon = new UpgradeableBeacon(address(impl), address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             EssenceNFT.initialize.selector,

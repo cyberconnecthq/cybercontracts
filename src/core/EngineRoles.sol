@@ -12,7 +12,7 @@ import { CyberEngine } from "./CyberEngine.sol";
  * @author CyberConnect
  * @notice This contract is used to set roles.
  */
-contract Roles is RolesAuthority {
+contract EngineRoles is RolesAuthority {
     constructor(address owner, address engine)
         RolesAuthority(owner, Authority(address(0)))
     {

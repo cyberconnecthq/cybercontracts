@@ -10,8 +10,9 @@ import { LibString } from "../src/libraries/LibString.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { MockSubscribeNFTV2 } from "./utils/MockSubscribeNFTV2.sol";
 import { MockProfile } from "./utils/MockProfile.sol";
+import { TestDeployer } from "./utils/TestDeployer.sol";
 
-contract SubscribeNFTUpgradeTest is Test {
+contract SubscribeNFTUpgradeTest is Test, TestDeployer {
     UpgradeableBeacon internal beacon;
     SubscribeNFT internal impl;
     BeaconProxy internal proxy;
@@ -22,8 +23,9 @@ contract SubscribeNFTUpgradeTest is Test {
     address constant alice = address(0xA11CE);
 
     function setUp() public {
-        profile = new MockProfile(address(0), address(0));
-        impl = new SubscribeNFT(address(profile));
+        profile = new MockProfile();
+        setProfile(address(profile));
+        impl = new SubscribeNFT();
         beacon = new UpgradeableBeacon(address(impl), address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
@@ -40,7 +42,7 @@ contract SubscribeNFTUpgradeTest is Test {
     }
 
     function testUpgrade() public {
-        MockSubscribeNFTV2 implB = new MockSubscribeNFTV2(address(profile));
+        MockSubscribeNFTV2 implB = new MockSubscribeNFTV2();
 
         assertEq(SubscribeNFT(address(proxy)).version(), 1);
         assertEq(SubscribeNFT(address(proxyB)).version(), 1);

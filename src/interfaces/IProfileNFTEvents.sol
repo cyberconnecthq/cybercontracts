@@ -36,7 +36,7 @@ interface IProfileNFTEvents {
      *
      * @param newDescriptor The newly set descriptor address.
      */
-    event SetProfileNFTDescriptor(address indexed newDescriptor);
+    event SetLink3ProfileDescriptor(address indexed newDescriptor);
 
     /**
      * @notice Emitted when a new animation template has been set.

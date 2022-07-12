@@ -13,4 +13,5 @@ abstract contract CyberEngineStorage {
     address public profileAddress;
     mapping(address => bool) internal _profileMwAllowlist;
     mapping(address => DataTypes.NamespaceStruct) internal _namespaceInfo;
+    mapping(bytes32 => address) internal _namespaceByName;
 }

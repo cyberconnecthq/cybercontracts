@@ -6,13 +6,16 @@ import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { EssenceNFTStorage } from "../storages/EssenceNFTStorage.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
+import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
 
 contract EssenceNFT is CyberNFTBase, EssenceNFTStorage, IUpgradeable {
     address public immutable PROFILE; // solhint-disable-line
 
-    constructor(address profile) {
-        require(profile != address(0), "ZERO_ADDRESS");
-        PROFILE = profile;
+    constructor() {
+        (, address profileProxy, , ) = IProfileDeployer(msg.sender)
+            .parameters();
+        require(profileProxy != address(0), "ZERO_ADDRESS");
+        PROFILE = profileProxy;
         _disableInitializers();
     }
 

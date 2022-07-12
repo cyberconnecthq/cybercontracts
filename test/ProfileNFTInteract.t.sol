@@ -23,10 +23,10 @@ import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 import { ProfileRoles } from "../src/core/ProfileRoles.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
-
+import { TestDeployer } from "./utils/TestDeployer.sol";
 
 // For tests that requires a profile to start with.
-contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
+contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     event Transfer(
         address indexed from,
         address indexed to,
@@ -55,25 +55,28 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         vm.etch(essenceMw, address(this).code);
 
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
-        address fakeImpl = address(new SubscribeNFT(address(0xdead)));
+        setProfile(address(0xdead));
+        address fakeImpl = address(new SubscribeNFT());
         subscribeBeacon = address(
             new UpgradeableBeacon(fakeImpl, address(profile))
         );
-        address fakeEssence = address(new EssenceNFT(address(0xdead)));
+        address fakeEssence = address(new EssenceNFT());
         essenceBeacon = address(
             new UpgradeableBeacon(fakeEssence, address(profile))
         );
-
-        MockProfile profileImpl = new MockProfile(
+        setParamers(
+            address(0),
+            address(0xdead),
             subscribeBeacon,
             essenceBeacon
         );
+        MockProfile profileImpl = new MockProfile();
         uint256 nonce = vm.getNonce(address(this));
         address profileAddr = LibDeploy._calcContractAddress(
             address(this),
             nonce + 1
         );
-        authority = new Roles(address(this), profileAddr);
+        authority = new ProfileRoles(address(this), profileAddr);
 
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
@@ -89,45 +92,20 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         );
         assertEq(address(profileProxy), profileAddr);
         profile = MockProfile(address(profileProxy));
-        vm.label(address(profile), "profileProxy");
-        vm.label(address(this), "Tester");
-        vm.label(bob, "Bob");
 
         authority.setUserRole(address(gov), Constants._PROFILE_GOV_ROLE, true);
         vm.prank(gov);
-        profile.setSigner(bob);
-
-        // register "bob"
+        assertEq(profile.nonces(bob), 0);
         string memory handle = "bob";
         string memory avatar = "avatar";
         string memory metadata = "metadata";
 
-        uint256 deadline = 100;
-        bytes32 digest = profile.hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    Constants._CREATE_PROFILE_TYPEHASH,
-                    bob,
-                    keccak256(bytes(handle)),
-                    keccak256(bytes(avatar)),
-                    keccak256(bytes(metadata)),
-                    0,
-                    deadline
-                )
-            )
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
-
-        assertEq(profile.nonces(bob), 0);
-        profileId = profile.createProfile{
-            value: Constants._INITIAL_FEE_TIER2
-        }(
-            DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
-            DataTypes.EIP712Signature(v, r, s, deadline)
+        profileId = profile.createProfile(
+            DataTypes.CreateProfileParams(bob, handle, avatar, metadata)
         );
         assertEq(profileId, 1);
 
-        assertEq(profile.nonces(bob), 1);
+        assertEq(profile.nonces(bob), 0);
     }
 
     function testCannotSubscribeEmptyList() public {
@@ -229,18 +207,20 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         string memory metadata = "ipfs";
         vm.warp(50);
         uint256 deadline = 100;
-        assertEq(profile.nonces(bob), 1);
 
-        bytes32 digest = profile.hashTypedDataV4(
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(profile),
             keccak256(
                 abi.encode(
                     Constants._SET_METADATA_TYPEHASH,
                     profileId,
                     keccak256(bytes(metadata)),
-                    1,
+                    profile.nonces(bob),
                     deadline
                 )
-            )
+            ),
+            profile.name(),
+            "1"
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
@@ -278,7 +258,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
                     keccak256(abi.encodePacked(profileIds)),
                     keccak256(abi.encodePacked(hashes)),
                     keccak256(abi.encodePacked(hashes)),
-                    0,
+                    profile.nonces(bob),
                     deadline
                 )
             ),
@@ -323,18 +303,20 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         vm.warp(50);
         uint256 deadline = 100;
 
-        assertEq(profile.nonces(bob), 1);
-        bytes32 digest = profile.hashTypedDataV4(
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(profile),
             keccak256(
                 abi.encode(
                     Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
                     profileId,
                     gov,
                     approved,
-                    1,
+                    profile.nonces(bob),
                     deadline
                 )
-            )
+            ),
+            profile.name(),
+            "1"
         );
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
@@ -357,21 +339,24 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
         string memory metadata = "ipfs";
         vm.warp(50);
         uint256 deadline = 100;
-        bytes32 digest = profile.hashTypedDataV4(
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(profile),
             keccak256(
                 abi.encode(
                     Constants._SET_METADATA_TYPEHASH,
                     profileId,
                     keccak256(bytes(metadata)),
-                    0,
+                    profile.nonces(bob) + 1,
                     deadline
                 )
-            )
+            ),
+            profile.name(),
+            "1"
         );
 
-        // signer is bob, however owner is charlie
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
+        // nonce should be 0
         vm.expectRevert("INVALID_SIGNATURE");
         profile.setMetadataWithSig(
             profileId,
@@ -713,7 +698,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents {
                     essenceId,
                     keccak256(preData),
                     keccak256(postData),
-                    1,
+                    profile.nonces(bob),
                     deadline
                 )
             ),

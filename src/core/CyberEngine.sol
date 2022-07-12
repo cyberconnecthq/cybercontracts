@@ -19,6 +19,7 @@ import { CyberEngineStorage } from "../storages/CyberEngineStorage.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { UpgradeableBeacon } from "../upgradeability/UpgradeableBeacon.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
 
 /**
  * @title CyberEngine
@@ -31,8 +32,12 @@ contract CyberEngine is
     UUPSUpgradeable,
     CyberEngineStorage,
     IUpgradeable,
+    IProfileDeployer,
     ICyberEngine
 {
+    // TODO: doc
+    DataTypes.DeployParameters public override parameters;
+
     constructor() {
         _disableInitializers();
     }
@@ -56,7 +61,6 @@ contract CyberEngine is
         bytes calldata data
     ) external requiresAuth {
         require(_profileMwAllowlist[mw], "PROFILE_MW_NOT_ALLOWED");
-        address preMw = _namespaceInfo[namespace].profileMw;
         _namespaceInfo[namespace].profileMw = mw;
         bytes memory returnData;
         if (mw != address(0)) {
@@ -92,12 +96,29 @@ contract CyberEngine is
         emit AllowProfileMw(mw, preAllowed, allowed);
     }
 
+    struct Addrs {
+        address authority;
+        address profileImpl;
+        address profileProxy;
+        address subscribeImpl;
+        address subscribeBeacon;
+        address essenceImpl;
+        address essenceBeacon;
+    }
+
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
         requiresAuth
     {
         bytes memory byteName = bytes(params.name);
         bytes memory byteSymbol = bytes(params.symbol);
+
+        bytes32 salt = keccak256(byteName);
+
+        require(
+            _namespaceByName[salt] == address(0),
+            "NAMESPACE_ALREADY_EXISTS"
+        );
 
         require(
             _profileMwAllowlist[params.mw] || params.mw == address(0),
@@ -112,47 +133,82 @@ contract CyberEngine is
             "SYMBOL_INVALID_LENGTH"
         );
 
-        // TODO delete and re-think about our proxy addreess calulation logic
-        // bytes data = 
-        address profileProxy = _computeAddress(
-            abi.encode(type(ERC1967Proxy).creationCode),
-            _salt
-        );
-        address authority = new RolesAuthority(
-            params.owner,
-            Authority(address(0))
-        );
-        address subscribeImpl = new SubscribeNFT(profileProxy);
-        address essenceImpl = new EssenceNFT(profileProxy);
-        address subscribeBeacon = new UpgradeableBeacon(
-            subscribeImpl,
-            params.owner
+        Addrs memory addrs;
+        addrs.authority = address(
+            new RolesAuthority(params.owner, Authority(address(0)))
         );
 
-        address essenceBeacon = new UpgradeableBeacon(
-            subscribeImpl,
-            params.owner
+        addrs.profileImpl = _computeAddress(
+            type(ProfileNFT).creationCode,
+            salt
         );
 
-        address profileImpl = new ProfileNFT(subscribeBeacon, essenceBeacon);
-
-        new ERC1967Proxy(
-            profileImpl,
-            abi.encodeWithSelector(
-                ProfileNFT.initialize.selector,
-                address(0),
-                params.name,
-                params.symbol,
-                params.descriptor,
-                authority
-            )
+        bytes memory data = abi.encodeWithSelector(
+            ProfileNFT.initialize.selector,
+            address(0),
+            params.name,
+            params.symbol,
+            params.descriptor,
+            authority
         );
 
-        _namespaceInfo[profileProxy].name = params.name;
-        _namespaceInfo[profileProxy].profileMw = params.mw;
-        _namespaceInfo[profileProxy].owner = params.owner;
+        addrs.profileProxy = _computeAddress(
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(addrs.profileImpl, data)
+            ),
+            salt
+        );
+
+        addrs.subscribeImpl = _computeAddress(
+            type(SubscribeNFT).creationCode,
+            salt
+        );
+
+        addrs.essenceImpl = _computeAddress(
+            type(EssenceNFT).creationCode,
+            salt
+        );
+
+        addrs.subscribeBeacon = _computeAddress(
+            abi.encodePacked(
+                type(UpgradeableBeacon).creationCode,
+                abi.encode(addrs.subscribeImpl, params.owner)
+            ),
+            salt
+        );
+        addrs.essenceBeacon = _computeAddress(
+            abi.encodePacked(
+                type(UpgradeableBeacon).creationCode,
+                abi.encode(addrs.essenceImpl, params.owner)
+            ),
+            salt
+        );
+
+        // Real deployment
+        parameters.profileProxy = addrs.profileProxy;
+        parameters.engine = address(this);
+        parameters.essenceBeacon = addrs.essenceBeacon;
+        parameters.subBeacon = addrs.subscribeBeacon;
+
+        new SubscribeNFT{ salt: salt }();
+        new EssenceNFT{ salt: salt }();
+        new UpgradeableBeacon{ salt: salt }(addrs.subscribeImpl, params.owner);
+        new UpgradeableBeacon{ salt: salt }(addrs.essenceImpl, params.owner);
+        new ProfileNFT{ salt: salt }();
+        new ERC1967Proxy{ salt: salt }(addrs.profileImpl, data);
+
+        delete parameters;
+
+        // deploy finish
+
+        _namespaceInfo[addrs.profileProxy].name = params.name;
+        _namespaceInfo[addrs.profileProxy].profileMw = params.mw;
+        _namespaceInfo[addrs.profileProxy].owner = params.owner;
 
         // TODO emit event
+
+        _namespaceByName[salt] = addrs.profileProxy;
     }
 
     /**
@@ -180,7 +236,7 @@ contract CyberEngine is
         _;
     }
 
-    function _computeAddress(bytes memory _byteCode, uint256 _salt)
+    function _computeAddress(bytes memory _byteCode, bytes32 salt)
         internal
         view
         returns (address)
@@ -189,7 +245,7 @@ contract CyberEngine is
             abi.encodePacked(
                 bytes1(0xff),
                 address(this),
-                _salt,
+                salt,
                 keccak256(_byteCode)
             )
         );

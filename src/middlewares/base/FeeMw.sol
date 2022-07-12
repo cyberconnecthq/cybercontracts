@@ -12,11 +12,11 @@ abstract contract FeeMw {
         TREASURY = treasury;
     }
 
-    function _treasuryAddress() internal view returns (address, uint16) {
+    function _treasuryAddress() internal view returns (address) {
         return ITreasury(TREASURY).getTreasuryAddress();
     }
 
-    function _treasuryFee() internal view returns (address, uint16) {
+    function _treasuryFee() internal view returns (uint16) {
         return ITreasury(TREASURY).getTreasuryFee();
     }
 }
