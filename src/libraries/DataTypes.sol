@@ -26,7 +26,6 @@ library DataTypes {
     struct CreateNamespaceParams {
         string name;
         string symbol;
-        address mw;
         address owner;
         address descriptor;
     }

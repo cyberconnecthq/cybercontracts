@@ -43,6 +43,8 @@ contract IntegrationBaseTest is Test, IProfileNFTEvents {
         TestLibFixture.auth(authority);
     }
 
+    function testNoop() public {}
+
     // TODO:
     // function testRegistration() public {
     //     // Register bob profile

@@ -15,7 +15,8 @@ import { Constants } from "../../src/libraries/Constants.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
 import { TestLib712 } from "../../test/utils/TestLib712.sol";
-
+import { Treasury } from "../../src/middlewares/base/Treasury.sol";
+import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import "forge-std/Vm.sol";
 
 // TODO: deploy with salt
@@ -33,14 +34,28 @@ library LibDeploy {
     address internal constant LINK3_OWNER =
         0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
 
-    address internal constant ENGINE_SIGNER =
+    address internal constant LINK3_SIGNER =
         0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
+    // TODO: change for prod
+    address internal constant ENGINE_TREASURY =
+        0x927f355117721e0E8A7b5eA20002b65B8a551890;
     bytes32 constant salt = keccak256(bytes("CyberConnect"));
     bytes32 constant link3Salt = keccak256(bytes(PROFILE_NAME));
+    address internal constant LINK3_TREASURY =
+        0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
 
     // currently the engine gov is always deployer
-    // address internal constant ENGINE_GOV =
-    //     0x927f355117721e0E8A7b5eA20002b65B8a551890;
+    // TODO: change for prod
+    address internal constant ENGINE_GOV =
+        0x927f355117721e0E8A7b5eA20002b65B8a551890;
+
+    // Initial States
+    uint256 internal constant _INITIAL_FEE_TIER0 = 10 ether;
+    uint256 internal constant _INITIAL_FEE_TIER1 = 2 ether;
+    uint256 internal constant _INITIAL_FEE_TIER2 = 1 ether;
+    uint256 internal constant _INITIAL_FEE_TIER3 = 0.5 ether;
+    uint256 internal constant _INITIAL_FEE_TIER4 = 0.1 ether;
+    uint256 internal constant _INITIAL_FEE_TIER5 = 0.01 ether;
 
     // all the deployed addresses, ordered by deploy order
     struct ContractAddresses {
@@ -49,13 +64,15 @@ library LibDeploy {
         Link3ProfileDescriptor descriptorImpl;
         address descriptorProxy;
         ProfileNFT profileImpl;
-        address profileProxy;
         SubscribeNFT subscribeImpl;
         UpgradeableBeacon subscribeBeacon;
         UpgradeableBeacon essenceBeacon;
         address engineProxyAddress;
         CyberBoxNFT boxImpl;
         address boxProxy;
+        address cyberTreasury;
+        address link3Profile;
+        address link3ProfileMw;
     }
 
     // create2
@@ -229,13 +246,47 @@ library LibDeploy {
         addrs.authority.setUserRole(deployer, Constants._ENGINE_GOV_ROLE, true);
 
         // 6. Deploy Link3
-        CyberEngine(addrs.engineProxyAddress).createNamespace(
-            DataTypes.CreateNamespaceParams(
-                PROFILE_NAME,
-                PROFILE_SYMBOL,
-                address(0),
-                address(0),
-                descriptor
+        addrs.link3Profile = CyberEngine(addrs.engineProxyAddress)
+            .createNamespace(
+                DataTypes.CreateNamespaceParams(
+                    PROFILE_NAME,
+                    PROFILE_SYMBOL,
+                    address(0),
+                    descriptor
+                )
+            );
+
+        // 7. Deploy Protocol Treasury
+        addrs.cyberTreasury = address(
+            new Treasury{ salt: salt }(ENGINE_GOV, ENGINE_TREASURY, 250)
+        );
+
+        // 8. Deploy Link3 Profile Middleware
+        addrs.link3ProfileMw = address(
+            new PermissionedFeeCreationMw{ salt: link3Salt }(
+                addrs.engineProxyAddress,
+                addrs.cyberTreasury
+            )
+        );
+
+        // 9. Engine Config Link3 Middleware
+        CyberEngine(addrs.engineProxyAddress).allowProfileMw(
+            addrs.link3ProfileMw,
+            true
+        );
+
+        CyberEngine(addrs.engineProxyAddress).setProfileMw(
+            addrs.link3Profile,
+            addrs.link3ProfileMw,
+            abi.encode(
+                LINK3_SIGNER,
+                LINK3_TREASURY,
+                _INITIAL_FEE_TIER0,
+                _INITIAL_FEE_TIER1,
+                _INITIAL_FEE_TIER2,
+                _INITIAL_FEE_TIER3,
+                _INITIAL_FEE_TIER4,
+                _INITIAL_FEE_TIER5
             )
         );
 
@@ -275,14 +326,20 @@ library LibDeploy {
         // );
 
         // 15. register a profile for testing
-        // if (block.chainid != 1) {
-        //     register(ProfileNFT(addrs.profileProxy), deployer);
-        // }
+        if (block.chainid != 1) {
+            register(
+                ProfileNFT(addrs.link3Profile),
+                deployer,
+                CyberEngine(addrs.engineProxyAddress),
+                PermissionedFeeCreationMw(addrs.link3ProfileMw)
+            );
+        }
+        // TODO: fix return
         return (
             addrs.engineProxyAddress,
             addrs.authority,
             addrs.boxProxy,
-            addrs.profileProxy,
+            addrs.link3Profile,
             address(addrs.descriptorProxy)
         );
     }
@@ -347,51 +404,102 @@ library LibDeploy {
         );
 
     // for testnet, profile owner is all deployer, signer is fake
-    // function register(ProfileNFT profile, address deployer) internal {
-    //     string memory handle = "cyberconnect";
-    //     // set signer
-    //     uint256 signerPk = 1;
-    //     address signer = vm.addr(signerPk);
-    //     profile.setSigner(signer);
-    //     require(profile.signer() == signer, "Signer is not set");
+    function register(
+        ProfileNFT profile,
+        address deployer,
+        CyberEngine engine,
+        PermissionedFeeCreationMw mw
+    ) internal {
+        console.log(LINK3_TREASURY.balance);
+        require(
+            LINK3_TREASURY.balance == 0 ether,
+            "link3 treasury balance is not correct"
+        );
+        string memory handle = "cyberconnect";
+        // set signer
+        uint256 signerPk = 1;
+        address signer = vm.addr(signerPk);
 
-    //     console.log("block.timestamp", block.timestamp);
-    //     uint256 deadline = block.timestamp + 60 * 60 * 24 * 30; // 30 days
-    //     string
-    //         memory avatar = "bafkreibcwcqcdf2pgwmco3pfzdpnfj3lijexzlzrbfv53sogz5uuydmvvu"; // TODO: ryan's punk
-    //     string memory metadata = "metadata";
-    //     bytes32 digest = TestLib712.hashTypedDataV4(
-    //         address(profile),
-    //         keccak256(
-    //             abi.encode(
-    //                 Constants._CREATE_PROFILE_TYPEHASH,
-    //                 ENGINE_SIGNER,
-    //                 keccak256(bytes(handle)),
-    //                 keccak256(bytes(avatar)),
-    //                 keccak256(bytes(metadata)),
-    //                 0,
-    //                 deadline
-    //             )
-    //         ),
-    //         PROFILE_NAME,
-    //         "1"
-    //     );
-    //     (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
+        // change signer to tempory signer
+        engine.setProfileMw(
+            address(profile),
+            address(mw),
+            abi.encode(
+                signer,
+                LINK3_TREASURY,
+                _INITIAL_FEE_TIER0,
+                _INITIAL_FEE_TIER1,
+                _INITIAL_FEE_TIER2,
+                _INITIAL_FEE_TIER3,
+                _INITIAL_FEE_TIER4,
+                _INITIAL_FEE_TIER5
+            )
+        );
+        require(mw.getSigner(address(profile)) == signer, "Signer is not set");
 
-    //     // use ENGINE_SIGNER instead of deployer since deployer could be a contract in anvil environment and safeMint will fail
-    //     require(profile.nonces(ENGINE_SIGNER) == 0);
-    //     profile.createProfile{ value: Constants._INITIAL_FEE_TIER2 }(
-    //         DataTypes.CreateProfileParams(
-    //             ENGINE_SIGNER,
-    //             handle,
-    //             avatar,
-    //             metadata
-    //         ),
-    //         DataTypes.EIP712Signature(v, r, s, deadline)
-    //     );
-    //     require(profile.nonces(ENGINE_SIGNER) == 1);
+        uint256 deadline = block.timestamp + 60 * 60 * 24 * 30; // 30 days
+        string
+            memory avatar = "bafkreibcwcqcdf2pgwmco3pfzdpnfj3lijexzlzrbfv53sogz5uuydmvvu"; // TODO: ryan's punk
+        string memory metadata = "metadata";
+        bytes32 digest;
+        {
+            bytes32 data = keccak256(
+                abi.encode(
+                    Constants._CREATE_PROFILE_TYPEHASH,
+                    LINK3_SIGNER, // mint to this address
+                    keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
+                    0,
+                    deadline
+                )
+            );
+            digest = TestLib712.hashTypedDataV4(
+                address(mw),
+                data,
+                "PermissionedFeeCreationMw",
+                "1"
+            );
+        }
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
 
-    //     // revert signer
-    //     profile.setSigner(ENGINE_SIGNER);
-    // }
+        // use ENGINE_SIGNER instead of deployer since deployer could be a contract in anvil environment and safeMint will fail
+        require(mw.getNonce(address(profile), LINK3_SIGNER) == 0);
+        profile.createProfile{ value: _INITIAL_FEE_TIER2 }(
+            DataTypes.CreateProfileParams(
+                LINK3_SIGNER,
+                handle,
+                avatar,
+                metadata
+            ),
+            abi.encode(v, r, s, deadline)
+        );
+        require(mw.getNonce(address(profile), LINK3_SIGNER) == 1);
+        require(profile.balanceOf(LINK3_SIGNER) == 1);
+        console.log(LINK3_TREASURY.balance);
+        require(
+            LINK3_TREASURY.balance == 0.975 ether,
+            "LINK3_TREASURY_BALANCE_INCORRECT"
+        );
+        require(
+            ENGINE_TREASURY.balance == 0.025 ether,
+            "ENGINE_TREASURY_BALANCE_INCORRECT"
+        );
+
+        // revert signer
+        engine.setProfileMw(
+            address(profile),
+            address(mw),
+            abi.encode(
+                LINK3_SIGNER,
+                LINK3_TREASURY,
+                _INITIAL_FEE_TIER0,
+                _INITIAL_FEE_TIER1,
+                _INITIAL_FEE_TIER2,
+                _INITIAL_FEE_TIER3,
+                _INITIAL_FEE_TIER4,
+                _INITIAL_FEE_TIER5
+            )
+        );
+    }
 }

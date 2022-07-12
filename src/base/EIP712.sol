@@ -29,9 +29,14 @@ abstract contract EIP712 {
         address expectedSigner,
         DataTypes.EIP712Signature calldata sig
     ) internal view {
-        require(sig.deadline >= block.timestamp, "DEADLINE_EXCEEDED");
-        address recoveredAddress = ecrecover(digest, sig.v, sig.r, sig.s);
-        require(recoveredAddress == expectedSigner, "INVALID_SIGNATURE");
+        _requiresExpectedSigner(
+            digest,
+            expectedSigner,
+            sig.v,
+            sig.r,
+            sig.s,
+            sig.deadline
+        );
     }
 
     function DOMAIN_SEPARATOR() public view returns (bytes32) {

@@ -60,7 +60,10 @@ contract CyberEngine is
         address mw,
         bytes calldata data
     ) external requiresAuth {
-        require(_profileMwAllowlist[mw], "PROFILE_MW_NOT_ALLOWED");
+        require(
+            mw == address(0) || _profileMwAllowlist[mw],
+            "PROFILE_MW_NOT_ALLOWED"
+        );
         _namespaceInfo[namespace].profileMw = mw;
         bytes memory returnData;
         if (mw != address(0)) {
@@ -76,6 +79,7 @@ contract CyberEngine is
         return _profileMwAllowlist[mw];
     }
 
+    // TODO: maybe separate
     function getNamespaceData(address namespace)
         external
         view
@@ -109,6 +113,7 @@ contract CyberEngine is
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
         requiresAuth
+        returns (address)
     {
         bytes memory byteName = bytes(params.name);
         bytes memory byteSymbol = bytes(params.symbol);
@@ -120,10 +125,6 @@ contract CyberEngine is
             "NAMESPACE_ALREADY_EXISTS"
         );
 
-        require(
-            _profileMwAllowlist[params.mw] || params.mw == address(0),
-            "PROFILE_MW_NOT_ALLOWED"
-        );
         require(
             byteName.length <= Constants._MAX_NAMESPACE_LENGTH,
             "NAME_INVALID_LENGTH"
@@ -196,19 +197,25 @@ contract CyberEngine is
         new UpgradeableBeacon{ salt: salt }(addrs.subscribeImpl, params.owner);
         new UpgradeableBeacon{ salt: salt }(addrs.essenceImpl, params.owner);
         new ProfileNFT{ salt: salt }();
-        new ERC1967Proxy{ salt: salt }(addrs.profileImpl, data);
+        address profileProxy = address(
+            new ERC1967Proxy{ salt: salt }(addrs.profileImpl, data)
+        );
+        require(
+            profileProxy == addrs.profileProxy,
+            "PROFILE_PROXY_WRONG_ADDRESS"
+        );
 
         delete parameters;
 
         // deploy finish
 
         _namespaceInfo[addrs.profileProxy].name = params.name;
-        _namespaceInfo[addrs.profileProxy].profileMw = params.mw;
         _namespaceInfo[addrs.profileProxy].owner = params.owner;
 
         // TODO emit event
 
         _namespaceByName[salt] = addrs.profileProxy;
+        return profileProxy;
     }
 
     /**
