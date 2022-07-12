@@ -2,11 +2,13 @@
 
 pragma solidity 0.8.14;
 
+import { EIP712 } from "./EIP712.sol";
 import { ERC721 } from "../dependencies/solmate/ERC721.sol";
-import { Initializable } from "../upgradeability/Initializable.sol";
+
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
-import { EIP712 } from "./EIP712.sol";
+
+import { Initializable } from "../upgradeability/Initializable.sol";
 
 // Sequential mint ERC721
 // TODO: Put EIP712 permit logic here
