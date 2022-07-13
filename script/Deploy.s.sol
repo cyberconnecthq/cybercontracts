@@ -5,9 +5,22 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import { LibDeploy } from "./libraries/LibDeploy.sol";
+import { ProfileNFT } from "../src/core/ProfileNFT.sol";
+import { CyberEngine } from "../src/core/CyberEngine.sol";
+import { PermissionedFeeCreationMw } from "../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 
 // 16 Transaction + 3 Transaction to mint a test profile
 contract DeployScript is Script {
+    // TODO: change for prod. need access
+    address internal constant LINK3_OWNER =
+        0x927f355117721e0E8A7b5eA20002b65B8a551890;
+    address internal constant LINK3_SIGNER =
+        0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
+    address internal constant ENGINE_AUTH_OWNER =
+        0x927f355117721e0E8A7b5eA20002b65B8a551890;
+    address internal constant ENGINE_GOV =
+        0x927f355117721e0E8A7b5eA20002b65B8a551890;
+
     function run() external {
         // TODO: this is Rinkeby address, change for prod
         address deployerContract;
@@ -19,13 +32,23 @@ contract DeployScript is Script {
             // deployerContract = 0xdB94815F9D2f5A647c8D96124C7C1d1b42a23B47;
         }
         // require(deployerContract != address(0), "DEPLOYER_CONTRACT_NOT_SET");
-        uint256 nonce = vm.getNonce(msg.sender);
         console.log("vm.getNonce", vm.getNonce(msg.sender));
         vm.startBroadcast();
 
-        LibDeploy.deploy(vm, msg.sender, nonce, deployerContract, true);
-        // TODO: set correct role capacity
-        // TODO: do a health check. verify everything
+        LibDeploy.deploy(
+            vm,
+            LibDeploy.DeployParams(
+                true,
+                deployerContract,
+                true,
+                LINK3_OWNER,
+                LINK3_SIGNER,
+                ENGINE_AUTH_OWNER,
+                ENGINE_GOV,
+                LINK3_SIGNER
+            )
+        );
+
         vm.stopBroadcast();
     }
 }

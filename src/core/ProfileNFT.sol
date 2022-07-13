@@ -2,17 +2,13 @@
 
 pragma solidity 0.8.14;
 
+import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
+import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
+
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
-import { CyberNFTBase } from "../base/CyberNFTBase.sol";
-import { Constants } from "../libraries/Constants.sol";
-import { DataTypes } from "../libraries/DataTypes.sol";
-import { LibString } from "../libraries/LibString.sol";
-import { Actions } from "../libraries/Actions.sol";
-import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
-import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
-import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
@@ -20,14 +16,20 @@ import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
-import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
+
+import { Constants } from "../libraries/Constants.sol";
+import { DataTypes } from "../libraries/DataTypes.sol";
+import { LibString } from "../libraries/LibString.sol";
+import { Actions } from "../libraries/Actions.sol";
+
+import { CyberNFTBase } from "../base/CyberNFTBase.sol";
+import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 
 /**
  * @title Profile NFT
  * @author CyberConnect
  * @notice This contract is used to create a profile NFT.
  */
-
 contract ProfileNFT is
     Pausable,
     ReentrancyGuard,
@@ -37,6 +39,22 @@ contract ProfileNFT is
     IUpgradeable,
     IProfileNFT
 {
+    /*//////////////////////////////////////////////////////////////
+                                STATES
+    //////////////////////////////////////////////////////////////*/
+
+    /* solhint-disable var-name-mixedcase */
+
+    address public immutable SUBSCRIBE_BEACON;
+    address public immutable ESSENCE_BEACON;
+    address public immutable ENGINE;
+
+    /* solhint-enable var-name-mixedcase */
+
+    /*//////////////////////////////////////////////////////////////
+                              MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
     /**
      * @notice Checks that the profile owner is the sender address.
      */
@@ -73,13 +91,9 @@ contract ProfileNFT is
         _;
     }
 
-    /* solhint-disable var-name-mixedcase */
-
-    address public immutable SUBSCRIBE_BEACON;
-    address public immutable ESSENCE_BEACON;
-    address public immutable ENGINE;
-
-    /* solhint-enable var-name-mixedcase */
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
 
     constructor() {
         (
@@ -93,10 +107,14 @@ contract ProfileNFT is
         _disableInitializers();
     }
 
-    // TODO: fix doc
+    /*//////////////////////////////////////////////////////////////
+                                 EXTERNAL
+    //////////////////////////////////////////////////////////////*/
+
     /**
      * @notice Initializes the Profile NFT.
      *
+     * @param _owner Owner of the Profile NFT.
      * @param name Name to set for the Profile NFT.
      * @param symbol Symbol to set for the Profile NFT.
      */
@@ -148,48 +166,6 @@ contract ProfileNFT is
             IProfileMiddleware(profileMw).postProcess(params, data);
         }
         return id;
-    }
-
-    /**
-     * @notice Generates the metadata json object.
-     *
-     * @param tokenId The profile NFT token ID.
-     * @return string The metadata json object.
-     * @dev It requires the tokenId to be already minted.
-     */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        _requireMinted(tokenId);
-        string memory handle = _profileById[tokenId].handle;
-        address subscribeNFT = _subscribeByProfileId[tokenId].subscribeNFT;
-        uint256 subscribers;
-        if (subscribeNFT == address(0)) {
-            subscribers = 0;
-        } else {
-            // TODO: maybe replace with interface to save gas
-            subscribers = CyberNFTBase(subscribeNFT).totalSupply();
-        }
-
-        return
-            IProfileNFTDescriptor(_nftDescriptor).tokenURI(
-                DataTypes.ConstructTokenURIParams({
-                    tokenId: tokenId,
-                    handle: handle,
-                    subscribers: subscribers
-                })
-            );
-    }
-
-    function transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) public override whenNotPaused {
-        super.transferFrom(from, to, id);
     }
 
     /**
@@ -328,12 +304,6 @@ contract ProfileNFT is
                 _profileById,
                 _essenceByIdByProfileId
             );
-    }
-
-    // TODO: UUPS base contracts for functions
-    // TODO: write a test for upgrade profile nft
-    function version() external pure virtual override returns (uint256) {
-        return _VERSION;
     }
 
     /**
@@ -515,6 +485,16 @@ contract ProfileNFT is
         emit SetSubscribeTokenURI(profileId, subscribeTokenURI);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                         EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    // TODO: UUPS base contracts for functions
+    // TODO: write a test for upgrade profile nft
+    function version() external pure virtual override returns (uint256) {
+        return _VERSION;
+    }
+
     /**
      * @notice Gets a profile subscribe middleware address.
      *
@@ -599,16 +579,6 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function getOperatorApproval(uint256 profileId, address operator)
-        public
-        view
-        returns (bool)
-    {
-        _requireMinted(profileId);
-        return _operatorApproval[profileId][operator];
-    }
-
-    /// @inheritdoc IProfileNFT
     function getHandleByProfileId(uint256 profileId)
         external
         view
@@ -629,6 +599,69 @@ contract ProfileNFT is
         bytes32 handleHash = keccak256(bytes(handle));
         return _profileIdByHandleHash[handleHash];
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                 PUBLIC
+    //////////////////////////////////////////////////////////////*/
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public override whenNotPaused {
+        super.transferFrom(from, to, id);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Generates the metadata json object.
+     *
+     * @param tokenId The profile NFT token ID.
+     * @return string The metadata json object.
+     * @dev It requires the tokenId to be already minted.
+     */
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        _requireMinted(tokenId);
+        string memory handle = _profileById[tokenId].handle;
+        address subscribeNFT = _subscribeByProfileId[tokenId].subscribeNFT;
+        uint256 subscribers;
+        if (subscribeNFT == address(0)) {
+            subscribers = 0;
+        } else {
+            // TODO: maybe replace with interface to save gas
+            subscribers = CyberNFTBase(subscribeNFT).totalSupply();
+        }
+
+        return
+            IProfileNFTDescriptor(_nftDescriptor).tokenURI(
+                DataTypes.ConstructTokenURIParams({
+                    tokenId: tokenId,
+                    handle: handle,
+                    subscribers: subscribers
+                })
+            );
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getOperatorApproval(uint256 profileId, address operator)
+        public
+        view
+        returns (bool)
+    {
+        _requireMinted(profileId);
+        return _operatorApproval[profileId][operator];
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                              INTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override onlyEngine {}

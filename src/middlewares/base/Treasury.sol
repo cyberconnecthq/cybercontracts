@@ -27,6 +27,7 @@ contract Treasury is ITreasury {
 
     function setGovernance(address gov) external onlyGov {
         _gov = gov;
+        // TODO: emit
     }
 
     function setTreasuryAddress(address treasuryAddress) external onlyGov {

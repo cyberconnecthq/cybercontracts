@@ -100,7 +100,7 @@ contract CyberEngine is
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
         requiresAuth
-        returns (address profileProxy, address authority)
+        returns (address profileProxy)
     {
         bytes memory byteName = bytes(params.name);
         bytes memory byteSymbol = bytes(params.symbol);
@@ -134,11 +134,15 @@ contract CyberEngine is
             address essImpl = IEssenceDeployer(params.addrs.essenceFactory)
                 .deploy(salt);
 
+            // TODO: test in integration
             address subBeacon = address(
-                new UpgradeableBeacon{ salt: salt }(subscribeImpl, params.owner)
+                new UpgradeableBeacon{ salt: salt }(
+                    subscribeImpl,
+                    address(this)
+                )
             );
             address essBeacon = address(
-                new UpgradeableBeacon{ salt: salt }(essImpl, params.owner)
+                new UpgradeableBeacon{ salt: salt }(essImpl, address(this))
             );
 
             IProfileDeployer(params.addrs.profileFactory).setProfileParameters(
