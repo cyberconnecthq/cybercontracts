@@ -73,10 +73,11 @@ PRIVATE_KEY=
 PINATA_JWT=
 ```
 
-1. Run `yarn deploy:rinkeby` or `yarn deploy:anvil` for local deployment. If you run into any unconfirmed txs, run `yarn deploy:rinkeby --resume` to continue. This also verifies contract on etherscan. Check `profile proxy` address log to make sure it's the same as step 0. Otherwise, abort. (This manual step will be fixed)
+0. You need a `Create2Deployer` to start the deployment. If you don't have a contract address, run `yarn deploy_deployer:goerli` or change deployerContract address in `Deploy.s.sol` to 0 to let the script deploy. Take down the deployer contract address
+1. Run `yarn deploy:goerli` or `yarn deploy:anvil` for local deployment. If you run into any unconfirmed txs, run `yarn deploy:rinkeby --resume` to continue. This also verifies contract on etherscan. Check `profile proxy` address log to make sure it's the same as step 0. Otherwise, abort. (This manual step will be fixed)
 2. Run `yarn post_deploy` to update ABI changes
 3. Run `yarn upload_animation:goerli` to upload animation uri for link3 to ipfs.
-4. RUn `yarn set_animation_url:goerli` to deploy link3 nft descriptor with animation url. Then set to profile.
+4. Check `script/animation_url/goerli-5/SetAnimationURL.s.sol` and make sure the deployer contract is same as step 0. Run `yarn set_animation_url:goerli` to deploy link3 nft descriptor with animation url. Then set to profile.
 
 # Tests
 
