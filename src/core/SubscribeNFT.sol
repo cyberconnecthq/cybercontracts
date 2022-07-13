@@ -9,7 +9,7 @@ import { Constants } from "../libraries/Constants.sol";
 import { LibString } from "../libraries/LibString.sol";
 import { SubscribeNFTStorage } from "../storages/SubscribeNFTStorage.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
-import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
+import { ISubscribeDeployer } from "../interfaces/ISubscribeDeployer.sol";
 
 /**
  * @title Subscribe NFT
@@ -26,8 +26,7 @@ contract SubscribeNFT is
     address public immutable PROFILE; // solhint-disable-line
 
     constructor() {
-        (, address profileProxy, , ) = IProfileDeployer(msg.sender)
-            .parameters();
+        address profileProxy = ISubscribeDeployer(msg.sender).subParams();
         require(profileProxy != address(0), "ZERO_ADDRESS");
         PROFILE = profileProxy;
         _disableInitializers();

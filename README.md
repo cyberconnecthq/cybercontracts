@@ -113,3 +113,7 @@ Register Fee based on handle length
 GNU General Public License v3.0 or later
 
 See [COPYING](./COPYING) to see the full text.
+
+# TODO
+
+- verify profile contracts deployed from engine

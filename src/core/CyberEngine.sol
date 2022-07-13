@@ -5,10 +5,11 @@ pragma solidity 0.8.14;
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
-import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { ProfileNFT } from "./ProfileNFT.sol";
-import { SubscribeNFT } from "./SubscribeNFT.sol";
-import { EssenceNFT } from "./EssenceNFT.sol";
+import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
+import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
+import { ISubscribeDeployer } from "../interfaces/ISubscribeDeployer.sol";
+import { IEssenceDeployer } from "../interfaces/IEssenceDeployer.sol";
 import { Auth, Authority } from "../dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
@@ -17,7 +18,6 @@ import { CyberEngineStorage } from "../storages/CyberEngineStorage.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { UpgradeableBeacon } from "../upgradeability/UpgradeableBeacon.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
 
 /**
  * @title CyberEngine
@@ -30,12 +30,8 @@ contract CyberEngine is
     UUPSUpgradeable,
     CyberEngineStorage,
     IUpgradeable,
-    IProfileDeployer,
     ICyberEngine
 {
-    // TODO: doc
-    DataTypes.DeployParameters public override parameters;
-
     constructor() {
         _disableInitializers();
     }
@@ -98,20 +94,10 @@ contract CyberEngine is
         emit AllowProfileMw(mw, preAllowed, allowed);
     }
 
-    struct Addrs {
-        address authority;
-        address profileImpl;
-        address profileProxy;
-        address subscribeImpl;
-        address subscribeBeacon;
-        address essenceImpl;
-        address essenceBeacon;
-    }
-
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
         requiresAuth
-        returns (address)
+        returns (address profileProxy)
     {
         bytes memory byteName = bytes(params.name);
         bytes memory byteSymbol = bytes(params.symbol);
@@ -131,89 +117,68 @@ contract CyberEngine is
             byteSymbol.length <= Constants._MAX_SYMBOL_LENGTH,
             "SYMBOL_INVALID_LENGTH"
         );
+        {
+            address authority = address(
+                new RolesAuthority{ salt: salt }(
+                    params.owner,
+                    Authority(address(0))
+                )
+            );
 
-        Addrs memory addrs;
-        addrs.authority = address(
-            new RolesAuthority(params.owner, Authority(address(0)))
-        );
+            ISubscribeDeployer(params.addrs.subscribeFactory).setSubParameters(
+                params.addrs.profileProxy
+            );
+            address subscribeImpl = ISubscribeDeployer(
+                params.addrs.subscribeFactory
+            ).deploy(salt);
 
-        addrs.profileImpl = _computeAddress(
-            type(ProfileNFT).creationCode,
-            salt
-        );
+            IEssenceDeployer(params.addrs.essenceFactory).setEssParameters(
+                params.addrs.profileProxy
+            );
+            address essImpl = IEssenceDeployer(params.addrs.essenceFactory)
+                .deploy(salt);
 
-        bytes memory data = abi.encodeWithSelector(
-            ProfileNFT.initialize.selector,
-            address(0),
-            params.name,
-            params.symbol,
-            params.descriptor,
-            authority
-        );
+            address subBeacon = address(
+                new UpgradeableBeacon{ salt: salt }(subscribeImpl, params.owner)
+            );
+            address essBeacon = address(
+                new UpgradeableBeacon{ salt: salt }(essImpl, params.owner)
+            );
 
-        addrs.profileProxy = _computeAddress(
-            abi.encodePacked(
-                type(ERC1967Proxy).creationCode,
-                abi.encode(addrs.profileImpl, data)
-            ),
-            salt
-        );
+            IProfileDeployer(params.addrs.profileFactory).setProfileParameters(
+                address(this),
+                subBeacon,
+                essBeacon
+            );
+            address profileImpl = IProfileDeployer(params.addrs.profileFactory)
+                .deploy(salt);
+            require(
+                profileImpl == params.addrs.authority,
+                "AUTHORITY_MISMATCH"
+            );
 
-        addrs.subscribeImpl = _computeAddress(
-            type(SubscribeNFT).creationCode,
-            salt
-        );
+            bytes memory data = abi.encodeWithSelector(
+                ProfileNFT.initialize.selector,
+                address(0),
+                params.name,
+                params.symbol,
+                authority
+            );
 
-        addrs.essenceImpl = _computeAddress(
-            type(EssenceNFT).creationCode,
-            salt
-        );
-
-        addrs.subscribeBeacon = _computeAddress(
-            abi.encodePacked(
-                type(UpgradeableBeacon).creationCode,
-                abi.encode(addrs.subscribeImpl, params.owner)
-            ),
-            salt
-        );
-        addrs.essenceBeacon = _computeAddress(
-            abi.encodePacked(
-                type(UpgradeableBeacon).creationCode,
-                abi.encode(addrs.essenceImpl, params.owner)
-            ),
-            salt
-        );
-
-        // Real deployment
-        parameters.profileProxy = addrs.profileProxy;
-        parameters.engine = address(this);
-        parameters.essenceBeacon = addrs.essenceBeacon;
-        parameters.subBeacon = addrs.subscribeBeacon;
-
-        new SubscribeNFT{ salt: salt }();
-        new EssenceNFT{ salt: salt }();
-        new UpgradeableBeacon{ salt: salt }(addrs.subscribeImpl, params.owner);
-        new UpgradeableBeacon{ salt: salt }(addrs.essenceImpl, params.owner);
-        new ProfileNFT{ salt: salt }();
-        address profileProxy = address(
-            new ERC1967Proxy{ salt: salt }(addrs.profileImpl, data)
-        );
+            profileProxy = address(
+                new ERC1967Proxy{ salt: salt }(profileImpl, data)
+            );
+        }
         require(
-            profileProxy == addrs.profileProxy,
+            profileProxy == params.addrs.profileProxy,
             "PROFILE_PROXY_WRONG_ADDRESS"
         );
 
-        delete parameters;
-
-        // deploy finish
-
-        _namespaceInfo[addrs.profileProxy].name = params.name;
-        _namespaceInfo[addrs.profileProxy].owner = params.owner;
+        _namespaceInfo[params.addrs.profileProxy].name = params.name;
+        _namespaceInfo[params.addrs.profileProxy].owner = params.owner;
 
         // TODO emit event
-
-        _namespaceByName[salt] = addrs.profileProxy;
-        return profileProxy;
+        _namespaceByName[salt] = params.addrs.profileProxy;
     }
 
     /**
@@ -239,21 +204,5 @@ contract CyberEngine is
         );
 
         _;
-    }
-
-    function _computeAddress(bytes memory _byteCode, bytes32 salt)
-        internal
-        view
-        returns (address)
-    {
-        bytes32 hash_ = keccak256(
-            abi.encodePacked(
-                bytes1(0xff),
-                address(this),
-                salt,
-                keccak256(_byteCode)
-            )
-        );
-        return address(uint160(uint256(hash_)));
     }
 }

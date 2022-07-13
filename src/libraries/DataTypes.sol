@@ -3,12 +3,6 @@
 pragma solidity 0.8.14;
 
 library DataTypes {
-    struct DeployParameters {
-        address engine;
-        address profileProxy;
-        address subBeacon;
-        address essenceBeacon;
-    }
     struct EIP712Signature {
         uint8 v;
         bytes32 r;
@@ -27,7 +21,7 @@ library DataTypes {
         string name;
         string symbol;
         address owner;
-        address descriptor;
+        ComputedAddresses addrs;
     }
 
     struct SubscribeData {
@@ -86,5 +80,29 @@ library DataTypes {
         uint256 tokenId;
         string handle;
         uint256 subscribers;
+    }
+
+    struct ComputedAddresses {
+        address authority;
+        address profileProxy;
+        // address subscribeImpl;
+        // address essenceImpl;
+        address profileFactory;
+        address subscribeFactory;
+        address essenceFactory;
+    }
+
+    struct ProfileDeployParameters {
+        address engine;
+        address subBeacon;
+        address essenceBeacon;
+    }
+
+    struct SubscribeDeployParameters {
+        address profileProxy;
+    }
+
+    struct EssenceDeployParameters {
+        address profileProxy;
     }
 }

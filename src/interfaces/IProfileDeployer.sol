@@ -2,14 +2,21 @@
 
 pragma solidity 0.8.14;
 
-interface IProfileDeployer {
-    function parameters()
+import { IDeployer } from "../interfaces/IDeployer.sol";
+
+interface IProfileDeployer is IDeployer {
+    function profileParams()
         external
         view
         returns (
             address engine,
-            address profileProxy,
             address subBeacon,
             address essenceBeacon
         );
+
+    function setProfileParameters(
+        address engine,
+        address subscribeBeacon,
+        address essenceBeacon
+    ) external;
 }

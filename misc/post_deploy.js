@@ -30,21 +30,24 @@ const writeDeploy = async () => {
     const rst = txs.transactions.map((tx) => tx.contractAddress);
     const md = markdownTable([
       ["Contract", "Address", "Etherscan"],
-      ["RolesAuthority", rst[0], etherscan + rst[0]],
-      ["CyberEngine (Impl)", rst[1], etherscan + rst[1]],
-      ["CyberEngine (Proxy)", rst[2], etherscan + rst[2]],
-      ["Link3 Descriptor (Impl)", rst[3], etherscan + rst[3]],
-      ["Link3 Descriptor (Proxy)", rst[4], etherscan + rst[4]],
+      ["RolesAuthority", rst[1], etherscan + rst[1]],
+      ["CyberEngine (Impl)", rst[2], etherscan + rst[2]],
+      ["CyberEngine (Proxy)", rst[3], etherscan + rst[3]],
+      ["Link3 Descriptor (Impl)", rst[4], etherscan + rst[3]],
+      ["Link3 Descriptor (Proxy)", rst[5], etherscan + rst[4]],
 
-      ["Link3 Profile (Proxy)", rst[9], etherscan + rst[9]],
-      ["Treasury", rst[10], etherscan + rst[10]],
+      ["Essence Factory", rst[10], etherscan + rst[10]],
+      ["Subscribe Factory", rst[11], etherscan + rst[11]],
+      ["Profile Factory", rst[12], etherscan + rst[12]],
+      ["Link3 Profile (Proxy)", rst[13], etherscan + rst[13]],
+      ["Cyber Treasury", rst[14], etherscan + rst[14]],
       [
         "Link3 Profile MW (PermissionedFeeCreationMw)",
-        rst[11],
-        etherscan + rst[11],
+        rst[15],
+        etherscan + rst[15],
       ],
-      ["CyberBoxNFT (Impl)", rst[14], etherscan + rst[14]],
-      ["CyberBoxNFT (Proxy)", rst[15], etherscan + rst[15]],
+      ["CyberBoxNFT (Impl)", rst[18], etherscan + rst[18]],
+      ["CyberBoxNFT (Proxy)", rst[19], etherscan + rst[19]],
     ]);
     await fs.writeFile(path.join("./docs/deploy", chain + ".md"), md);
   }

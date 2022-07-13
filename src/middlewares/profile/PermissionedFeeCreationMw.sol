@@ -8,7 +8,6 @@ import { FeeMw } from "../base/FeeMw.sol";
 import { Constants } from "../../libraries/Constants.sol";
 import { DataTypes } from "../../libraries/DataTypes.sol";
 import { EIP712 } from "../../base/EIP712.sol";
-import "forge-std/console.sol";
 
 contract PermissionedFeeCreationMw is
     IProfileMiddleware,
@@ -182,10 +181,8 @@ contract PermissionedFeeCreationMw is
         _requiresEnoughFee(msg.sender, params.handle, msg.value);
         _requiresValidSig(params, v, r, s, deadline, mwData);
 
-        console.log("treasury", _treasuryFee());
         uint256 treasuryCollected = (msg.value * _treasuryFee()) /
             Constants._MAX_BPS;
-        console.log("collected", treasuryCollected);
         uint256 actualCollected = msg.value - treasuryCollected;
 
         payable(mwData.recipient).transfer(actualCollected);
