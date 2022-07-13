@@ -640,7 +640,8 @@ library LibDeploy {
                 "bafkreibcwcqcdf2pgwmco3pfzdpnfj3lijexzlzrbfv53sogz5uuydmvvu",
                 "metadata"
             ),
-            abi.encode(v, r, s, deadline)
+            abi.encode(v, r, s, deadline),
+            new bytes(0)
         );
         require(mw.getNonce(address(profile), mintToEOA) == 1);
         require(profile.balanceOf(mintToEOA) == 1);

@@ -21,7 +21,6 @@ import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
 import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
-import { ActionEvents } from "../src/libraries/ActionEvents.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 
@@ -134,7 +133,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         expected[0] = result;
 
         vm.expectEmit(true, false, false, true);
-        emit ActionEvents.Subscribe(address(this), ids, datas, datas);
+        emit Subscribe(address(this), ids, datas, datas);
 
         uint256[] memory called = profile.subscribe(ids, datas, datas);
         assertEq(called.length, expected.length);
@@ -276,7 +275,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.expectEmit(true, false, false, true);
-        emit ActionEvents.Subscribe(charlie, profileIds, subDatas, subDatas);
+        emit Subscribe(charlie, profileIds, subDatas, subDatas);
 
         profile.subscribeWithSig(
             profileIds,
@@ -483,12 +482,14 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.expectRevert("NOT_MINTED");
         uint256 nonExistentProfileId = 8888;
         profile.registerEssence(
-            nonExistentProfileId,
-            "name",
-            "symbol",
-            "uri",
-            essenceMw,
-            new bytes(0)
+            DataTypes.RegisterEssenceParams(
+                nonExistentProfileId,
+                "name",
+                "symbol",
+                "uri",
+                essenceMw,
+                new bytes(0)
+            )
         );
     }
 
@@ -497,12 +498,14 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
         vm.prank(charlie);
         profile.registerEssence(
-            profileId,
-            "name",
-            "symbol",
-            "uri",
-            essenceMw,
-            new bytes(0)
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                "name",
+                "symbol",
+                "uri",
+                essenceMw,
+                new bytes(0)
+            )
         );
     }
 
@@ -511,12 +514,14 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         address notMw = address(0xDEEAAAD);
         vm.prank(bob);
         profile.registerEssence(
-            profileId,
-            "name",
-            "symbol",
-            "uri",
-            notMw,
-            new bytes(0)
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                "name",
+                "symbol",
+                "uri",
+                notMw,
+                new bytes(0)
+            )
         );
     }
 
@@ -546,7 +551,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         string memory symbol = "symbol";
         string memory uri = "uri";
 
-        emit ActionEvents.RegisterEssence(
+        emit RegisterEssence(
             profileId,
             expectedEssenceId,
             name,
@@ -556,12 +561,14 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             returnData
         );
         uint256 essenceId = profile.registerEssence(
-            profileId,
-            name,
-            symbol,
-            uri,
-            essenceMw,
-            new bytes(0)
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                name,
+                symbol,
+                uri,
+                essenceMw,
+                new bytes(0)
+            )
         );
         assertEq(essenceId, expectedEssenceId);
     }
@@ -577,12 +584,14 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         // register without middleware
         uint256 essenceId = profile.registerEssence(
-            profileId,
-            "name",
-            "symbol",
-            "uri",
-            address(0),
-            new bytes(0)
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                "name",
+                "symbol",
+                "uri",
+                address(0),
+                new bytes(0)
+            )
         );
         assertEq(essenceId, expectedEssenceId);
 
@@ -600,12 +609,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.expectEmit(true, false, false, true);
-        emit ActionEvents.CollectEssence(
-            minter,
-            profileId,
-            new bytes(0),
-            new bytes(0)
-        );
+        emit CollectEssence(minter, profileId, new bytes(0), new bytes(0));
 
         vm.prank(minter);
         profile.collect(profileId, essenceId, new bytes(0), new bytes(0));
@@ -617,12 +621,14 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         // register without middleware
         uint256 essenceId = profile.registerEssence(
-            profileId,
-            "name",
-            "symbol",
-            "uri",
-            address(0),
-            new bytes(0)
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                "name",
+                "symbol",
+                "uri",
+                address(0),
+                new bytes(0)
+            )
         );
         assertEq(essenceId, expectedEssenceId);
 
@@ -641,15 +647,10 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.expectEmit(true, true, false, true);
-        emit ActionEvents.DeployEssenceNFT(profileId, essenceId, essenceProxy);
+        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
 
         vm.expectEmit(true, false, false, true);
-        emit ActionEvents.CollectEssence(
-            minter,
-            profileId,
-            new bytes(0),
-            new bytes(0)
-        );
+        emit CollectEssence(minter, profileId, new bytes(0), new bytes(0));
 
         vm.prank(minter);
         profile.collect(profileId, essenceId, new bytes(0), new bytes(0));
@@ -661,12 +662,14 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         // register without middleware
         uint256 essenceId = profile.registerEssence(
-            profileId,
-            "name",
-            "symbol",
-            "uri",
-            address(0),
-            new bytes(0)
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                "name",
+                "symbol",
+                "uri",
+                address(0),
+                new bytes(0)
+            )
         );
         assertEq(essenceId, expectedEssenceId);
 
@@ -685,13 +688,13 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.expectEmit(true, true, false, true);
-        emit ActionEvents.DeployEssenceNFT(profileId, essenceId, essenceProxy);
+        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
 
         bytes memory preData = new bytes(0);
         bytes memory postData = new bytes(0);
 
         vm.expectEmit(true, false, false, true);
-        emit ActionEvents.CollectEssence(minter, profileId, preData, postData);
+        emit CollectEssence(minter, profileId, preData, postData);
 
         // sign
         vm.warp(50);

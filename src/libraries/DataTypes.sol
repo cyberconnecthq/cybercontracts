@@ -24,6 +24,15 @@ library DataTypes {
         ComputedAddresses addrs;
     }
 
+    struct RegisterEssenceParams {
+        uint256 profileId;
+        string name;
+        string symbol;
+        string essenceTokenURI;
+        address essenceMw;
+        bytes initData;
+    }
+
     struct SubscribeData {
         address sender;
         uint256[] profileIds;
@@ -39,15 +48,6 @@ library DataTypes {
         bytes preData;
         bytes postData;
         address essBeacon;
-    }
-
-    struct RegisterEssenceData {
-        uint256 profileId;
-        string name;
-        string symbol;
-        string essenceTokenURI;
-        address essenceMw;
-        bytes prepareData;
     }
 
     struct ProfileStruct {

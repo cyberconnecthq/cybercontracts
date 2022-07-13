@@ -132,11 +132,27 @@ contract ProfileNFT is
         _pause();
     }
 
-    /// @inheritdoc IProfileNFT
+    /**
+     * @notice Creates a profile and mints it to the recipient address.
+     *
+     * @param params contains all params.
+     * @param preData contains extra pre-processing data.
+     * @param postData contains extra post-processing data.
+     *
+     * @dev The current function validates the caller address and the handle before minting
+     * and the following conditions must be met:
+     * - The caller address must be the engine address.
+     * - The recipient address must be a valid Ethereum address.
+     * - The handle must contain only a-z, A-Z, 0-9.
+     * - The handle must not be already used.
+     * - The handle must not be longer than 27 bytes.
+     * - The handle must not be empty.
+     */
     function createProfile(
         DataTypes.CreateProfileParams calldata params,
-        bytes calldata data
-    ) external payable override nonReentrant returns (uint256) {
+        bytes calldata preData,
+        bytes calldata postData
+    ) external payable nonReentrant returns (uint256 tokenID) {
         address profileMw = ICyberEngine(ENGINE).getProfileMwByNamespace(
             address(this)
         );
@@ -144,16 +160,16 @@ contract ProfileNFT is
         if (profileMw != address(0)) {
             IProfileMiddleware(profileMw).preProcess{ value: msg.value }(
                 params,
-                data
+                preData
             );
         }
 
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "HANDLE_TAKEN");
 
-        uint256 id = _mint(params.to);
-        Actions.createProfile(
-            id,
+        tokenID = _mint(params.to);
+        bool primaryProfileSet = Actions.createProfile(
+            tokenID,
             _totalCount,
             params,
             _profileById,
@@ -163,9 +179,20 @@ contract ProfileNFT is
         );
 
         if (profileMw != address(0)) {
-            IProfileMiddleware(profileMw).postProcess(params, data);
+            IProfileMiddleware(profileMw).postProcess(params, postData);
         }
-        return id;
+
+        emit CreateProfile(
+            params.to,
+            tokenID,
+            params.handle,
+            params.avatar,
+            params.metadata
+        );
+
+        if (primaryProfileSet) {
+            emit SetPrimaryProfile(params.to, tokenID);
+        }
     }
 
     /**
@@ -278,32 +305,32 @@ contract ProfileNFT is
     }
 
     // TODO: test
-    function registerEssence(
-        uint256 profileId,
-        string calldata name,
-        string calldata symbol,
-        string calldata essenceTokenURI,
-        address essenceMw,
-        bytes calldata initData
-    ) external onlyProfileOwnerOrOperator(profileId) returns (uint256) {
+    function registerEssence(DataTypes.RegisterEssenceParams calldata params)
+        external
+        onlyProfileOwnerOrOperator(params.profileId)
+        returns (uint256)
+    {
         require(
-            essenceMw == address(0) ||
-                ICyberEngine(ENGINE).isEssenceMwAllowed(essenceMw),
+            params.essenceMw == address(0) ||
+                ICyberEngine(ENGINE).isEssenceMwAllowed(params.essenceMw),
             "ESSENCE_MW_NOT_ALLOWED"
         );
-        return
-            Actions.registerEssence(
-                DataTypes.RegisterEssenceData(
-                    profileId,
-                    name,
-                    symbol,
-                    essenceTokenURI,
-                    essenceMw,
-                    initData
-                ),
-                _profileById,
-                _essenceByIdByProfileId
-            );
+        (uint256 tokenID, bytes memory returnData) = Actions.registerEssence(
+            params,
+            _profileById,
+            _essenceByIdByProfileId
+        );
+
+        emit RegisterEssence(
+            params.profileId,
+            tokenID,
+            params.name,
+            params.symbol,
+            params.essenceTokenURI,
+            params.essenceMw,
+            returnData
+        );
+        return tokenID;
     }
 
     /**
@@ -680,23 +707,28 @@ contract ProfileNFT is
         uint256[] calldata profileIds,
         bytes[] calldata preDatas,
         bytes[] calldata postDatas
-    ) internal returns (uint256[] memory result) {
+    ) internal returns (uint256[] memory) {
         for (uint256 i = 0; i < profileIds.length; i++) {
             _requireMinted(profileIds[i]);
         }
 
-        return
-            Actions.subscribe(
-                DataTypes.SubscribeData(
-                    sender,
-                    profileIds,
-                    preDatas,
-                    postDatas,
-                    SUBSCRIBE_BEACON
-                ),
-                _subscribeByProfileId,
-                _profileById
-            );
+        uint256[] memory result = Actions.subscribe(
+            DataTypes.SubscribeData(
+                sender,
+                profileIds,
+                preDatas,
+                postDatas,
+                SUBSCRIBE_BEACON
+            ),
+            _subscribeByProfileId,
+            _profileById
+        );
+
+        emit Subscribe(sender, profileIds, preDatas, postDatas);
+        // if (deployedSubscribeNFT != address(0)) {
+        //     emit DeploySubscribeNFT(profileId, deployedSubscribeNFT);
+        // }
+        return result;
     }
 
     function _collect(
@@ -708,18 +740,23 @@ contract ProfileNFT is
     ) internal returns (uint256) {
         _requireMinted(profileId);
 
-        return
-            Actions.collect(
-                DataTypes.CollectData(
-                    collector,
-                    profileId,
-                    essenceId,
-                    preData,
-                    postData,
-                    ESSENCE_BEACON
-                ),
-                _essenceByIdByProfileId
-            );
+        (uint256 tokenID, address deployedEssenceNFT) = Actions.collect(
+            DataTypes.CollectData(
+                collector,
+                profileId,
+                essenceId,
+                preData,
+                postData,
+                ESSENCE_BEACON
+            ),
+            _essenceByIdByProfileId
+        );
+
+        emit CollectEssence(collector, profileId, preData, postData);
+
+        if (deployedEssenceNFT != address(0)) {
+            emit DeployEssenceNFT(profileId, essenceId, deployedEssenceNFT);
+        }
     }
 
     function _setPrimaryProfile(address user, uint256 profileId) internal {
