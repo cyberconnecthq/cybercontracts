@@ -600,6 +600,11 @@ contract ProfileNFT is
         return _profileIdByHandleHash[handleHash];
     }
 
+    /// @inheritdoc IProfileNFT
+    function getNamespaceOwner() external view override returns (address) {
+        return _namespaceOwner;
+    }
+
     /*//////////////////////////////////////////////////////////////
                                  PUBLIC
     //////////////////////////////////////////////////////////////*/

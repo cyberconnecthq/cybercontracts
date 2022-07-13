@@ -11,9 +11,6 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 
 // Sequential mint ERC721
-// TODO: Put EIP712 permit logic here
-// TODO: Might need to fork ERC721 for to store startTimeStamp like
-// https://github.com/chiru-labs/ERC721A/blob/538817040d98c6464afa0be7cc625cef44776668/contracts/IERC721A.sol#L75
 abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
     bytes32 internal constant EIP712_REVISION_HASH = keccak256("1");
 
