@@ -10,24 +10,39 @@ import { Constants } from "../../../../src/libraries/Constants.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
 import { ProfileNFT } from "../../../../src/core/ProfileNFT.sol";
+import { TestIntegrationBase } from "../../../utils/TestIntegrationBase.sol";
 
-contract SubscribeOnlyOnceMwTest is Test, IProfileNFTEvents {
-    SubscribeOnlyOnceMw mw;
-    RolesAuthority authority;
-    address boxAddress;
-    address profileAddress;
-    address alice = address(0xA11CE);
-    uint256 bobPk = 1;
-    address bob = vm.addr(bobPk); // matches TestLibFixture
+contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
     uint256 bobProfileId;
     address profileDescriptorAddress;
-    ProfileNFT profileNFT;
+    SubscribeOnlyOnceMw subMw;
 
     event Transfer(
         address indexed from,
         address indexed to,
         uint256 indexed id
     );
+
+    function setUp() public {
+        _setUp();
+        subMw = new SubscribeOnlyOnceMw();
+        vm.label(address(subMw), "SubscribeMiddleware");
+        string memory handle = "bob";
+        address to = bob;
+
+        bobProfileId = TestLibFixture.registerBobProfile(
+            vm,
+            profile,
+            profileMw,
+            handle,
+            to,
+            link3SignerPk
+        );
+
+        engine.allowSubscribeMw(address(subMw), true);
+        vm.prank(bob);
+        profile.setSubscribeMw(bobProfileId, address(subMw), new bytes(0));
+    }
 
     // function setUp() public {
     //     mw = new SubscribeOnlyOnceMw();
@@ -56,32 +71,33 @@ contract SubscribeOnlyOnceMwTest is Test, IProfileNFTEvents {
     //     profileNFT.setSubscribeMw(bobProfileId, address(mw), new bytes(0));
     // }
 
-    // function testSubscribeOnlyOnce() public {
-    //     uint256[] memory ids = new uint256[](1);
-    //     ids[0] = bobProfileId;
-    //     bytes[] memory data = new bytes[](1);
+    function testSubscribeOnlyOnce() public {
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = bobProfileId;
+        bytes[] memory data = new bytes[](1);
 
-    //     uint256 nonce = vm.getNonce(address(profileNFT));
-    //     address subscribeProxy = LibDeploy._calcContractAddress(
-    //         address(profileNFT),
-    //         nonce
-    //     );
+        uint256 nonce = vm.getNonce(address(profile));
+        address subscribeProxy = LibDeploy._calcContractAddress(
+            address(profile),
+            nonce
+        );
 
-    //     vm.expectEmit(true, true, false, true);
-    //     emit DeploySubscribeNFT(bobProfileId, address(subscribeProxy));
+        // TODO
+        // vm.expectEmit(true, true, false, true);
+        // emit DeploySubscribeNFT(bobProfileId, address(subscribeProxy));
 
-    //     vm.expectEmit(true, true, true, true);
-    //     emit Transfer(address(0), alice, 1);
+        // vm.expectEmit(true, true, true, true);
+        // emit Transfer(address(0), alice, 1);
 
-    //     vm.expectEmit(true, false, false, true);
-    //     emit Subscribe(alice, ids, data, data);
+        // vm.expectEmit(true, false, false, true);
+        // emit Subscribe(alice, ids, data, data);
 
-    //     vm.prank(alice);
-    //     profileNFT.subscribe(ids, data, data);
+        vm.prank(alice);
+        profile.subscribe(ids, data, data);
 
-    //     // Second subscribe will fail
-    //     vm.expectRevert("Already subscribed");
-    //     vm.prank(alice);
-    //     profileNFT.subscribe(ids, data, data);
-    // }
+        // Second subscribe will fail
+        vm.expectRevert("Already subscribed");
+        vm.prank(alice);
+        profile.subscribe(ids, data, data);
+    }
 }

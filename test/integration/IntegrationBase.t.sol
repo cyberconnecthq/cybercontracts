@@ -14,70 +14,53 @@ import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/Permiss
 import { TestIntegrationBase } from "../utils/TestIntegrationBase.sol";
 
 contract IntegrationBaseTest is TestIntegrationBase, IProfileNFTEvents {
-    ProfileNFT profileNFT;
-    Link3ProfileDescriptor profileDescriptor;
-    RolesAuthority authority;
-    PermissionedFeeCreationMw mw;
-    address boxAddress;
-    address profileAddress;
-    uint256 bobProfileId;
-
     function setUp() public {
-        LibDeploy.ContractAddresses memory addrs = LibDeploy.deployInTest(
-            vm,
-            link3Signer
-        );
-        authority = RolesAuthority(addrs.engineAuthority);
-        profileNFT = ProfileNFT(addrs.link3Profile);
-        profileDescriptor = Link3ProfileDescriptor(addrs.link3DescriptorProxy);
-        mw = PermissionedFeeCreationMw(addrs.link3ProfileMw);
+        _setUp();
     }
 
-    function testNoop() public {}
-
     function testRegistrationTwice() public {
-        assertEq(mw.getSigner(address(profileNFT)), link3Signer);
+        assertEq(profileMw.getSigner(address(profile)), link3Signer);
         string memory handle = "bob";
-        address to = address(0xA11CE);
+        address to = bob;
         // Register bob profile
         vm.expectEmit(true, true, false, true);
         emit SetPrimaryProfile(to, 2); // hardcode profileid
-        bobProfileId = TestLibFixture.registerBobProfile(
+        uint256 bobProfileId = TestLibFixture.registerBobProfile(
             vm,
-            profileNFT,
-            mw,
+            profile,
+            profileMw,
             handle,
             to,
             link3SignerPk
         );
 
         // check bob profile details
-        string memory gotHandle = profileNFT.getHandleByProfileId(bobProfileId);
-        string memory avatar = profileNFT.getAvatar(bobProfileId);
-        string memory metadata = profileNFT.getMetadata(bobProfileId);
-        address descriptor = profileNFT.getNFTDescriptor();
+        string memory gotHandle = profile.getHandleByProfileId(bobProfileId);
+        string memory avatar = profile.getAvatar(bobProfileId);
+        string memory metadata = profile.getMetadata(bobProfileId);
+        address descriptor = profile.getNFTDescriptor();
         assertEq(gotHandle, handle);
         assertEq(avatar, "avatar");
         assertEq(metadata, "metadata");
         assertEq(descriptor, address(0));
 
         // check bob balance
-        assertEq(profileNFT.balanceOf(to), 1);
+        assertEq(profile.balanceOf(to), 1);
 
         // check bob profile ownership
-        assertEq(profileNFT.ownerOf(bobProfileId), to);
+        assertEq(profile.ownerOf(bobProfileId), to);
 
         // TODO check tokenURI
-        // assertEq(profileNFT.tokenURI(bobProfileId), bobUri);
+        // assertEq(profile.tokenURI(bobProfileId), bobUri);
 
-        assertEq(profileNFT.getPrimaryProfile(to), bobProfileId);
-        assertEq(profileNFT.getPrimaryProfile(to), bobProfileId);
+        assertEq(profile.getPrimaryProfile(to), bobProfileId);
+        assertEq(profile.getPrimaryProfile(to), bobProfileId);
 
         // register second time will not set primary profile
         uint256 secondId = TestLibFixture.registerBobProfile(
             vm,
-            profileNFT,
-            mw,
+            profile,
+            profileMw,
             "handle2",
             to,
             link3SignerPk
@@ -85,6 +68,6 @@ contract IntegrationBaseTest is TestIntegrationBase, IProfileNFTEvents {
         assertEq(secondId, 3);
 
         // primary profile is still 2
-        assertEq(profileNFT.getPrimaryProfile(to), 2);
+        assertEq(profile.getPrimaryProfile(to), 2);
     }
 }
