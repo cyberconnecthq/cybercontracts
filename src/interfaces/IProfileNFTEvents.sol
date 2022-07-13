@@ -31,6 +31,14 @@ interface IProfileNFTEvents {
     event SetNFTDescriptor(address indexed newDescriptor);
 
     /**
+     * @notice Emitted when a new namespace owner has been set.
+     *
+     * @param preOwner The previous owner address.
+     * @param newOwner The newly set owner address.
+     */
+    event SetNamespaceOwner(address indexed preOwner, address indexed newOwner);
+
+    /**
      * @notice Emitted when a new animation template has been set.
      *
      * @param newTemplate The newly set animation template.
@@ -73,32 +81,6 @@ interface IProfileNFTEvents {
         address indexed operator,
         bool prevApproved,
         bool approved
-    );
-
-    /**
-     * @notice Emitted when a subscription middleware has been allowed.
-     *
-     * @param mw The middleware address.
-     * @param preAllowed The previously allow state.
-     * @param newAllowed The newly set allow state.
-     */
-    event AllowSubscribeMw(
-        address indexed mw,
-        bool indexed preAllowed,
-        bool indexed newAllowed
-    );
-
-    /**
-     * @notice Emitted when a essence middleware has been allowed.
-     *
-     * @param mw The middleware address.
-     * @param preAllowed The previously allow state.
-     * @param newAllowed The newly set allow state.
-     */
-    event AllowEssenceMw(
-        address indexed mw,
-        bool indexed preAllowed,
-        bool indexed newAllowed
     );
 
     /**

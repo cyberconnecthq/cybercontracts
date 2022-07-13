@@ -14,15 +14,12 @@ import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UU
 import { ProfileNFTStorage } from "../storages/ProfileNFTStorage.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
-import { Auth, Authority } from "../dependencies/solmate/Auth.sol";
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
-import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
-// import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
 
 /**
@@ -34,13 +31,48 @@ import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.so
 contract ProfileNFT is
     Pausable,
     ReentrancyGuard,
-    Auth,
     CyberNFTBase,
     UUPSUpgradeable,
     ProfileNFTStorage,
     IUpgradeable,
     IProfileNFT
 {
+    /**
+     * @notice Checks that the profile owner is the sender address.
+     */
+    modifier onlyProfileOwner(uint256 profileId) {
+        require(ownerOf(profileId) == msg.sender, "ONLY_PROFILE_OWNER");
+        _;
+    }
+
+    /**
+     * @notice Checks that the profile owner or operator is the sender address.
+     */
+    modifier onlyProfileOwnerOrOperator(uint256 profileId) {
+        require(
+            ownerOf(profileId) == msg.sender ||
+                getOperatorApproval(profileId, msg.sender),
+            "ONLY_PROFILE_OWNER_OR_OPERATOR"
+        );
+        _;
+    }
+
+    /**
+     * @notice Checks that the namespace owner is the sender address.
+     */
+    modifier onlyNamespaceOwner() {
+        require(_namespaceOwner == msg.sender, "ONLY_NAMESPACE_OWNER");
+        _;
+    }
+
+    /**
+     * @notice Checks that the CyberEngine is the sender address.
+     */
+    modifier onlyEngine() {
+        require(ENGINE == msg.sender, "ONLY_ENGINE");
+        _;
+    }
+
     /* solhint-disable var-name-mixedcase */
 
     address public immutable SUBSCRIBE_BEACON;
@@ -71,13 +103,12 @@ contract ProfileNFT is
     function initialize(
         address _owner,
         string calldata name,
-        string calldata symbol,
-        address _rolesAuthority
+        string calldata symbol
     ) external initializer {
         CyberNFTBase._initialize(name, symbol);
-        Auth.__Auth_Init(_owner, Authority(_rolesAuthority));
         ReentrancyGuard.__ReentrancyGuard_init();
 
+        _namespaceOwner = _owner;
         emit Initialize(_owner);
         // start with paused
         _pause();
@@ -88,9 +119,9 @@ contract ProfileNFT is
         DataTypes.CreateProfileParams calldata params,
         bytes calldata data
     ) external payable override nonReentrant returns (uint256) {
-        address profileMw = ICyberEngine(ENGINE)
-            .getNamespaceData(address(this))
-            .profileMw;
+        address profileMw = ICyberEngine(ENGINE).getProfileMwByNamespace(
+            address(this)
+        );
 
         if (profileMw != address(0)) {
             IProfileMiddleware(profileMw).preProcess{ value: msg.value }(
@@ -117,28 +148,6 @@ contract ProfileNFT is
             IProfileMiddleware(profileMw).postProcess(params, data);
         }
         return id;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function getHandleByProfileId(uint256 profileId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        _requireMinted(profileId);
-        return _profileById[profileId].handle;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function getProfileIdByHandle(string calldata handle)
-        external
-        view
-        override
-        returns (uint256)
-    {
-        bytes32 handleHash = keccak256(bytes(handle));
-        return _profileIdByHandleHash[handleHash];
     }
 
     /**
@@ -175,336 +184,12 @@ contract ProfileNFT is
             );
     }
 
-    /// @inheritdoc IProfileNFT
-    function getNFTDescriptor() external view override returns (address) {
-        return _nftDescriptor;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function getOperatorApproval(uint256 profileId, address operator)
-        public
-        view
-        returns (bool)
-    {
-        _requireMinted(profileId);
-        return _operatorApproval[profileId][operator];
-    }
-
-    function _setOperatorApproval(
-        uint256 profileId,
-        address operator,
-        bool approved
-    ) internal {
-        require(operator != address(0), "ZERO_ADDRESS");
-        bool prev = _operatorApproval[profileId][operator];
-        _operatorApproval[profileId][operator] = approved;
-        emit SetOperatorApproval(profileId, operator, prev, approved);
-    }
-
-    /// @inheritdoc IProfileNFT
-    function setOperatorApproval(
-        uint256 profileId,
-        address operator,
-        bool approved
-    ) external override onlyProfileOwner(profileId) {
-        _setOperatorApproval(profileId, operator, approved);
-    }
-
-    /**
-     * @notice Sets the operator approval with a signature.
-     *
-     * @param profileId The profile ID.
-     * @param operator The operator address.
-     * @param approved The new state of the approval.
-     * @param sig The EIP712 signature.
-     */
-    function setOperatorApprovalWithSig(
-        uint256 profileId,
-        address operator,
-        bool approved,
-        DataTypes.EIP712Signature calldata sig
-    ) external {
-        address owner = ownerOf(profileId);
-        _requiresExpectedSigner(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
-                        profileId,
-                        operator,
-                        approved,
-                        nonces[owner]++,
-                        sig.deadline
-                    )
-                )
-            ),
-            owner,
-            sig
-        );
-        _setOperatorApproval(profileId, operator, approved);
-    }
-
-    function _setMetadata(uint256 profileId, string calldata metadata)
-        internal
-    {
-        require(
-            bytes(metadata).length <= Constants._MAX_URI_LENGTH,
-            "METADATA_INVALID_LENGTH"
-        );
-        _metadataById[profileId] = metadata;
-        emit SetMetadata(profileId, metadata);
-    }
-
-    /// @inheritdoc IProfileNFT
-    function setMetadata(uint256 profileId, string calldata metadata)
-        external
-        override
-        onlyProfileOwnerOrOperator(profileId)
-    {
-        _setMetadata(profileId, metadata);
-    }
-
-    /**
-     * @notice Sets the profile metadata with a signture.
-     *
-     * @param profileId The profile ID.
-     * @param metadata The new metadata to be set.
-     * @param sig The EIP712 signature.
-     * @dev Only owner's signature works.
-     */
-    function setMetadataWithSig(
-        uint256 profileId,
-        string calldata metadata,
-        DataTypes.EIP712Signature calldata sig
-    ) external {
-        address owner = ownerOf(profileId);
-        _requiresExpectedSigner(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        Constants._SET_METADATA_TYPEHASH,
-                        profileId,
-                        keccak256(bytes(metadata)),
-                        nonces[owner]++,
-                        sig.deadline
-                    )
-                )
-            ),
-            owner,
-            sig
-        );
-        _setMetadata(profileId, metadata);
-    }
-
-    /// @inheritdoc IProfileNFT
-    function getMetadata(uint256 profileId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        _requireMinted(profileId);
-        return _metadataById[profileId];
-    }
-
-    /// @inheritdoc IProfileNFT
-    function getAvatar(uint256 profileId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        _requireMinted(profileId);
-        return _profileById[profileId].avatar;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function setNFTDescriptor(address descriptor)
-        external
-        override
-        requiresAuth
-    {
-        _nftDescriptor = descriptor;
-        emit SetNFTDescriptor(descriptor);
-    }
-
-    function setAnimationTemplate(string calldata template)
-        external
-        requiresAuth
-    {
-        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
-
-        emit SetAnimationTemplate(template);
-    }
-
-    /// @inheritdoc IProfileNFT
-    function setAvatar(uint256 profileId, string calldata avatar)
-        external
-        override
-        onlyProfileOwnerOrOperator(profileId)
-    {
-        require(
-            bytes(avatar).length <= Constants._MAX_URI_LENGTH,
-            "AVATAR_INVALID_LENGTH"
-        );
-        _profileById[profileId].avatar = avatar;
-        emit SetAvatar(profileId, avatar);
-    }
-
-    // TODO: UUPS base contracts for functions
-    // TODO: write a test for upgrade profile nft
-    function version() external pure virtual override returns (uint256) {
-        return _VERSION;
-    }
-
-    // UUPS upgradeability
-    function _authorizeUpgrade(address) internal override canUpgrade {}
-
-    /**
-     * @notice Checks if the sender is authorized to upgrade the contract.
-     */
-    modifier canUpgrade() {
-        require(
-            isAuthorized(msg.sender, Constants._AUTHORIZE_UPGRADE),
-            "UNAUTHORIZED"
-        );
-
-        _;
-    }
-
-    /**
-     * @notice Changes the pause state of the profile nft.
-     *
-     * @param toPause The pause state.
-     */
-    function pause(bool toPause) external requiresAuth {
-        if (toPause) {
-            super._pause();
-        } else {
-            super._unpause();
-        }
-    }
-
     function transferFrom(
         address from,
         address to,
         uint256 id
     ) public override whenNotPaused {
         super.transferFrom(from, to, id);
-    }
-
-    /// @inheritdoc IProfileNFT
-    function setPrimaryProfile(uint256 profileId)
-        external
-        override
-        onlyProfileOwner(profileId)
-    {
-        _requireMinted(profileId);
-        _setPrimaryProfile(msg.sender, profileId);
-        emit SetPrimaryProfile(msg.sender, profileId);
-    }
-
-    function _setPrimaryProfile(address user, uint256 profileId) internal {
-        _addressToPrimaryProfile[user] = profileId;
-    }
-
-    /// @inheritdoc IProfileNFT
-    function getPrimaryProfile(address user)
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return _addressToPrimaryProfile[user];
-    }
-
-    /**
-     * @notice Checks that the profile owner is the sender address.
-     */
-    modifier onlyProfileOwner(uint256 profileId) {
-        require(ownerOf(profileId) == msg.sender, "ONLY_PROFILE_OWNER");
-        _;
-    }
-
-    /**
-     * @notice Checks that the profile owner or operator is the sender address.
-     */
-    modifier onlyProfileOwnerOrOperator(uint256 profileId) {
-        require(
-            ownerOf(profileId) == msg.sender ||
-                getOperatorApproval(profileId, msg.sender),
-            "ONLY_PROFILE_OWNER_OR_OPERATOR"
-        );
-        _;
-    }
-
-    function getSubscribeNFT(uint256 profileId)
-        external
-        view
-        override
-        returns (address)
-    {
-        return _subscribeByProfileId[profileId].subscribeNFT;
-    }
-
-    function getSubscribeNFTTokenURI(uint256 profileId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return _subscribeByProfileId[profileId].tokenURI;
-    }
-
-    function getEssenceNFT(uint256 profileId, uint256 essenceId)
-        external
-        view
-        override
-        returns (address)
-    {
-        return _essenceByIdByProfileId[profileId][essenceId].essenceNFT;
-    }
-
-    function getEssenceNFTTokenURI(uint256 profileId, uint256 essenceId)
-        external
-        view
-        override
-        returns (string memory)
-    {
-        return _essenceByIdByProfileId[profileId][essenceId].tokenURI;
-    }
-
-    /**
-     * @notice The subscription functionality.
-     *
-     * @param sender The sender address.
-     * @param profileIds The profile ids to subscribed to.
-     * @param preDatas The subscription data used in pre process.
-     * @param postDatas The subscription data used in post process.
-     * @return result The subscription nft ids.
-     */
-    function _subscribe(
-        address sender,
-        uint256[] calldata profileIds,
-        bytes[] calldata preDatas,
-        bytes[] calldata postDatas
-    ) internal returns (uint256[] memory result) {
-        for (uint256 i = 0; i < profileIds.length; i++) {
-            _requireMinted(profileIds[i]);
-        }
-
-        return
-            Actions.subscribe(
-                DataTypes.SubscribeData(
-                    sender,
-                    profileIds,
-                    preDatas,
-                    postDatas,
-                    SUBSCRIBE_BEACON
-                ),
-                _subscribeByProfileId,
-                _profileById
-            );
     }
 
     /**
@@ -579,29 +264,6 @@ contract ProfileNFT is
         return _subscribe(msg.sender, profileIds, preDatas, postDatas);
     }
 
-    function _collect(
-        address collector,
-        uint256 profileId,
-        uint256 essenceId,
-        bytes calldata preData,
-        bytes calldata postData
-    ) internal returns (uint256) {
-        _requireMinted(profileId);
-
-        return
-            Actions.collect(
-                DataTypes.CollectData(
-                    collector,
-                    profileId,
-                    essenceId,
-                    preData,
-                    postData,
-                    ESSENCE_BEACON
-                ),
-                _essenceByIdByProfileId
-            );
-    }
-
     function collect(
         uint256 profileId,
         uint256 essenceId,
@@ -648,6 +310,11 @@ contract ProfileNFT is
         address essenceMw,
         bytes calldata initData
     ) external onlyProfileOwnerOrOperator(profileId) returns (uint256) {
+        require(
+            essenceMw == address(0) ||
+                ICyberEngine(ENGINE).isEssenceMwAllowed(essenceMw),
+            "ESSENCE_MW_NOT_ALLOWED"
+        );
         return
             Actions.registerEssence(
                 DataTypes.RegisterEssenceData(
@@ -659,19 +326,151 @@ contract ProfileNFT is
                     initData
                 ),
                 _profileById,
-                _essenceByIdByProfileId,
-                _essenceMwAllowlist
+                _essenceByIdByProfileId
             );
     }
 
+    // TODO: UUPS base contracts for functions
+    // TODO: write a test for upgrade profile nft
+    function version() external pure virtual override returns (uint256) {
+        return _VERSION;
+    }
+
     /**
-     * @notice Gets a profile subscribe middleware address.
+     * @notice Changes the pause state of the profile nft.
      *
-     * @param profileId The profile id.
-     * @return address The middleware address.
+     * @param toPause The pause state.
      */
-    function getSubscribeMw(uint256 profileId) external view returns (address) {
-        return _subscribeByProfileId[profileId].subscribeMw;
+    function pause(bool toPause) external onlyNamespaceOwner {
+        if (toPause) {
+            super._pause();
+        } else {
+            super._unpause();
+        }
+    }
+
+    function setAnimationTemplate(string calldata template)
+        external
+        onlyNamespaceOwner
+    {
+        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
+
+        emit SetAnimationTemplate(template);
+    }
+
+    function setNamespaceOwner(address owner) external onlyNamespaceOwner {
+        address preOwner = _namespaceOwner;
+        _namespaceOwner = owner;
+
+        emit SetNamespaceOwner(preOwner, owner);
+    }
+
+    /// @inheritdoc IProfileNFT
+    function setNFTDescriptor(address descriptor)
+        external
+        override
+        onlyNamespaceOwner
+    {
+        _nftDescriptor = descriptor;
+        emit SetNFTDescriptor(descriptor);
+    }
+
+    /// @inheritdoc IProfileNFT
+    function setAvatar(uint256 profileId, string calldata avatar)
+        external
+        override
+        onlyProfileOwnerOrOperator(profileId)
+    {
+        require(
+            bytes(avatar).length <= Constants._MAX_URI_LENGTH,
+            "AVATAR_INVALID_LENGTH"
+        );
+        _profileById[profileId].avatar = avatar;
+        emit SetAvatar(profileId, avatar);
+    }
+
+    /// @inheritdoc IProfileNFT
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) external override onlyProfileOwner(profileId) {
+        _setOperatorApproval(profileId, operator, approved);
+    }
+
+    /**
+     * @notice Sets the operator approval with a signature.
+     *
+     * @param profileId The profile ID.
+     * @param operator The operator address.
+     * @param approved The new state of the approval.
+     * @param sig The EIP712 signature.
+     */
+    function setOperatorApprovalWithSig(
+        uint256 profileId,
+        address operator,
+        bool approved,
+        DataTypes.EIP712Signature calldata sig
+    ) external {
+        address owner = ownerOf(profileId);
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
+                        profileId,
+                        operator,
+                        approved,
+                        nonces[owner]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            owner,
+            sig
+        );
+        _setOperatorApproval(profileId, operator, approved);
+    }
+
+    /// @inheritdoc IProfileNFT
+    function setMetadata(uint256 profileId, string calldata metadata)
+        external
+        override
+        onlyProfileOwnerOrOperator(profileId)
+    {
+        _setMetadata(profileId, metadata);
+    }
+
+    /**
+     * @notice Sets the profile metadata with a signture.
+     *
+     * @param profileId The profile ID.
+     * @param metadata The new metadata to be set.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     */
+    function setMetadataWithSig(
+        uint256 profileId,
+        string calldata metadata,
+        DataTypes.EIP712Signature calldata sig
+    ) external {
+        address owner = ownerOf(profileId);
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._SET_METADATA_TYPEHASH,
+                        profileId,
+                        keccak256(bytes(metadata)),
+                        nonces[owner]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            owner,
+            sig
+        );
+        _setMetadata(profileId, metadata);
     }
 
     // TODO: withSig
@@ -681,7 +480,7 @@ contract ProfileNFT is
         bytes calldata prepareData
     ) external onlyProfileOwner(profileId) {
         require(
-            mw == address(0) || _subscribeMwAllowlist[mw],
+            mw == address(0) || ICyberEngine(ENGINE).isSubscribeMwAllowed(mw),
             "SUB_MW_NOT_ALLOWED"
         );
         _subscribeByProfileId[profileId].subscribeMw = mw;
@@ -695,6 +494,17 @@ contract ProfileNFT is
         emit SetSubscribeMw(profileId, mw, returnData);
     }
 
+    /// @inheritdoc IProfileNFT
+    function setPrimaryProfile(uint256 profileId)
+        external
+        override
+        onlyProfileOwner(profileId)
+    {
+        _requireMinted(profileId);
+        _setPrimaryProfile(msg.sender, profileId);
+        emit SetPrimaryProfile(msg.sender, profileId);
+    }
+
     // TODO: withSig
     // TODO: integration test
     function setSubscribeTokenURI(
@@ -706,46 +516,202 @@ contract ProfileNFT is
     }
 
     /**
-     * @notice Allows the subscriber middleware.
+     * @notice Gets a profile subscribe middleware address.
      *
-     * @param mw The middleware address.
-     * @param allowed The allowance state.
+     * @param profileId The profile id.
+     * @return address The middleware address.
      */
-    function allowSubscribeMw(address mw, bool allowed) external requiresAuth {
-        bool preAllowed = _subscribeMwAllowlist[mw];
-        _subscribeMwAllowlist[mw] = allowed;
-        emit AllowSubscribeMw(mw, preAllowed, allowed);
+    function getSubscribeMw(uint256 profileId) external view returns (address) {
+        return _subscribeByProfileId[profileId].subscribeMw;
     }
 
-    /**
-     * @notice Checks if the subscriber middleware is allowed.
-     *
-     * @param mw The middleware address.
-     * @return bool The allowance state.
-     */
-    function isSubscribeMwAllowed(address mw) external view returns (bool) {
-        return _subscribeMwAllowlist[mw];
+    /// @inheritdoc IProfileNFT
+    function getPrimaryProfile(address user)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return _addressToPrimaryProfile[user];
     }
 
-    /**
-     * @notice Allows the essence middleware.
-     *
-     * @param mw The middleware address.
-     * @param allowed The allowance state.
-     */
-    function allowEssenceMw(address mw, bool allowed) external requiresAuth {
-        bool preAllowed = _essenceMwAllowlist[mw];
-        _essenceMwAllowlist[mw] = allowed;
-        emit AllowEssenceMw(mw, preAllowed, allowed);
+    function getSubscribeNFT(uint256 profileId)
+        external
+        view
+        override
+        returns (address)
+    {
+        return _subscribeByProfileId[profileId].subscribeNFT;
     }
 
+    function getSubscribeNFTTokenURI(uint256 profileId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        return _subscribeByProfileId[profileId].tokenURI;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getMetadata(uint256 profileId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        _requireMinted(profileId);
+        return _metadataById[profileId];
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getAvatar(uint256 profileId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        _requireMinted(profileId);
+        return _profileById[profileId].avatar;
+    }
+
+    function getEssenceNFT(uint256 profileId, uint256 essenceId)
+        external
+        view
+        override
+        returns (address)
+    {
+        return _essenceByIdByProfileId[profileId][essenceId].essenceNFT;
+    }
+
+    function getEssenceNFTTokenURI(uint256 profileId, uint256 essenceId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        return _essenceByIdByProfileId[profileId][essenceId].tokenURI;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getNFTDescriptor() external view override returns (address) {
+        return _nftDescriptor;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getOperatorApproval(uint256 profileId, address operator)
+        public
+        view
+        returns (bool)
+    {
+        _requireMinted(profileId);
+        return _operatorApproval[profileId][operator];
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getHandleByProfileId(uint256 profileId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        _requireMinted(profileId);
+        return _profileById[profileId].handle;
+    }
+
+    /// @inheritdoc IProfileNFT
+    function getProfileIdByHandle(string calldata handle)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        bytes32 handleHash = keccak256(bytes(handle));
+        return _profileIdByHandleHash[handleHash];
+    }
+
+    // UUPS upgradeability
+    function _authorizeUpgrade(address) internal override onlyEngine {}
+
     /**
-     * @notice Checks if the essence middleware is allowed.
+     * @notice The subscription functionality.
      *
-     * @param mw The middleware address.
-     * @return bool The allowance state.
+     * @param sender The sender address.
+     * @param profileIds The profile ids to subscribed to.
+     * @param preDatas The subscription data used in pre process.
+     * @param postDatas The subscription data used in post process.
+     * @return result The subscription nft ids.
      */
-    function isEssenceMwAllowed(address mw) external view returns (bool) {
-        return _essenceMwAllowlist[mw];
+    function _subscribe(
+        address sender,
+        uint256[] calldata profileIds,
+        bytes[] calldata preDatas,
+        bytes[] calldata postDatas
+    ) internal returns (uint256[] memory result) {
+        for (uint256 i = 0; i < profileIds.length; i++) {
+            _requireMinted(profileIds[i]);
+        }
+
+        return
+            Actions.subscribe(
+                DataTypes.SubscribeData(
+                    sender,
+                    profileIds,
+                    preDatas,
+                    postDatas,
+                    SUBSCRIBE_BEACON
+                ),
+                _subscribeByProfileId,
+                _profileById
+            );
+    }
+
+    function _collect(
+        address collector,
+        uint256 profileId,
+        uint256 essenceId,
+        bytes calldata preData,
+        bytes calldata postData
+    ) internal returns (uint256) {
+        _requireMinted(profileId);
+
+        return
+            Actions.collect(
+                DataTypes.CollectData(
+                    collector,
+                    profileId,
+                    essenceId,
+                    preData,
+                    postData,
+                    ESSENCE_BEACON
+                ),
+                _essenceByIdByProfileId
+            );
+    }
+
+    function _setPrimaryProfile(address user, uint256 profileId) internal {
+        _addressToPrimaryProfile[user] = profileId;
+    }
+
+    function _setMetadata(uint256 profileId, string calldata metadata)
+        internal
+    {
+        require(
+            bytes(metadata).length <= Constants._MAX_URI_LENGTH,
+            "METADATA_INVALID_LENGTH"
+        );
+        _metadataById[profileId] = metadata;
+        emit SetMetadata(profileId, metadata);
+    }
+
+    function _setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) internal {
+        require(operator != address(0), "ZERO_ADDRESS");
+        bool prev = _operatorApproval[profileId][operator];
+        _operatorApproval[profileId][operator] = approved;
+        emit SetOperatorApproval(profileId, operator, prev, approved);
     }
 }
