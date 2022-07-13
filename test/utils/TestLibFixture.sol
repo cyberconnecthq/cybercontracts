@@ -8,68 +8,53 @@ import { Constants } from "../../src/libraries/Constants.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { IProfileNFT } from "../../src/interfaces/IProfileNFT.sol";
 import { TestLib712 } from "./TestLib712.sol";
+import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
+import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import "forge-std/Vm.sol";
 import "forge-std/console.sol";
 
 // Only for testing, not for deploying script
 // TODO: move to test folder
 library TestLibFixture {
-    address constant _GOV = address(0xC11); // TODO: dont hardcode this
-
-    address private constant VM_ADDRESS =
-        address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
-    Vm public constant vm = Vm(VM_ADDRESS);
-
-    function auth(RolesAuthority authority) internal {
-        authority.setUserRole(_GOV, Constants._PROFILE_GOV_ROLE, true);
-    }
-
-    function registerBobProfile(ProfileNFT profile)
-        internal
-        returns (uint256 profileId)
-    {
-        return registerBobProfile(profile, 0, "bob");
-    }
-
     // Need to be called after auth
+    string private constant avatar = "avatar";
+    string private constant metadata = "metadata";
+
     function registerBobProfile(
+        Vm vm,
         ProfileNFT profile,
-        uint256 nonce,
-        string memory handle
+        PermissionedFeeCreationMw mw,
+        string memory handle,
+        address mintToEOA,
+        uint256 signerPk
     ) internal returns (uint256 profileId) {
-        // uint256 bobPk = 1;
-        // address bob = vm.addr(bobPk);
-        // // set signer
-        // vm.prank(_GOV);
-        // profile.setSigner(bob);
-        // uint256 deadline = 100;
-        // string memory avatar = "avatar";
-        // string memory metadata = "metadata";
-        // bytes32 digest = TestLib712.hashTypedDataV4(
-        //     address(profile),
-        //     keccak256(
-        //         abi.encode(
-        //             Constants._CREATE_PROFILE_TYPEHASH,
-        //             bob,
-        //             keccak256(bytes(handle)),
-        //             keccak256(bytes(avatar)),
-        //             keccak256(bytes(metadata)),
-        //             nonce,
-        //             deadline
-        //         )
-        //     ),
-        //     "Link3 Profile",
-        //     "1"
-        // );
-        // (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-        // require(profile.nonces(bob) == nonce);
-        // profileId = profile.createProfile{
-        //     value: Constants._INITIAL_FEE_TIER2
-        // }(
-        //     DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
-        //     DataTypes.EIP712Signature(v, r, s, deadline)
-        // );
-        // // require(profileId == 1);
-        // require(profile.nonces(bob) == nonce + 1);
+        uint256 deadline = block.timestamp + 60 * 60;
+        uint256 nonce = mw.getNonce(address(profile), mintToEOA);
+
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(mw),
+            keccak256(
+                abi.encode(
+                    Constants._CREATE_PROFILE_TYPEHASH,
+                    mintToEOA,
+                    keccak256(bytes(handle)),
+                    keccak256(bytes(avatar)),
+                    keccak256(bytes(metadata)),
+                    nonce,
+                    deadline
+                )
+            ),
+            "PermissionedFeeCreationMw",
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
+        profileId = profile.createProfile{
+            value: LibDeploy._INITIAL_FEE_TIER2
+        }(
+            DataTypes.CreateProfileParams(mintToEOA, handle, avatar, metadata),
+            abi.encode(v, r, s, deadline)
+        );
+        // require(profileId == 1);
+        require(mw.getNonce(address(profile), mintToEOA) == nonce + 1);
     }
 }

@@ -269,25 +269,24 @@ library LibDeploy {
         }
     }
 
-    // for testing
-    function deployInTest(Vm vm)
+    // for testing, link3 signer has private key = 1890
+    function deployInTest(Vm vm, address link3Signer)
         internal
         returns (ContractAddresses memory addrs)
     {
-        return
-            deploy(
-                vm,
-                DeployParams(
-                    false,
-                    address(0),
-                    false,
-                    address(this),
-                    address(this),
-                    address(this),
-                    address(this),
-                    address(0x1890)
-                )
-            );
+        addrs = deploy(
+            vm,
+            DeployParams(
+                false,
+                address(0),
+                false,
+                address(this),
+                link3Signer,
+                address(this),
+                address(this),
+                address(0x1890) // any address to receive a link3 profile
+            )
+        );
     }
 
     function deploy(Vm vm, DeployParams memory params)
@@ -517,10 +516,11 @@ library LibDeploy {
         }
     }
 
-    function healthCheck(ContractAddresses memory addrs, address link3Signer)
-        internal
-        view
-    {
+    function healthCheck(
+        ContractAddresses memory addrs,
+        address link3Signer,
+        address link3Owner
+    ) internal view {
         string memory name = CyberEngine(addrs.engineProxyAddress)
             .getNameByNamespace(addrs.link3Profile);
         address mw = CyberEngine(addrs.engineProxyAddress)
@@ -531,23 +531,10 @@ library LibDeploy {
                 keccak256(abi.encodePacked(LINK3_NAME)),
             "WRONG_NAME"
         );
-        // TODO: fix this after ownable
-        // require(
-        //     profile.owner() == ENGINE_OWNER,
-        //     "ProfileNFT owner is not deployer"
-        // );
-        // require(
-        //     authority.canCall(
-        //         deployer,
-        //         address(profile),
-        //         ProfileNFT.setSigner.selector
-        //     ),
-        //     "ProfileNFT Owner can set Signer"
-        // );
-        // require(
-        //     authority.doesUserHaveRole(deployer, Constants._PROFILE_GOV_ROLE),
-        //     "Governance address is not set"
-        // );
+        require(
+            ProfileNFT(addrs.link3Profile).getNamespaceOwner() == link3Owner,
+            "ProfileNFT owner is not deployer"
+        );
         require(
             PermissionedFeeCreationMw(addrs.link3ProfileMw).getSigner(
                 addrs.link3Profile

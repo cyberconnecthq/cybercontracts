@@ -166,13 +166,34 @@ interface IProfileNFT is IProfileNFTEvents {
      */
     function getSubscribeNFT(uint256 profileId) external view returns (address);
 
+    /**
+     * @notice Gets the Essence NFT token URI.
+     *
+     * @param profileId The profile ID.
+     * @param essenceId The Essence ID.
+     * @return string The Essence NFT token URI.
+     */
     function getEssenceNFTTokenURI(uint256 profileId, uint256 essenceId)
         external
         view
         returns (string memory);
 
+    /**
+     * @notice Gets the Essence NFT address.
+     *
+     * @param profileId The profile ID.
+     * @param essenceId The Essence ID.
+     * @return address The Essence NFT address.
+     */
     function getEssenceNFT(uint256 profileId, uint256 essenceId)
         external
         view
         returns (address);
+
+    /**
+     * @notice Gets the profile namespace owner.
+     *
+     * @return address The owner of this profile namespace.
+     */
+    function getNamespaceOwner() external view returns (address);
 }
