@@ -70,11 +70,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         setParamers(address(0), subscribeBeacon, essenceBeacon, engine);
         MockProfile profileImpl = new MockProfile();
         uint256 nonce = vm.getNonce(address(this));
-        address profileAddr = LibDeploy._calcContractAddress(
-            address(this),
-            nonce + 1
-        );
-
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             gov,
@@ -85,10 +80,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             address(profileImpl),
             data
         );
-        assertEq(address(profileProxy), profileAddr);
         profile = MockProfile(address(profileProxy));
 
-        // vm.prank(gov);
         assertEq(profile.nonces(bob), 0);
         string memory handle = "bob";
         string memory avatar = "avatar";
@@ -98,7 +91,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata)
         );
         assertEq(profileId, 1);
-
         assertEq(profile.nonces(bob), 0);
     }
 
