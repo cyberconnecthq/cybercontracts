@@ -5,7 +5,7 @@ pragma solidity 0.8.14;
 import { ICyberEngine } from "../../interfaces/ICyberEngine.sol";
 
 abstract contract PermissionedMw {
-    address public immutable ENGINE;
+    address public immutable ENGINE; // solhint-disable-line
 
     modifier onlyEngine() {
         require(ENGINE == msg.sender, "NON_ENGINE_ADDRESS");
