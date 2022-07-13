@@ -3,5 +3,5 @@
 pragma solidity 0.8.14;
 
 interface IDeployer {
-    function deploy(bytes32 salt) external;
+    function deploy(bytes32 salt) external returns (address addr);
 }

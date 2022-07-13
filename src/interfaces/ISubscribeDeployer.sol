@@ -5,5 +5,7 @@ pragma solidity 0.8.14;
 import { IDeployer } from "../interfaces/IDeployer.sol";
 
 interface ISubscribeDeployer is IDeployer {
-    function parameters() external view returns (address profileProxy);
+    function subParams() external view returns (address profileProxy);
+
+    function setSubParameters(address profileProxy) external;
 }

@@ -66,12 +66,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         essenceBeacon = address(
             new UpgradeableBeacon(fakeEssence, address(profile))
         );
-        setParamers(
-            address(0),
-            address(0xdead),
-            subscribeBeacon,
-            essenceBeacon
-        );
+        setParamers(address(0xdead), subscribeBeacon, essenceBeacon);
         MockProfile profileImpl = new MockProfile();
         uint256 nonce = vm.getNonce(address(this));
         address profileAddr = LibDeploy._calcContractAddress(

@@ -13,7 +13,7 @@ contract EssenceNFT is CyberNFTBase, EssenceNFTStorage, IUpgradeable {
     address public immutable PROFILE; // solhint-disable-line
 
     constructor() {
-        address profileProxy = IEssenceDeployer(msg.sender).parameters();
+        address profileProxy = IEssenceDeployer(msg.sender).essParams();
         require(profileProxy != address(0), "ZERO_ADDRESS");
         PROFILE = profileProxy;
         _disableInitializers();

@@ -26,7 +26,7 @@ contract SubscribeNFT is
     address public immutable PROFILE; // solhint-disable-line
 
     constructor() {
-        address profileProxy = ISubscribeDeployer(msg.sender).parameters();
+        address profileProxy = ISubscribeDeployer(msg.sender).subParams();
         require(profileProxy != address(0), "ZERO_ADDRESS");
         PROFILE = profileProxy;
         _disableInitializers();

@@ -7,13 +7,14 @@ import { SubscribeNFT } from "../core/SubscribeNFT.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 contract SubscribeNFTFactory is ISubscribeDeployer {
-    DataTypes.SubscribeDeployParameters public override parameters;
+    DataTypes.SubscribeDeployParameters public override subParams;
 
-    constructor(address profileProxy, bytes32 salt) {
-        parameters.profileProxy = profileProxy;
+    function setSubParameters(address profileProxy) external override {
+        subParams.profileProxy = profileProxy;
     }
 
-    function deploy(bytes32 salt) external override {
-        new SubscribeNFT{ salt: salt }();
+    function deploy(bytes32 salt) external override returns (address addr) {
+        addr = address(new SubscribeNFT{ salt: salt }());
+        delete subParams;
     }
 }

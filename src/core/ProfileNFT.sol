@@ -50,34 +50,33 @@ contract ProfileNFT is
     /* solhint-enable var-name-mixedcase */
 
     constructor() {
-        ENGINE = msg.sender;
-        (address subBeacon, address essenceBeacon) = IProfileDeployer(
-            msg.sender
-        ).parameters();
+        (
+            address engine,
+            address subBeacon,
+            address essenceBeacon
+        ) = IProfileDeployer(msg.sender).profileParams();
+        ENGINE = engine;
         SUBSCRIBE_BEACON = subBeacon;
         ESSENCE_BEACON = essenceBeacon;
         _disableInitializers();
     }
 
+    // TODO: fix doc
     /**
      * @notice Initializes the Profile NFT.
      *
      * @param name Name to set for the Profile NFT.
      * @param symbol Symbol to set for the Profile NFT.
-     * @param nftDescriptor The profile NFT descriptor address to set for the Profile NFT.
      */
     function initialize(
         address _owner,
         string calldata name,
         string calldata symbol,
-        address nftDescriptor,
         address _rolesAuthority
     ) external initializer {
-        require(nftDescriptor != address(0), "ZERO_ADDRESS");
         CyberNFTBase._initialize(name, symbol);
         Auth.__Auth_Init(_owner, Authority(_rolesAuthority));
         ReentrancyGuard.__ReentrancyGuard_init();
-        _nftDescriptor = nftDescriptor;
 
         emit Initialize(_owner);
         // start with paused

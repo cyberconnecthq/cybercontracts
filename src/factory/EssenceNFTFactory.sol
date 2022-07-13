@@ -7,13 +7,15 @@ import { EssenceNFT } from "../core/EssenceNFT.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 contract EssenceNFTFactory is IEssenceDeployer {
-    DataTypes.EssenceDeployParameters public override parameters;
+    DataTypes.EssenceDeployParameters public override essParams;
 
-    constructor(address profileProxy, bytes32 salt) {
-        parameters.profileProxy = profileProxy;
+    // TODO: access
+    function setEssParameters(address profileProxy) external override {
+        essParams.profileProxy = profileProxy;
     }
 
-    function deploy(bytes32 salt) external override {
-        new EssenceNFT{ salt: salt }();
+    function deploy(bytes32 salt) external override returns (address addr) {
+        addr = address(new EssenceNFT{ salt: salt }());
+        delete essParams;
     }
 }

@@ -21,7 +21,6 @@ library DataTypes {
         string name;
         string symbol;
         address owner;
-        address descriptor;
         ComputedAddresses addrs;
     }
 
@@ -84,16 +83,17 @@ library DataTypes {
     }
 
     struct ComputedAddresses {
-        address profileImpl;
+        address authority;
         address profileProxy;
-        address subscribeImpl;
-        address essenceImpl;
+        // address subscribeImpl;
+        // address essenceImpl;
         address profileFactory;
         address subscribeFactory;
         address essenceFactory;
     }
 
     struct ProfileDeployParameters {
+        address engine;
         address subBeacon;
         address essenceBeacon;
     }

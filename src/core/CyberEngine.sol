@@ -97,7 +97,7 @@ contract CyberEngine is
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
         requiresAuth
-        returns (address)
+        returns (address profileProxy)
     {
         bytes memory byteName = bytes(params.name);
         bytes memory byteSymbol = bytes(params.symbol);
@@ -117,35 +117,60 @@ contract CyberEngine is
             byteSymbol.length <= Constants._MAX_SYMBOL_LENGTH,
             "SYMBOL_INVALID_LENGTH"
         );
+        {
+            address authority = address(
+                new RolesAuthority{ salt: salt }(
+                    params.owner,
+                    Authority(address(0))
+                )
+            );
 
-        // todo delete authority from init
-        bytes memory data = abi.encodeWithSelector(
-            ProfileNFT.initialize.selector,
-            address(0),
-            params.name,
-            params.symbol,
-            params.descriptor,
-            address(0)
-        );
+            ISubscribeDeployer(params.addrs.subscribeFactory).setSubParameters(
+                params.addrs.profileProxy
+            );
+            address subscribeImpl = ISubscribeDeployer(
+                params.addrs.subscribeFactory
+            ).deploy(salt);
 
-        ISubscribeDeployer(params.addrs.subscribeFactory).deploy(salt);
-        IEssenceDeployer(params.addrs.essenceFactory).deploy(salt);
+            IEssenceDeployer(params.addrs.essenceFactory).setEssParameters(
+                params.addrs.profileProxy
+            );
+            address essImpl = IEssenceDeployer(params.addrs.essenceFactory)
+                .deploy(salt);
 
-        new UpgradeableBeacon{ salt: salt }(
-            params.addrs.subscribeImpl,
-            params.owner
-        );
-        new UpgradeableBeacon{ salt: salt }(
-            params.addrs.essenceImpl,
-            params.owner
-        );
+            address subBeacon = address(
+                new UpgradeableBeacon{ salt: salt }(subscribeImpl, params.owner)
+            );
+            address essBeacon = address(
+                new UpgradeableBeacon{ salt: salt }(essImpl, params.owner)
+            );
 
-        IProfileDeployer(params.addrs.profileFactory).deploy(salt);
-        address actualProfileProxy = address(
-            new ERC1967Proxy{ salt: salt }(params.addrs.profileImpl, data)
-        );
+            IProfileDeployer(params.addrs.profileFactory).setProfileParameters(
+                address(this),
+                subBeacon,
+                essBeacon
+            );
+            address profileImpl = IProfileDeployer(params.addrs.profileFactory)
+                .deploy(salt);
+            require(
+                profileImpl == params.addrs.authority,
+                "AUTHORITY_MISMATCH"
+            );
+
+            bytes memory data = abi.encodeWithSelector(
+                ProfileNFT.initialize.selector,
+                address(0),
+                params.name,
+                params.symbol,
+                authority
+            );
+
+            profileProxy = address(
+                new ERC1967Proxy{ salt: salt }(profileImpl, data)
+            );
+        }
         require(
-            actualProfileProxy == params.addrs.profileProxy,
+            profileProxy == params.addrs.profileProxy,
             "PROFILE_PROXY_WRONG_ADDRESS"
         );
 
@@ -154,7 +179,6 @@ contract CyberEngine is
 
         // TODO emit event
         _namespaceByName[salt] = params.addrs.profileProxy;
-        return params.addrs.profileProxy;
     }
 
     /**
