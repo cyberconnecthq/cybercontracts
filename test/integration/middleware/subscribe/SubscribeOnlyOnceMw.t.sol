@@ -2,15 +2,13 @@
 
 pragma solidity 0.8.14;
 import "forge-std/Test.sol";
-
-import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
-
 import { LibDeploy } from "../../../../script/libraries/LibDeploy.sol";
-import { Constants } from "../../../../src/libraries/Constants.sol";
-import { DataTypes } from "../../../../src/libraries/DataTypes.sol";
-
 import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
+import { RolesAuthority } from "../../../../src/dependencies/solmate/RolesAuthority.sol";
 import { SubscribeOnlyOnceMw } from "../../../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
+import { Constants } from "../../../../src/libraries/Constants.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
 import { ProfileNFT } from "../../../../src/core/ProfileNFT.sol";
 import { TestIntegrationBase } from "../../../utils/TestIntegrationBase.sol";
 
@@ -46,6 +44,33 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
         profile.setSubscribeMw(bobProfileId, address(subMw), new bytes(0));
     }
 
+    // function setUp() public {
+    //     mw = new SubscribeOnlyOnceMw();
+    //     vm.label(address(mw), "SubscribeMiddleware");
+    //     uint256 nonce = vm.getNonce(address(this));
+    //     address proxy;
+    //     (
+    //         proxy,
+    //         authority,
+    //         boxAddress,
+    //         profileAddress,
+    //         profileDescriptorAddress
+    //     ) = LibDeploy.deploy(
+    //         address(this),
+    //         nonce,
+    //         "https://animation.example.com"
+    //     );
+    //     profileNFT = ProfileNFT(address(profileAddress));
+
+    //     TestLibFixture.auth(authority);
+    //     vm.prank(TestLibFixture._GOV);
+    //     profileNFT.allowSubscribeMw(address(mw), true);
+    //     bobProfileId = TestLibFixture.registerBobProfile(profileNFT);
+    //     // set module
+    //     vm.prank(bob);
+    //     profileNFT.setSubscribeMw(bobProfileId, address(mw), new bytes(0));
+    // }
+
     function testSubscribeOnlyOnce() public {
         uint256[] memory ids = new uint256[](1);
         ids[0] = bobProfileId;
@@ -68,11 +93,11 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
         // emit Subscribe(alice, ids, data, data);
 
         vm.prank(alice);
-        profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        profile.subscribe(ids, data, data);
 
         // Second subscribe will fail
         vm.expectRevert("Already subscribed");
         vm.prank(alice);
-        profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        profile.subscribe(ids, data, data);
     }
 }
