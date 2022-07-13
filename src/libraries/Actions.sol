@@ -12,6 +12,7 @@ import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/Beaco
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 
+
 library Actions {
     function createProfile(
         uint256 id,
@@ -23,7 +24,6 @@ library Actions {
         mapping(address => uint256) storage _addressToPrimaryProfile
     ) external {
         bytes32 handleHash = keccak256(bytes(params.handle));
-        //require(!_exists(_profileIdByHandleHash[handleHash]), "HANDLE_TAKEN");
 
         _profileById[_totalCount].handle = params.handle;
         _profileById[_totalCount].avatar = params.avatar;

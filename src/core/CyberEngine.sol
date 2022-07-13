@@ -100,7 +100,7 @@ contract CyberEngine is
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
         requiresAuth
-        returns (address profileProxy, address authority)
+        returns (address profileProxy)
     {
         bytes memory byteName = bytes(params.name);
         bytes memory byteSymbol = bytes(params.symbol);
