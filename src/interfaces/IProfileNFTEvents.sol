@@ -6,22 +6,11 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 
 interface IProfileNFTEvents {
     /**
-     * @dev Emitted when the CyberEngine is initialized.
+     * @dev Emitted when the ProfileNFT is initialized.
      *
-     * @param owner Owner to set for CyberEngine.
+     * @param owner Namespace owner.
      */
     event Initialize(address indexed owner);
-
-    /**
-     * @dev Emitted when a new box address has been set.
-     *
-     * @param preBoxAddr The previous box address.
-     * @param newBoxAddress The newly set box address.
-     */
-    event SetBoxAddress(
-        address indexed preBoxAddr,
-        address indexed newBoxAddress
-    );
 
     /**
      * @notice Emitted when a new Profile NFT Descriptor has been set.
@@ -97,7 +86,7 @@ interface IProfileNFTEvents {
     );
 
     /**
-     * @notice Emitted when a subscription middleware has been set to a profile.
+     * @notice Emitted when a subscription tokenURI has been set to a profile.
      *
      * @param profileId The profile id.
      * @param subscribeTokenURI The token URI for subscribe NFT.
@@ -105,5 +94,97 @@ interface IProfileNFTEvents {
     event SetSubscribeTokenURI(
         uint256 indexed profileId,
         string subscribeTokenURI
+    );
+
+    /**
+     * @notice Emitted when a new profile been created.
+     *
+     * @param to The receiver address.
+     * @param profileId The newly generated profile id.
+     * @param handle The newly set handle.
+     * @param avatar The newly set avatar.
+     * @param metadata The newly set metadata.
+     */
+    event CreateProfile(
+        address indexed to,
+        uint256 indexed profileId,
+        string handle,
+        string avatar,
+        string metadata
+    );
+
+    /**
+     * @notice Emitted when a new essence been created.
+     *
+     * @param profileId The profile id.
+     * @param essenceId The essence id.
+     * @param name The essence name.
+     * @param symbol The essence symbol.
+     * @param essenceTokenURI the essence tokenURI.
+     * @param essenceMw The essence middleware.
+     * @param prepareReturnData The data returned from prepare.
+     */
+    event RegisterEssence(
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        string name,
+        string symbol,
+        string essenceTokenURI,
+        address essenceMw,
+        bytes prepareReturnData
+    );
+
+    /**
+     * @notice Emitted when a subscription has been created.
+     *
+     * @param sender The sender address.
+     * @param profileIds The profile ids subscribed to.
+     * @param preDatas The subscription data for preprocess.
+     * @param postDatas The subscription data for postprocess.
+     */
+    event Subscribe(
+        address indexed sender,
+        uint256[] profileIds,
+        bytes[] preDatas,
+        bytes[] postDatas
+    );
+
+    /**
+     * @notice Emitted when a new subscribe nft has been deployed.
+     *
+     * @param profileId The profile id.
+     * @param subscribeNFT The newly deployed subscribe nft address.
+     */
+    event DeploySubscribeNFT(
+        uint256 indexed profileId,
+        address indexed subscribeNFT
+    );
+
+    /**
+     * @notice Emitted when a new essence nft has been deployed.
+     *
+     * @param profileId The profile id.
+     * @param essenceId The essence id.
+     * @param essenceNFT The newly deployed subscribe nft address.
+     */
+    event DeployEssenceNFT(
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        address indexed essenceNFT
+    );
+
+    /**
+     * @notice Emitted when an essence has been collected.
+     *
+     * @param collector The collector address.
+     * @param profileId The profile id.
+     * @param preData The collect data for preprocess.
+     * @param postData The collect data for postprocess.
+     */
+    event CollectEssence(
+        address indexed collector,
+        uint256 profileId,
+        bytes preData,
+        bytes postData
     );
 }

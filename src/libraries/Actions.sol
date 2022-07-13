@@ -2,49 +2,18 @@
 
 pragma solidity 0.8.14;
 
-import { DataTypes } from "./DataTypes.sol";
-import { Constants } from "./Constants.sol";
-import { ActionEvents } from "./ActionEvents.sol";
-import { LibString } from "./LibString.sol";
+import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
+
 import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
-import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 
+import { DataTypes } from "./DataTypes.sol";
+import { Constants } from "./Constants.sol";
+import { LibString } from "./LibString.sol";
 
 library Actions {
-    function createProfile(
-        uint256 id,
-        uint256 _totalCount,
-        DataTypes.CreateProfileParams calldata params,
-        mapping(uint256 => DataTypes.ProfileStruct) storage _profileById,
-        mapping(bytes32 => uint256) storage _profileIdByHandleHash,
-        mapping(uint256 => string) storage _metadataById,
-        mapping(address => uint256) storage _addressToPrimaryProfile
-    ) external {
-        bytes32 handleHash = keccak256(bytes(params.handle));
-
-        _profileById[_totalCount].handle = params.handle;
-        _profileById[_totalCount].avatar = params.avatar;
-
-        _profileIdByHandleHash[handleHash] = _totalCount;
-        _metadataById[_totalCount] = params.metadata;
-
-        emit ActionEvents.CreateProfile(
-            params.to,
-            id,
-            params.handle,
-            params.avatar,
-            params.metadata
-        );
-
-        if (_addressToPrimaryProfile[params.to] == 0) {
-            _addressToPrimaryProfile[params.to] = id;
-            emit ActionEvents.SetPrimaryProfile(params.to, id);
-        }
-    }
-
     function subscribe(
         DataTypes.SubscribeData calldata data,
         mapping(uint256 => DataTypes.SubscribeStruct)
@@ -73,6 +42,8 @@ library Actions {
                     _subscribeByProfileId,
                     _profileById
                 );
+                // TODO check gas
+                //deployedSubscribeNFT = subscribeNFT;
             }
             // run middleware before subscribe
             if (subscribeMw != address(0)) {
@@ -93,14 +64,84 @@ library Actions {
                 );
             }
         }
+    }
 
-        emit ActionEvents.Subscribe(
-            data.sender,
-            data.profileIds,
-            data.preDatas,
-            data.postDatas
+    function collect(
+        DataTypes.CollectData calldata data,
+        mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
+            storage _essenceByIdByProfileId
+    ) external returns (uint256 tokenId, address deployedEssenceNFT) {
+        require(
+            bytes(
+                _essenceByIdByProfileId[data.profileId][data.essenceId].tokenURI
+            ).length != 0,
+            "ESSENCE_NOT_REGISTERED"
         );
-        return result;
+        address essenceNFT = _essenceByIdByProfileId[data.profileId][
+            data.essenceId
+        ].essenceNFT;
+        address essenceMw = _essenceByIdByProfileId[data.profileId][
+            data.essenceId
+        ].essenceMw;
+
+        // lazy deploy essence NFT
+        if (essenceNFT == address(0)) {
+            bytes memory initData = abi.encodeWithSelector(
+                IEssenceNFT.initialize.selector,
+                data.profileId,
+                data.essenceId,
+                _essenceByIdByProfileId[data.profileId][data.essenceId].name,
+                _essenceByIdByProfileId[data.profileId][data.essenceId].symbol
+            );
+            essenceNFT = address(new BeaconProxy(data.essBeacon, initData));
+            _essenceByIdByProfileId[data.profileId][data.essenceId]
+                .essenceNFT = essenceNFT;
+            deployedEssenceNFT = essenceNFT;
+        }
+        // run middleware before collectign essence
+        if (essenceMw != address(0)) {
+            IEssenceMiddleware(essenceMw).preProcess(
+                data.profileId,
+                data.essenceId,
+                data.collector,
+                essenceNFT,
+                data.preData
+            );
+        }
+        tokenId = IEssenceNFT(essenceNFT).mint(data.collector);
+        if (essenceMw != address(0)) {
+            IEssenceMiddleware(essenceMw).postProcess(
+                data.profileId,
+                data.essenceId,
+                data.collector,
+                essenceNFT,
+                data.postData
+            );
+        }
+    }
+
+    function registerEssence(
+        DataTypes.RegisterEssenceData calldata data,
+        mapping(uint256 => DataTypes.ProfileStruct) storage _profileById,
+        mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
+            storage _essenceByIdByProfileId
+    ) external returns (uint256, bytes memory) {
+        uint256 id = ++_profileById[data.profileId].essenceCount;
+        _essenceByIdByProfileId[data.profileId][id].name = data.name;
+        _essenceByIdByProfileId[data.profileId][id].symbol = data.symbol;
+        _essenceByIdByProfileId[data.profileId][id].tokenURI = data
+            .essenceTokenURI;
+        bytes memory returnData;
+        if (data.essenceMw != address(0)) {
+            _essenceByIdByProfileId[data.profileId][id].essenceMw = data
+                .essenceMw;
+            returnData = IEssenceMiddleware(data.essenceMw).prepare(
+                data.profileId,
+                id,
+                data.initData
+            );
+        }
+        return (id, returnData);
     }
 
     function _deploySubscribeNFT(
@@ -132,106 +173,6 @@ library Actions {
             )
         );
         _subscribeByProfileId[profileId].subscribeNFT = subscribeNFT;
-        emit ActionEvents.DeploySubscribeNFT(profileId, subscribeNFT);
         return subscribeNFT;
-    }
-
-    function collect(
-        DataTypes.CollectData calldata data,
-        mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
-            storage _essenceByIdByProfileId
-    ) external returns (uint256) {
-        require(
-            bytes(
-                _essenceByIdByProfileId[data.profileId][data.essenceId].tokenURI
-            ).length != 0,
-            "ESSENCE_NOT_REGISTERED"
-        );
-        address essenceNFT = _essenceByIdByProfileId[data.profileId][
-            data.essenceId
-        ].essenceNFT;
-        address essenceMw = _essenceByIdByProfileId[data.profileId][
-            data.essenceId
-        ].essenceMw;
-
-        // lazy deploy essence NFT
-        if (essenceNFT == address(0)) {
-            bytes memory initData = abi.encodeWithSelector(
-                IEssenceNFT.initialize.selector,
-                data.profileId,
-                data.essenceId,
-                _essenceByIdByProfileId[data.profileId][data.essenceId].name,
-                _essenceByIdByProfileId[data.profileId][data.essenceId].symbol
-            );
-            essenceNFT = address(new BeaconProxy(data.essBeacon, initData));
-            _essenceByIdByProfileId[data.profileId][data.essenceId]
-                .essenceNFT = essenceNFT;
-            emit ActionEvents.DeployEssenceNFT(
-                data.profileId,
-                data.essenceId,
-                essenceNFT
-            );
-        }
-        // run middleware before collectign essence
-        if (essenceMw != address(0)) {
-            IEssenceMiddleware(essenceMw).preProcess(
-                data.profileId,
-                data.essenceId,
-                data.collector,
-                essenceNFT,
-                data.preData
-            );
-        }
-        uint256 tokenId = IEssenceNFT(essenceNFT).mint(data.collector);
-        if (essenceMw != address(0)) {
-            IEssenceMiddleware(essenceMw).postProcess(
-                data.profileId,
-                data.essenceId,
-                data.collector,
-                essenceNFT,
-                data.postData
-            );
-        }
-
-        emit ActionEvents.CollectEssence(
-            data.collector,
-            data.profileId,
-            data.preData,
-            data.postData
-        );
-        return tokenId;
-    }
-
-    function registerEssence(
-        DataTypes.RegisterEssenceData calldata data,
-        mapping(uint256 => DataTypes.ProfileStruct) storage _profileById,
-        mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
-            storage _essenceByIdByProfileId
-    ) external returns (uint256) {
-        uint256 id = ++_profileById[data.profileId].essenceCount;
-        _essenceByIdByProfileId[data.profileId][id].name = data.name;
-        _essenceByIdByProfileId[data.profileId][id].symbol = data.symbol;
-        _essenceByIdByProfileId[data.profileId][id].tokenURI = data
-            .essenceTokenURI;
-        bytes memory returnData;
-        if (data.essenceMw != address(0)) {
-            _essenceByIdByProfileId[data.profileId][id].essenceMw = data
-                .essenceMw;
-            returnData = IEssenceMiddleware(data.essenceMw).prepare(
-                data.profileId,
-                id,
-                data.prepareData
-            );
-        }
-        emit ActionEvents.RegisterEssence(
-            data.profileId,
-            id,
-            data.name,
-            data.symbol,
-            data.essenceTokenURI,
-            data.essenceMw,
-            returnData
-        );
-        return id;
     }
 }

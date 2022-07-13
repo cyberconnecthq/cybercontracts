@@ -30,16 +30,6 @@ contract MockProfile is ProfileNFT {
         external
         returns (uint256)
     {
-        uint256 id = _mint(params.to);
-        Actions.createProfile(
-            id,
-            _totalCount,
-            params,
-            _profileById,
-            _profileIdByHandleHash,
-            _metadataById,
-            _addressToPrimaryProfile
-        );
-        return id;
+        return _createProfile(params);
     }
 }

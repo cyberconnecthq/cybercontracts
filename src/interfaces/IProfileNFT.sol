@@ -6,7 +6,7 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 import { IProfileNFTEvents } from "./IProfileNFTEvents.sol";
 
 interface IProfileNFT is IProfileNFTEvents {
-    /**
+    /*
      * @notice Creates a profile and mints it to the recipient address.
      *
      * @param params contains all params.
@@ -23,7 +23,8 @@ interface IProfileNFT is IProfileNFTEvents {
      */
     function createProfile(
         DataTypes.CreateProfileParams calldata params,
-        bytes calldata data
+        bytes calldata preData,
+        bytes calldata postData
     ) external payable returns (uint256);
 
     /**
