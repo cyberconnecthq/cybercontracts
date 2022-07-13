@@ -46,6 +46,15 @@ library LibDeploy {
         address calcEngineProxy;
         address link3Authority;
     }
+    struct DeployParams {
+        // address deployer; // 1. in test it is the Test contract. 2. in deployment it is msg.sender (deployer)
+        bool isDeploy;
+        address deployerContract; // Create2Deployer. in test this is expected to be address(0)
+        bool writeFile; // write deployed contract addresses to file in deployment flow
+        address link3Owner; // 1. in test, use Test contract so that signing process still works. 2. in deployment use real owner.
+        address engineAuthOwner; // 1. in test use Test contract 2. in deployment use msg.sender (deployer)
+        address engineGov; // 1. in test use Test contract 2. in deployment use real address
+    }
 
     string internal constant LINK3_NAME = "Link3";
     string internal constant LINK3_SYMBOL = "LINK3";
@@ -56,8 +65,8 @@ library LibDeploy {
     address internal constant LINK3_OWNER =
         0x927f355117721e0E8A7b5eA20002b65B8a551890;
 
-    address internal constant LINK3_SIGNER =
-        0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
+    // address internal constant LINK3_SIGNER =
+    // 0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
     // TODO: change for prod
     address internal constant ENGINE_TREASURY =
         0x1890a1625d837A809b0e77EdE1a999a161df085d;
@@ -276,13 +285,10 @@ library LibDeploy {
 
     function deploy(
         Vm vm,
-        address deployer,
-        uint256 nonce,
-        address _deployerContract,
-        bool writeFile
+        DeployParams params
     ) internal returns (ContractAddresses memory addrs) {
         // 1. Deploy engine + link3 profile
-        addrs = _deploy(vm, deployer, nonce, _deployerContract, writeFile);
+        addrs = _deploy(vm, params);
         // 2. Register a test profile
         if (block.chainid != 1) {
             LibDeploy.register(
@@ -297,42 +303,42 @@ library LibDeploy {
 
     function _deploy(
         Vm vm,
-        address deployer,
-        uint256 nonce,
-        address _deployerContract,
-        bool writeFile
+        DeployParams params
     ) private returns (ContractAddresses memory addrs) {
-        if (writeFile) {
+        // check params
+        if (!params.isDeploy) {
+            require(params.deployerContract == address(0));
+            require(!params.writeFile);
+        }
+        if (params.writeFile) {
             _prepareToWrite(vm);
             _writeText(vm, _fileNameJson(), "{");
             _writeText(vm, _fileNameMd(), "|Contract|Address|");
             _writeText(vm, _fileNameMd(), "|-|-|");
         }
-        console.log("starting nonce", nonce);
-        console.log("deployer address", deployer);
 
         Create2Deployer dc;
-        if (_deployerContract == address(0)) {
+        if (params.deployerContract == address(0)) {
             console.log(
                 "=====================deploying deployer contract================="
             );
             dc = new Create2Deployer(); // for running test
-            if (writeFile) {
+            if (params.writeFile) {
                 _write(vm, "Create2Deployer", address(dc));
             }
         } else {
-            dc = Create2Deployer(_deployerContract); // for deployment
+            dc = Create2Deployer(params.deployerContract); // for deployment
         }
 
         // 0. Deploy RolesAuthority
         addrs.engineAuthority = dc.deploy(
             abi.encodePacked(
                 type(RolesAuthority).creationCode,
-                abi.encode(deployer, Authority(address(0))) // use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
+                abi.encode(params.deployer, Authority(address(0))) // use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
             ),
             salt
         );
-        if (writeFile) {
+        if (params.writeFile) {
             _write(vm, "RolesAuthority", addrs.engineAuthority);
         }
 
@@ -359,7 +365,7 @@ library LibDeploy {
 
         // 1. Deploy Engine Impl
         addrs.engineImpl = dc.deploy(type(CyberEngine).creationCode, salt);
-        if (writeFile) {
+        if (params.writeFile) {
             _write(vm, "EngineImpl", addrs.engineImpl);
         }
 
@@ -376,7 +382,7 @@ library LibDeploy {
             ),
             salt
         );
-        if (writeFile) {
+        if (params.writeFile) {
             _write(vm, "EngineProxy", addrs.engineProxyAddress);
         }
 
@@ -429,7 +435,7 @@ library LibDeploy {
             true
         );
         RolesAuthority(addrs.engineAuthority).setUserRole(
-            deployer, //use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
+            pramas.engineGov, //use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
             Constants._ENGINE_GOV_ROLE,
             true
         );
@@ -438,9 +444,9 @@ library LibDeploy {
         (addrs.link3Profile, addrs.link3Authority) = deployLink3(
             addrs.engineProxyAddress,
             vm,
-            writeFile
+            params.writeFile
         );
-        if (writeFile) {
+        if (params.writeFile) {
             _write(vm, "Link3 Profile", addrs.link3Profile);
             _write(vm, "Link3 Authority", addrs.link3Authority);
         }
