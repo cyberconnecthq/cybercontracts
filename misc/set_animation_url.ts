@@ -15,12 +15,10 @@ const pinataJWT = process.env.PINATA_JWT;
 const getLink3Profile = async (chainName: string) => {
   const file = path.join(base, chainName, "contract.md");
   const data = await fs.readFile(file, "utf-8");
-  console.log(data)
-  let matched = data.match(/\|Link3 Profile\|(.*)|/g);
-  console.log('matched', matched);
+  let matched = data.match(/\|Link3 Profile\|(.*)\|/);
+  console.log("matched", matched);
   return {
-    // link3: ethers.utils.getAddress(matched[0]),
-    link3: "",
+    link3: ethers.utils.getAddress(matched![1]),
   };
 };
 

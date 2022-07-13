@@ -766,7 +766,7 @@ library LibDeploy {
             salt
         );
         if (writeFile) {
-            _writeLastLine(vm, "Link3 Descriptor (Proxy)", proxy);
+            _write(vm, "Link3 Descriptor (Proxy)", proxy);
         }
 
         // Need to have access to LINK3 OWNER
