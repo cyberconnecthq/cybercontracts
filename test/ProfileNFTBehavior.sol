@@ -44,14 +44,8 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
 
         MockProfile profileImpl = new MockProfile();
         uint256 nonce = vm.getNonce(address(this));
-        address profileAddr = LibDeploy._calcContractAddress(
-            address(this),
-            nonce + 3
-        );
-
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
-        vm.label(profileAddr, "profile proxy");
-        setProfile(profileAddr);
+        setProfile(address(0xdead));
         address impl = address(new SubscribeNFT());
         subscribeBeacon = address(
             new UpgradeableBeacon(impl, address(profile))
@@ -67,7 +61,6 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
             address(profileImpl),
             data
         );
-        assertEq(address(profileProxy), profileAddr);
         profile = MockProfile(address(profileProxy));
     }
 
