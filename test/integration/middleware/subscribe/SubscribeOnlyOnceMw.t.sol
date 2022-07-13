@@ -2,13 +2,15 @@
 
 pragma solidity 0.8.14;
 import "forge-std/Test.sol";
-import { LibDeploy } from "../../../../script/libraries/LibDeploy.sol";
-import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
-import { RolesAuthority } from "../../../../src/dependencies/solmate/RolesAuthority.sol";
-import { SubscribeOnlyOnceMw } from "../../../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
-import { Constants } from "../../../../src/libraries/Constants.sol";
-import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
 import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
+
+import { LibDeploy } from "../../../../script/libraries/LibDeploy.sol";
+import { Constants } from "../../../../src/libraries/Constants.sol";
+import { DataTypes } from "../../../../src/libraries/DataTypes.sol";
+
+import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
+import { SubscribeOnlyOnceMw } from "../../../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
 import { ProfileNFT } from "../../../../src/core/ProfileNFT.sol";
 import { TestIntegrationBase } from "../../../utils/TestIntegrationBase.sol";
 
@@ -66,11 +68,11 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
         // emit Subscribe(alice, ids, data, data);
 
         vm.prank(alice);
-        profile.subscribe(ids, data, data);
+        profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
 
         // Second subscribe will fail
         vm.expectRevert("Already subscribed");
         vm.prank(alice);
-        profile.subscribe(ids, data, data);
+        profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
     }
 }

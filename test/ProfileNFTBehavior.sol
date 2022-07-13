@@ -4,30 +4,30 @@ pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import { MockProfile } from "./utils/MockProfile.sol";
-import { Constants } from "../src/libraries/Constants.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
-import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
+import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
+import { IProfileNFTDescriptor } from "../src/interfaces/IProfileNFTDescriptor.sol";
+
+import { Constants } from "../src/libraries/Constants.sol";
+import { DataTypes } from "../src/libraries/DataTypes.sol";
+import { LibDeploy } from "../script/libraries/LibDeploy.sol";
+
+import { MockProfile } from "./utils/MockProfile.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
-import { Authority } from "../src/dependencies/solmate/Auth.sol";
-import { DataTypes } from "../src/libraries/DataTypes.sol";
-import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
-import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { LibDeploy } from "../script/libraries/LibDeploy.sol";
-import { IProfileNFTDescriptor } from "../src/interfaces/IProfileNFTDescriptor.sol";
 import { Link3ProfileDescriptor } from "../src/periphery/Link3ProfileDescriptor.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 
 contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     MockProfile internal profile;
-    RolesAuthority internal rolesAuthority;
     address internal essenceBeacon = address(0xC);
     address internal subscribeBeacon;
-
     address constant alice = address(0xA11CE);
     address constant bob = address(0xB0B);
+    address constant gov = address(0x8888);
     string constant handle = "handle";
     string constant handle2 = "handle2";
     string constant avatar = "avatar";
@@ -40,6 +40,8 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     address descriptor = address(0x233);
 
     function setUp() public {
+        vm.etch(descriptor, address(this).code);
+
         MockProfile profileImpl = new MockProfile();
         uint256 nonce = vm.getNonce(address(this));
         address profileAddr = LibDeploy._calcContractAddress(
@@ -55,14 +57,11 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
             new UpgradeableBeacon(impl, address(profile))
         );
 
-        vm.etch(descriptor, address(this).code);
-
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
-            address(0),
+            gov,
             "Name",
-            "Symbol",
-            descriptor
+            "Symbol"
         );
         ERC1967Proxy profileProxy = new ERC1967Proxy(
             address(profileImpl),
@@ -86,13 +85,13 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     // }
 
     function testCannotSetNFTDescriptorAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
+        vm.expectRevert("ONLY_NAMESPACE_OWNER");
         vm.prank(alice);
         profile.setNFTDescriptor(descriptor);
     }
 
     function testCannotSetAnimationTemplateAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
+        vm.expectRevert("ONLY_NAMESPACE_OWNER");
         vm.prank(alice);
         profile.setAnimationTemplate("new_ani_template");
     }
@@ -459,9 +458,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     // }
 
     function testSetLink3ProfileDescriptorGov() public {
-        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
-
-        vm.prank(alice);
+        vm.prank(gov);
         vm.expectEmit(true, false, false, true);
         emit SetNFTDescriptor(descriptor);
 
@@ -469,6 +466,9 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testSetAnimationTemplateGov() public {
+        vm.startPrank(gov);
+        profile.setNFTDescriptor(descriptor);
+
         string memory template = "new_ani_template";
         vm.mockCall(
             profile.getNFTDescriptor(),
@@ -478,11 +478,9 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
             ),
             abi.encode(1)
         );
-        rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
         vm.expectEmit(true, false, false, true);
         emit SetAnimationTemplate(template);
 
-        vm.prank(alice);
         profile.setAnimationTemplate(template);
     }
 
