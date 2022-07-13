@@ -130,8 +130,7 @@ library LibDeploy {
     function _writeHelper(
         Vm vm,
         string memory name,
-        address addr,
-        bool lastLine
+        address addr
     ) internal {
         _writeText(
             vm,
@@ -146,19 +145,6 @@ library LibDeploy {
                 )
             )
         );
-        _writeText(
-            vm,
-            _fileNameJson(),
-            string(
-                abi.encodePacked(
-                    '  "',
-                    name,
-                    '": "',
-                    LibString.toHexString(addr),
-                    lastLine ? '"' : '",'
-                )
-            )
-        );
     }
 
     function _write(
@@ -166,15 +152,7 @@ library LibDeploy {
         string memory name,
         address addr
     ) internal {
-        _writeHelper(vm, name, addr, false);
-    }
-
-    function _writeLastLine(
-        Vm vm,
-        string memory name,
-        address addr
-    ) internal {
-        _writeHelper(vm, name, addr, true);
+        _writeHelper(vm, name, addr);
     }
 
     // create2
@@ -793,6 +771,8 @@ library LibDeploy {
 
         // Need to have access to LINK3 OWNER
         ProfileNFT(link3Profile).setNFTDescriptor(proxy);
-        // TODO: check tokenURI
+
+        require(ProfileNFT(link3Profile).getNFTDescriptor() == proxy, "NFT_DESCRIPTOR_NOT_SET");
+        console.log(ProfileNFT(link3Profile).tokenURI(1));
     }
 }

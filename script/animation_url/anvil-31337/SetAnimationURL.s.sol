@@ -9,15 +9,12 @@ import { Create2Deployer } from "../../libraries/Create2Deployer.sol";
 import { LibDeploy } from "../../libraries/LibDeploy.sol";
 
 contract SetAnimationURL is Script {
-    address internal link3Profile = 0xBCED30578853979f7CFDA447Ff47f63CDFA979bc;
-    string internal animationUrl =
-        "https://cyberconnect.mypinata.cloud/ipfs/bafkreifx3vcbi25afciwr55l56z45xoy7jsrqi54b2kqhd3pjb766sy5ti";
-    address internal link3Auth = 0x429562824f63BD2Cd7CBFB73Cfe264A6ff0C6e1E;
-    Create2Deployer dc = Create2Deployer(address(0));
+    address internal link3Profile = ;
+    string internal animationUrl = "https://cyberconnect.mypinata.cloud/ipfs/bafkreihxi4ce5xcax43vkchm6thmajivxh7ecnihn4kvqwo4sz5x2cngfm";
 
     function run() external {
         // make sure only on anvil
-        address deployerContract = 0xa6e99A4ED7498b3cdDCBB61a6A607a4925Faa1B7;
+        address deployerContract = 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512;
         require(block.chainid == 31337, "ONLY_ANVIL");
         vm.startBroadcast();
 
@@ -25,7 +22,8 @@ contract SetAnimationURL is Script {
             vm,
             deployerContract,
             true,
-            animationUrl
+            animationUrl,
+            link3Profile
         );
 
         vm.stopBroadcast();
