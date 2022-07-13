@@ -27,10 +27,6 @@ import "forge-std/Vm.sol";
 
 // TODO: deploy with salt
 library LibDeploy {
-    address private constant VM_ADDRESS =
-        address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
-    Vm public constant vm = Vm(VM_ADDRESS);
-
     string internal constant PROFILE_NAME = "Link3";
     string internal constant PROFILE_SYMBOL = "LINK3";
     // TODO: Fix engine owner, use 0 address for integration test.
@@ -162,30 +158,6 @@ library LibDeploy {
         _writeHelper(vm, name, addr, true);
     }
 
-    // TODO: remove, test only
-    function special(
-        bytes memory _byteCode,
-        bytes32 _salt,
-        address deployer
-    ) internal returns (address) {
-        console.log("byteCode", vm.toString(_byteCode));
-        // console.log("dc", address(dc));
-        console.log("salt", uint256(_salt));
-        console.log("deployer", deployer);
-        console.log("keccak256", uint256(keccak256(_byteCode)));
-        bytes32 hash_ = keccak256(
-            abi.encodePacked(
-                bytes1(0xff),
-                deployer,
-                _salt,
-                keccak256(_byteCode)
-            )
-        );
-        console.log("hash", uint256(hash_));
-        console.log("address", address(uint160(uint256(hash_))));
-        return address(uint160(uint256(hash_)));
-    }
-
     // all the deployed addresses, ordered by deploy order
     struct ContractAddresses {
         address authority;
@@ -204,6 +176,7 @@ library LibDeploy {
         address link3ProfileMw;
         address calcEngineImpl;
         address calcEngineProxy;
+        address link3Authority;
     }
 
     // create2
@@ -346,6 +319,9 @@ library LibDeploy {
                 "=====================deploying deployer contract================="
             );
             dc = new Create2Deployer(); // for running test
+            if (writeFile) {
+                _write(vm, "Create2Deployer", address(dc));
+            }
         } else {
             dc = Create2Deployer(_deployerContract); // for deployment
         }
@@ -368,7 +344,7 @@ library LibDeploy {
             address(addrs.authority)
         );
 
-        addrs.calcEngineImpl = special(
+        addrs.calcEngineImpl = _computeAddress(
             type(CyberEngine).creationCode,
             salt,
             address(dc)
@@ -465,14 +441,14 @@ library LibDeploy {
         );
 
         // 6. Deploy Link3
-
-        addrs.link3Profile = deployLink3(
+        (addrs.link3Profile, addrs.link3Authority) = deployLink3(
             addrs.engineProxyAddress,
             vm,
             writeFile
         );
         if (writeFile) {
             _write(vm, "Link3 Profile", addrs.link3Profile);
+            _write(vm, "Link3 Authority", addrs.link3Authority);
         }
 
         // 7. Deploy Protocol Treasury
@@ -748,7 +724,7 @@ library LibDeploy {
         address engine,
         Vm vm,
         bool writeFile
-    ) internal returns (address profileProxy) {
+    ) internal returns (address profileProxy, address authority) {
         address essFac;
         address subFac;
         address profileFac;
@@ -798,22 +774,21 @@ library LibDeploy {
             _write(vm, "Essence Factory", essFac);
             _write(vm, "Subscribe Factory", subFac);
         }
-        require(
-            CyberEngine(engine).createNamespace(
-                DataTypes.CreateNamespaceParams(
-                    PROFILE_NAME,
-                    PROFILE_SYMBOL,
-                    LINK3_OWNER,
-                    DataTypes.ComputedAddresses(
-                        profileImpl,
-                        profileProxy,
-                        profileFac,
-                        subFac,
-                        essFac
-                    )
+        address deployed;
+        (deployed, authority) = CyberEngine(engine).createNamespace(
+            DataTypes.CreateNamespaceParams(
+                PROFILE_NAME,
+                PROFILE_SYMBOL,
+                LINK3_OWNER,
+                DataTypes.ComputedAddresses(
+                    profileProxy,
+                    profileFac,
+                    subFac,
+                    essFac
                 )
-            ) == profileProxy
+            )
         );
+        require(deployed == profileProxy);
     }
 
     function deployLink3Descriptor(
@@ -821,8 +796,17 @@ library LibDeploy {
         address _dc,
         bool writeFile,
         string memory animationUrl,
-        address link3Profile
+        address link3Profile,
+        address authority
     ) internal {
+        require(
+            RolesAuthority(authority).owner() == LINK3_OWNER,
+            "Authority owner is not LINK3_OWNER"
+        );
+        require(
+            RolesAuthority(authority).owner() == msg.sender,
+            "Authority owner is not msg.sender"
+        );
         Create2Deployer dc = Create2Deployer(_dc);
         address impl = dc.deploy(
             abi.encodePacked(
@@ -851,6 +835,18 @@ library LibDeploy {
         if (writeFile) {
             _writeLastLine(vm, "Link3 Descriptor (Proxy)", proxy);
         }
+
+        RolesAuthority(authority).setRoleCapability(
+            Constants._PROFILE_GOV_ROLE,
+            link3Profile,
+            ProfileNFT.setNFTDescriptor.selector,
+            true
+        );
+        RolesAuthority(authority).setUserRole(
+            LINK3_OWNER,
+            Constants._PROFILE_GOV_ROLE,
+            true
+        );
 
         // Need to have access to LINK3 OWNER
         ProfileNFT(link3Profile).setNFTDescriptor(proxy);

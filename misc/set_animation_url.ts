@@ -17,7 +17,10 @@ const getLink3Profile = async (chainName: string) => {
   const file = path.join(base, chainName, "contract.json");
   const data = await fs.readFile(file, "utf-8");
   const j = JSON5.parse(data);
-  return ethers.utils.getAddress(j["Link3 Profile"]);
+  return {
+    link3: ethers.utils.getAddress(j["Link3 Profile"]),
+    link3Auth: ethers.utils.getAddress(j["Link3 Authority"]),
+  };
 };
 
 const writeTemplate = async (profileProxy: string, chainName: string) => {
@@ -67,7 +70,8 @@ const writeToPinata = async ({
 const templateDeployScript = async (
   link3Profile: string,
   templateURL: string,
-  chainName: string
+  chainName: string,
+  link3Auth: string
 ) => {
   const p = path.join(
     "./script/animation_url/",
@@ -82,16 +86,18 @@ const templateDeployScript = async (
   const file = await fs.readFile(p, "utf8");
   let out = file.replace(/LINK3_PROFILE/g, link3Profile);
   out = out.replace(/ANIMATION_URL/g, templateURL);
+  out = out.replace(/LINK3_AUTH/g, link3Auth);
   await fs.writeFile(outP, out);
 };
 
 const main = async (chainName: string) => {
-  const link3 = await getLink3Profile(chainName);
+  const { link3, link3Auth } = await getLink3Profile(chainName);
   const out = await writeTemplate(link3, chainName);
   const pinataURL = await writeToPinata(out);
-  console.log("profileProxy", link3);
+  console.log("link3", link3);
+  console.log("link3 auth", link3Auth);
   console.log("pinataURL", pinataURL);
-  await templateDeployScript(link3, pinataURL, chainName);
+  await templateDeployScript(link3, pinataURL, chainName, link3Auth);
 };
 
 main(process.argv[2])

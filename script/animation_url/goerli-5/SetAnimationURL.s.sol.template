@@ -10,13 +10,14 @@ import { LibDeploy } from "../../libraries/LibDeploy.sol";
 
 contract SetAnimationURL is Script {
     address internal link3Profile = LINK3_PROFILE;
+    address internal link3Auth = LINK3_AUTH;
     string internal animationUrl = "ANIMATION_URL";
     Create2Deployer dc = Create2Deployer(address(0));
 
     function run() external {
         // make sure only on anvil
         address deployerContract = 0xdB94815F9D2f5A647c8D96124C7C1d1b42a23B47;
-        require(block.chainid == 31337, "ONLY_RINKEBY");
+        require(block.chainid == 5, "ONLY_GOERLI");
         vm.startBroadcast();
 
         LibDeploy.deployLink3Descriptor(
@@ -24,7 +25,8 @@ contract SetAnimationURL is Script {
             deployerContract,
             true,
             animationUrl,
-            link3Profile
+            link3Profile,
+            link3Auth
         );
 
         vm.stopBroadcast();

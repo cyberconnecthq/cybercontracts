@@ -16,7 +16,7 @@ contract DeployScript is Script {
         } else if (block.chainid == 4) {
             deployerContract = 0x1202F1AAe12d3fcBFB9320eE2396c19f93581f41;
         } else if (block.chainid == 5) {
-            deployerContract = 0xdB94815F9D2f5A647c8D96124C7C1d1b42a23B47; 
+            // deployerContract = 0xdB94815F9D2f5A647c8D96124C7C1d1b42a23B47;
         }
         // require(deployerContract != address(0), "DEPLOYER_CONTRACT_NOT_SET");
         uint256 nonce = vm.getNonce(msg.sender);
