@@ -14,6 +14,7 @@ contract EssenceNFTFactory is IEssenceDeployer {
         essParams.profileProxy = profileProxy;
     }
 
+    // TODO:
     function deploy(bytes32 salt) external override returns (address addr) {
         addr = address(new EssenceNFT{ salt: salt }());
         delete essParams;

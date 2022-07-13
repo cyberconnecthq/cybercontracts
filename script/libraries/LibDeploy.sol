@@ -274,18 +274,24 @@ library LibDeploy {
         internal
         returns (ContractAddresses memory addrs)
     {
-        addrs = deploy(
-            vm,
-            DeployParams(
-                false,
-                address(0),
-                false,
-                address(this),
-                link3Signer,
-                address(this),
-                address(this),
-                address(0x1890) // any address to receive a link3 profile
-            )
+        DeployParams memory params = DeployParams(
+            false,
+            address(0),
+            false,
+            address(this),
+            link3Signer,
+            address(this),
+            address(this),
+            address(0x1890) // any address to receive a link3 profile
+        );
+        addrs = deploy(vm, params);
+        // Health check
+        healthCheck(
+            addrs,
+            params.link3Signer,
+            params.link3Owner,
+            params.engineAuthOwner,
+            params.engineGov
         );
     }
 
@@ -306,6 +312,13 @@ library LibDeploy {
             );
         }
         // 3. Health check
+        healthCheck(
+            addrs,
+            params.link3Signer,
+            params.link3Owner,
+            params.engineAuthOwner,
+            params.engineGov
+        );
     }
 
     function _deploy(Vm vm, DeployParams memory params)
@@ -398,11 +411,24 @@ library LibDeploy {
             "ENGINE_PROXY_MISMATCH"
         );
 
+        // TODO: move to internal tx
         // 5. Set Governance Role
         RolesAuthority(addrs.engineAuthority).setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             addrs.engineProxyAddress,
             CyberEngine.allowProfileMw.selector,
+            true
+        );
+        RolesAuthority(addrs.engineAuthority).setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            addrs.engineProxyAddress,
+            CyberEngine.allowSubscribeMw.selector,
+            true
+        );
+        RolesAuthority(addrs.engineAuthority).setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            addrs.engineProxyAddress,
+            CyberEngine.allowEssenceMw.selector,
             true
         );
         RolesAuthority(addrs.engineAuthority).setRoleCapability(
@@ -418,7 +444,7 @@ library LibDeploy {
             true
         );
         RolesAuthority(addrs.engineAuthority).setUserRole(
-            params.engineGov, //use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
+            params.engineGov,
             Constants._ENGINE_GOV_ROLE,
             true
         );
@@ -519,7 +545,9 @@ library LibDeploy {
     function healthCheck(
         ContractAddresses memory addrs,
         address link3Signer,
-        address link3Owner
+        address link3Owner,
+        address engineAuthOwner,
+        address engineGov
     ) internal view {
         string memory name = CyberEngine(addrs.engineProxyAddress)
             .getNameByNamespace(addrs.link3Profile);
@@ -555,6 +583,20 @@ library LibDeploy {
         );
         require(ProfileNFT(addrs.link3Profile).paused(), "LINK3_NOT_PAUSED");
         require(CyberBoxNFT(addrs.boxProxy).paused(), "CYBERBOX_NOT_PAUSED");
+        require(
+            RolesAuthority(addrs.engineAuthority).doesUserHaveRole(
+                engineGov,
+                Constants._ENGINE_GOV_ROLE
+            ),
+            "ENGINE_GOV_ROLE"
+        );
+        console.log(RolesAuthority(addrs.engineAuthority).owner());
+        console.log(engineAuthOwner);
+        console.log(msg.sender);
+        require(
+            RolesAuthority(addrs.engineAuthority).owner() == engineAuthOwner,
+            "ENGINE_AUTH_OWNER_WRONG"
+        );
     }
 
     string constant TEST_HANDLE = "cyberconnect";
