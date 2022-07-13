@@ -354,7 +354,7 @@ library LibDeploy {
         addrs.authority = dc.deploy(
             abi.encodePacked(
                 type(RolesAuthority).creationCode,
-                abi.encode(ENGINE_GOV, Authority(address(0)))
+                abi.encode(deployer, Authority(address(0))) // use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
             ),
             salt
         );
@@ -469,7 +469,7 @@ library LibDeploy {
             true
         );
         RolesAuthority(addrs.authority).setUserRole(
-            ENGINE_GOV,
+            deployer, //use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
             Constants._ENGINE_GOV_ROLE,
             true
         );
