@@ -18,7 +18,7 @@ contract DeployScript is Script {
         console.log("vm.getNonce", vm.getNonce(msg.sender));
         vm.startBroadcast();
 
-        LibDeploy.deploy(vm, msg.sender, nonce, deployerContract);
+        LibDeploy.deploy(vm, msg.sender, nonce, deployerContract, true);
         // TODO: set correct role capacity
         // TODO: do a health check. verify everything
         vm.stopBroadcast();
