@@ -132,27 +132,11 @@ contract ProfileNFT is
         _pause();
     }
 
-    /**
-     * @notice Creates a profile and mints it to the recipient address.
-     *
-     * @param params contains all params.
-     * @param preData contains extra pre-processing data.
-     * @param postData contains extra post-processing data.
-     *
-     * @dev The current function validates the caller address and the handle before minting
-     * and the following conditions must be met:
-     * - The caller address must be the engine address.
-     * - The recipient address must be a valid Ethereum address.
-     * - The handle must contain only a-z, A-Z, 0-9.
-     * - The handle must not be already used.
-     * - The handle must not be longer than 27 bytes.
-     * - The handle must not be empty.
-     */
     function createProfile(
         DataTypes.CreateProfileParams calldata params,
         bytes calldata preData,
         bytes calldata postData
-    ) external payable nonReentrant returns (uint256 tokenID) {
+    ) external override payable nonReentrant returns (uint256 tokenID) {
         address profileMw = ICyberEngine(ENGINE).getProfileMwByNamespace(
             address(this)
         );
@@ -199,7 +183,7 @@ contract ProfileNFT is
      * @notice Subscribe to an address(es) with a signature.
      *
      * @param sender The sender address.
-     * @param profileIds The profile ids to subscribed to.
+     * @param params The params for subscription.
      * @param preDatas The subscription data for preprocess.
      * @param postDatas The subscription data for postprocess.
      * @param sig The EIP712 signature.
@@ -207,7 +191,7 @@ contract ProfileNFT is
      * @return uint256[] The subscription nft ids.
      */
     function subscribeWithSig(
-        uint256[] calldata profileIds,
+        DataTypes.SubscribeParams calldata params,
         bytes[] calldata preDatas,
         bytes[] calldata postDatas,
         address sender,
@@ -236,7 +220,7 @@ contract ProfileNFT is
                 keccak256(
                     abi.encode(
                         Constants._SUBSCRIBE_TYPEHASH,
-                        keccak256(abi.encodePacked(profileIds)),
+                        keccak256(abi.encodePacked(params.profileIds)),
                         keccak256(abi.encodePacked(preHashes)),
                         keccak256(abi.encodePacked(postHashes)),
                         nonces[sender]++,
@@ -247,38 +231,36 @@ contract ProfileNFT is
             sender,
             sig
         );
-        return _subscribe(sender, profileIds, preDatas, postDatas);
+        return _subscribe(sender, params, preDatas, postDatas);
     }
 
     /**
      * @notice The subscription functionality.
      *
-     * @param profileIds The profile ids to subscribed to.
+     * @param params The params for subscription.
      * @param preDatas The subscription data for preprocess.
      * @param postDatas The subscription data for postprocess.
      * @return uint256[] The subscription nft ids.
      * @dev the function requires the stated to be not paused.
      */
     function subscribe(
-        uint256[] calldata profileIds,
+        DataTypes.SubscribeParams calldata params,
         bytes[] calldata preDatas,
         bytes[] calldata postDatas
     ) external returns (uint256[] memory) {
-        return _subscribe(msg.sender, profileIds, preDatas, postDatas);
+        return _subscribe(msg.sender, params, preDatas, postDatas);
     }
 
     function collect(
-        uint256 profileId,
-        uint256 essenceId,
+        DataTypes.CollectParams calldata params,
         bytes calldata preData,
         bytes calldata postData
     ) external returns (uint256 tokenId) {
-        return _collect(msg.sender, profileId, essenceId, preData, postData);
+        return _collect(msg.sender, params, preData, postData);
     }
 
     function collectWithSig(
-        uint256 profileId,
-        uint256 essenceId,
+        DataTypes.CollectParams calldata params,
         bytes calldata preData,
         bytes calldata postData,
         address sender,
@@ -289,8 +271,8 @@ contract ProfileNFT is
                 keccak256(
                     abi.encode(
                         Constants._COLLECT_TYPEHASH,
-                        profileId,
-                        essenceId,
+                        params.profileId,
+                        params.essenceId,
                         keccak256(preData),
                         keccak256(postData),
                         nonces[sender]++,
@@ -301,7 +283,7 @@ contract ProfileNFT is
             sender,
             sig
         );
-        return _collect(sender, profileId, essenceId, preData, postData);
+        return _collect(sender, params, preData, postData);
     }
 
     // TODO: test
@@ -697,25 +679,25 @@ contract ProfileNFT is
      * @notice The subscription functionality.
      *
      * @param sender The sender address.
-     * @param profileIds The profile ids to subscribed to.
+     * @param params The params for subscription.
      * @param preDatas The subscription data used in pre process.
      * @param postDatas The subscription data used in post process.
      * @return result The subscription nft ids.
      */
     function _subscribe(
         address sender,
-        uint256[] calldata profileIds,
+        DataTypes.SubscribeParams calldata params,
         bytes[] calldata preDatas,
         bytes[] calldata postDatas
     ) internal returns (uint256[] memory) {
-        for (uint256 i = 0; i < profileIds.length; i++) {
-            _requireMinted(profileIds[i]);
+        for (uint256 i = 0; i < params.profileIds.length; i++) {
+            _requireMinted(params.profileIds[i]);
         }
 
         uint256[] memory result = Actions.subscribe(
             DataTypes.SubscribeData(
                 sender,
-                profileIds,
+                params.profileIds,
                 preDatas,
                 postDatas,
                 SUBSCRIBE_BEACON
@@ -724,7 +706,7 @@ contract ProfileNFT is
             _profileById
         );
 
-        emit Subscribe(sender, profileIds, preDatas, postDatas);
+        emit Subscribe(sender, params.profileIds, preDatas, postDatas);
         // if (deployedSubscribeNFT != address(0)) {
         //     emit DeploySubscribeNFT(profileId, deployedSubscribeNFT);
         // }
@@ -733,18 +715,17 @@ contract ProfileNFT is
 
     function _collect(
         address collector,
-        uint256 profileId,
-        uint256 essenceId,
+        DataTypes.CollectParams calldata params,
         bytes calldata preData,
         bytes calldata postData
     ) internal returns (uint256) {
-        _requireMinted(profileId);
+        _requireMinted(params.profileId);
 
         (uint256 tokenID, address deployedEssenceNFT) = Actions.collect(
             DataTypes.CollectData(
                 collector,
-                profileId,
-                essenceId,
+                params.profileId,
+                params.essenceId,
                 preData,
                 postData,
                 ESSENCE_BEACON
@@ -752,10 +733,10 @@ contract ProfileNFT is
             _essenceByIdByProfileId
         );
 
-        emit CollectEssence(collector, profileId, preData, postData);
+        emit CollectEssence(collector, params.profileId, preData, postData);
 
         if (deployedEssenceNFT != address(0)) {
-            emit DeployEssenceNFT(profileId, essenceId, deployedEssenceNFT);
+            emit DeployEssenceNFT(params.profileId, params.essenceId, deployedEssenceNFT);
         }
     }
 

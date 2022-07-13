@@ -33,6 +33,15 @@ library DataTypes {
         bytes initData;
     }
 
+    struct SubscribeParams {
+        uint256[] profileIds;
+    }
+
+    struct CollectParams {
+        uint256 profileId;
+        uint256 essenceId;
+    }
+
     struct SubscribeData {
         address sender;
         uint256[] profileIds;
@@ -49,7 +58,7 @@ library DataTypes {
         bytes postData;
         address essBeacon;
     }
-
+    
     struct ProfileStruct {
         string handle;
         string avatar;
