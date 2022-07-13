@@ -438,16 +438,6 @@ library LibDeploy {
             salt
         );
 
-        // addrs.descriptorProxy = address(
-        //     new ERC1967Proxy(
-        //         address(addrs.descriptorImpl),
-        //         abi.encodeWithSelector(
-        //             Link3ProfileDescriptor.initialize.selector,
-        //             templateURL
-        //         )
-        //     )
-        // );
-
         // 5. Set Governance Role
 
         RolesAuthority(addrs.authority).setRoleCapability(
@@ -475,11 +465,11 @@ library LibDeploy {
         );
 
         // 6. Deploy Link3
+
         addrs.link3Profile = deployLink3(
             addrs.engineProxyAddress,
-            PROFILE_NAME,
-            PROFILE_SYMBOL,
-            LINK3_OWNER
+            vm,
+            writeFile
         );
         if (writeFile) {
             _write(vm, "Link3 Profile", addrs.link3Profile);
@@ -756,9 +746,8 @@ library LibDeploy {
 
     function deployLink3(
         address engine,
-        string memory name,
-        string memory symbol,
-        address owner
+        Vm vm,
+        bool writeFile
     ) internal returns (address profileProxy) {
         address essFac;
         address subFac;
@@ -783,7 +772,7 @@ library LibDeploy {
             authority = _computeAddress(
                 abi.encodePacked(
                     type(RolesAuthority).creationCode,
-                    abi.encode(owner, address(0))
+                    abi.encode(LINK3_OWNER, address(0))
                 ),
                 link3Salt,
                 engine
@@ -791,8 +780,8 @@ library LibDeploy {
             bytes memory data = abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
                 address(0),
-                name,
-                symbol,
+                PROFILE_NAME,
+                PROFILE_SYMBOL,
                 authority
             );
             profileProxy = _computeAddress(
@@ -804,12 +793,17 @@ library LibDeploy {
                 engine
             );
         }
+        if (writeFile) {
+            _write(vm, "Profile Factory", profileFac);
+            _write(vm, "Essence Factory", essFac);
+            _write(vm, "Subscribe Factory", subFac);
+        }
         require(
             CyberEngine(engine).createNamespace(
                 DataTypes.CreateNamespaceParams(
-                    name,
-                    symbol,
-                    owner,
+                    PROFILE_NAME,
+                    PROFILE_SYMBOL,
+                    LINK3_OWNER,
                     DataTypes.ComputedAddresses(
                         profileImpl,
                         profileProxy,

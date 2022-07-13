@@ -1,2 +1,13 @@
-| Contract | Address |
-| -------- | ------- |
+|Contract|Address|
+|-|-|
+|RolesAuthority|0xb6d6db4672508e886a934cc1e5dd3843f5e5fe83|
+|EngineImpl|0x6a2fb1095d36f1a052594ff7f2c96d2912ea145b|
+|EngineProxy|0x296f5bbda39c7150513ea7335a3864a8745a9c2e|
+|Profile Factory|0xf5059a5d33d5853360d16c683c16e67980206f36|
+|Essence Factory|0x1613beb3b2c4f22ee086b2b38c1476a3ce7f78e8|
+|Subscribe Factory|0x851356ae760d987e095750cceb3bc6014560891c|
+|Link3 Profile|0x123d9ebeb935383e164787287a52cca24d031529|
+|CyberConnect Treasury|0x70d839b60049a6d4eddb6ca7e6723848f4401277|
+|Link3 Profile MW (PermissionedFeeCreationMw)|0xcb544d9608cf3f23ec1d0199a9322c79ab6d231f|
+|CyberBoxNFT (Impl)|0x361f379e34dd04eb8cda9de9d208db5a4234560f|
+|CyberBoxNFT (Proxy)|0x802acfb9276b9be01a23665db1438e4bfbeee730|

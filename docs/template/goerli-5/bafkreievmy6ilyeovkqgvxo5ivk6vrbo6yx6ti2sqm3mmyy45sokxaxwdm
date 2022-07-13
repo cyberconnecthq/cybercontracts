@@ -149,9 +149,9 @@
       const height = 500;
       const link3Url = "link3.to/";
       const nodeURL =
-        "https://rinkeby.infura.io/v3/a606847a1dd5461c9081be56bd0ffe71";
+        "https://goerli.infura.io/v3/a606847a1dd5461c9081be56bd0ffe71";
       const provider = new ethers.providers.JsonRpcProvider(nodeURL);
-      const contractAddress = "0x56aD3f7e5E3Eb0B00b57e6985C136d4a0Be955D2";
+      const contractAddress = "0xAaF7d83C1F5092c5d003221cB20eb0f6b673e8C6";
       const abi = [
         {
           inputs: [

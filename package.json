@@ -13,12 +13,15 @@
     "build": "forge build --force",
     "deploy:anvil": "source .env.anvil && forge script script/Deploy.s.sol:DeployScript --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
     "deploy:rinkeby": "source .env.rinkeby && forge script script/Deploy.s.sol:DeployScript --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "deploy:goerli": "source .env.goerli && forge script script/Deploy.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "pre_deploy": "node misc/pre_deploy.js",
     "post_deploy": "ts-node misc/post_deploy.ts",
     "upload_animation:anvil": "ts-node misc/set_animation_url.ts anvil-31337",
+    "upload_animation:goerli": "ts-node misc/set_animation_url.ts goerli-5",
     "set_animation_url:anvil": "source .env.anvil && forge script script/animation_url/anvil-31337/SetAnimationURL.s.sol:SetAnimationURL --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
     "qrtest": "rm -rf ./test/qrcode ./misc/qrcode/html ./misc/qrcode/svg && node misc/qrcode/gen-sol.js && mkdir -pv misc/qrcode/svg && forge test --match-contract QRSVGIntegration -vvv && node misc/qrcode/gen-html.js  && node misc/qrcode/puppet.js",
     "deploy_deployer:rinkeby": "source .env.rinkeby && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "deploy_deployer:goerli": "source .env.goerli && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_deployer:anvil": "source .env.anvil && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
     "size": "hardhat size-contracts"
   },
@@ -28,9 +31,11 @@
     "dotenv": "^16.0.1",
     "ethers": "^5.6.9",
     "form-data": "^4.0.0",
+    "hardhat": "^2.10.0",
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-preprocessor": "^0.1.4",
     "husky": "^8.0.1",
+    "json5": "^2.2.1",
     "lint-staged": "^13.0.1",
     "prettier": "^2.7.1",
     "prettier-plugin-solidity": "^1.0.0-beta.19",
@@ -57,10 +62,5 @@
         }
       }
     ]
-  },
-  "dependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
-    "hardhat": "^2.10.0"
-  },
-  "type": "module"
+  }
 }
