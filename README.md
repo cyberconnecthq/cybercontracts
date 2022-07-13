@@ -53,16 +53,22 @@ Some opinionated design decisino:
 
 (Replace `rinkeby` with `anvil` or other supported network) 0. Create `.env.rinkeby` file with following env
 
+```bash 
+# .env.pinata
+PINATA_JWT=
+```
+
 ```bash
+# .env.rinkeby
 RINKEBY_RPC_URL=
 PRIVATE_KEY=
 ETHERSCAN_KEY=
-PINATA_JWT=
 ```
 
 for local deployment in `.env.anvil`
 
 ```bash
+# .env.anvil
 PRIVATE_KEY=
 PINATA_JWT=
 ```
