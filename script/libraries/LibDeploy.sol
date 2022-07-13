@@ -32,10 +32,6 @@ library LibDeploy {
         address engineImpl;
         address link3DescriptorImpl;
         address link3DescriptorProxy;
-        // address profileImpl; // not used
-        // address subscribeImpl; // not used
-        // address subscribeBeacon; // not used
-        // address essenceBeacon; // not used
         address engineProxyAddress;
         address boxImpl;
         address boxProxy;
@@ -44,7 +40,6 @@ library LibDeploy {
         address link3ProfileMw;
         address calcEngineImpl;
         address calcEngineProxy;
-        // address link3Authority;
     }
     struct DeployParams {
         // address deployer; // 1. in test it is the Test contract. 2. in deployment it is msg.sender (deployer)
@@ -759,23 +754,14 @@ library LibDeploy {
         require(deployed == profileProxy);
     }
 
+    // Can only run from owner of link3 profile contract
     function deployLink3Descriptor(
         Vm vm,
         address _dc,
         bool writeFile,
         string memory animationUrl,
-        address link3Profile,
-        address authority,
-        address link3Owner
+        address link3Profile
     ) internal {
-        require(
-            RolesAuthority(authority).owner() == link3Owner,
-            "Authority owner is not LINK3_OWNER"
-        );
-        require(
-            RolesAuthority(authority).owner() == msg.sender,
-            "Authority owner is not msg.sender"
-        );
         Create2Deployer dc = Create2Deployer(_dc);
         address impl = dc.deploy(
             abi.encodePacked(
@@ -804,18 +790,6 @@ library LibDeploy {
         if (writeFile) {
             _writeLastLine(vm, "Link3 Descriptor (Proxy)", proxy);
         }
-
-        RolesAuthority(authority).setRoleCapability(
-            Constants._PROFILE_GOV_ROLE,
-            link3Profile,
-            ProfileNFT.setNFTDescriptor.selector,
-            true
-        );
-        RolesAuthority(authority).setUserRole(
-            link3Owner,
-            Constants._PROFILE_GOV_ROLE,
-            true
-        );
 
         // Need to have access to LINK3 OWNER
         ProfileNFT(link3Profile).setNFTDescriptor(proxy);
