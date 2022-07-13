@@ -19,12 +19,14 @@ contract TestDeployer is
     function setParamers(
         address _profileProxy,
         address _subBeacon,
-        address _essenceBeacon
+        address _essenceBeacon,
+        address _engine
     ) internal {
         essParams.profileProxy = _profileProxy;
         subParams.profileProxy = _profileProxy;
         profileParams.subBeacon = _subBeacon;
         profileParams.essenceBeacon = _essenceBeacon;
+        profileParams.engine = _engine;
     }
 
     function setEssParameters(address profileProxy) external {}

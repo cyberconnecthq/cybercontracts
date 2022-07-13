@@ -2,27 +2,27 @@
 
 pragma solidity 0.8.14;
 
-import "../src/core/ProfileNFT.sol";
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/libraries/Constants.sol";
 import "../src/libraries/DataTypes.sol";
-import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
-import { Authority } from "../src/dependencies/solmate/Auth.sol";
-import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
-import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
+
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import { Base64 } from "../src/dependencies/openzeppelin/Base64.sol";
+
 import { LibString } from "../src/libraries/LibString.sol";
+import { LibDeploy } from "../script/libraries/LibDeploy.sol";
+
+import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
+import { ProfileNFT } from "../src/core/ProfileNFT.sol";
+import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
 import { Link3ProfileDescriptor } from "../src/periphery/Link3ProfileDescriptor.sol";
 import { MockProfile } from "./utils/MockProfile.sol";
-import { LibDeploy } from "../script/libraries/LibDeploy.sol";
-import { Base64 } from "../src/dependencies/openzeppelin/Base64.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 
 contract ProfileNFTTest is Test, TestDeployer {
     MockProfile internal token;
     Link3ProfileDescriptor internal descriptor;
-    RolesAuthority internal rolesAuthority;
     address constant alice = address(0xA11CE);
     address constant bob = address(0xA12CE);
     address constant minter = address(0xB0B);
@@ -65,18 +65,13 @@ contract ProfileNFTTest is Test, TestDeployer {
         descriptor = new Link3ProfileDescriptor(profileAddr);
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
-            address(0),
+            gov,
             "TestProfile",
             "TP",
             address(descriptor)
         );
         ERC1967Proxy profileProxy = new ERC1967Proxy(address(tokenImpl), data);
         token = MockProfile(address(profileProxy));
-        rolesAuthority.setUserRole(
-            address(gov),
-            Constants._PROFILE_GOV_ROLE,
-            true
-        );
     }
 
     function testBasic() public {

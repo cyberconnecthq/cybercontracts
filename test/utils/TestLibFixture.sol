@@ -2,16 +2,19 @@
 
 pragma solidity 0.8.14;
 
-import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
-import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
-import { Constants } from "../../src/libraries/Constants.sol";
-import { DataTypes } from "../../src/libraries/DataTypes.sol";
-import { IProfileNFT } from "../../src/interfaces/IProfileNFT.sol";
-import { TestLib712 } from "./TestLib712.sol";
-import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
-import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import "forge-std/Vm.sol";
 import "forge-std/console.sol";
+import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
+
+import { IProfileNFT } from "../../src/interfaces/IProfileNFT.sol";
+
+import { Constants } from "../../src/libraries/Constants.sol";
+import { DataTypes } from "../../src/libraries/DataTypes.sol";
+import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
+import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
+
+import { TestLib712 } from "./TestLib712.sol";
+import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 
 // Only for testing, not for deploying script
 // TODO: move to test folder
@@ -52,7 +55,8 @@ library TestLibFixture {
             value: LibDeploy._INITIAL_FEE_TIER2
         }(
             DataTypes.CreateProfileParams(mintToEOA, handle, avatar, metadata),
-            abi.encode(v, r, s, deadline)
+            abi.encode(v, r, s, deadline),
+            new bytes(0)
         );
         // require(profileId == 1);
         require(mw.getNonce(address(profile), mintToEOA) == nonce + 1);

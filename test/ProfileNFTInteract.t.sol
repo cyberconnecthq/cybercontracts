@@ -3,23 +3,25 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
-import { MockProfile } from "./utils/MockProfile.sol";
-import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
-import { Constants } from "../src/libraries/Constants.sol";
+import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
+
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
+import { ICyberEngine } from "../src/interfaces/ICyberEngine.sol";
 import { ISubscribeNFT } from "../src/interfaces/ISubscribeNFT.sol";
 import { IEssenceNFT } from "../src/interfaces/IEssenceNFT.sol";
 import { ISubscribeMiddleware } from "../src/interfaces/ISubscribeMiddleware.sol";
 import { IEssenceMiddleware } from "../src/interfaces/IEssenceMiddleware.sol";
+import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
+
+import { Constants } from "../src/libraries/Constants.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
+
+import { MockProfile } from "./utils/MockProfile.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
-import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { EssenceNFT } from "../src/core/EssenceNFT.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
-import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
-import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
-import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
@@ -38,10 +40,10 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     );
 
     MockProfile internal profile;
-    RolesAuthority internal authority;
     address internal subscribeBeacon;
     address internal essenceBeacon;
     address internal gov = address(0xCCC);
+    address internal engine = address(0x888);
     uint256 internal bobPk = 10000;
     address internal bob = vm.addr(bobPk);
     uint256 internal profileId;
@@ -53,6 +55,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     function setUp() public {
         vm.etch(subscribeMw, address(this).code);
         vm.etch(essenceMw, address(this).code);
+        vm.etch(engine, address(this).code);
 
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
         setProfile(address(0xdead));
@@ -64,7 +67,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         essenceBeacon = address(
             new UpgradeableBeacon(fakeEssence, address(profile))
         );
-        setParamers(address(0xdead), subscribeBeacon, essenceBeacon);
+        setParamers(address(0), subscribeBeacon, essenceBeacon, engine);
         MockProfile profileImpl = new MockProfile();
         uint256 nonce = vm.getNonce(address(this));
         address profileAddr = LibDeploy._calcContractAddress(
@@ -74,10 +77,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
-            address(0),
+            gov,
             "Name",
-            "Symbol",
-            address(0x233)
+            "Symbol"
         );
         ERC1967Proxy profileProxy = new ERC1967Proxy(
             address(profileImpl),
@@ -86,8 +88,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         assertEq(address(profileProxy), profileAddr);
         profile = MockProfile(address(profileProxy));
 
-        authority.setUserRole(address(gov), Constants._PROFILE_GOV_ROLE, true);
-        vm.prank(gov);
+        // vm.prank(gov);
         assertEq(profile.nonces(bob), 0);
         string memory handle = "bob";
         string memory avatar = "avatar";
@@ -417,19 +418,30 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     function testCannotSetSubscribeMwIfNotAllowed() public {
         vm.expectRevert("SUB_MW_NOT_ALLOWED");
         address notMw = address(0xDEEAAAD);
+
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isSubscribeMwAllowed.selector,
+                notMw
+            ),
+            abi.encode(false)
+        );
+
         vm.prank(bob);
         profile.setSubscribeMw(profileId, notMw, new bytes(0));
         assertEq(profile.getSubscribeMw(profileId), address(0));
     }
 
     function testSetSubscribeMw() public {
-        // allow subscribeMw
-        vm.prank(gov);
-
-        // TODO mock call
-        //profile.allowSubscribeMw(subscribeMw, true);
-        //assertEq(profile.isSubscribeMwAllowed(subscribeMw), true);
-
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isSubscribeMwAllowed.selector,
+                subscribeMw
+            ),
+            abi.encode(true)
+        );
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(111);
         vm.mockCall(
@@ -518,8 +530,17 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testCannotRegisterEssenceWithEssenceMwNotAllowed() public {
-        vm.expectRevert("ESSENCE_MW_NOT_ALLOWED");
         address notMw = address(0xDEEAAAD);
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                notMw
+            ),
+            abi.encode(false)
+        );
+
+        vm.expectRevert("ESSENCE_MW_NOT_ALLOWED");
         vm.prank(bob);
         profile.registerEssence(
             DataTypes.RegisterEssenceParams(
@@ -534,12 +555,14 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testRegisterEssenceAsProfileOwner() public {
-        vm.prank(gov);
-
-        // TODO mock call
-        // profile.allowEssenceMw(essenceMw, true);
-
-        // assertEq(profile.isEssenceMwAllowed(essenceMw), true);
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                essenceMw
+            ),
+            abi.encode(true)
+        );
 
         vm.prank(bob);
         uint256 expectedEssenceId = 1;
@@ -662,11 +685,11 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             abi.encode(tokenId)
         );
 
-        vm.expectEmit(true, true, false, true);
-        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
-
         vm.expectEmit(true, false, false, true);
         emit CollectEssence(minter, profileId, new bytes(0), new bytes(0));
+
+        vm.expectEmit(true, true, false, true);
+        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
 
         vm.prank(minter);
         profile.collect(
@@ -707,14 +730,14 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             abi.encode(tokenId)
         );
 
-        vm.expectEmit(true, true, false, true);
-        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
-
         bytes memory preData = new bytes(0);
         bytes memory postData = new bytes(0);
 
         vm.expectEmit(true, false, false, true);
         emit CollectEssence(minter, profileId, preData, postData);
+
+        vm.expectEmit(true, true, false, true);
+        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
 
         // sign
         vm.warp(50);
