@@ -14,29 +14,6 @@ import { Constants } from "./Constants.sol";
 import { LibString } from "./LibString.sol";
 
 library Actions {
-    function createProfile(
-        uint256 id,
-        uint256 _totalCount,
-        DataTypes.CreateProfileParams calldata params,
-        mapping(uint256 => DataTypes.ProfileStruct) storage _profileById,
-        mapping(bytes32 => uint256) storage _profileIdByHandleHash,
-        mapping(uint256 => string) storage _metadataById,
-        mapping(address => uint256) storage _addressToPrimaryProfile
-    ) external returns (bool primaryProfileSet) {
-        bytes32 handleHash = keccak256(bytes(params.handle));
-
-        _profileById[_totalCount].handle = params.handle;
-        _profileById[_totalCount].avatar = params.avatar;
-
-        _profileIdByHandleHash[handleHash] = _totalCount;
-        _metadataById[_totalCount] = params.metadata;
-
-        if (_addressToPrimaryProfile[params.to] == 0) {
-            _addressToPrimaryProfile[params.to] = id;
-            primaryProfileSet = true;
-        }
-    }
-
     function subscribe(
         DataTypes.SubscribeData calldata data,
         mapping(uint256 => DataTypes.SubscribeStruct)
@@ -87,38 +64,6 @@ library Actions {
                 );
             }
         }
-    }
-
-    function _deploySubscribeNFT(
-        address subBeacon,
-        uint256 profileId,
-        mapping(uint256 => DataTypes.SubscribeStruct)
-            storage _subscribeByProfileId,
-        mapping(uint256 => DataTypes.ProfileStruct) storage _profileById
-    ) internal returns (address) {
-        address subscribeNFT = address(
-            new BeaconProxy(
-                subBeacon,
-                abi.encodeWithSelector(
-                    ISubscribeNFT.initialize.selector,
-                    profileId,
-                    string(
-                        abi.encodePacked(
-                            _profileById[profileId].handle,
-                            Constants._SUBSCRIBE_NFT_NAME_SUFFIX
-                        )
-                    ),
-                    string(
-                        abi.encodePacked(
-                            LibString.toUpper(_profileById[profileId].handle),
-                            Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
-                        )
-                    )
-                )
-            )
-        );
-        _subscribeByProfileId[profileId].subscribeNFT = subscribeNFT;
-        return subscribeNFT;
     }
 
     function collect(
@@ -176,26 +121,58 @@ library Actions {
     }
 
     function registerEssence(
-        DataTypes.RegisterEssenceParams calldata params,
+        DataTypes.RegisterEssenceData calldata data,
         mapping(uint256 => DataTypes.ProfileStruct) storage _profileById,
         mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
             storage _essenceByIdByProfileId
     ) external returns (uint256, bytes memory) {
-        uint256 id = ++_profileById[params.profileId].essenceCount;
-        _essenceByIdByProfileId[params.profileId][id].name = params.name;
-        _essenceByIdByProfileId[params.profileId][id].symbol = params.symbol;
-        _essenceByIdByProfileId[params.profileId][id].tokenURI = params
+        uint256 id = ++_profileById[data.profileId].essenceCount;
+        _essenceByIdByProfileId[data.profileId][id].name = data.name;
+        _essenceByIdByProfileId[data.profileId][id].symbol = data.symbol;
+        _essenceByIdByProfileId[data.profileId][id].tokenURI = data
             .essenceTokenURI;
         bytes memory returnData;
-        if (params.essenceMw != address(0)) {
-            _essenceByIdByProfileId[params.profileId][id].essenceMw = params
+        if (data.essenceMw != address(0)) {
+            _essenceByIdByProfileId[data.profileId][id].essenceMw = data
                 .essenceMw;
-            returnData = IEssenceMiddleware(params.essenceMw).prepare(
-                params.profileId,
+            returnData = IEssenceMiddleware(data.essenceMw).prepare(
+                data.profileId,
                 id,
-                params.initData
+                data.initData
             );
         }
         return (id, returnData);
+    }
+
+    function _deploySubscribeNFT(
+        address subBeacon,
+        uint256 profileId,
+        mapping(uint256 => DataTypes.SubscribeStruct)
+            storage _subscribeByProfileId,
+        mapping(uint256 => DataTypes.ProfileStruct) storage _profileById
+    ) internal returns (address) {
+        address subscribeNFT = address(
+            new BeaconProxy(
+                subBeacon,
+                abi.encodeWithSelector(
+                    ISubscribeNFT.initialize.selector,
+                    profileId,
+                    string(
+                        abi.encodePacked(
+                            _profileById[profileId].handle,
+                            Constants._SUBSCRIBE_NFT_NAME_SUFFIX
+                        )
+                    ),
+                    string(
+                        abi.encodePacked(
+                            LibString.toUpper(_profileById[profileId].handle),
+                            Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
+                        )
+                    )
+                )
+            )
+        );
+        _subscribeByProfileId[profileId].subscribeNFT = subscribeNFT;
+        return subscribeNFT;
     }
 }

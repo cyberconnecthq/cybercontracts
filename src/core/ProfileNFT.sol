@@ -136,7 +136,7 @@ contract ProfileNFT is
         DataTypes.CreateProfileParams calldata params,
         bytes calldata preData,
         bytes calldata postData
-    ) external override payable nonReentrant returns (uint256 tokenID) {
+    ) external payable override nonReentrant returns (uint256 tokenID) {
         address profileMw = ICyberEngine(ENGINE).getProfileMwByNamespace(
             address(this)
         );
@@ -148,20 +148,7 @@ contract ProfileNFT is
             );
         }
 
-        bytes32 handleHash = keccak256(bytes(params.handle));
-        require(!_exists(_profileIdByHandleHash[handleHash]), "HANDLE_TAKEN");
-
-        tokenID = _mint(params.to);
-        bool primaryProfileSet = Actions.createProfile(
-            tokenID,
-            _totalCount,
-            params,
-            _profileById,
-            _profileIdByHandleHash,
-            _metadataById,
-            _addressToPrimaryProfile
-        );
-
+        tokenID = _createProfile(params);
         if (profileMw != address(0)) {
             IProfileMiddleware(profileMw).postProcess(params, postData);
         }
@@ -173,10 +160,6 @@ contract ProfileNFT is
             params.avatar,
             params.metadata
         );
-
-        if (primaryProfileSet) {
-            emit SetPrimaryProfile(params.to, tokenID);
-        }
     }
 
     /**
@@ -287,18 +270,25 @@ contract ProfileNFT is
     }
 
     // TODO: test
-    function registerEssence(DataTypes.RegisterEssenceParams calldata params)
-        external
-        onlyProfileOwnerOrOperator(params.profileId)
-        returns (uint256)
-    {
+    function registerEssence(
+        DataTypes.RegisterEssenceParams calldata params,
+        bytes calldata initData
+    ) external onlyProfileOwnerOrOperator(params.profileId) returns (uint256) {
         require(
             params.essenceMw == address(0) ||
                 ICyberEngine(ENGINE).isEssenceMwAllowed(params.essenceMw),
             "ESSENCE_MW_NOT_ALLOWED"
         );
+
         (uint256 tokenID, bytes memory returnData) = Actions.registerEssence(
-            params,
+            DataTypes.RegisterEssenceData(
+                params.profileId,
+                params.name,
+                params.symbol,
+                params.essenceTokenURI,
+                params.essenceMw,
+                initData
+            ),
             _profileById,
             _essenceByIdByProfileId
         );
@@ -736,7 +726,31 @@ contract ProfileNFT is
         emit CollectEssence(collector, params.profileId, preData, postData);
 
         if (deployedEssenceNFT != address(0)) {
-            emit DeployEssenceNFT(params.profileId, params.essenceId, deployedEssenceNFT);
+            emit DeployEssenceNFT(
+                params.profileId,
+                params.essenceId,
+                deployedEssenceNFT
+            );
+        }
+    }
+
+    function _createProfile(DataTypes.CreateProfileParams calldata params)
+        internal
+        returns (uint256 tokenID)
+    {
+        bytes32 handleHash = keccak256(bytes(params.handle));
+        require(!_exists(_profileIdByHandleHash[handleHash]), "HANDLE_TAKEN");
+
+        tokenID = _mint(params.to);
+
+        _profileById[_totalCount].handle = params.handle;
+        _profileById[_totalCount].avatar = params.avatar;
+        _metadataById[_totalCount] = params.metadata;
+        _profileIdByHandleHash[handleHash] = _totalCount;
+
+        if (_addressToPrimaryProfile[params.to] == 0) {
+            _addressToPrimaryProfile[params.to] = tokenID;
+            emit SetPrimaryProfile(params.to, tokenID);
         }
     }
 

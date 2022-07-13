@@ -30,7 +30,6 @@ library DataTypes {
         string symbol;
         string essenceTokenURI;
         address essenceMw;
-        bytes initData;
     }
 
     struct SubscribeParams {
@@ -42,6 +41,14 @@ library DataTypes {
         uint256 essenceId;
     }
 
+    struct RegisterEssenceData {
+        uint256 profileId;
+        string name;
+        string symbol;
+        string essenceTokenURI;
+        address essenceMw;
+        bytes initData;
+    }
     struct SubscribeData {
         address sender;
         uint256[] profileIds;
@@ -58,7 +65,7 @@ library DataTypes {
         bytes postData;
         address essBeacon;
     }
-    
+
     struct ProfileStruct {
         string handle;
         string avatar;
