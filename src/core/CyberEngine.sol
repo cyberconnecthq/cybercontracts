@@ -134,11 +134,15 @@ contract CyberEngine is
             address essImpl = IEssenceDeployer(params.addrs.essenceFactory)
                 .deploy(salt);
 
+            // TODO: test in integration
             address subBeacon = address(
-                new UpgradeableBeacon{ salt: salt }(subscribeImpl, params.owner)
+                new UpgradeableBeacon{ salt: salt }(
+                    subscribeImpl,
+                    address(this)
+                )
             );
             address essBeacon = address(
-                new UpgradeableBeacon{ salt: salt }(essImpl, params.owner)
+                new UpgradeableBeacon{ salt: salt }(essImpl, address(this))
             );
 
             IProfileDeployer(params.addrs.profileFactory).setProfileParameters(

@@ -27,8 +27,28 @@ import "forge-std/Vm.sol";
 
 // TODO: deploy with salt
 library LibDeploy {
-    string internal constant PROFILE_NAME = "Link3";
-    string internal constant PROFILE_SYMBOL = "LINK3";
+    struct ContractAddresses {
+        address engineAuthority;
+        address engineImpl;
+        address link3DescriptorImpl;
+        address link3DescriptorProxy;
+        // address profileImpl; // not used
+        // address subscribeImpl; // not used
+        // address subscribeBeacon; // not used
+        // address essenceBeacon; // not used
+        address engineProxyAddress;
+        address boxImpl;
+        address boxProxy;
+        address cyberTreasury;
+        address link3Profile;
+        address link3ProfileMw;
+        address calcEngineImpl;
+        address calcEngineProxy;
+        address link3Authority;
+    }
+
+    string internal constant LINK3_NAME = "Link3";
+    string internal constant LINK3_SYMBOL = "LINK3";
     // TODO: Fix engine owner, use 0 address for integration test.
     // have to be different from deployer to make tests useful
     address internal constant ENGINE_OWNER = address(0);
@@ -42,7 +62,7 @@ library LibDeploy {
     address internal constant ENGINE_TREASURY =
         0x1890a1625d837A809b0e77EdE1a999a161df085d;
     bytes32 constant salt = keccak256(bytes("CyberConnect"));
-    bytes32 constant link3Salt = keccak256(bytes(PROFILE_NAME));
+    bytes32 constant link3Salt = keccak256(bytes(LINK3_NAME));
     address internal constant LINK3_TREASURY =
         0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
 
@@ -158,27 +178,6 @@ library LibDeploy {
         _writeHelper(vm, name, addr, true);
     }
 
-    // all the deployed addresses, ordered by deploy order
-    struct ContractAddresses {
-        address authority;
-        address engineImpl;
-        address descriptorImpl;
-        address descriptorProxy;
-        address profileImpl;
-        address subscribeImpl;
-        address subscribeBeacon;
-        address essenceBeacon;
-        address engineProxyAddress;
-        address boxImpl;
-        address boxProxy;
-        address cyberTreasury;
-        address link3Profile;
-        address link3ProfileMw;
-        address calcEngineImpl;
-        address calcEngineProxy;
-        address link3Authority;
-    }
-
     // create2
     function _computeAddress(
         bytes memory _byteCode,
@@ -271,16 +270,7 @@ library LibDeploy {
         Vm vm,
         address deployer,
         uint256 nonce
-    )
-        internal
-        returns (
-            address,
-            address,
-            address,
-            address,
-            address
-        )
-    {
+    ) internal returns (ContractAddresses memory addrs) {
         return deploy(vm, deployer, nonce, address(0), false);
     }
 
@@ -290,16 +280,28 @@ library LibDeploy {
         uint256 nonce,
         address _deployerContract,
         bool writeFile
-    )
-        internal
-        returns (
-            address,
-            address,
-            address,
-            address,
-            address
-        )
-    {
+    ) internal returns (ContractAddresses memory addrs) {
+        // 1. Deploy engine + link3 profile
+        addrs = _deploy(vm, deployer, nonce, _deployerContract, writeFile);
+        // 2. Register a test profile
+        if (block.chainid != 1) {
+            LibDeploy.register(
+                vm,
+                ProfileNFT(addrs.link3Profile),
+                CyberEngine(addrs.engineProxyAddress),
+                PermissionedFeeCreationMw(addrs.link3ProfileMw)
+            );
+        }
+        // 3. Health check
+    }
+
+    function _deploy(
+        Vm vm,
+        address deployer,
+        uint256 nonce,
+        address _deployerContract,
+        bool writeFile
+    ) private returns (ContractAddresses memory addrs) {
         if (writeFile) {
             _prepareToWrite(vm);
             _writeText(vm, _fileNameJson(), "{");
@@ -308,11 +310,7 @@ library LibDeploy {
         }
         console.log("starting nonce", nonce);
         console.log("deployer address", deployer);
-        // TODO: emergency admin
-        // address emergencyAdmin = address(0x1890);
 
-        // Define variables by using struct to avoid stack too deep error
-        ContractAddresses memory addrs;
         Create2Deployer dc;
         if (_deployerContract == address(0)) {
             console.log(
@@ -327,7 +325,7 @@ library LibDeploy {
         }
 
         // 0. Deploy RolesAuthority
-        addrs.authority = dc.deploy(
+        addrs.engineAuthority = dc.deploy(
             abi.encodePacked(
                 type(RolesAuthority).creationCode,
                 abi.encode(deployer, Authority(address(0))) // use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
@@ -335,13 +333,13 @@ library LibDeploy {
             salt
         );
         if (writeFile) {
-            _write(vm, "RolesAuthority", addrs.authority);
+            _write(vm, "RolesAuthority", addrs.engineAuthority);
         }
 
         bytes memory data = abi.encodeWithSelector(
             CyberEngine.initialize.selector,
             ENGINE_OWNER,
-            address(addrs.authority)
+            address(addrs.engineAuthority)
         );
 
         addrs.calcEngineImpl = _computeAddress(
@@ -388,23 +386,20 @@ library LibDeploy {
         );
 
         // 3. Deploy Link3 Descriptor Impl
-        addrs.descriptorImpl = dc.deploy(
+        addrs.link3DescriptorImpl = dc.deploy(
             abi.encodePacked(
                 type(Link3ProfileDescriptor).creationCode,
                 abi.encode(LINK3_OWNER)
             ),
             salt
         );
-        // addrs.descriptorImpl = address(
-        //     new Link3ProfileDescriptor{ salt: link3Salt }(LINK3_OWNER)
-        // );
 
         // 4. Deploy Link3 Descriptor Proxy
-        addrs.descriptorProxy = dc.deploy(
+        addrs.link3DescriptorProxy = dc.deploy(
             abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(
-                    addrs.descriptorImpl,
+                    addrs.link3DescriptorImpl,
                     abi.encodeWithSelector(
                         Link3ProfileDescriptor.initialize.selector,
                         ""
@@ -415,26 +410,25 @@ library LibDeploy {
         );
 
         // 5. Set Governance Role
-
-        RolesAuthority(addrs.authority).setRoleCapability(
+        RolesAuthority(addrs.engineAuthority).setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             addrs.engineProxyAddress,
             CyberEngine.allowProfileMw.selector,
             true
         );
-        RolesAuthority(addrs.authority).setRoleCapability(
+        RolesAuthority(addrs.engineAuthority).setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             addrs.engineProxyAddress,
             CyberEngine.createNamespace.selector,
             true
         );
-        RolesAuthority(addrs.authority).setRoleCapability(
+        RolesAuthority(addrs.engineAuthority).setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             addrs.engineProxyAddress,
             CyberEngine.setProfileMw.selector,
             true
         );
-        RolesAuthority(addrs.authority).setUserRole(
+        RolesAuthority(addrs.engineAuthority).setUserRole(
             deployer, //use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
             Constants._ENGINE_GOV_ROLE,
             true
@@ -462,11 +456,8 @@ library LibDeploy {
         if (writeFile) {
             _write(vm, "CyberConnect Treasury", addrs.cyberTreasury);
         }
-        // addrs.cyberTreasury = address(
-        //     new Treasury{ salt: salt }(ENGINE_GOV, ENGINE_TREASURY, 250)
-        // );
 
-        // 8. Deploy Link3 Profile Middleware
+        // 8. Deploy Profile Middleware
         addrs.link3ProfileMw = dc.deploy(
             abi.encodePacked(
                 type(PermissionedFeeCreationMw).creationCode,
@@ -482,12 +473,6 @@ library LibDeploy {
                 addrs.link3ProfileMw
             );
         }
-        // addrs.link3ProfileMw = address(
-        //     new PermissionedFeeCreationMw{ salt: link3Salt }(
-        //         addrs.engineProxyAddress,
-        //         addrs.cyberTreasury
-        //     )
-        // );
 
         // 9. Engine Allow Middleware
         CyberEngine(addrs.engineProxyAddress).allowProfileMw(
@@ -511,115 +496,88 @@ library LibDeploy {
             )
         );
 
-        // TODO: check address
-        {
-            // scope to avoid stack too deep error
-            // 11. Deploy BoxNFT Impl
-            addrs.boxImpl = dc.deploy(type(CyberBoxNFT).creationCode, salt);
-            if (writeFile) {
-                _write(vm, "CyberBoxNFT (Impl)", addrs.boxImpl);
-            }
-
-            // 12. Deploy Proxy for BoxNFT
-            bytes memory _data = abi.encodeWithSelector(
-                CyberBoxNFT.initialize.selector,
-                ENGINE_GOV,
-                "CyberBox",
-                "CYBER_BOX"
-            );
-            addrs.boxProxy = dc.deploy(
-                abi.encodePacked(
-                    type(ERC1967Proxy).creationCode,
-                    abi.encode(addrs.boxImpl, _data)
-                ),
-                salt
-            );
-            if (writeFile) {
-                _write(vm, "CyberBoxNFT (Proxy)", addrs.boxProxy);
-            }
+        // scope to avoid stack too deep error
+        // 11. Deploy BoxNFT Impl
+        addrs.boxImpl = dc.deploy(type(CyberBoxNFT).creationCode, salt);
+        if (writeFile) {
+            _write(vm, "CyberBoxNFT (Impl)", addrs.boxImpl);
         }
 
-        // 15. register a profile for testing
-        if (block.chainid != 1) {
-            register(
-                vm,
-                ProfileNFT(addrs.link3Profile),
-                CyberEngine(addrs.engineProxyAddress),
-                PermissionedFeeCreationMw(addrs.link3ProfileMw)
-            );
+        // 12. Deploy Proxy for BoxNFT
+        bytes memory _data = abi.encodeWithSelector(
+            CyberBoxNFT.initialize.selector,
+            ENGINE_GOV,
+            "CyberBox",
+            "CYBER_BOX"
+        );
+        addrs.boxProxy = dc.deploy(
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(addrs.boxImpl, _data)
+            ),
+            salt
+        );
+        if (writeFile) {
+            _write(vm, "CyberBoxNFT (Proxy)", addrs.boxProxy);
         }
 
+        // TODO: fix this
         if (writeFile) {
             _writeText(vm, _fileNameJson(), "}");
         }
-        // TODO: fix return
-        return (
-            addrs.engineProxyAddress,
-            addrs.authority,
-            addrs.boxProxy,
-            addrs.link3Profile,
-            address(addrs.descriptorProxy)
-        );
     }
 
-    // function healthCheck(
-    //     address deployer,
-    //     RolesAuthority authority,
-    //     ProfileNFT profile,
-    //     CyberBoxNFT box
-    // ) internal view {
-    //     require(
-    //         profile.owner() == ENGINE_OWNER,
-    //         "ProfileNFT owner is not deployer"
-    //     );
-    //     // require(
-    //     //     profile.signer() == ENGINE_SIGNER,
-    //     //     "ProfileNFT signer is not set correctly"
-    //     // );
-    //     require(
-    //         keccak256(abi.encodePacked(profile.name())) ==
-    //             keccak256(abi.encodePacked(PROFILE_NAME)),
-    //         "ProfileNFT name is not set correctly"
-    //     );
-    //     require(
-    //         keccak256(abi.encodePacked(profile.symbol())) ==
-    //             keccak256(abi.encodePacked(PROFILE_SYMBOL)),
-    //         "ProfileNFT symbol is not set correctly"
-    //     );
-    //     // require(
-    //     //     authority.canCall(
-    //     //         deployer,
-    //     //         address(profile),
-    //     //         ProfileNFT.setSigner.selector
-    //     //     ),
-    //     //     "ProfileNFT Owner can set Signer"
-    //     // );
-    //     require(
-    //         authority.doesUserHaveRole(deployer, Constants._PROFILE_GOV_ROLE),
-    //         "Governance address is not set"
-    //     );
-    //     require(profile.paused(), "ProfileNFT is not paused");
-    //     require(box.paused(), "CyberBoxNFT is not paused");
-
-    //     // TODO: add all checks
-    // }
-
-    // function setupGovernance(
-    //     ProfileNFT profile,
-    //     address deployer,
-    //     RolesAuthority authority
-    // ) internal {
-    //     authority.setUserRole(deployer, Constants._PROFILE_GOV_ROLE, true);
-
-    //     // change user from deployer to governance
-    //     profile.setSigner(ENGINE_SIGNER);
-    // }
-
-    // utils
-    bytes32 private constant _TYPE_HASH =
-        keccak256(
-            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+    function healthCheck(ContractAddresses memory addrs) internal view {
+        DataTypes.NamespaceStruct memory namespaceInfo = CyberEngine(
+            addrs.engineProxyAddress
+        ).getNamespaceData(addrs.link3Profile);
+        require(
+            namespaceInfo.profileMw == addrs.link3ProfileMw,
+            "WRONG_PROFILE_MW"
         );
+        require(
+            keccak256(abi.encodePacked(namespaceInfo.name)) ==
+                keccak256(abi.encodePacked(LINK3_NAME)),
+            "WRONG_NAME"
+        );
+        // TODO: fix this after ownable
+        // require(
+        //     profile.owner() == ENGINE_OWNER,
+        //     "ProfileNFT owner is not deployer"
+        // );
+        // require(
+        //     authority.canCall(
+        //         deployer,
+        //         address(profile),
+        //         ProfileNFT.setSigner.selector
+        //     ),
+        //     "ProfileNFT Owner can set Signer"
+        // );
+        // require(
+        //     authority.doesUserHaveRole(deployer, Constants._PROFILE_GOV_ROLE),
+        //     "Governance address is not set"
+        // );
+        require(
+            PermissionedFeeCreationMw(addrs.link3ProfileMw).getSigner(
+                addrs.link3Profile
+            ) == LINK3_SIGNER,
+            "LINK3_SIGNER_WRONG"
+        );
+        require(
+            keccak256(
+                abi.encodePacked(ProfileNFT(addrs.link3Profile).name())
+            ) == keccak256(abi.encodePacked(LINK3_NAME)),
+            "LINK3_WRONG_NAME"
+        );
+        require(
+            keccak256(
+                abi.encodePacked(ProfileNFT(addrs.link3Profile).symbol())
+            ) == keccak256(abi.encodePacked(LINK3_SYMBOL)),
+            "LINK3_WRONG_SYMBOL"
+        );
+        require(ProfileNFT(addrs.link3Profile).paused(), "LINK3_NOT_PAUSED");
+        require(CyberBoxNFT(addrs.boxProxy).paused(), "CYBERBOX_NOT_PAUSED");
+    }
 
     // for testnet, profile owner is all deployer, signer is fake
     function register(
@@ -680,11 +638,10 @@ library LibDeploy {
         }
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
 
-        // use ENGINE_SIGNER instead of deployer since deployer could be a contract in anvil environment and safeMint will fail
         require(mw.getNonce(address(profile), LINK3_SIGNER) == 0);
         profile.createProfile{ value: _INITIAL_FEE_TIER5 }(
             DataTypes.CreateProfileParams(
-                LINK3_SIGNER,
+                LINK3_SIGNER, // use LINK3_SIGNER instead of deployer since deployer could be a contract in anvil environment and safeMint will fail
                 handle,
                 "bafkreibcwcqcdf2pgwmco3pfzdpnfj3lijexzlzrbfv53sogz5uuydmvvu",
                 "metadata"
@@ -729,16 +686,12 @@ library LibDeploy {
         address subFac;
         address profileFac;
         address profileImpl;
-
         {
             // TODO: reuse factory
             essFac = address(new EssenceNFTFactory());
             subFac = address(new SubscribeNFTFactory());
             profileFac = address(new ProfileNFTFactory());
 
-            address authority;
-            // address subImpl;
-            // address essenceImpl;
             profileImpl = _computeAddress(
                 type(ProfileNFT).creationCode,
                 link3Salt,
@@ -756,8 +709,8 @@ library LibDeploy {
             bytes memory data = abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
                 address(0),
-                PROFILE_NAME,
-                PROFILE_SYMBOL,
+                LINK3_NAME,
+                LINK3_SYMBOL,
                 authority
             );
             profileProxy = _computeAddress(
@@ -777,8 +730,8 @@ library LibDeploy {
         address deployed;
         (deployed, authority) = CyberEngine(engine).createNamespace(
             DataTypes.CreateNamespaceParams(
-                PROFILE_NAME,
-                PROFILE_SYMBOL,
+                LINK3_NAME,
+                LINK3_SYMBOL,
                 LINK3_OWNER,
                 DataTypes.ComputedAddresses(
                     profileProxy,

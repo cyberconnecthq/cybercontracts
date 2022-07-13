@@ -5,6 +5,9 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import { LibDeploy } from "./libraries/LibDeploy.sol";
+import { ProfileNFT } from "../src/core/ProfileNFT.sol";
+import { CyberEngine } from "../src/core/CyberEngine.sol";
+import { PermissionedFeeCreationMw } from "../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 
 // 16 Transaction + 3 Transaction to mint a test profile
 contract DeployScript is Script {
@@ -24,8 +27,7 @@ contract DeployScript is Script {
         vm.startBroadcast();
 
         LibDeploy.deploy(vm, msg.sender, nonce, deployerContract, true);
-        // TODO: set correct role capacity
-        // TODO: do a health check. verify everything
+
         vm.stopBroadcast();
     }
 }
