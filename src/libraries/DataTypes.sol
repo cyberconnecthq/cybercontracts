@@ -71,7 +71,6 @@ library DataTypes {
     }
 
     struct NamespaceStruct {
-        address owner;
         address profileMw;
         string name;
     }

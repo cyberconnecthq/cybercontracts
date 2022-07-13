@@ -10,6 +10,7 @@ abstract contract ProfileNFTStorage {
 
     // storage
     address internal _nftDescriptor;
+    address internal _namespaceOwner;
     mapping(uint256 => DataTypes.ProfileStruct) internal _profileById;
     mapping(bytes32 => uint256) internal _profileIdByHandleHash;
     mapping(uint256 => string) internal _metadataById;
@@ -17,8 +18,6 @@ abstract contract ProfileNFTStorage {
     mapping(address => uint256) internal _addressToPrimaryProfile;
     mapping(uint256 => DataTypes.SubscribeStruct)
         internal _subscribeByProfileId;
-    mapping(address => bool) internal _subscribeMwAllowlist;
     mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
         internal _essenceByIdByProfileId;
-    mapping(address => bool) internal _essenceMwAllowlist;
 }

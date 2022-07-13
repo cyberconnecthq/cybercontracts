@@ -6,8 +6,17 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 import { ICyberEngineEvents } from "../interfaces/ICyberEngineEvents.sol";
 
 interface ICyberEngine is ICyberEngineEvents {
-    function getNamespaceData(address namespace)
+    function getNameByNamespace(address namespace)
         external
         view
-        returns (DataTypes.NamespaceStruct memory);
+        returns (string memory);
+
+    function getProfileMwByNamespace(address namespace)
+        external
+        view
+        returns (address);
+
+    function isEssenceMwAllowed(address mw) external view returns (bool);
+
+    function isSubscribeMwAllowed(address mw) external view returns (bool);
 }

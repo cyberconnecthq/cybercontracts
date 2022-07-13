@@ -206,13 +206,8 @@ library Actions {
         DataTypes.RegisterEssenceData calldata data,
         mapping(uint256 => DataTypes.ProfileStruct) storage _profileById,
         mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
-            storage _essenceByIdByProfileId,
-        mapping(address => bool) storage _essenceMwAllowlist
+            storage _essenceByIdByProfileId
     ) external returns (uint256) {
-        require(
-            data.essenceMw == address(0) || _essenceMwAllowlist[data.essenceMw],
-            "ESSENCE_MW_NOT_ALLOWED"
-        );
         uint256 id = ++_profileById[data.profileId].essenceCount;
         _essenceByIdByProfileId[data.profileId][id].name = data.name;
         _essenceByIdByProfileId[data.profileId][id].symbol = data.symbol;

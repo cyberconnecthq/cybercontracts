@@ -16,7 +16,6 @@ import { LibString } from "../src/libraries/LibString.sol";
 import { Link3ProfileDescriptor } from "../src/periphery/Link3ProfileDescriptor.sol";
 import { MockProfile } from "./utils/MockProfile.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
-import { ProfileRoles } from "../src/core/ProfileRoles.sol";
 import { Base64 } from "../src/dependencies/openzeppelin/Base64.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 
@@ -63,15 +62,13 @@ contract ProfileNFTTest is Test, TestDeployer {
             address(this),
             nonce + 2
         );
-        rolesAuthority = new ProfileRoles(address(this), profileAddr);
         descriptor = new Link3ProfileDescriptor(profileAddr);
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             address(0),
             "TestProfile",
             "TP",
-            address(descriptor),
-            rolesAuthority
+            address(descriptor)
         );
         ERC1967Proxy profileProxy = new ERC1967Proxy(address(tokenImpl), data);
         token = MockProfile(address(profileProxy));

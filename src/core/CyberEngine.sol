@@ -32,6 +32,18 @@ contract CyberEngine is
     IUpgradeable,
     ICyberEngine
 {
+    /**
+     * @notice Checks if the sender is authorized to upgrade the contract.
+     */
+    modifier canUpgrade() {
+        require(
+            isAuthorized(msg.sender, Constants._AUTHORIZE_UPGRADE),
+            "UNAUTHORIZED"
+        );
+
+        _;
+    }
+
     constructor() {
         _disableInitializers();
     }
@@ -49,39 +61,6 @@ contract CyberEngine is
         Auth.__Auth_Init(_owner, _rolesAuthority);
     }
 
-    function setProfileMw(
-        address namespace,
-        address mw,
-        bytes calldata data
-    ) external requiresAuth {
-        require(
-            mw == address(0) || _profileMwAllowlist[mw],
-            "PROFILE_MW_NOT_ALLOWED"
-        );
-        _namespaceInfo[namespace].profileMw = mw;
-        bytes memory returnData;
-        if (mw != address(0)) {
-            returnData = IProfileMiddleware(mw).setProfileMwData(
-                namespace,
-                data
-            );
-        }
-        emit SetProfileMw(namespace, mw, returnData);
-    }
-
-    function isProfileMwAllowed(address mw) external view returns (bool) {
-        return _profileMwAllowlist[mw];
-    }
-
-    // TODO: maybe separate
-    function getNamespaceData(address namespace)
-        external
-        view
-        returns (DataTypes.NamespaceStruct memory)
-    {
-        return _namespaceInfo[namespace];
-    }
-
     /**
      * @notice Allows the profile middleware.
      *
@@ -92,6 +71,30 @@ contract CyberEngine is
         bool preAllowed = _profileMwAllowlist[mw];
         _profileMwAllowlist[mw] = allowed;
         emit AllowProfileMw(mw, preAllowed, allowed);
+    }
+
+    /**
+     * @notice Allows the subscriber middleware.
+     *
+     * @param mw The middleware address.
+     * @param allowed The allowance state.
+     */
+    function allowSubscribeMw(address mw, bool allowed) external requiresAuth {
+        bool preAllowed = _subscribeMwAllowlist[mw];
+        _subscribeMwAllowlist[mw] = allowed;
+        emit AllowSubscribeMw(mw, preAllowed, allowed);
+    }
+
+    /**
+     * @notice Allows the essence middleware.
+     *
+     * @param mw The middleware address.
+     * @param allowed The allowance state.
+     */
+    function allowEssenceMw(address mw, bool allowed) external requiresAuth {
+        bool preAllowed = _essenceMwAllowlist[mw];
+        _essenceMwAllowlist[mw] = allowed;
+        emit AllowEssenceMw(mw, preAllowed, allowed);
     }
 
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
@@ -118,13 +121,6 @@ contract CyberEngine is
             "SYMBOL_INVALID_LENGTH"
         );
         {
-            authority = address(
-                new RolesAuthority{ salt: salt }(
-                    params.owner,
-                    Authority(address(0))
-                )
-            );
-
             ISubscribeDeployer(params.addrs.subscribeFactory).setSubParameters(
                 params.addrs.profileProxy
             );
@@ -155,10 +151,9 @@ contract CyberEngine is
 
             bytes memory data = abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
-                address(0),
+                params.owner,
                 params.name,
-                params.symbol,
-                authority
+                params.symbol
             );
 
             profileProxy = address(
@@ -171,10 +166,9 @@ contract CyberEngine is
         );
 
         _namespaceInfo[params.addrs.profileProxy].name = params.name;
-        _namespaceInfo[params.addrs.profileProxy].owner = params.owner;
-
-        // TODO emit event
         _namespaceByName[salt] = params.addrs.profileProxy;
+
+        // TODO emit
     }
 
     /**
@@ -187,18 +181,73 @@ contract CyberEngine is
         return _VERSION;
     }
 
-    // UUPS upgradeability
-    function _authorizeUpgrade(address) internal override canUpgrade {}
+    function setProfileMw(
+        address namespace,
+        address mw,
+        bytes calldata data
+    ) external requiresAuth {
+        require(
+            mw == address(0) || _profileMwAllowlist[mw],
+            "PROFILE_MW_NOT_ALLOWED"
+        );
+        _namespaceInfo[namespace].profileMw = mw;
+        bytes memory returnData;
+        if (mw != address(0)) {
+            returnData = IProfileMiddleware(mw).setProfileMwData(
+                namespace,
+                data
+            );
+        }
+        emit SetProfileMw(namespace, mw, returnData);
+    }
 
     /**
-     * @notice Checks if the sender is authorized to upgrade the contract.
+     * @notice Checks if the essence middleware is allowed.
+     *
+     * @param mw The middleware address.
+     * @return bool The allowance state.
      */
-    modifier canUpgrade() {
-        require(
-            isAuthorized(msg.sender, Constants._AUTHORIZE_UPGRADE),
-            "UNAUTHORIZED"
-        );
-
-        _;
+    function isEssenceMwAllowed(address mw) external view returns (bool) {
+        return _essenceMwAllowlist[mw];
     }
+
+    /**
+     * @notice Checks if the subscriber middleware is allowed.
+     *
+     * @param mw The middleware address.
+     * @return bool The allowance state.
+     */
+    function isSubscribeMwAllowed(address mw)
+        external
+        view
+        override
+        returns (bool)
+    {
+        return _subscribeMwAllowlist[mw];
+    }
+
+    function isProfileMwAllowed(address mw) external view returns (bool) {
+        return _profileMwAllowlist[mw];
+    }
+
+    function getNameByNamespace(address namespace)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        return _namespaceInfo[namespace].name;
+    }
+
+    function getProfileMwByNamespace(address namespace)
+        external
+        view
+        override
+        returns (address)
+    {
+        return _namespaceInfo[namespace].profileMw;
+    }
+
+    // UUPS upgradeability
+    function _authorizeUpgrade(address) internal override canUpgrade {}
 }

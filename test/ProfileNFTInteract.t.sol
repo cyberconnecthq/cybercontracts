@@ -22,7 +22,6 @@ import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 import { ActionEvents } from "../src/libraries/ActionEvents.sol";
-import { ProfileRoles } from "../src/core/ProfileRoles.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 
@@ -73,15 +72,13 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             address(this),
             nonce + 1
         );
-        authority = new ProfileRoles(address(this), profileAddr);
 
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             address(0),
             "Name",
             "Symbol",
-            address(0x233),
-            authority
+            address(0x233)
         );
         ERC1967Proxy profileProxy = new ERC1967Proxy(
             address(profileImpl),
@@ -393,17 +390,17 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         profile.setAvatar(profileId, avatar);
     }
 
-    function testCannotAllowSubscribeMwIfNotGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        profile.allowSubscribeMw(subscribeMw, false);
-    }
+    // function testCannotAllowSubscribeMwIfNotGov() public {
+    //     vm.expectRevert("UNAUTHORIZED");
+    //     profile.allowSubscribeMw(subscribeMw, false);
+    // }
 
-    function testAllowSubscribeMw() public {
-        vm.prank(gov);
-        profile.allowSubscribeMw(subscribeMw, true);
+    // function testAllowSubscribeMw() public {
+    //     vm.prank(gov);
+    //     profile.allowSubscribeMw(subscribeMw, true);
 
-        assertEq(profile.isSubscribeMwAllowed(subscribeMw), true);
-    }
+    //     assertEq(profile.isSubscribeMwAllowed(subscribeMw), true);
+    // }
 
     function testCannotSetSubscribeMwIfNotOwner() public {
         vm.expectRevert("ONLY_PROFILE_OWNER");
@@ -421,9 +418,10 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     function testSetSubscribeMw() public {
         // allow subscribeMw
         vm.prank(gov);
-        profile.allowSubscribeMw(subscribeMw, true);
 
-        assertEq(profile.isSubscribeMwAllowed(subscribeMw), true);
+        // TODO mock call
+        //profile.allowSubscribeMw(subscribeMw, true);
+        //assertEq(profile.isSubscribeMwAllowed(subscribeMw), true);
 
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(111);
@@ -469,17 +467,17 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         profile.setPrimaryProfile(profileId);
     }
 
-    function testCannotAllowEssenceMwAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        profile.allowEssenceMw(essenceMw, false);
-    }
+    // function testCannotAllowEssenceMwAsNonGov() public {
+    //     vm.expectRevert("UNAUTHORIZED");
+    //     profile.allowEssenceMw(essenceMw, false);
+    // }
 
-    function testAllowEssenceMw() public {
-        vm.prank(gov);
-        profile.allowEssenceMw(essenceMw, true);
+    // function testAllowEssenceMw() public {
+    //     vm.prank(gov);
+    //     profile.allowEssenceMw(essenceMw, true);
 
-        assertEq(profile.isEssenceMwAllowed(essenceMw), true);
-    }
+    //     assertEq(profile.isEssenceMwAllowed(essenceMw), true);
+    // }
 
     function testCannotRegisterEssenceIfProfileNotMinted() public {
         vm.expectRevert("NOT_MINTED");
@@ -524,9 +522,11 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
     function testRegisterEssenceAsProfileOwner() public {
         vm.prank(gov);
-        profile.allowEssenceMw(essenceMw, true);
 
-        assertEq(profile.isEssenceMwAllowed(essenceMw), true);
+        // TODO mock call
+        // profile.allowEssenceMw(essenceMw, true);
+
+        // assertEq(profile.isEssenceMwAllowed(essenceMw), true);
 
         vm.prank(bob);
         uint256 expectedEssenceId = 1;
