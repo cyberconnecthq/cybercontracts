@@ -850,5 +850,6 @@ library LibDeploy {
 
         // Need to have access to LINK3 OWNER
         ProfileNFT(link3Profile).setNFTDescriptor(proxy);
+        // TODO: check tokenURI
     }
 }
