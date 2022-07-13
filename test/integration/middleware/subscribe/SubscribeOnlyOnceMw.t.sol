@@ -44,33 +44,6 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
         profile.setSubscribeMw(bobProfileId, address(subMw), new bytes(0));
     }
 
-    // function setUp() public {
-    //     mw = new SubscribeOnlyOnceMw();
-    //     vm.label(address(mw), "SubscribeMiddleware");
-    //     uint256 nonce = vm.getNonce(address(this));
-    //     address proxy;
-    //     (
-    //         proxy,
-    //         authority,
-    //         boxAddress,
-    //         profileAddress,
-    //         profileDescriptorAddress
-    //     ) = LibDeploy.deploy(
-    //         address(this),
-    //         nonce,
-    //         "https://animation.example.com"
-    //     );
-    //     profileNFT = ProfileNFT(address(profileAddress));
-
-    //     TestLibFixture.auth(authority);
-    //     vm.prank(TestLibFixture._GOV);
-    //     profileNFT.allowSubscribeMw(address(mw), true);
-    //     bobProfileId = TestLibFixture.registerBobProfile(profileNFT);
-    //     // set module
-    //     vm.prank(bob);
-    //     profileNFT.setSubscribeMw(bobProfileId, address(mw), new bytes(0));
-    // }
-
     function testSubscribeOnlyOnce() public {
         uint256[] memory ids = new uint256[](1);
         ids[0] = bobProfileId;
