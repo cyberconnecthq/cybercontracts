@@ -97,7 +97,7 @@ contract CyberEngine is
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
         requiresAuth
-        returns (address profileProxy)
+        returns (address profileProxy, address authority)
     {
         bytes memory byteName = bytes(params.name);
         bytes memory byteSymbol = bytes(params.symbol);
@@ -118,7 +118,7 @@ contract CyberEngine is
             "SYMBOL_INVALID_LENGTH"
         );
         {
-            address authority = address(
+            authority = address(
                 new RolesAuthority{ salt: salt }(
                     params.owner,
                     Authority(address(0))
@@ -152,10 +152,6 @@ contract CyberEngine is
             );
             address profileImpl = IProfileDeployer(params.addrs.profileFactory)
                 .deploy(salt);
-            require(
-                profileImpl == params.addrs.authority,
-                "AUTHORITY_MISMATCH"
-            );
 
             bytes memory data = abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,

@@ -83,7 +83,6 @@ library DataTypes {
     }
 
     struct ComputedAddresses {
-        address authority;
         address profileProxy;
         // address subscribeImpl;
         // address essenceImpl;
