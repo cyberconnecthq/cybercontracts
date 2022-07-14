@@ -5,12 +5,26 @@ pragma solidity 0.8.14;
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 interface ICyberEngineEvents {
+    /**
+     * @notice Emitted when a profile middleware has been allowed.
+     *
+     * @param mw The middleware address.
+     * @param preAllowed The previously allow state.
+     * @param newAllowed The newly set allow state.
+     */
     event AllowProfileMw(
         address indexed mw,
         bool indexed preAllowed,
         bool indexed newAllowed
     );
 
+    /**
+     * @notice Emitted when a profile middleware has been set.
+     *
+     * @param profileAddress The profile address.
+     * @param mw The middleware address.
+     * @param returnData The profile middeware data.
+     */
     event SetProfileMw(
         address indexed profileAddress,
         address mw,

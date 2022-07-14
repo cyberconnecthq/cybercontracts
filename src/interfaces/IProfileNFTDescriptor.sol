@@ -5,6 +5,11 @@ pragma solidity 0.8.14;
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 interface IProfileNFTDescriptor {
+    /**
+     * @notice Sets the profile NFT animation template.
+     *
+     * @param template The new template.
+     */
     function setAnimationTemplate(string calldata template) external;
 
     /**

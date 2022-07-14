@@ -38,6 +38,7 @@ contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
         // do nothing
     }
 
+    /// @inheritdoc ISubscribeMiddleware
     function prepare(uint256, bytes calldata)
         external
         pure

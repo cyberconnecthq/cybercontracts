@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.14;
 
+import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { IEssenceDeployer } from "../interfaces/IEssenceDeployer.sol";
@@ -9,7 +10,17 @@ import { IEssenceDeployer } from "../interfaces/IEssenceDeployer.sol";
 import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { EssenceNFTStorage } from "../storages/EssenceNFTStorage.sol";
 
-contract EssenceNFT is CyberNFTBase, EssenceNFTStorage, IUpgradeable {
+/**
+ * @title Essence NFT
+ * @author CyberConnect
+ * @notice This contract is used to create an Essence NFT.
+ */
+contract EssenceNFT is
+    CyberNFTBase,
+    EssenceNFTStorage,
+    IUpgradeable,
+    IEssenceNFT
+{
     address public immutable PROFILE; // solhint-disable-line
 
     constructor() {
@@ -19,6 +30,7 @@ contract EssenceNFT is CyberNFTBase, EssenceNFTStorage, IUpgradeable {
         _disableInitializers();
     }
 
+    /// @inheritdoc IEssenceNFT
     function initialize(
         uint256 profileId,
         uint256 essenceId,
@@ -30,11 +42,19 @@ contract EssenceNFT is CyberNFTBase, EssenceNFTStorage, IUpgradeable {
         CyberNFTBase._initialize(name, symbol);
     }
 
+    /// @inheritdoc IEssenceNFT
     function mint(address to) external returns (uint256) {
         require(msg.sender == PROFILE, "ONLY_PROFILE");
         return super._mint(to);
     }
 
+    /**
+     * @notice Generates the metadata json object.
+     *
+     * @param tokenId The profile NFT token ID.
+     * @return string The metadata json object.
+     * @dev It requires the tokenId to be already minted.
+     */
     function tokenURI(uint256 tokenId)
         public
         view
@@ -47,6 +67,12 @@ contract EssenceNFT is CyberNFTBase, EssenceNFTStorage, IUpgradeable {
             IProfileNFT(PROFILE).getEssenceNFTTokenURI(_profileId, _essenceId);
     }
 
+    /**
+     * @notice Contract version number.
+     *
+     * @return uint256 The version number.
+     * @dev This contract can be upgraded with UUPS upgradeability.
+     */
     function version() external pure override returns (uint256) {
         return _VERSION;
     }

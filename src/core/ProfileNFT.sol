@@ -318,6 +318,7 @@ contract ProfileNFT is
         }
     }
 
+    /// @inheritdoc IProfileNFT
     function setAnimationTemplate(string calldata template)
         external
         onlyNamespaceOwner
