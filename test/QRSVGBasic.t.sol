@@ -18,7 +18,7 @@ contract QRSVGBasicTest is Test {
         );
     }
 
-    function testInternalGeneralURI() public {
+    function testInternalGeneralURI() public view {
         QRSVG.QRMatrix memory m;
         string memory uri = QRSVG.generateQRURI(m);
         console.log(uri);
