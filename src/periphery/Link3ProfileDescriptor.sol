@@ -12,22 +12,38 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 
 import { Initializable } from "../upgradeability/Initializable.sol";
 
+import { Link3ProfileDescriptorStorage } from "../storages/Link3ProfileDescriptorStorage.sol";
+
 /**
  * @title Profile NFT Descriptor
  * @author CyberConnect
  * @notice This contract is used to create profile NFT token uri.
  */
 // TODO: storage
-contract Link3ProfileDescriptor is IProfileNFTDescriptor, Initializable {
+contract Link3ProfileDescriptor is
+    Link3ProfileDescriptorStorage,
+    IProfileNFTDescriptor,
+    Initializable
+{
+    /*//////////////////////////////////////////////////////////////
+                                STATES
+    //////////////////////////////////////////////////////////////*/
+
     address public immutable OWNER; // solhint-disable-line
-    string public animationTemplate;
-    string internal constant BASE_URL = "https://link3.to/";
+
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
 
     constructor(address owner) {
         require(owner != address(0), "ZERO_ADDRESS");
         OWNER = owner;
         _disableInitializers();
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                 EXTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Initializes the Profile NFT Descriptor.
