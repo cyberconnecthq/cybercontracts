@@ -40,6 +40,9 @@ library LibDeploy {
         address link3ProfileMw;
         address calcEngineImpl;
         address calcEngineProxy;
+        address essFac;
+        address subFac;
+        address profileFac;
     }
     struct DeployParams {
         // address deployer; // 1. in test it is the Test contract. 2. in deployment it is msg.sender (deployer)
@@ -62,8 +65,8 @@ library LibDeploy {
     // TODO: change for prod
     address internal constant ENGINE_TREASURY =
         0x1890a1625d837A809b0e77EdE1a999a161df085d;
-    bytes32 constant salt = keccak256(bytes("CyberConnect"));
-    bytes32 constant link3Salt = keccak256(bytes(LINK3_NAME));
+    bytes32 constant SALT = keccak256(bytes("CyberConnect"));
+    bytes32 constant LINK3_SALT = keccak256(bytes(LINK3_NAME));
     address internal constant LINK3_TREASURY =
         0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
 
@@ -323,7 +326,7 @@ library LibDeploy {
                 type(RolesAuthority).creationCode,
                 abi.encode(params.engineAuthOwner, Authority(address(0))) // use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
             ),
-            salt
+            SALT
         );
         if (params.writeFile) {
             _write(vm, "RolesAuthority", addrs.engineAuthority);
@@ -337,7 +340,7 @@ library LibDeploy {
 
         addrs.calcEngineImpl = _computeAddress(
             type(CyberEngine).creationCode,
-            salt,
+            SALT,
             address(dc)
         );
 
@@ -346,12 +349,12 @@ library LibDeploy {
                 type(ERC1967Proxy).creationCode,
                 abi.encode(addrs.calcEngineImpl, data)
             ),
-            salt,
+            SALT,
             address(dc)
         );
 
         // 1. Deploy Engine Impl
-        addrs.engineImpl = dc.deploy(type(CyberEngine).creationCode, salt);
+        addrs.engineImpl = dc.deploy(type(CyberEngine).creationCode, SALT);
         if (params.writeFile) {
             _write(vm, "EngineImpl", addrs.engineImpl);
         }
@@ -367,7 +370,7 @@ library LibDeploy {
                 type(ERC1967Proxy).creationCode,
                 abi.encode(addrs.calcEngineImpl, data)
             ),
-            salt
+            SALT
         );
         if (params.writeFile) {
             _write(vm, "EngineProxy", addrs.engineProxyAddress);
@@ -416,12 +419,25 @@ library LibDeploy {
             true
         );
 
+        // TODO: reuse factory
+        addrs.essFac = address(new EssenceNFTFactory());
+        addrs.subFac = address(new SubscribeNFTFactory());
+        addrs.profileFac = address(new ProfileNFTFactory());
+        if (params.writeFile) {
+            _write(vm, "Profile Factory", addrs.profileFac);
+            _write(vm, "Essence Factory", addrs.essFac);
+            _write(vm, "Subscribe Factory", addrs.subFac);
+        }
         // 6. Deploy Link3
-        addrs.link3Profile = deployLink3(
+        addrs.link3Profile = createNamespace(
             addrs.engineProxyAddress,
-            vm,
-            params.writeFile,
-            params.link3Owner
+            params.link3Owner,
+            LINK3_NAME,
+            LINK3_SYMBOL,
+            LINK3_SALT,
+            addrs.essFac,
+            addrs.subFac,
+            addrs.profileFac
         );
         if (params.writeFile) {
             _write(vm, "Link3 Profile", addrs.link3Profile);
@@ -433,7 +449,7 @@ library LibDeploy {
                 type(Treasury).creationCode,
                 abi.encode(params.engineGov, ENGINE_TREASURY, 250)
             ),
-            salt
+            SALT
         );
         if (params.writeFile) {
             _write(vm, "CyberConnect Treasury", addrs.cyberTreasury);
@@ -445,7 +461,7 @@ library LibDeploy {
                 type(PermissionedFeeCreationMw).creationCode,
                 abi.encode(addrs.engineProxyAddress, addrs.cyberTreasury)
             ),
-            salt
+            SALT
         );
 
         if (params.writeFile) {
@@ -480,7 +496,7 @@ library LibDeploy {
 
         // scope to avoid stack too deep error
         // 11. Deploy BoxNFT Impl
-        addrs.boxImpl = dc.deploy(type(CyberBoxNFT).creationCode, salt);
+        addrs.boxImpl = dc.deploy(type(CyberBoxNFT).creationCode, SALT);
         if (params.writeFile) {
             _write(vm, "CyberBoxNFT (Impl)", addrs.boxImpl);
         }
@@ -497,7 +513,7 @@ library LibDeploy {
                 type(ERC1967Proxy).creationCode,
                 abi.encode(addrs.boxImpl, _data)
             ),
-            salt
+            SALT
         );
         if (params.writeFile) {
             _write(vm, "CyberBoxNFT (Proxy)", addrs.boxProxy);
@@ -663,53 +679,45 @@ library LibDeploy {
         );
     }
 
-    function deployLink3(
+    function createNamespace(
         address engine,
-        Vm vm,
-        bool writeFile,
-        address link3Owner
+        address owner,
+        string memory name,
+        string memory symbol,
+        bytes32 salt,
+        address essFac,
+        address subFac,
+        address profileFac
     ) internal returns (address profileProxy) {
-        address essFac;
-        address subFac;
-        address profileFac;
         address profileImpl;
         {
-            // TODO: reuse factory
-            essFac = address(new EssenceNFTFactory());
-            subFac = address(new SubscribeNFTFactory());
-            profileFac = address(new ProfileNFTFactory());
-
             profileImpl = _computeAddress(
                 type(ProfileNFT).creationCode,
-                link3Salt,
+                salt,
                 profileFac
             );
 
             bytes memory data = abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
-                link3Owner,
-                LINK3_NAME,
-                LINK3_SYMBOL
+                owner,
+                name,
+                symbol
             );
             profileProxy = _computeAddress(
                 abi.encodePacked(
                     type(ERC1967Proxy).creationCode,
                     abi.encode(profileImpl, data)
                 ),
-                link3Salt,
+                salt,
                 engine
             );
         }
-        if (writeFile) {
-            _write(vm, "Profile Factory", profileFac);
-            _write(vm, "Essence Factory", essFac);
-            _write(vm, "Subscribe Factory", subFac);
-        }
+
         address deployed = CyberEngine(engine).createNamespace(
             DataTypes.CreateNamespaceParams(
-                LINK3_NAME,
-                LINK3_SYMBOL,
-                link3Owner,
+                name,
+                symbol,
+                owner,
                 DataTypes.ComputedAddresses(
                     profileProxy,
                     profileFac,
@@ -735,7 +743,7 @@ library LibDeploy {
                 type(Link3ProfileDescriptor).creationCode,
                 abi.encode(link3Profile)
             ),
-            salt
+            SALT
         );
         if (writeFile) {
             _write(vm, "Link3 Descriptor (Impl)", impl);
@@ -752,7 +760,7 @@ library LibDeploy {
                     )
                 )
             ),
-            salt
+            SALT
         );
         if (writeFile) {
             _write(vm, "Link3 Descriptor (Proxy)", proxy);

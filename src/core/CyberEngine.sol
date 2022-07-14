@@ -173,6 +173,8 @@ contract CyberEngine is
 
         _namespaceInfo[params.addrs.profileProxy].name = params.name;
         _namespaceByName[salt] = params.addrs.profileProxy;
+
+        emit CreateNamespace(profileProxy, params.name, params.symbol);
     }
 
     /**

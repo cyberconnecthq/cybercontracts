@@ -639,7 +639,6 @@ contract ProfileNFT is
         if (subscribeNFT == address(0)) {
             subscribers = 0;
         } else {
-            // TODO: maybe replace with interface to save gas
             subscribers = CyberNFTBase(subscribeNFT).totalSupply();
         }
 
