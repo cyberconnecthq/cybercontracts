@@ -116,7 +116,7 @@ contract CyberEngine is
         );
 
         require(
-            byteName.length <= Constants._MAX_NAMESPACE_LENGTH,
+            byteName.length <= Constants._MAX_NAME_LENGTH,
             "NAME_INVALID_LENGTH"
         );
         require(
@@ -137,7 +137,6 @@ contract CyberEngine is
             address essImpl = IEssenceDeployer(params.addrs.essenceFactory)
                 .deploy(salt);
 
-            // TODO: test in integration
             address subBeacon = address(
                 new UpgradeableBeacon{ salt: salt }(
                     subscribeImpl,
@@ -174,8 +173,6 @@ contract CyberEngine is
 
         _namespaceInfo[params.addrs.profileProxy].name = params.name;
         _namespaceByName[salt] = params.addrs.profileProxy;
-
-        // TODO emit
     }
 
     /**

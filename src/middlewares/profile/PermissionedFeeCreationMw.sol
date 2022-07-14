@@ -135,7 +135,6 @@ contract PermissionedFeeCreationMw is
         MiddlewareData storage mwData = mwDataByNamespace[namespace];
         uint256 fee = mwData.feeMapping[Tier.Tier5];
 
-        require(byteHandle.length >= 1, "INVALID_HANDLE_LENGTH");
         if (byteHandle.length < 6) {
             fee = mwData.feeMapping[Tier(byteHandle.length - 1)];
         }
@@ -158,7 +157,6 @@ contract PermissionedFeeCreationMw is
                 (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
                 "Handle has invalid character"
             );
-            // optimation
             unchecked {
                 ++i;
             }
