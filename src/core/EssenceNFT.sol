@@ -21,7 +21,15 @@ contract EssenceNFT is
     IUpgradeable,
     IEssenceNFT
 {
+    /*//////////////////////////////////////////////////////////////
+                                STATES
+    //////////////////////////////////////////////////////////////*/
+
     address public immutable PROFILE; // solhint-disable-line
+
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
 
     constructor() {
         address profileProxy = IEssenceDeployer(msg.sender).essParams();
@@ -29,6 +37,10 @@ contract EssenceNFT is
         PROFILE = profileProxy;
         _disableInitializers();
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                 EXTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc IEssenceNFT
     function initialize(

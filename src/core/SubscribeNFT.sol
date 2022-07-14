@@ -25,7 +25,15 @@ contract SubscribeNFT is
     IUpgradeable,
     ISubscribeNFT
 {
+    /*//////////////////////////////////////////////////////////////
+                                STATES
+    //////////////////////////////////////////////////////////////*/
+
     address public immutable PROFILE; // solhint-disable-line
+
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
 
     constructor() {
         address profileProxy = ISubscribeDeployer(msg.sender).subParams();
@@ -33,6 +41,10 @@ contract SubscribeNFT is
         PROFILE = profileProxy;
         _disableInitializers();
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                 EXTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc ISubscribeNFT
     function initialize(
