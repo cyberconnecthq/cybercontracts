@@ -18,19 +18,26 @@ import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 
 contract SubscribeNFTUpgradeTest is Test, TestDeployer {
     UpgradeableBeacon internal beacon;
-    SubscribeNFT internal impl;
     BeaconProxy internal proxy;
     BeaconProxy internal proxyB;
-    MockProfile internal profile;
+    address internal profile;
 
     uint256 internal profileId = 1;
     address constant alice = address(0xA11CE);
 
+    function _deployV2(address _profile)
+        internal
+        returns (MockSubscribeNFTV2 addr)
+    {
+        subParams.profileProxy = _profile;
+        addr = new MockSubscribeNFTV2{ salt: _salt }();
+        delete subParams;
+    }
+
     function setUp() public {
-        profile = new MockProfile();
-        setProfile(address(profile));
-        impl = new SubscribeNFT();
-        beacon = new UpgradeableBeacon(address(impl), address(profile));
+        profile = address(0xdead);
+        address impl = deploySubscribe(_salt, address(profile));
+        beacon = new UpgradeableBeacon(impl, address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
             profileId,
@@ -46,7 +53,7 @@ contract SubscribeNFTUpgradeTest is Test, TestDeployer {
     }
 
     function testUpgrade() public {
-        MockSubscribeNFTV2 implB = new MockSubscribeNFTV2();
+        MockSubscribeNFTV2 implB = _deployV2(profile);
 
         assertEq(SubscribeNFT(address(proxy)).version(), 1);
         assertEq(SubscribeNFT(address(proxyB)).version(), 1);

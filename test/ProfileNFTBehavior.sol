@@ -41,13 +41,19 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     function setUp() public {
         vm.etch(descriptor, address(this).code);
 
-        MockProfile profileImpl = new MockProfile();
         uint256 nonce = vm.getNonce(address(this));
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
-        setProfile(address(0xdead));
-        address impl = address(new SubscribeNFT());
+        address impl = address(
+            deploySubscribe(keccak256(bytes("salt")), address(0xdead))
+        );
         subscribeBeacon = address(
             new UpgradeableBeacon(impl, address(profile))
+        );
+
+        address profileImpl = testDeployMockProfile(
+            address(0xdead),
+            essenceBeacon,
+            subscribeBeacon
         );
 
         bytes memory data = abi.encodeWithSelector(

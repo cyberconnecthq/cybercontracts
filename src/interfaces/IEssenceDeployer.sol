@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.14;
 
-import { IDeployer } from "../interfaces/IDeployer.sol";
-
-interface IEssenceDeployer is IDeployer {
+interface IEssenceDeployer {
     function essParams() external view returns (address profileProxy);
 
-    function setEssParameters(address profileProxy) external;
+    function deployEssence(bytes32 salt, address profileProxy)
+        external
+        returns (address addr);
 }

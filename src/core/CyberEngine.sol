@@ -124,18 +124,12 @@ contract CyberEngine is
             "SYMBOL_INVALID_LENGTH"
         );
         {
-            ISubscribeDeployer(params.addrs.subscribeFactory).setSubParameters(
-                params.addrs.profileProxy
-            );
             address subscribeImpl = ISubscribeDeployer(
                 params.addrs.subscribeFactory
-            ).deploy(salt);
+            ).deploySubscribe(salt, params.addrs.profileProxy);
 
-            IEssenceDeployer(params.addrs.essenceFactory).setEssParameters(
-                params.addrs.profileProxy
-            );
             address essImpl = IEssenceDeployer(params.addrs.essenceFactory)
-                .deploy(salt);
+                .deployEssence(salt, params.addrs.profileProxy);
 
             address subBeacon = address(
                 new UpgradeableBeacon{ salt: salt }(
@@ -147,13 +141,8 @@ contract CyberEngine is
                 new UpgradeableBeacon{ salt: salt }(essImpl, address(this))
             );
 
-            IProfileDeployer(params.addrs.profileFactory).setProfileParameters(
-                address(this),
-                subBeacon,
-                essBeacon
-            );
             address profileImpl = IProfileDeployer(params.addrs.profileFactory)
-                .deploy(salt);
+                .deployProfile(salt, address(this), subBeacon, essBeacon);
 
             bytes memory data = abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,

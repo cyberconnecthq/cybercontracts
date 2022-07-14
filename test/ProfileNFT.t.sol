@@ -59,6 +59,11 @@ contract ProfileNFTTest is Test, TestDeployer {
             "TP",
             address(0)
         );
+        address tokenImpl = testDeployMockProfile(
+            address(0xdead),
+            address(0xdead),
+            address(0xdead)
+        );
         ERC1967Proxy profileProxy = new ERC1967Proxy(address(tokenImpl), data);
         token = MockProfile(address(profileProxy));
     }
@@ -67,8 +72,8 @@ contract ProfileNFTTest is Test, TestDeployer {
         assertEq(token.name(), "TestProfile");
         assertEq(token.symbol(), "TP");
         assertEq(token.paused(), true);
-        assertEq(token.SUBSCRIBE_BEACON(), address(0));
-        assertEq(token.ESSENCE_BEACON(), address(0));
+        assertEq(token.SUBSCRIBE_BEACON(), address(0xdead));
+        assertEq(token.ESSENCE_BEACON(), address(0xdead));
     }
 
     function testCannotGetTokenURIOfUnmintted() public {

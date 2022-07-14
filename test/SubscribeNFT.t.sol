@@ -23,9 +23,8 @@ contract SubscribeNFTTest is Test, TestDeployer {
         uint256 indexed id
     );
     UpgradeableBeacon internal beacon;
-    SubscribeNFT internal impl;
     BeaconProxy internal proxy;
-    MockProfile internal profile;
+    address internal profile;
 
     SubscribeNFT internal c;
 
@@ -37,10 +36,9 @@ contract SubscribeNFTTest is Test, TestDeployer {
     string constant symbol = "1890_SUB";
 
     function setUp() public {
-        profile = new MockProfile();
-        setProfile(address(profile));
-        impl = new SubscribeNFT();
-        beacon = new UpgradeableBeacon(address(impl), address(profile));
+        profile = address(0xdead);
+        address impl = deploySubscribe(_salt, address(profile));
+        beacon = new UpgradeableBeacon(impl, address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
             profileId,

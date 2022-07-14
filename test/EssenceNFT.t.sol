@@ -22,9 +22,8 @@ contract EssenceNFTTest is Test, TestDeployer {
     );
 
     UpgradeableBeacon internal beacon;
-    EssenceNFT internal impl;
     BeaconProxy internal proxy;
-    ProfileNFT internal profile;
+    address internal profile = address(0xdead);
 
     uint256 internal profileId = 18;
     uint256 internal essenceId = 90;
@@ -37,10 +36,8 @@ contract EssenceNFTTest is Test, TestDeployer {
     address constant bob = address(0xB0B);
 
     function setUp() public {
-        profile = new ProfileNFT();
-        setProfile(address(profile));
-        impl = new EssenceNFT();
-        beacon = new UpgradeableBeacon(address(impl), address(profile));
+        address impl = deployEssence(_salt, profile);
+        beacon = new UpgradeableBeacon(impl, address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             EssenceNFT.initialize.selector,
             profileId,

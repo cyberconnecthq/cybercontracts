@@ -8,20 +8,18 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 
 import { ProfileNFT } from "../core/ProfileNFT.sol";
 
-contract ProfileNFTFactory is IProfileDeployer {
+contract ProfileDeployer is IProfileDeployer {
     DataTypes.ProfileDeployParameters public override profileParams;
 
-    function setProfileParameters(
+    function deployProfile(
+        bytes32 salt,
         address engine,
         address subscribeBeacon,
         address essenceBeacon
-    ) external override {
+    ) public override returns (address addr) {
         profileParams.engine = engine;
         profileParams.essenceBeacon = essenceBeacon;
         profileParams.subBeacon = subscribeBeacon;
-    }
-
-    function deploy(bytes32 salt) external override returns (address addr) {
         addr = address(new ProfileNFT{ salt: salt }());
         delete profileParams;
     }
