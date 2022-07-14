@@ -177,13 +177,15 @@ interface IProfileNFTEvents {
      * @notice Emitted when an essence has been collected.
      *
      * @param collector The collector address.
+     * @param tokenId The token id of the newly minted essent NFT.
      * @param profileId The profile id.
      * @param preData The collect data for preprocess.
      * @param postData The collect data for postprocess.
      */
     event CollectEssence(
         address indexed collector,
-        uint256 profileId,
+        uint256 indexed tokenId,
+        uint256 indexed profileId,
         bytes preData,
         bytes postData
     );

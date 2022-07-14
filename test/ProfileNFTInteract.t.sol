@@ -610,13 +610,22 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.expectEmit(true, false, false, true);
-        emit CollectEssence(minter, profileId, new bytes(0), new bytes(0));
-
-        vm.prank(minter);
-        profile.collect(
-            DataTypes.CollectParams(profileId, essenceId),
+        emit CollectEssence(
+            minter,
+            tokenId,
+            profileId,
             new bytes(0),
             new bytes(0)
+        );
+
+        vm.prank(minter);
+        assertEq(
+            profile.collect(
+                DataTypes.CollectParams(profileId, essenceId),
+                new bytes(0),
+                new bytes(0)
+            ),
+            tokenId
         );
     }
 
@@ -651,17 +660,26 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             abi.encode(tokenId)
         );
 
-        vm.expectEmit(true, false, false, true);
-        emit CollectEssence(minter, profileId, new bytes(0), new bytes(0));
+        vm.expectEmit(true, true, false, true);
+        emit CollectEssence(
+            minter,
+            tokenId,
+            profileId,
+            new bytes(0),
+            new bytes(0)
+        );
 
         vm.expectEmit(true, true, false, true);
         emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
 
         vm.prank(minter);
-        profile.collect(
-            DataTypes.CollectParams(profileId, essenceId),
-            new bytes(0),
-            new bytes(0)
+        assertEq(
+            profile.collect(
+                DataTypes.CollectParams(profileId, essenceId),
+                new bytes(0),
+                new bytes(0)
+            ),
+            tokenId
         );
     }
 
@@ -684,54 +702,53 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         uint256 tokenId = 1890;
 
-        address minter = bob;
-        uint256 nonce = vm.getNonce(address(profile));
         address essenceProxy = LibDeploy._calcContractAddress(
             address(profile),
-            nonce
+            vm.getNonce(address(profile))
         );
         vm.mockCall(
             essenceProxy,
-            abi.encodeWithSelector(IEssenceNFT.mint.selector, minter),
+            abi.encodeWithSelector(IEssenceNFT.mint.selector, bob),
             abi.encode(tokenId)
         );
 
-        bytes memory preData = new bytes(0);
-        bytes memory postData = new bytes(0);
+        bytes memory data = new bytes(0);
 
         vm.expectEmit(true, false, false, true);
-        emit CollectEssence(minter, profileId, preData, postData);
-
-        vm.expectEmit(true, true, false, true);
-        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
+        emit CollectEssence(bob, tokenId, profileId, data, data);
 
         // sign
         vm.warp(50);
         uint256 deadline = 100;
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._COLLECT_TYPEHASH,
-                    profileId,
-                    essenceId,
-                    keccak256(preData),
-                    keccak256(postData),
-                    profile.nonces(bob),
-                    deadline
-                )
-            ),
-            profile.name(),
-            "1"
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            bobPk,
+            TestLib712.hashTypedDataV4(
+                address(profile),
+                keccak256(
+                    abi.encode(
+                        Constants._COLLECT_TYPEHASH,
+                        profileId,
+                        essenceId,
+                        keccak256(data),
+                        keccak256(data),
+                        profile.nonces(bob),
+                        deadline
+                    )
+                ),
+                profile.name(),
+                "1"
+            )
         );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
-        profile.collectWithSig(
-            DataTypes.CollectParams(profileId, essenceId),
-            preData,
-            postData,
-            bob,
-            DataTypes.EIP712Signature(v, r, s, deadline)
+        assertEq(
+            profile.collectWithSig(
+                DataTypes.CollectParams(profileId, essenceId),
+                data,
+                data,
+                bob,
+                DataTypes.EIP712Signature(v, r, s, deadline)
+            ),
+            tokenId
         );
     }
 

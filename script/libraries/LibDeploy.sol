@@ -33,8 +33,6 @@ library LibDeploy {
         address link3DescriptorImpl;
         address link3DescriptorProxy;
         address engineProxyAddress;
-        address boxImpl;
-        address boxProxy;
         address cyberTreasury;
         address link3Profile;
         address link3ProfileMw;
@@ -256,22 +254,26 @@ library LibDeploy {
             address(0x1890) // any address to receive a link3 profile
         );
         addrs = deploy(vm, params);
-        // Health check
-        healthCheck(
-            addrs,
-            params.link3Signer,
-            params.link3Owner,
-            params.engineAuthOwner,
-            params.engineGov
-        );
     }
 
     function deploy(Vm vm, DeployParams memory params)
         internal
         returns (ContractAddresses memory addrs)
     {
+        Create2Deployer dc;
+        if (params.deployerContract == address(0)) {
+            console.log(
+                "=====================deploying deployer contract================="
+            );
+            dc = new Create2Deployer(); // for running test
+            if (params.writeFile) {
+                _write(vm, "Create2Deployer", address(dc));
+            }
+        } else {
+            dc = Create2Deployer(params.deployerContract); // for deployment
+        }
         // 1. Deploy engine + link3 profile
-        addrs = _deploy(vm, params);
+        addrs = _deploy(vm, dc, params);
         // 2. Register a test profile
         if (block.chainid != 1) {
             LibDeploy.registerLink3TestProfile(
@@ -292,10 +294,45 @@ library LibDeploy {
         );
     }
 
-    function _deploy(Vm vm, DeployParams memory params)
-        private
-        returns (ContractAddresses memory addrs)
-    {
+    function deployBox(
+        Vm vm,
+        address dc,
+        address link3Owner,
+        bool writeFile
+    ) internal returns (address boxImpl, address boxProxy) {
+        boxImpl = Create2Deployer(dc).deploy(
+            type(CyberBoxNFT).creationCode,
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "CyberBoxNFT (Impl)", boxImpl);
+        }
+
+        // 12. Deploy Proxy for BoxNFT
+        bytes memory _data = abi.encodeWithSelector(
+            CyberBoxNFT.initialize.selector,
+            link3Owner,
+            "CyberBox",
+            "CYBER_BOX"
+        );
+        boxProxy = Create2Deployer(dc).deploy(
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(boxImpl, _data)
+            ),
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "CyberBoxNFT (Proxy)", boxProxy);
+        }
+        require(CyberBoxNFT(boxProxy).paused(), "CYBERBOX_NOT_PAUSED");
+    }
+
+    function _deploy(
+        Vm vm,
+        Create2Deployer dc,
+        DeployParams memory params
+    ) private returns (ContractAddresses memory addrs) {
         // check params
         if (!params.isDeploy) {
             require(params.deployerContract == address(0));
@@ -305,19 +342,6 @@ library LibDeploy {
             _prepareToWrite(vm);
             _writeText(vm, _fileNameMd(), "|Contract|Address|");
             _writeText(vm, _fileNameMd(), "|-|-|");
-        }
-
-        Create2Deployer dc;
-        if (params.deployerContract == address(0)) {
-            console.log(
-                "=====================deploying deployer contract================="
-            );
-            dc = new Create2Deployer(); // for running test
-            if (params.writeFile) {
-                _write(vm, "Create2Deployer", address(dc));
-            }
-        } else {
-            dc = Create2Deployer(params.deployerContract); // for deployment
         }
 
         // 0. Deploy RolesAuthority
@@ -493,31 +517,6 @@ library LibDeploy {
                 _INITIAL_FEE_TIER5
             )
         );
-
-        // scope to avoid stack too deep error
-        // 11. Deploy BoxNFT Impl
-        addrs.boxImpl = dc.deploy(type(CyberBoxNFT).creationCode, SALT);
-        if (params.writeFile) {
-            _write(vm, "CyberBoxNFT (Impl)", addrs.boxImpl);
-        }
-
-        // 12. Deploy Proxy for BoxNFT
-        bytes memory _data = abi.encodeWithSelector(
-            CyberBoxNFT.initialize.selector,
-            params.link3Owner,
-            "CyberBox",
-            "CYBER_BOX"
-        );
-        addrs.boxProxy = dc.deploy(
-            abi.encodePacked(
-                type(ERC1967Proxy).creationCode,
-                abi.encode(addrs.boxImpl, _data)
-            ),
-            SALT
-        );
-        if (params.writeFile) {
-            _write(vm, "CyberBoxNFT (Proxy)", addrs.boxProxy);
-        }
     }
 
     function healthCheck(
@@ -560,7 +559,6 @@ library LibDeploy {
             "LINK3_WRONG_SYMBOL"
         );
         require(ProfileNFT(addrs.link3Profile).paused(), "LINK3_NOT_PAUSED");
-        require(CyberBoxNFT(addrs.boxProxy).paused(), "CYBERBOX_NOT_PAUSED");
         require(
             RolesAuthority(addrs.engineAuthority).doesUserHaveRole(
                 engineGov,
