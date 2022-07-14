@@ -3,8 +3,10 @@
 pragma solidity 0.8.14;
 
 import { IEssenceDeployer } from "../interfaces/IEssenceDeployer.sol";
-import { EssenceNFT } from "../core/EssenceNFT.sol";
+
 import { DataTypes } from "../libraries/DataTypes.sol";
+
+import { EssenceNFT } from "../core/EssenceNFT.sol";
 
 contract EssenceNFTFactory is IEssenceDeployer {
     DataTypes.EssenceDeployParameters public override essParams;

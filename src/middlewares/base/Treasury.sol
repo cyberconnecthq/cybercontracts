@@ -3,6 +3,7 @@
 pragma solidity 0.8.14;
 
 import { ITreasury } from "../../interfaces/ITreasury.sol";
+
 import { Constants } from "../../libraries/Constants.sol";
 
 contract Treasury is ITreasury {

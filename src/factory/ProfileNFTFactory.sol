@@ -3,8 +3,10 @@
 pragma solidity 0.8.14;
 
 import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
-import { ProfileNFT } from "../core/ProfileNFT.sol";
+
 import { DataTypes } from "../libraries/DataTypes.sol";
+
+import { ProfileNFT } from "../core/ProfileNFT.sol";
 
 contract ProfileNFTFactory is IProfileDeployer {
     DataTypes.ProfileDeployParameters public override profileParams;
