@@ -34,6 +34,19 @@ contract DeployScript is Script {
             deployParams.engineGov = address(
                 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             );
+        } else if (block.chainid == 5) {
+            deployParams.link3Owner = address(
+                0x927f355117721e0E8A7b5eA20002b65B8a551890
+            );
+            deployParams.link3Signer = address(
+                0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
+            );
+            deployParams.engineAuthOwner = address(
+                0x927f355117721e0E8A7b5eA20002b65B8a551890
+            );
+            deployParams.engineGov = address(
+                0x927f355117721e0E8A7b5eA20002b65B8a551890
+            );
         }
     }
 

@@ -1,17 +1,18 @@
 | Contract                                     | Address                                    |
 | -------------------------------------------- | ------------------------------------------ |
-| Create2Deployer                              | 0x1705af66520054b3c11d67e5c7e8fe1db84dbb0f |
-| RolesAuthority                               | 0xd462c948c26ca277bef5d463a16328170398e2e8 |
-| EngineImpl                                   | 0x6f5b0d840c670c811b2633399cd4b9a0d23a4526 |
-| EngineProxy                                  | 0x37b9d970ce9dd8a77242fd9c187b31f0d4f717ca |
-| Profile Factory                              | 0x5c61f0fafb1a46f638d6d9c5e6d7c4f095bc4fb0 |
-| Essence Factory                              | 0x8f9c361c389b2cb65caafc872948e2f182ed3e7f |
-| Subscribe Factory                            | 0x7a55af805570c58187bece7a822e372818c610b2 |
-| Link3 Profile                                | 0xab58cf38affa74bd5241329b52500b7b7959a3da |
-| Link3 Authority                              | 0x63e0c38bfc9589b927209553207ceee1a5da136b |
-| CyberConnect Treasury                        | 0x320211a885b9bc5281d71fc36eac0ca74f00c1d7 |
-| Link3 Profile MW (PermissionedFeeCreationMw) | 0x34696dfa1d59a1409208de38503cf5da86a7b189 |
-| CyberBoxNFT (Impl)                           | 0x34d8b42a65e7eee39b7e64546a2f851422509746 |
-| CyberBoxNFT (Proxy)                          | 0x13445321fe5c0bd7bc92eae1ec54adc312187ce8 |
-| Link3 Descriptor (Impl)                      | 0x3f04fcd10b115249c9df7bc753b976c4d53d163f |
-| Link3 Descriptor (Proxy)                     | 0x2aa2893a2b08d37328ab1178c9536901078b1bbf |
+| Create2Deployer                              | 0xf8bd428a025ecb629e6d963ec78399587682fe14 |
+| RolesAuthority                               | 0xadf331920095e025eda2857eef2d2ff531f2812f |
+| EngineImpl                                   | 0x4289c1f165e62a9bcccbb215990abeb10fa8e8bd |
+| EngineProxy                                  | 0xb5c5b3e7db76d5d2bbc1e30f6b7aa722acd55092 |
+| Profile Factory                              | 0x40ccddf2ce83f7ac5ba187b422de42954f6962b1 |
+| Essence Factory                              | 0x0d0d024ee9307806c941a35ca3c37907b91187b5 |
+| Subscribe Factory                            | 0xd63cc5c72d459234d64d2ae13ce8eeda5576e935 |
+| Link3 Profile                                | 0xf739b940edcff9228edfda83664a7584e170dc75 |
+| CyberConnect Treasury                        | 0xeaf6d420f22fd4f096a172b14d20bf573713058e |
+| Link3 Profile MW (PermissionedFeeCreationMw) | 0x977f3e9df1b153a5189c29465d650b312b900320 |
+| CyberBoxNFT (Impl)                           | 0xffbcd911abf0ddadf293406472e30d5a593c57a2 |
+| CyberBoxNFT (Proxy)                          | 0x609de4c3b7c5e9afa87d97c8ef2280910b5b7608 |
+| Link3 Descriptor (Impl)                      | 0x62ed599d60da321cc70dc910c1d18e08b721b344 |
+| Link3 Descriptor (Proxy)                     | 0x8505113fb29bdc4b1429e2107694d22b19f1dcc7 |
+| Link3 Descriptor (Impl)                      | 0x62ed599d60da321cc70dc910c1d18e08b721b344 |
+| Link3 Descriptor (Proxy)                     | 0x8505113fb29bdc4b1429e2107694d22b19f1dcc7 |
