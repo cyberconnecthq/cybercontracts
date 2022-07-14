@@ -719,7 +719,7 @@ contract ProfileNFT is
     ) internal returns (uint256) {
         _requireMinted(params.profileId);
 
-        (uint256 tokenID, address deployedEssenceNFT) = Actions.collect(
+        (uint256 tokenId, address deployedEssenceNFT) = Actions.collect(
             DataTypes.CollectData(
                 collector,
                 params.profileId,
@@ -731,7 +731,13 @@ contract ProfileNFT is
             _essenceByIdByProfileId
         );
 
-        emit CollectEssence(collector, params.profileId, preData, postData);
+        emit CollectEssence(
+            collector,
+            tokenId,
+            params.profileId,
+            preData,
+            postData
+        );
 
         if (deployedEssenceNFT != address(0)) {
             emit DeployEssenceNFT(
@@ -740,6 +746,7 @@ contract ProfileNFT is
                 deployedEssenceNFT
             );
         }
+        return tokenId;
     }
 
     function _createProfile(DataTypes.CreateProfileParams calldata params)
