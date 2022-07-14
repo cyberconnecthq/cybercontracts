@@ -66,7 +66,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         essenceBeacon = address(
             new UpgradeableBeacon(fakeEssenceImpl, address(profile))
         );
-        address profileImpl = testDeployMockProfile(
+        address profileImpl = deployMockProfile(
             engine,
             essenceBeacon,
             subscribeBeacon

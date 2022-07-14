@@ -18,9 +18,24 @@ contract ProfileNFTUpgradeTest is Test, TestDeployer {
     address constant gov = address(0x888);
     address constant engine = address(0x666);
 
+    function _deployV2(
+        address _engine,
+        address _essenceBeacon,
+        address _subBeacon
+    ) internal returns (MockProfileV2 addr) {
+        profileParams.engine = _engine;
+        profileParams.essenceBeacon = _essenceBeacon;
+        profileParams.subBeacon = _subBeacon;
+        addr = new MockProfileV2{ salt: _salt }();
+        delete profileParams;
+    }
+
     function setUp() public {
-        setParamers(address(0), address(0), address(0), engine);
-        MockProfile profileImpl = new MockProfile();
+        address profileImpl = deployMockProfile(
+            engine,
+            address(0xdead),
+            address(0xdead)
+        );
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             gov,
@@ -37,7 +52,11 @@ contract ProfileNFTUpgradeTest is Test, TestDeployer {
 
     function testCannotUpgradeToAndCallAsNonEngine() public {
         assertEq(ProfileNFT(address(profile)).version(), 1);
-        MockProfileV2 implV2 = new MockProfileV2();
+        MockProfileV2 implV2 = _deployV2(
+            engine,
+            address(0xdead),
+            address(0xdead)
+        );
 
         vm.expectRevert("ONLY_ENGINE");
         ProfileNFT(address(profile)).upgradeToAndCall(
@@ -49,7 +68,11 @@ contract ProfileNFTUpgradeTest is Test, TestDeployer {
 
     function testCannotUpgradeAsNonEngine() public {
         assertEq(ProfileNFT(address(profile)).version(), 1);
-        MockProfileV2 implV2 = new MockProfileV2();
+        MockProfileV2 implV2 = _deployV2(
+            engine,
+            address(0xdead),
+            address(0xdead)
+        );
 
         vm.expectRevert("ONLY_ENGINE");
         ProfileNFT(address(profile)).upgradeTo(address(implV2));
@@ -58,7 +81,11 @@ contract ProfileNFTUpgradeTest is Test, TestDeployer {
 
     function testUpgrade() public {
         assertEq(ProfileNFT(address(profile)).version(), 1);
-        MockProfileV2 implV2 = new MockProfileV2();
+        MockProfileV2 implV2 = _deployV2(
+            engine,
+            address(0xdead),
+            address(0xdead)
+        );
 
         vm.prank(engine);
 
@@ -68,7 +95,11 @@ contract ProfileNFTUpgradeTest is Test, TestDeployer {
 
     function testUpgradeToAndCall() public {
         assertEq(ProfileNFT(address(profile)).version(), 1);
-        MockProfileV2 implV2 = new MockProfileV2();
+        MockProfileV2 implV2 = _deployV2(
+            engine,
+            address(0xdead),
+            address(0xdead)
+        );
 
         vm.prank(engine);
 

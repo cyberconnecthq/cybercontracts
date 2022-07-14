@@ -11,7 +11,7 @@ import { MockProfile } from "./MockProfile.sol";
 contract TestDeployer is ProfileDeployer, SubscribeDeployer, EssenceDeployer {
     bytes32 internal _salt = keccak256(bytes("salt"));
 
-    function testDeployMockProfile(
+    function deployMockProfile(
         address engine,
         address essenceBeacon,
         address subscribeBeacon

@@ -51,7 +51,6 @@ contract ProfileNFTTest is Test, TestDeployer {
         );
 
     function setUp() public {
-        MockProfile tokenImpl = new MockProfile();
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             gov,
@@ -59,7 +58,7 @@ contract ProfileNFTTest is Test, TestDeployer {
             "TP",
             address(0)
         );
-        address tokenImpl = testDeployMockProfile(
+        address tokenImpl = deployMockProfile(
             address(0xdead),
             address(0xdead),
             address(0xdead)

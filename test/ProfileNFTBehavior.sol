@@ -50,7 +50,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
             new UpgradeableBeacon(impl, address(profile))
         );
 
-        address profileImpl = testDeployMockProfile(
+        address profileImpl = deployMockProfile(
             address(0xdead),
             essenceBeacon,
             subscribeBeacon
