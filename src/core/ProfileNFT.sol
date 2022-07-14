@@ -101,6 +101,10 @@ contract ProfileNFT is
             address subBeacon,
             address essenceBeacon
         ) = IProfileDeployer(msg.sender).profileParams();
+        // TODO: test deployer
+        require(engine != address(0), "ENGINE_NOT_SET");
+        require(subBeacon != address(0), "SUBSCRIBE_BEACON_NOT_SET");
+        require(essenceBeacon != address(0), "ESSENCE_BEACON_NOT_SET");
         ENGINE = engine;
         SUBSCRIBE_BEACON = subBeacon;
         ESSENCE_BEACON = essenceBeacon;

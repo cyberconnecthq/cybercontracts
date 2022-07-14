@@ -56,7 +56,6 @@ contract ProfileNFTTest is Test, TestDeployer {
         );
 
     function setUp() public {
-        MockProfile tokenImpl = new MockProfile();
         uint256 nonce = vm.getNonce(address(this));
         address profileAddr = LibDeploy._calcContractAddress(
             address(this),
@@ -70,6 +69,11 @@ contract ProfileNFTTest is Test, TestDeployer {
             "TP",
             address(descriptor)
         );
+        address tokenImpl = testDeployMockProfile(
+            address(0xdead),
+            address(0xdead),
+            address(0xdead)
+        );
         ERC1967Proxy profileProxy = new ERC1967Proxy(address(tokenImpl), data);
         token = MockProfile(address(profileProxy));
     }
@@ -78,8 +82,8 @@ contract ProfileNFTTest is Test, TestDeployer {
         assertEq(token.name(), "TestProfile");
         assertEq(token.symbol(), "TP");
         assertEq(token.paused(), true);
-        assertEq(token.SUBSCRIBE_BEACON(), address(0));
-        assertEq(token.ESSENCE_BEACON(), address(0));
+        assertEq(token.SUBSCRIBE_BEACON(), address(0xdead));
+        assertEq(token.ESSENCE_BEACON(), address(0xdead));
     }
 
     function testCannotGetTokenURIOfUnmintted() public {
