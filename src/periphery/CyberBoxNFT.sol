@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.14;
 
-import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { ICyberBoxEvents } from "../interfaces/ICyberBoxEvents.sol";

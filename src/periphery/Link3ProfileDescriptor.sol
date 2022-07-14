@@ -2,12 +2,15 @@
 
 pragma solidity 0.8.14;
 
-import { LibString } from "../libraries/LibString.sol";
-import { QRSVG } from "../libraries/QRSVG.sol";
 import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
+
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
-import { Initializable } from "../upgradeability/Initializable.sol";
+
+import { QRSVG } from "../libraries/QRSVG.sol";
+import { LibString } from "../libraries/LibString.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
+
+import { Initializable } from "../upgradeability/Initializable.sol";
 
 /**
  * @title Profile NFT Descriptor

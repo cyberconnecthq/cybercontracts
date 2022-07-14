@@ -2,8 +2,9 @@
 
 pragma solidity 0.8.14;
 
-import { DataTypes } from "../libraries/DataTypes.sol";
 import { IProfileNFTEvents } from "./IProfileNFTEvents.sol";
+
+import { DataTypes } from "../libraries/DataTypes.sol";
 
 interface IProfileNFT is IProfileNFTEvents {
     /*

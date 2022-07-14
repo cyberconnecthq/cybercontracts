@@ -3,8 +3,10 @@
 pragma solidity 0.8.14;
 
 import { ISubscribeDeployer } from "../interfaces/ISubscribeDeployer.sol";
-import { SubscribeNFT } from "../core/SubscribeNFT.sol";
+
 import { DataTypes } from "../libraries/DataTypes.sol";
+
+import { SubscribeNFT } from "../core/SubscribeNFT.sol";
 
 contract SubscribeNFTFactory is ISubscribeDeployer {
     DataTypes.SubscribeDeployParameters public override subParams;
