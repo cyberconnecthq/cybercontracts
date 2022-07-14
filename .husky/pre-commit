@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged && forge test -vvv && forge snapshot --no-match-path "test/qrcode/*"
+npx lint-staged && forge test -vvv && forge snapshot --check

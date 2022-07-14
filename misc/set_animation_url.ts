@@ -5,7 +5,6 @@ import * as fsSync from "fs";
 import { default as FormData } from "form-data";
 import axios from "axios";
 import { ethers } from "ethers";
-import * as JSON5 from "json5";
 
 dotenv.config({ debug: true, path: ".env.pinata" });
 
@@ -14,12 +13,11 @@ const pinataBase = "https://cyberconnect.mypinata.cloud/ipfs/";
 const pinataJWT = process.env.PINATA_JWT;
 
 const getLink3Profile = async (chainName: string) => {
-  const file = path.join(base, chainName, "contract.json");
+  const file = path.join(base, chainName, "contract.md");
   const data = await fs.readFile(file, "utf-8");
-  const j = JSON5.parse(data);
+  let matched = data.match(/\|Link3 Profile\|(.*)\|/);
   return {
-    link3: ethers.utils.getAddress(j["Link3 Profile"]),
-    link3Auth: ethers.utils.getAddress(j["Link3 Authority"]),
+    link3: ethers.utils.getAddress(matched![1]),
   };
 };
 
@@ -70,8 +68,7 @@ const writeToPinata = async ({
 const templateDeployScript = async (
   link3Profile: string,
   templateURL: string,
-  chainName: string,
-  link3Auth: string
+  chainName: string
 ) => {
   const p = path.join(
     "./script/animation_url/",
@@ -86,18 +83,16 @@ const templateDeployScript = async (
   const file = await fs.readFile(p, "utf8");
   let out = file.replace(/LINK3_PROFILE/g, link3Profile);
   out = out.replace(/ANIMATION_URL/g, templateURL);
-  out = out.replace(/LINK3_AUTH/g, link3Auth);
   await fs.writeFile(outP, out);
 };
 
 const main = async (chainName: string) => {
-  const { link3, link3Auth } = await getLink3Profile(chainName);
+  const { link3 } = await getLink3Profile(chainName);
   const out = await writeTemplate(link3, chainName);
   const pinataURL = await writeToPinata(out);
   console.log("link3", link3);
-  console.log("link3 auth", link3Auth);
   console.log("pinataURL", pinataURL);
-  await templateDeployScript(link3, pinataURL, chainName, link3Auth);
+  await templateDeployScript(link3, pinataURL, chainName);
 };
 
 main(process.argv[2])

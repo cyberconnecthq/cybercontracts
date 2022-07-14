@@ -6,8 +6,6 @@ node_modules
 broadcast/
 .DS_Store
 artifacts/
-docs/deploy/anvil-31337
-docs/template/anvil-31337
 test/qrcode
 misc/qrcode/svg
 misc/qrcode/html

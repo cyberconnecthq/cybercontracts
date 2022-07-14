@@ -9,19 +9,36 @@ import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { CyberEngine } from "../src/core/CyberEngine.sol";
 import { PermissionedFeeCreationMw } from "../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 
-// 16 Transaction + 3 Transaction to mint a test profile
 contract DeployScript is Script {
-    // TODO: change for prod. need access
-    address internal constant LINK3_OWNER =
-        0x927f355117721e0E8A7b5eA20002b65B8a551890;
-    address internal constant LINK3_SIGNER =
-        0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
-    address internal constant ENGINE_AUTH_OWNER =
-        0x927f355117721e0E8A7b5eA20002b65B8a551890;
-    address internal constant ENGINE_GOV =
-        0x927f355117721e0E8A7b5eA20002b65B8a551890;
+    struct DeployParameters {
+        address link3Owner;
+        address link3Signer;
+        address engineAuthOwner;
+        address engineGov;
+    }
+
+    DeployParameters internal deployParams;
+
+    function _setDeployParams() private {
+        if (block.chainid == 31337) {
+            // use the same address that runs the deployment script
+            deployParams.link3Owner = address(
+                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+            );
+            deployParams.link3Signer = address(
+                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+            );
+            deployParams.engineAuthOwner = address(
+                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+            );
+            deployParams.engineGov = address(
+                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+            );
+        }
+    }
 
     function run() external {
+        _setDeployParams();
         // TODO: this is Rinkeby address, change for prod
         address deployerContract;
         if (block.chainid == 31337) {
@@ -41,11 +58,11 @@ contract DeployScript is Script {
                 true,
                 deployerContract,
                 true,
-                LINK3_OWNER,
-                LINK3_SIGNER,
-                ENGINE_AUTH_OWNER,
-                ENGINE_GOV,
-                LINK3_SIGNER
+                deployParams.link3Owner,
+                deployParams.link3Signer,
+                deployParams.engineAuthOwner,
+                deployParams.engineGov,
+                deployParams.link3Signer
             )
         );
 
