@@ -42,4 +42,17 @@ interface ICyberEngineEvents {
         bool indexed preAllowed,
         bool indexed newAllowed
     );
+
+    /**
+     * @notice Emitted when a namespace has been created
+     *
+     * @param namespace The namespace address.
+     * @param name The namespace name.
+     * @param symbol The namespace symbol.
+     */
+    event CreateNamespace(
+        address indexed namespace,
+        string name,
+        string symbol
+    );
 }

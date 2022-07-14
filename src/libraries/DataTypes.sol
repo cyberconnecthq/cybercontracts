@@ -99,8 +99,6 @@ library DataTypes {
 
     struct ComputedAddresses {
         address profileProxy;
-        // address subscribeImpl;
-        // address essenceImpl;
         address profileFactory;
         address subscribeFactory;
         address essenceFactory;
