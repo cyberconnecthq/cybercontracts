@@ -11,11 +11,7 @@ interface ICyberEngineEvents {
         bool indexed newAllowed
     );
 
-    event SetProfileMw(
-        address indexed profileAddress,
-        address mw,
-        bytes returnData
-    );
+    event SetProfileMw(address indexed namespace, address mw, bytes returnData);
 
     /**
      * @notice Emitted when a subscription middleware has been allowed.

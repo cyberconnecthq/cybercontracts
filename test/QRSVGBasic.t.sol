@@ -3,8 +3,9 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
-import { QRSVG } from "../src/libraries/QRSVG.sol";
 import "forge-std/console.sol";
+
+import { QRSVG } from "../src/libraries/QRSVG.sol";
 
 contract QRSVGBasicTest is Test {
     string url = "https://link3.to/cyberconnect";

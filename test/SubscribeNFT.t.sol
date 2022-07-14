@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 pragma solidity 0.8.14;
+
 import "forge-std/Test.sol";
-import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
-import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
-import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
+
+import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
+
 import { Constants } from "../src/libraries/Constants.sol";
-import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
+import { DataTypes } from "../src/libraries/DataTypes.sol";
+
 import { MockProfile } from "./utils/MockProfile.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
-import { DataTypes } from "../src/libraries/DataTypes.sol";
+import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
+import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 
 contract SubscribeNFTTest is Test, TestDeployer {
     event Approval(

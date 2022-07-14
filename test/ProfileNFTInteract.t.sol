@@ -66,7 +66,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         essenceBeacon = address(
             new UpgradeableBeacon(fakeEssenceImpl, address(profile))
         );
-        address profileImpl = testDeployMockProfile(
+        address profileImpl = deployMockProfile(
             engine,
             essenceBeacon,
             subscribeBeacon
@@ -171,7 +171,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
     // TODO: add test for subscribe to multiple profiles
 
-    // TODO: use integration test instead of mock
     function testCannotSetOperatorIfNotOwner() public {
         vm.expectRevert("ONLY_PROFILE_OWNER");
         profile.setOperatorApproval(profileId, address(0), true);
@@ -389,18 +388,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         profile.setAvatar(profileId, avatar);
     }
 
-    // function testCannotAllowSubscribeMwIfNotGov() public {
-    //     vm.expectRevert("UNAUTHORIZED");
-    //     profile.allowSubscribeMw(subscribeMw, false);
-    // }
-
-    // function testAllowSubscribeMw() public {
-    //     vm.prank(gov);
-    //     profile.allowSubscribeMw(subscribeMw, true);
-
-    //     assertEq(profile.isSubscribeMwAllowed(subscribeMw), true);
-    // }
-
     function testCannotSetSubscribeMwIfNotOwner() public {
         vm.expectRevert("ONLY_PROFILE_OWNER");
         profile.setSubscribeMw(profileId, subscribeMw, new bytes(0));
@@ -476,18 +463,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.expectRevert("ONLY_PROFILE_OWNER");
         profile.setPrimaryProfile(profileId);
     }
-
-    // function testCannotAllowEssenceMwAsNonGov() public {
-    //     vm.expectRevert("UNAUTHORIZED");
-    //     profile.allowEssenceMw(essenceMw, false);
-    // }
-
-    // function testAllowEssenceMw() public {
-    //     vm.prank(gov);
-    //     profile.allowEssenceMw(essenceMw, true);
-
-    //     assertEq(profile.isEssenceMwAllowed(essenceMw), true);
-    // }
 
     function testCannotRegisterEssenceIfProfileNotMinted() public {
         vm.expectRevert("NOT_MINTED");
