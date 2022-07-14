@@ -58,17 +58,19 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.etch(engine, address(this).code);
 
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
-        setProfile(address(0xdead));
-        address fakeImpl = address(new SubscribeNFT());
+        address fakeImpl = deploySubscribe(_salt, address(0xdead));
         subscribeBeacon = address(
             new UpgradeableBeacon(fakeImpl, address(profile))
         );
-        address fakeEssence = address(new EssenceNFT());
+        address fakeEssenceImpl = deployEssence(_salt, address(0xdead));
         essenceBeacon = address(
-            new UpgradeableBeacon(fakeEssence, address(profile))
+            new UpgradeableBeacon(fakeEssenceImpl, address(profile))
         );
-        setParamers(address(0), subscribeBeacon, essenceBeacon, engine);
-        MockProfile profileImpl = new MockProfile();
+        address profileImpl = testDeployMockProfile(
+            engine,
+            essenceBeacon,
+            subscribeBeacon
+        );
         uint256 nonce = vm.getNonce(address(this));
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
@@ -76,10 +78,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             "Name",
             "Symbol"
         );
-        ERC1967Proxy profileProxy = new ERC1967Proxy(
-            address(profileImpl),
-            data
-        );
+        ERC1967Proxy profileProxy = new ERC1967Proxy(profileImpl, data);
         profile = MockProfile(address(profileProxy));
 
         assertEq(profile.nonces(bob), 0);

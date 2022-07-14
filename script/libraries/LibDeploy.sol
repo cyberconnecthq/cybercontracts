@@ -18,9 +18,9 @@ import { TestLib712 } from "../../test/utils/TestLib712.sol";
 import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import { Create2Deployer } from "./Create2Deployer.sol";
-import { EssenceNFTFactory } from "../../src/factory/EssenceNFTFactory.sol";
-import { SubscribeNFTFactory } from "../../src/factory/SubscribeNFTFactory.sol";
-import { ProfileNFTFactory } from "../../src/factory/ProfileNFTFactory.sol";
+import { EssenceDeployer } from "../../src/deployer/EssenceDeployer.sol";
+import { SubscribeDeployer } from "../../src/deployer/SubscribeDeployer.sol";
+import { ProfileDeployer } from "../../src/deployer/ProfileDeployer.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
 
 import "forge-std/Vm.sol";
@@ -420,9 +420,9 @@ library LibDeploy {
         );
 
         // TODO: reuse factory
-        addrs.essFac = address(new EssenceNFTFactory());
-        addrs.subFac = address(new SubscribeNFTFactory());
-        addrs.profileFac = address(new ProfileNFTFactory());
+        addrs.essFac = dc.deploy(type(EssenceDeployer).creationCode, SALT);
+        addrs.subFac = dc.deploy(type(SubscribeDeployer).creationCode, SALT);
+        addrs.profileFac = dc.deploy(type(ProfileDeployer).creationCode, SALT);
         if (params.writeFile) {
             _write(vm, "Profile Factory", addrs.profileFac);
             _write(vm, "Essence Factory", addrs.essFac);
