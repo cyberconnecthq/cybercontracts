@@ -717,6 +717,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.expectEmit(true, false, false, true);
         emit CollectEssence(bob, tokenId, profileId, data, data);
 
+        vm.expectEmit(true, true, false, true);
+        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
+
         // sign
         vm.warp(50);
         uint256 deadline = 100;
