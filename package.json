@@ -26,7 +26,9 @@
     "deploy_deployer:rinkeby": "source .env.rinkeby && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_deployer:goerli": "source .env.goerli && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_deployer:anvil": "source .env.anvil && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
-    "size": "hardhat size-contracts"
+    "size": "hardhat size-contracts",
+    "deploy_full:anvil": "yarn deploy:anvil && yarn upload_animation:anvil && yarn set_animation_url:anvil",
+    "deploy_full:goerli": "yarn deploy:goerli && yarn upload_animation:goerli && yarn set_animation_url:goerli"
   },
   "devDependencies": {
     "axios": "^0.27.2",

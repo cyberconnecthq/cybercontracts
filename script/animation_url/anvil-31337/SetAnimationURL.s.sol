@@ -9,8 +9,9 @@ import { Create2Deployer } from "../../libraries/Create2Deployer.sol";
 import { LibDeploy } from "../../libraries/LibDeploy.sol";
 
 contract SetAnimationURL is Script {
-    address internal link3Profile = 0xdf65466a1C0B82813eE4697F49154f5b6217020b;
-    string internal animationUrl = "https://cyberconnect.mypinata.cloud/ipfs/bafkreibsssy52v5is4zpmtyhcxw4mby6adnzgnsvubqign2qj7m745rwpa";
+    address internal link3Profile = 0x0Ea8A473f149c03E38C5787158276854489fD0b1;
+    string internal animationUrl =
+        "https://cyberconnect.mypinata.cloud/ipfs/bafkreiejm7as3aw6en6vxejxma55eaasfkbsc3ii5vacahudgqf5wh7pfu";
 
     function run() external {
         // make sure only on anvil

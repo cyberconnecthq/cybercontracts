@@ -16,7 +16,6 @@ const getLink3Profile = async (chainName: string) => {
   const file = path.join(base, chainName, "contract.md");
   const data = await fs.readFile(file, "utf-8");
   let matched = data.match(/\|Link3 Profile\|(.*)\|/);
-  console.log("matched", matched);
   return {
     link3: ethers.utils.getAddress(matched![1]),
   };

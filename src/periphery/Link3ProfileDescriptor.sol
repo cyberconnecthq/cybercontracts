@@ -66,7 +66,7 @@ contract Link3ProfileDescriptor is IProfileNFTDescriptor, Initializable {
                         abi.encodePacked(
                             '{"name":"',
                             formattedName,
-                            '","description":"CyberConnect profile for ',
+                            '","description":"Link3 profile for ',
                             formattedName,
                             '","image":"',
                             drawStaticImage(params.handle),
