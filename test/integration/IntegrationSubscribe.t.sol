@@ -24,7 +24,6 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         _setUp();
     }
 
-    // test sub without sub only once profileMw
     function testSubscription() public {
         string memory handle = "bob";
         address to = bob;
@@ -77,6 +76,7 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
 
         // check bob sub nft supply
         assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 2);
+        assertEq(CyberNFTBase(bobSubNFT).balanceOf(alice), 2);
 
         // check ownership of second sub nft
         assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(alice));

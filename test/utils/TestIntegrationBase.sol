@@ -19,16 +19,14 @@ abstract contract TestIntegrationBase is Test {
     Link3ProfileDescriptor profileDescriptor;
     PermissionedFeeCreationMw profileMw;
     CyberEngine engine;
+    LibDeploy.ContractAddresses addrs;
 
     constructor() {
         link3Signer = vm.addr(link3SignerPk);
     }
 
     function _setUp() internal {
-        LibDeploy.ContractAddresses memory addrs = LibDeploy.deployInTest(
-            vm,
-            link3Signer
-        );
+        addrs = LibDeploy.deployInTest(vm, link3Signer);
         profile = ProfileNFT(addrs.link3Profile);
         profileDescriptor = Link3ProfileDescriptor(addrs.link3DescriptorProxy);
         profileMw = PermissionedFeeCreationMw(addrs.link3ProfileMw);
