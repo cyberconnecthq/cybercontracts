@@ -429,7 +429,7 @@ library LibDeploy {
             _write(vm, "Subscribe Factory", addrs.subFac);
         }
         // 6. Deploy Link3
-        (addrs.link3Profile) = createNamespace(
+        addrs.link3Profile = createNamespace(
             addrs.engineProxyAddress,
             params.link3Owner,
             LINK3_NAME,
