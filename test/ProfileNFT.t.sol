@@ -3,26 +3,21 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
-import "forge-std/console2.sol";
-import "../src/libraries/Constants.sol";
-import "../src/libraries/DataTypes.sol";
-
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { Base64 } from "../src/dependencies/openzeppelin/Base64.sol";
 
 import { LibString } from "../src/libraries/LibString.sol";
-import { LibDeploy } from "../script/libraries/LibDeploy.sol";
+import { Constants } from "../src/libraries/Constants.sol";
+import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
-import { Link3ProfileDescriptor } from "../src/periphery/Link3ProfileDescriptor.sol";
 import { MockProfile } from "./utils/MockProfile.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 
 contract ProfileNFTTest is Test, TestDeployer {
     MockProfile internal token;
-    Link3ProfileDescriptor internal descriptor;
     address constant alice = address(0xA11CE);
     address constant bob = address(0xA12CE);
     address constant minter = address(0xB0B);
@@ -56,19 +51,17 @@ contract ProfileNFTTest is Test, TestDeployer {
         );
 
     function setUp() public {
-        MockProfile tokenImpl = new MockProfile();
-        uint256 nonce = vm.getNonce(address(this));
-        address profileAddr = LibDeploy._calcContractAddress(
-            address(this),
-            nonce + 2
-        );
-        descriptor = new Link3ProfileDescriptor(profileAddr);
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             gov,
             "TestProfile",
             "TP",
-            address(descriptor)
+            address(0)
+        );
+        address tokenImpl = deployMockProfile(
+            address(0xdead),
+            address(0xdead),
+            address(0xdead)
         );
         ERC1967Proxy profileProxy = new ERC1967Proxy(address(tokenImpl), data);
         token = MockProfile(address(profileProxy));
@@ -78,18 +71,14 @@ contract ProfileNFTTest is Test, TestDeployer {
         assertEq(token.name(), "TestProfile");
         assertEq(token.symbol(), "TP");
         assertEq(token.paused(), true);
-        assertEq(token.SUBSCRIBE_BEACON(), address(0));
-        assertEq(token.ESSENCE_BEACON(), address(0));
+        assertEq(token.SUBSCRIBE_BEACON(), address(0xdead));
+        assertEq(token.ESSENCE_BEACON(), address(0xdead));
     }
 
     function testCannotGetTokenURIOfUnmintted() public {
         vm.expectRevert("NOT_MINTED");
         token.tokenURI(0);
     }
-
-    // TODO: add this back or maybe test this in subscribe nft test / integration test
-    // function testTokenURISubscriber() public {
-    // }
 
     function testGetHandleByProfileId() public {
         token.createProfile(createProfileDataAlice);
@@ -101,59 +90,12 @@ contract ProfileNFTTest is Test, TestDeployer {
         assertEq(token.getProfileIdByHandle("alice"), 1);
     }
 
-    // TODO add this back
-    // function testCannotCreateProfileWithHandleTaken() public {
-    //     token.createProfile(createProfileDataAlice);
-    //     vm.expectRevert("HANDLE_TAKEN");
-    //     token.createProfile(createProfileDataAlice);
-    // }
+    function testCannotCreateProfileWithHandleTaken() public {
+        token.createProfile(createProfileDataAlice);
+        vm.expectRevert("HANDLE_TAKEN");
+        token.createProfile(createProfileDataAlice);
+    }
 
-    // function testCannotCreateProfileLongerThanMaxHandleLength() public {
-    //     vm.expectRevert("HANDLE_INVALID_LENGTH");
-    //     token.createProfile(
-    //         DataTypes.CreateProfileParams(
-    //             alice,
-    //             "aliceandbobisareallylongname",
-    //             "https://example.com/alice.jpg",
-    //             "metadata"
-    //         )
-    //     );
-    // }
-
-    // function testCannotCreateProfileWithAnInvalidCharacter() public {
-    //     vm.expectRevert("HANDLE_INVALID_CHARACTER");
-    //     token.createProfile(
-    //         DataTypes.CreateProfileParams(
-    //             alice,
-    //             "alice&bob",
-    //             imageUri,
-    //             "metadata"
-    //         )
-    //     );
-    // }
-
-    // function testCannotCreateProfileWith0LenthHandle() public {
-    //     vm.expectRevert("HANDLE_INVALID_LENGTH");
-    //     token.createProfile(
-    //         DataTypes.CreateProfileParams(alice, "", imageUri, "metadata")
-    //     );
-    // }
-
-    // function testCannotCreateProfileWithACapitalLetter() public {
-    //     vm.expectRevert("HANDLE_INVALID_CHARACTER");
-    //     token.createProfile(
-    //         DataTypes.CreateProfileParams(alice, "Test", imageUri, "metadata")
-    //     );
-    // }
-
-    // function testCannotCreateProfileWithBlankSpace() public {
-    //     vm.expectRevert("HANDLE_INVALID_CHARACTER");
-    //     token.createProfile(
-    //         DataTypes.CreateProfileParams(alice, " ", imageUri, "metadata")
-    //     );
-    // }
-
-    // operator
     function testGetOperatorApproval() public {
         uint256 id = token.createProfile(createProfileDataAlice);
         assertEq(token.getOperatorApproval(id, address(0)), false);
@@ -187,12 +129,13 @@ contract ProfileNFTTest is Test, TestDeployer {
     }
 
     function testSetDescriptorAsGov() public {
+        address descriptor = address(0x666);
         vm.prank(gov);
+
         token.setNFTDescriptor(address(descriptor));
         assertEq(token.getNFTDescriptor(), address(descriptor));
     }
 
-    // avatar
     function testSetAvatarAsOwner() public {
         uint256 id = token.createProfile(createProfileDataAlice);
         assertEq(token.getAvatar(id), "https://example.com/alice.jpg");
@@ -251,13 +194,13 @@ contract ProfileNFTTest is Test, TestDeployer {
 
     function testReturnProfileId() public {
         vm.startPrank(alice);
-        // creates 2 profiles, bob's profile is automatically set as default
+
         uint256 profileIdAlice = token.createProfile(createProfileDataAlice);
         uint256 profileIdAlice2 = token.createProfile(createProfileDataBob);
-        // get the default profile id
+
         uint256 primaryIdAlice = token.getPrimaryProfile(alice);
         assertEq(primaryIdAlice, profileIdAlice);
-        // set another primary profile id
+
         token.setPrimaryProfile(profileIdAlice2);
         uint256 primaryIdAlice2 = token.getPrimaryProfile(alice);
         assertEq(profileIdAlice2, primaryIdAlice2);

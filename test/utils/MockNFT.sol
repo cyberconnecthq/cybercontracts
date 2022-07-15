@@ -5,12 +5,7 @@ pragma solidity 0.8.14;
 import { CyberNFTBase } from "../../src/base/CyberNFTBase.sol";
 
 contract MockNFT is CyberNFTBase {
-    function tokenURI(uint256 _tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
+    function tokenURI(uint256) public pure override returns (string memory) {
         return "";
     }
 

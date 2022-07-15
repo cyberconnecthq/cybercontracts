@@ -4,10 +4,12 @@ pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
 import "./utils/MockNFT.sol";
-import { Constants } from "../src/libraries/Constants.sol";
-import { TestLib712 } from "./utils/TestLib712.sol";
-import { DataTypes } from "../src/libraries/DataTypes.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
+import { Constants } from "../src/libraries/Constants.sol";
+import { DataTypes } from "../src/libraries/DataTypes.sol";
+
+import { TestLib712 } from "./utils/TestLib712.sol";
 
 contract CyberNFTBaseTest is Test {
     MockNFT internal token;

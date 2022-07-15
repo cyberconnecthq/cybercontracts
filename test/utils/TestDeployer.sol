@@ -2,49 +2,73 @@
 
 pragma solidity 0.8.14;
 
-import { IProfileDeployer } from "../../src/interfaces/IProfileDeployer.sol";
 import { ISubscribeDeployer } from "../../src/interfaces/ISubscribeDeployer.sol";
 import { IEssenceDeployer } from "../../src/interfaces/IEssenceDeployer.sol";
+import { IProfileDeployer } from "../../src/interfaces/IProfileDeployer.sol";
+
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
+
+import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
+import { EssenceNFT } from "../../src/core/EssenceNFT.sol";
+import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
+
+import { MockProfile } from "./MockProfile.sol";
 
 contract TestDeployer is
     IProfileDeployer,
     ISubscribeDeployer,
     IEssenceDeployer
 {
-    DataTypes.EssenceDeployParameters public essParams;
-    DataTypes.SubscribeDeployParameters public subParams;
-    DataTypes.ProfileDeployParameters public profileParams;
+    bytes32 internal _salt = keccak256(bytes("salt"));
 
-    function setParamers(
-        address _profileProxy,
-        address _subBeacon,
-        address _essenceBeacon,
-        address _engine
-    ) internal {
-        essParams.profileProxy = _profileProxy;
-        subParams.profileProxy = _profileProxy;
-        profileParams.subBeacon = _subBeacon;
-        profileParams.essenceBeacon = _essenceBeacon;
-        profileParams.engine = _engine;
+    function deployMockProfile(
+        address engine,
+        address essenceBeacon,
+        address subscribeBeacon
+    ) internal returns (address addr) {
+        profileParams.engine = engine;
+        profileParams.essenceBeacon = essenceBeacon;
+        profileParams.subBeacon = subscribeBeacon;
+        addr = address(new MockProfile{ salt: _salt }());
+        delete profileParams;
     }
 
-    function setEssParameters(address profileProxy) external {}
+    DataTypes.SubscribeDeployParameters public override subParams;
 
-    function setSubParameters(address profileProxy) external {}
+    function deploySubscribe(bytes32 salt, address profileProxy)
+        public
+        override
+        returns (address addr)
+    {
+        subParams.profileProxy = profileProxy;
+        addr = address(new SubscribeNFT{ salt: salt }());
+        delete subParams;
+    }
 
-    function setProfileParameters(
+    DataTypes.EssenceDeployParameters public override essParams;
+
+    function deployEssence(bytes32 salt, address profileProxy)
+        public
+        override
+        returns (address addr)
+    {
+        essParams.profileProxy = profileProxy;
+        addr = address(new EssenceNFT{ salt: salt }());
+        delete essParams;
+    }
+
+    DataTypes.ProfileDeployParameters public override profileParams;
+
+    function deployProfile(
+        bytes32 salt,
         address engine,
         address subscribeBeacon,
         address essenceBeacon
-    ) external {}
-
-    function setProfile(address _profile) internal {
-        essParams.profileProxy = _profile;
-        subParams.profileProxy = _profile;
-    }
-
-    function deploy(bytes32) external pure returns (address addr) {
-        return address(0);
+    ) public override returns (address addr) {
+        profileParams.engine = engine;
+        profileParams.essenceBeacon = essenceBeacon;
+        profileParams.subBeacon = subscribeBeacon;
+        addr = address(new ProfileNFT{ salt: salt }());
+        delete profileParams;
     }
 }

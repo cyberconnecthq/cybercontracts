@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 pragma solidity 0.8.14;
+
 import "forge-std/Test.sol";
-import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
-import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
-import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
+
+import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
+
 import { Constants } from "../src/libraries/Constants.sol";
-import { Auth, Authority } from "../src/dependencies/solmate/Auth.sol";
+import { DataTypes } from "../src/libraries/DataTypes.sol";
+
 import { MockProfile } from "./utils/MockProfile.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
-import { DataTypes } from "../src/libraries/DataTypes.sol";
+import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
+import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 
 contract SubscribeNFTTest is Test, TestDeployer {
     event Approval(
@@ -20,9 +23,8 @@ contract SubscribeNFTTest is Test, TestDeployer {
         uint256 indexed id
     );
     UpgradeableBeacon internal beacon;
-    SubscribeNFT internal impl;
     BeaconProxy internal proxy;
-    MockProfile internal profile;
+    address internal profile;
 
     SubscribeNFT internal c;
 
@@ -34,10 +36,9 @@ contract SubscribeNFTTest is Test, TestDeployer {
     string constant symbol = "1890_SUB";
 
     function setUp() public {
-        profile = new MockProfile();
-        setProfile(address(profile));
-        impl = new SubscribeNFT();
-        beacon = new UpgradeableBeacon(address(impl), address(profile));
+        profile = address(0xdead);
+        address impl = deploySubscribe(_salt, address(profile));
+        beacon = new UpgradeableBeacon(impl, address(profile));
         bytes memory functionData = abi.encodeWithSelector(
             SubscribeNFT.initialize.selector,
             profileId,

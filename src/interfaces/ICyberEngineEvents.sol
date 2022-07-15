@@ -21,15 +21,11 @@ interface ICyberEngineEvents {
     /**
      * @notice Emitted when a profile middleware has been set.
      *
-     * @param profileAddress The profile address.
+     * @param namespace The namespace address.
      * @param mw The middleware address.
      * @param returnData The profile middeware data.
      */
-    event SetProfileMw(
-        address indexed profileAddress,
-        address mw,
-        bytes returnData
-    );
+    event SetProfileMw(address indexed namespace, address mw, bytes returnData);
 
     /**
      * @notice Emitted when a subscription middleware has been allowed.

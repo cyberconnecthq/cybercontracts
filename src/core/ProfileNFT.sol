@@ -101,6 +101,10 @@ contract ProfileNFT is
             address subBeacon,
             address essenceBeacon
         ) = IProfileDeployer(msg.sender).profileParams();
+        // TODO: test deployer
+        require(engine != address(0), "ENGINE_NOT_SET");
+        require(subBeacon != address(0), "SUBSCRIBE_BEACON_NOT_SET");
+        require(essenceBeacon != address(0), "ESSENCE_BEACON_NOT_SET");
         ENGINE = engine;
         SUBSCRIBE_BEACON = subBeacon;
         ESSENCE_BEACON = essenceBeacon;
@@ -123,13 +127,12 @@ contract ProfileNFT is
         string calldata name,
         string calldata symbol
     ) external initializer {
+        require(_owner != address(0), "ZERO_ADDRESS");
+        _namespaceOwner = _owner;
         CyberNFTBase._initialize(name, symbol);
         ReentrancyGuard.__ReentrancyGuard_init();
-
-        _namespaceOwner = _owner;
-        emit Initialize(_owner);
-        // start with paused
         _pause();
+        emit Initialize(_owner);
     }
 
     /// @inheritdoc IProfileNFT
@@ -319,17 +322,17 @@ contract ProfileNFT is
         }
     }
 
-    /// @inheritdoc IProfileNFT
+    // TODO: remove
     function setAnimationTemplate(string calldata template)
         external
         onlyNamespaceOwner
     {
-        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
-
         emit SetAnimationTemplate(template);
+        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
     }
 
     function setNamespaceOwner(address owner) external onlyNamespaceOwner {
+        require(owner != address(0), "ZERO_ADDRESS");
         address preOwner = _namespaceOwner;
         _namespaceOwner = owner;
 
@@ -342,6 +345,7 @@ contract ProfileNFT is
         override
         onlyNamespaceOwner
     {
+        require(descriptor != address(0), "ZERO_ADDRESS");
         _nftDescriptor = descriptor;
         emit SetNFTDescriptor(descriptor);
     }
@@ -717,7 +721,7 @@ contract ProfileNFT is
     ) internal returns (uint256) {
         _requireMinted(params.profileId);
 
-        (uint256 tokenID, address deployedEssenceNFT) = Actions.collect(
+        (uint256 tokenId, address deployedEssenceNFT) = Actions.collect(
             DataTypes.CollectData(
                 collector,
                 params.profileId,
@@ -729,7 +733,13 @@ contract ProfileNFT is
             _essenceByIdByProfileId
         );
 
-        emit CollectEssence(collector, params.profileId, preData, postData);
+        emit CollectEssence(
+            collector,
+            tokenId,
+            params.profileId,
+            preData,
+            postData
+        );
 
         if (deployedEssenceNFT != address(0)) {
             emit DeployEssenceNFT(
@@ -738,6 +748,7 @@ contract ProfileNFT is
                 deployedEssenceNFT
             );
         }
+        return tokenId;
     }
 
     function _createProfile(DataTypes.CreateProfileParams calldata params)

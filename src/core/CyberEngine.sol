@@ -137,28 +137,25 @@ contract CyberEngine is
         );
 
         require(
-            byteName.length <= Constants._MAX_NAMESPACE_LENGTH,
+            byteName.length <= Constants._MAX_NAME_LENGTH,
             "NAME_INVALID_LENGTH"
         );
         require(
             byteSymbol.length <= Constants._MAX_SYMBOL_LENGTH,
             "SYMBOL_INVALID_LENGTH"
         );
+
+        _namespaceInfo[params.addrs.profileProxy].name = params.name;
+        _namespaceByName[salt] = params.addrs.profileProxy;
+
         {
-            ISubscribeDeployer(params.addrs.subscribeFactory).setSubParameters(
-                params.addrs.profileProxy
-            );
             address subscribeImpl = ISubscribeDeployer(
                 params.addrs.subscribeFactory
-            ).deploy(salt);
+            ).deploySubscribe(salt, params.addrs.profileProxy);
 
-            IEssenceDeployer(params.addrs.essenceFactory).setEssParameters(
-                params.addrs.profileProxy
-            );
             address essImpl = IEssenceDeployer(params.addrs.essenceFactory)
-                .deploy(salt);
+                .deployEssence(salt, params.addrs.profileProxy);
 
-            // TODO: test in integration
             address subBeacon = address(
                 new UpgradeableBeacon{ salt: salt }(
                     subscribeImpl,
@@ -169,13 +166,8 @@ contract CyberEngine is
                 new UpgradeableBeacon{ salt: salt }(essImpl, address(this))
             );
 
-            IProfileDeployer(params.addrs.profileFactory).setProfileParameters(
-                address(this),
-                subBeacon,
-                essBeacon
-            );
             address profileImpl = IProfileDeployer(params.addrs.profileFactory)
-                .deploy(salt);
+                .deployProfile(salt, address(this), subBeacon, essBeacon);
 
             bytes memory data = abi.encodeWithSelector(
                 ProfileNFT.initialize.selector,
@@ -192,9 +184,6 @@ contract CyberEngine is
             profileProxy == params.addrs.profileProxy,
             "PROFILE_PROXY_WRONG_ADDRESS"
         );
-
-        _namespaceInfo[params.addrs.profileProxy].name = params.name;
-        _namespaceByName[salt] = params.addrs.profileProxy;
 
         emit CreateNamespace(profileProxy, params.name, params.symbol);
     }
