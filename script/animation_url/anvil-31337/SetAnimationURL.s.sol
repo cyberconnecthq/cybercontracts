@@ -7,13 +7,15 @@ import { ProfileNFT } from "../../../src/core/ProfileNFT.sol";
 import { Link3ProfileDescriptor } from "../../../src/periphery/Link3ProfileDescriptor.sol";
 import { Create2Deployer } from "../../libraries/Create2Deployer.sol";
 import { LibDeploy } from "../../libraries/LibDeploy.sol";
+import { DeploySetting } from "../../libraries/DeploySetting.sol";
 
-contract SetAnimationURL is Script {
-    address internal link3Profile = 0x0Ea8A473f149c03E38C5787158276854489fD0b1;
+contract SetAnimationURL is Script, DeploySetting {
+    address internal link3Profile = 0x5529B9C57C9eC39d5E38AbC72e15Dd0dEEF6C37C;
     string internal animationUrl =
-        "https://cyberconnect.mypinata.cloud/ipfs/bafkreiejm7as3aw6en6vxejxma55eaasfkbsc3ii5vacahudgqf5wh7pfu";
+        "https://cyberconnect.mypinata.cloud/ipfs/bafkreibu64g4mx4iktos2iln6pyy563ttmxved2w2alw7jl4dofgcs7oge";
 
     function run() external {
+        _setDeployParams();
         // make sure only on anvil
         address deployerContract = 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512;
         require(block.chainid == 31337, "ONLY_ANVIL");
@@ -24,7 +26,8 @@ contract SetAnimationURL is Script {
             deployerContract,
             true,
             animationUrl,
-            link3Profile
+            link3Profile,
+            deployParams.link3Owner
         );
 
         vm.stopBroadcast();
