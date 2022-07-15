@@ -14,7 +14,7 @@ import { Constants } from "./Constants.sol";
 import { LibString } from "./LibString.sol";
 
 library Actions {
-    // same as IProfielNFTEvents to trick etherscan ABI
+    // HACK: same as IProfielNFTEvents to trick etherscan ABI
     event DeploySubscribeNFT(
         uint256 indexed profileId,
         address indexed subscribeNFT
