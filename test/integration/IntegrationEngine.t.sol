@@ -63,7 +63,7 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
         vm.startPrank(namespaceOwner);
 
         link5Profile.setNFTDescriptor(address(new MockLink5NFTDescriptor()));
-        
+
         assertEq(link5Profile.tokenURI(profileIdBob), "Link5TokenURI");
         vm.stopPrank();
 
@@ -121,59 +121,6 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
         assertEq(link5Profile.tokenURI(profileIdCarlyTwo), "Link5TokenURI");
 
         assertEq(link5Profile.tokenURI(profileIdBob), "Link5TokenURI");
-        vm.stopPrank();
-
-        // Carly creates another profile in Link5
-        vm.startPrank(carly);
-        bytes memory dataCarly = new bytes(0);
-        uint256 profileIdCarly = link5Profile.createProfile(
-            DataTypes.CreateProfileParams(
-                carly,
-                "realCarly",
-                "carly'avatar",
-                "carly's metadata"
-            ),
-            dataCarly,
-            dataCarly
-        );
-        assertEq(profileIdCarly, 2);
-        assertEq(link5Profile.totalSupply(), 2);
-        assertEq(link5Profile.balanceOf(bob), 1);
-        assertEq(link5Profile.ownerOf(profileIdCarly), carly);
-        vm.stopPrank();
-
-        // set NFT descriptor for Carly
-
-        vm.startPrank(namespaceOwner);
-
-        link5Profile.setNFTDescriptor(address(new MockLink5NFTDescriptor()));
-        assertEq(link5Profile.tokenURI(profileIdCarly), "Link5TokenURI");
-        vm.stopPrank();
-
-        // Carly creates another profile under their address
-        vm.startPrank(carly);
-        bytes memory dataCarlyTwo = new bytes(0);
-        uint256 profileIdCarlyTwo = link5Profile.createProfile(
-            DataTypes.CreateProfileParams(
-                carly,
-                "Carly Second",
-                "carly Second'avatar",
-                "carly Second's metadata"
-            ),
-            dataCarlyTwo,
-            dataCarlyTwo
-        );
-        assertEq(profileIdCarlyTwo, 3);
-        assertEq(link5Profile.totalSupply(), 3);
-        assertEq(link5Profile.balanceOf(carly), 2);
-        assertEq(link5Profile.ownerOf(profileIdCarlyTwo), carly);
-        vm.stopPrank();
-
-        // set NFT descriptor for Carly's second profile
-        vm.startPrank(namespaceOwner);
-
-        link5Profile.setNFTDescriptor(address(new MockLink5NFTDescriptor()));
-        assertEq(link5Profile.tokenURI(profileIdCarlyTwo), "Link5TokenURI");
         vm.stopPrank();
     }
 }
