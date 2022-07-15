@@ -638,6 +638,10 @@ contract ProfileNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
+        require(
+            address(_nftDescriptor) != address(0),
+            "NFT_DESCRIPTOR_NOT_SET"
+        );
         string memory handle = _profileById[tokenId].handle;
         address subscribeNFT = _subscribeByProfileId[tokenId].subscribeNFT;
         uint256 subscribers;

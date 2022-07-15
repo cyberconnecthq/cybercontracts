@@ -18,6 +18,7 @@ import { Constants } from "../src/libraries/Constants.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 import { MockProfile } from "./utils/MockProfile.sol";
+import { MockLink5NFTDescriptor } from "./utils/MockLink5NFTDescriptor.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { EssenceNFT } from "../src/core/EssenceNFT.sol";
@@ -90,6 +91,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
         assertEq(profileId, 1);
         assertEq(profile.nonces(bob), 0);
+        assertEq(profile.getNamespaceOwner(), gov);
     }
 
     function testCannotSubscribeEmptyList() public {
@@ -783,5 +785,17 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
         assertEq(profile.getApproved(profileId), alice);
+    }
+
+    function testCannotGetTokenURIWithoutDescriptor() public {
+        vm.expectRevert("NFT_DESCRIPTOR_NOT_SET");
+        profile.tokenURI(profileId);
+    }
+
+    function testTokenURIWithDescriptor() public {
+        address descriptor = address(new MockLink5NFTDescriptor());
+        vm.prank(gov);
+        profile.setNFTDescriptor(descriptor);
+        assertEq(profile.tokenURI(profileId), "Link5TokenURI");
     }
 }
