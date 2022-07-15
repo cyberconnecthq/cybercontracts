@@ -44,7 +44,7 @@ contract Treasury is ITreasury {
         return _treasuryAddress;
     }
 
-    function getTreasuryFee() external view override returns (uint16) {
+    function getTreasuryFee() external view override returns (uint256) {
         return _treasuryFee;
     }
 }
