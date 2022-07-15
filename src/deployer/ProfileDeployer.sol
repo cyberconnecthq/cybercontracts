@@ -16,7 +16,7 @@ contract ProfileDeployer is IProfileDeployer {
         address engine,
         address subscribeBeacon,
         address essenceBeacon
-    ) public override returns (address addr) {
+    ) external override returns (address addr) {
         profileParams.engine = engine;
         profileParams.essenceBeacon = essenceBeacon;
         profileParams.subBeacon = subscribeBeacon;

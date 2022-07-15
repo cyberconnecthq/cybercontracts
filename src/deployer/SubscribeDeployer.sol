@@ -12,7 +12,7 @@ contract SubscribeDeployer is ISubscribeDeployer {
     DataTypes.SubscribeDeployParameters public override subParams;
 
     function deploySubscribe(bytes32 salt, address profileProxy)
-        public
+        external
         override
         returns (address addr)
     {

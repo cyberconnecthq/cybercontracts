@@ -12,8 +12,6 @@ import { Initializable } from "../upgradeability/Initializable.sol";
 
 // Sequential mint ERC721
 abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
-    bytes32 internal constant EIP712_REVISION_HASH = keccak256("1");
-
     uint256 internal _totalCount = 0;
     mapping(address => uint256) public nonces;
 
