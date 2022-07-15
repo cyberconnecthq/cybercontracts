@@ -13,7 +13,6 @@ contract DeployScript is Script, DeploySetting {
     function run() external {
         _setDeployParams();
 
-        // require(deployerContract != address(0), "DEPLOYER_CONTRACT_NOT_SET");
         console.log("vm.getNonce", vm.getNonce(msg.sender));
         vm.startBroadcast();
 
