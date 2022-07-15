@@ -8,5 +8,4 @@ abstract contract CyberBoxNFTStorage {
 
     // storage
     address public signer;
-    address public owner;
 }

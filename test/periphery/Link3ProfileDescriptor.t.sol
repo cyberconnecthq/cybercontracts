@@ -20,12 +20,11 @@ contract Link3ProfileDescriptorTest is Test {
     string animationTemplate = "https://animation.example.com";
 
     function setUp() public {
-        Link3ProfileDescriptor descriptorImpl = new Link3ProfileDescriptor(
-            owner
-        );
+        Link3ProfileDescriptor descriptorImpl = new Link3ProfileDescriptor();
         bytes memory data = abi.encodeWithSelector(
             Link3ProfileDescriptor.initialize.selector,
-            animationTemplate
+            animationTemplate,
+            owner
         );
         ERC1967Proxy proxy = new ERC1967Proxy(address(descriptorImpl), data);
         descriptor = Link3ProfileDescriptor(address(proxy));
@@ -36,7 +35,7 @@ contract Link3ProfileDescriptorTest is Test {
     }
 
     function testCannotSetAnimationTemplateNonProfile() public {
-        vm.expectRevert("ONLY_OWNER");
+        vm.expectRevert("UNAUTHORIZED");
         vm.prank(address(0));
         descriptor.setAnimationTemplate(animationTemplate);
     }
@@ -48,6 +47,11 @@ contract Link3ProfileDescriptorTest is Test {
             descriptor.animationTemplate(),
             "https://new.animation.example.com"
         );
+    }
+
+    function testCannotSetAnimationTemplateAsNonOwner() public {
+        vm.expectRevert("UNAUTHORIZED");
+        descriptor.setAnimationTemplate("new_ani_template");
     }
 
     function testTokenURI() public {

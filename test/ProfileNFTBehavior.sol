@@ -37,6 +37,13 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
         uint256 indexed id
     );
     address descriptor = address(0x233);
+    DataTypes.CreateProfileParams internal createProfileDataAlice =
+        DataTypes.CreateProfileParams(
+            alice,
+            "alice",
+            "https://example.com/alice.jpg",
+            "metadata"
+        );
 
     function setUp() public {
         vm.etch(descriptor, address(this).code);
@@ -74,12 +81,6 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
         profile.setNFTDescriptor(descriptor);
     }
 
-    function testCannotSetAnimationTemplateAsNonGov() public {
-        vm.expectRevert("ONLY_NAMESPACE_OWNER");
-        vm.prank(alice);
-        profile.setAnimationTemplate("new_ani_template");
-    }
-
     function testSetDescriptorGov() public {
         vm.prank(gov);
         vm.expectEmit(true, false, false, true);
@@ -88,84 +89,14 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
         profile.setNFTDescriptor(descriptor);
     }
 
-    function testSetAnimationTemplateGov() public {
-        vm.startPrank(gov);
-        profile.setNFTDescriptor(descriptor);
+    function testRegisterTwiceWillNotChangePrimaryProfile() public {
+        profile.createProfile(createProfileDataAlice);
+        assertEq(profile.getHandleByProfileId(1), "alice");
+        assertEq(profile.getPrimaryProfile(alice), 1);
 
-        string memory template = "new_ani_template";
-        vm.mockCall(
-            profile.getNFTDescriptor(),
-            abi.encodeWithSelector(
-                IProfileNFTDescriptor.setAnimationTemplate.selector,
-                template
-            ),
-            abi.encode(1)
-        );
-        vm.expectEmit(true, false, false, true);
-        emit SetAnimationTemplate(template);
-
-        profile.setAnimationTemplate(template);
+        createProfileDataAlice.handle = "alice2";
+        profile.createProfile(createProfileDataAlice);
+        assertEq(profile.getHandleByProfileId(2), "alice2");
+        assertEq(profile.getPrimaryProfile(alice), 1);
     }
-
-    // TODO: etch is not working well with mockCall
-    // function testRegisterTwiceWillNotChangePrimaryProfile() public {
-    //     // register first time
-    //     address charlie = vm.addr(1);
-    //     rolesAuthority.setUserRole(alice, Constants._PROFILE_GOV_ROLE, true);
-    //     vm.prank(alice);
-    //     profile.setSigner(charlie);
-
-    //     // change block timestamp to make deadline valid
-    //     vm.warp(50);
-    //     uint256 deadline = 100;
-    //     bytes32 digest = profile.hashTypedDataV4(
-    //         keccak256(
-    //             abi.encode(
-    //                 Constants._CREATE_PROFILE_TYPEHASH,
-    //                 bob,
-    //                 keccak256(bytes(handle)),
-    //                 keccak256(bytes(avatar)),
-    //                 keccak256(bytes(metadata)),
-    //                 0,
-    //                 deadline
-    //             )
-    //         )
-    //     );
-    //     (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-
-    //     vm.mockCall(
-    //         profileAddress,
-    //         abi.encodeWithSelector(
-    //             IProfileNFT.createProfile.selector,
-    //             DataTypes.CreateProfileParams(bob, handle, "", "")
-    //         ),
-    //         // return false here to indicate that the address has primary profile set already
-    //         abi.encode(2, false)
-    //     );
-    //     vm.mockCall(
-    //         profileAddress,
-    //         abi.encodeWithSelector(
-    //             IProfileNFT.setPrimaryProfile.selector,
-    //             bob,
-    //             1
-    //         ),
-    //         abi.encode(0)
-    //     );
-    //     assertEq(profile.nonces(bob), 0);
-
-    //     vm.expectEmit(true, true, false, true);
-    //     emit Register(bob, 1, handle, avatar, metadata);
-
-    //     vm.expectEmit(true, true, false, true);
-    //     emit SetPrimaryProfile(bob, 1);
-
-    //     assertEq(
-    //         profile.register{ value: Constants._INITIAL_FEE_TIER2 }(
-    //             DataTypes.CreateProfileParams(bob, handle, avatar, metadata),
-    //             DataTypes.EIP712Signature(v, r, s, deadline)
-    //         ),
-    //         1
-    //     );
-    //     assertEq(profile.nonces(bob), 1);
-    // }
 }

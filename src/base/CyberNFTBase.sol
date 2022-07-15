@@ -78,6 +78,6 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
         override
         returns (string memory)
     {
-        return _name;
+        return name;
     }
 }
