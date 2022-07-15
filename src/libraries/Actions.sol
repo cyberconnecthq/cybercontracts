@@ -14,6 +14,12 @@ import { Constants } from "./Constants.sol";
 import { LibString } from "./LibString.sol";
 
 library Actions {
+    // same as IProfielNFTEvents
+    event DeploySubscribeNFT(
+        uint256 indexed profileId,
+        address indexed subscribeNFT
+    );
+
     function subscribe(
         DataTypes.SubscribeData calldata data,
         mapping(uint256 => DataTypes.SubscribeStruct)
@@ -42,10 +48,8 @@ library Actions {
                     _subscribeByProfileId,
                     _profileById
                 );
-                // TODO check gas
-                //deployedSubscribeNFT = subscribeNFT;
+                emit DeploySubscribeNFT(data.profileIds[i], subscribeNFT);
             }
-            // run middleware before subscribe
             if (subscribeMw != address(0)) {
                 ISubscribeMiddleware(subscribeMw).preProcess(
                     data.profileIds[i],
