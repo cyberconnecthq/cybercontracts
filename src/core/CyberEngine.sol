@@ -189,16 +189,6 @@ contract CyberEngine is
     }
 
     /**
-     * @notice Contract version number.
-     *
-     * @return uint256 The version number.
-     * @dev This contract can be upgraded with UUPS upgradeability.
-     */
-    function version() external pure virtual override returns (uint256) {
-        return _VERSION;
-    }
-
-    /**
      * @notice Sets the profile middleware.
      *
      * @param namespace The namespace address.
@@ -227,7 +217,12 @@ contract CyberEngine is
     }
 
     /// @inheritdoc ICyberEngine
-    function isEssenceMwAllowed(address mw) external view returns (bool) {
+    function isEssenceMwAllowed(address mw)
+        external
+        view
+        override
+        returns (bool)
+    {
         return _essenceMwAllowlist[mw];
     }
 
@@ -242,7 +237,12 @@ contract CyberEngine is
     }
 
     /// @inheritdoc ICyberEngine
-    function isProfileMwAllowed(address mw) external view returns (bool) {
+    function isProfileMwAllowed(address mw)
+        external
+        view
+        override
+        returns (bool)
+    {
         return _profileMwAllowlist[mw];
     }
 
@@ -264,6 +264,15 @@ contract CyberEngine is
         returns (address)
     {
         return _namespaceInfo[namespace].profileMw;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                         EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /// @inheritdoc IUpgradeable
+    function version() external pure virtual override returns (uint256) {
+        return _VERSION;
     }
 
     /*//////////////////////////////////////////////////////////////

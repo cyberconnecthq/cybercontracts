@@ -356,20 +356,13 @@ contract ProfileNFT is
         _setOperatorApproval(profileId, operator, approved);
     }
 
-    /**
-     * @notice Sets the operator approval with a signature.
-     *
-     * @param profileId The profile ID.
-     * @param operator The operator address.
-     * @param approved The new state of the approval.
-     * @param sig The EIP712 signature.
-     */
+    /// @inheritdoc IProfileNFT
     function setOperatorApprovalWithSig(
         uint256 profileId,
         address operator,
         bool approved,
         DataTypes.EIP712Signature calldata sig
-    ) external {
+    ) external override {
         address owner = ownerOf(profileId);
         _requiresExpectedSigner(
             _hashTypedDataV4(
@@ -399,19 +392,12 @@ contract ProfileNFT is
         _setMetadata(profileId, metadata);
     }
 
-    /**
-     * @notice Sets the profile metadata with a signture.
-     *
-     * @param profileId The profile ID.
-     * @param metadata The new metadata to be set.
-     * @param sig The EIP712 signature.
-     * @dev Only owner's signature works.
-     */
+    /// @inheritdoc IProfileNFT
     function setMetadataWithSig(
         uint256 profileId,
         string calldata metadata,
         DataTypes.EIP712Signature calldata sig
-    ) external {
+    ) external override {
         address owner = ownerOf(profileId);
         _requiresExpectedSigner(
             _hashTypedDataV4(
@@ -432,11 +418,12 @@ contract ProfileNFT is
     }
 
     // TODO: withSig
+    /// @inheritdoc IProfileNFT
     function setSubscribeMw(
         uint256 profileId,
         address mw,
         bytes calldata prepareData
-    ) external onlyProfileOwner(profileId) {
+    ) external override onlyProfileOwner(profileId) {
         require(
             mw == address(0) || ICyberEngine(ENGINE).isSubscribeMwAllowed(mw),
             "SUB_MW_NOT_ALLOWED"
@@ -465,10 +452,11 @@ contract ProfileNFT is
 
     // TODO: withSig
     // TODO: integration test
+    /// @inheritdoc IProfileNFT
     function setSubscribeTokenURI(
         uint256 profileId,
         string calldata subscribeTokenURI
-    ) external onlyProfileOwnerOrOperator(profileId) {
+    ) external override onlyProfileOwnerOrOperator(profileId) {
         _subscribeByProfileId[profileId].tokenURI = subscribeTokenURI;
         emit SetSubscribeTokenURI(profileId, subscribeTokenURI);
     }
@@ -479,17 +467,18 @@ contract ProfileNFT is
 
     // TODO: UUPS base contracts for functions
     // TODO: write a test for upgrade profile nft
+    /// @inheritdoc IUpgradeable
     function version() external pure virtual override returns (uint256) {
         return _VERSION;
     }
 
-    /**
-     * @notice Gets a profile subscribe middleware address.
-     *
-     * @param profileId The profile id.
-     * @return address The middleware address.
-     */
-    function getSubscribeMw(uint256 profileId) external view returns (address) {
+    /// @inheritdoc IProfileNFT
+    function getSubscribeMw(uint256 profileId)
+        external
+        view
+        override
+        returns (address)
+    {
         return _subscribeByProfileId[profileId].subscribeMw;
     }
 
@@ -503,6 +492,7 @@ contract ProfileNFT is
         return _addressToPrimaryProfile[user];
     }
 
+    /// @inheritdoc IProfileNFT
     function getSubscribeNFT(uint256 profileId)
         external
         view
@@ -512,6 +502,7 @@ contract ProfileNFT is
         return _subscribeByProfileId[profileId].subscribeNFT;
     }
 
+    /// @inheritdoc IProfileNFT
     function getSubscribeNFTTokenURI(uint256 profileId)
         external
         view
@@ -543,6 +534,7 @@ contract ProfileNFT is
         return _profileById[profileId].avatar;
     }
 
+    /// @inheritdoc IProfileNFT
     function getEssenceNFT(uint256 profileId, uint256 essenceId)
         external
         view
@@ -552,6 +544,7 @@ contract ProfileNFT is
         return _essenceByIdByProfileId[profileId][essenceId].essenceNFT;
     }
 
+    /// @inheritdoc IProfileNFT
     function getEssenceNFTTokenURI(uint256 profileId, uint256 essenceId)
         external
         view

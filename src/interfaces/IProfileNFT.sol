@@ -207,11 +207,59 @@ interface IProfileNFT is IProfileNFTEvents {
     ) external;
 
     /**
+     * @notice Sets the operator approval with a signature.
+     *
+     * @param profileId The profile ID.
+     * @param operator The operator address.
+     * @param approved The new state of the approval.
+     * @param sig The EIP712 signature.
+     */
+    function setOperatorApprovalWithSig(
+        uint256 profileId,
+        address operator,
+        bool approved,
+        DataTypes.EIP712Signature calldata sig
+    ) external;
+
+    /**
+     * @notice Sets the profile metadata with a signture.
+     *
+     * @param profileId The profile ID.
+     * @param metadata The new metadata to be set.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     */
+    function setMetadataWithSig(
+        uint256 profileId,
+        string calldata metadata,
+        DataTypes.EIP712Signature calldata sig
+    ) external;
+
+    function setSubscribeMw(
+        uint256 profileId,
+        address mw,
+        bytes calldata prepareData
+    ) external;
+
+    function setSubscribeTokenURI(
+        uint256 profileId,
+        string calldata subscribeTokenURI
+    ) external;
+
+    /**
      * @notice Sets the primary profile for the user.
      *
      * @param profileId The profile ID that is set to be primary.
      */
     function setPrimaryProfile(uint256 profileId) external;
+
+    /**
+     * @notice Gets a profile subscribe middleware address.
+     *
+     * @param profileId The profile id.
+     * @return address The middleware address.
+     */
+    function getSubscribeMw(uint256 profileId) external view returns (address);
 
     /**
      * @notice Gets the primary profile of the user.
