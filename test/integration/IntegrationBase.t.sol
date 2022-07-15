@@ -50,8 +50,9 @@ contract IntegrationBaseTest is TestIntegrationBase, IProfileNFTEvents {
         // check bob profile ownership
         assertEq(profile.ownerOf(bobProfileId), to);
 
-        // TODO check tokenURI
-        // assertEq(profile.tokenURI(bobProfileId), bobUri);
+        // check tokenURI should revert before setting descriptor
+        vm.expectRevert("NFT_DESCRIPTOR_NOT_SET");
+        profile.tokenURI(bobProfileId);
 
         assertEq(profile.getPrimaryProfile(to), bobProfileId);
         assertEq(profile.getPrimaryProfile(to), bobProfileId);

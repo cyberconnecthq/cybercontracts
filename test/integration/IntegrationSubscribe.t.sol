@@ -45,12 +45,12 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
             address(profile),
             nonce
         );
-        // alice subscribes to bob
-        // TODO:
-        // vm.expectEmit(true, true, false, true);
-        // emit DeploySubscribeNFT(ids[0], subscribeProxy);
-        // vm.expectEmit(true, false, false, true);
-        // emit Subscribe(alice, ids, data, data);
+
+        vm.expectEmit(true, true, false, true, address(profile));
+        emit DeploySubscribeNFT(ids[0], subscribeProxy);
+        vm.expectEmit(true, false, false, true, address(profile));
+        emit Subscribe(alice, ids, data, data);
+
         vm.prank(alice);
         uint256 nftid = profile.subscribe(
             DataTypes.SubscribeParams(ids),
@@ -66,9 +66,8 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(alice));
 
         // alice subscribes again to bob
-        // TODO
-        // vm.expectEmit(true, false, false, true);
-        // emit Subscribe(alice, ids, data, data);
+        vm.expectEmit(true, false, false, true, address(profile));
+        emit Subscribe(alice, ids, data, data);
         vm.prank(alice);
         nftid = profile.subscribe(DataTypes.SubscribeParams(ids), data, data)[
             0

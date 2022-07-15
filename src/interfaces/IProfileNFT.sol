@@ -167,13 +167,6 @@ interface IProfileNFT is IProfileNFTEvents {
     function getNFTDescriptor() external view returns (address);
 
     /**
-     * @notice Sets the profile NFT animation template.
-     *
-     * @param template The new template.
-     */
-    function setAnimationTemplate(string calldata template) external;
-
-    /**
      * @notice Gets the profile avatar.
      *
      * @param profileId The profile ID.

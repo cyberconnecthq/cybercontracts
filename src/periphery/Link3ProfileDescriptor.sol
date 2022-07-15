@@ -3,6 +3,7 @@
 pragma solidity 0.8.14;
 
 import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
+import { Owned } from "../dependencies/solmate/Owned.sol";
 
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 
@@ -11,33 +12,24 @@ import { LibString } from "../libraries/LibString.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 import { Initializable } from "../upgradeability/Initializable.sol";
-
 import { Link3ProfileDescriptorStorage } from "../storages/Link3ProfileDescriptorStorage.sol";
 
 /**
  * @title Profile NFT Descriptor
- * @author CyberConnect
+ * @author Link3
  * @notice This contract is used to create profile NFT token uri.
  */
-// TODO: storage
 contract Link3ProfileDescriptor is
     Link3ProfileDescriptorStorage,
+    Owned,
     IProfileNFTDescriptor,
     Initializable
 {
     /*//////////////////////////////////////////////////////////////
-                                STATES
-    //////////////////////////////////////////////////////////////*/
-
-    address public immutable OWNER; // solhint-disable-line
-
-    /*//////////////////////////////////////////////////////////////
                                  CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address owner) {
-        require(owner != address(0), "ZERO_ADDRESS");
-        OWNER = owner;
+    constructor() {
         _disableInitializers();
     }
 
@@ -50,16 +42,20 @@ contract Link3ProfileDescriptor is
      *
      * @param _animationTemplate Template animation url to set for the Profile NFT.
      */
-    function initialize(string calldata _animationTemplate)
+    function initialize(string calldata _animationTemplate, address _owner)
         external
         initializer
     {
         animationTemplate = _animationTemplate;
+        Owned.__Owned_Init(_owner);
     }
 
     /// @inheritdoc IProfileNFTDescriptor
-    function setAnimationTemplate(string calldata template) external override {
-        require(msg.sender == OWNER, "ONLY_OWNER");
+    function setAnimationTemplate(string calldata template)
+        external
+        override
+        onlyOwner
+    {
         animationTemplate = template;
     }
 

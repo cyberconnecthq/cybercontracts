@@ -58,15 +58,14 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
             nonce
         );
 
-        // TODO
-        // vm.expectEmit(true, true, false, true);
-        // emit DeploySubscribeNFT(bobProfileId, address(subscribeProxy));
+        vm.expectEmit(true, true, false, true, address(profile));
+        emit DeploySubscribeNFT(bobProfileId, address(subscribeProxy));
 
-        // vm.expectEmit(true, true, true, true);
-        // emit Transfer(address(0), alice, 1);
+        vm.expectEmit(true, true, true, true, address(subscribeProxy));
+        emit Transfer(address(0), alice, 1);
 
-        // vm.expectEmit(true, false, false, true);
-        // emit Subscribe(alice, ids, data, data);
+        vm.expectEmit(true, false, false, true, address(profile));
+        emit Subscribe(alice, ids, data, data);
 
         vm.prank(alice);
         profile.subscribe(DataTypes.SubscribeParams(ids), data, data);

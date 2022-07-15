@@ -4,6 +4,7 @@ pragma solidity 0.8.14;
 
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
+import { Owned } from "../dependencies/solmate/Owned.sol";
 
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { ICyberBoxEvents } from "../interfaces/ICyberBoxEvents.sol";
@@ -23,20 +24,17 @@ contract CyberBoxNFT is
     Pausable,
     CyberNFTBase,
     UUPSUpgradeable,
+    Owned,
     CyberBoxNFTStorage,
     IUpgradeable,
     ICyberBoxEvents
 {
     /*//////////////////////////////////////////////////////////////
-                              MODIFIERS
+                                 CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    /**
-     * @notice Checks that sender is owner address.
-     */
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only Owner");
-        _;
+    constructor() {
+        _disableInitializers();
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -55,8 +53,8 @@ contract CyberBoxNFT is
         string calldata _symbol_
     ) external initializer {
         CyberNFTBase._initialize(_name_, _symbol_);
+        Owned.__Owned_Init(_owner);
         signer = _owner;
-        owner = _owner;
         // start with paused
         _pause();
     }
@@ -166,19 +164,5 @@ contract CyberBoxNFT is
         signer = _signer;
 
         emit SetSigner(preSigner, _signer);
-    }
-
-    /**
-     * @notice Sets the new owner address.
-     *
-     * @param _owner The owner address.
-     * @dev The address can not be zero address.
-     */
-    function setOwner(address _owner) external onlyOwner {
-        require(_owner != address(0), "zero address owner");
-        address preOwner = owner;
-        owner = _owner;
-
-        emit SetOwner(preOwner, _owner);
     }
 }

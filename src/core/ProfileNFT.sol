@@ -300,15 +300,6 @@ contract ProfileNFT is
         }
     }
 
-    // TODO: remove
-    function setAnimationTemplate(string calldata template)
-        external
-        onlyNamespaceOwner
-    {
-        emit SetAnimationTemplate(template);
-        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
-    }
-
     /// @inheritdoc IProfileNFT
     function setNamespaceOwner(address owner)
         external
@@ -465,8 +456,6 @@ contract ProfileNFT is
                          EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
 
-    // TODO: UUPS base contracts for functions
-    // TODO: write a test for upgrade profile nft
     /// @inheritdoc IUpgradeable
     function version() external pure virtual override returns (uint256) {
         return _VERSION;
@@ -615,6 +604,10 @@ contract ProfileNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
+        require(
+            address(_nftDescriptor) != address(0),
+            "NFT_DESCRIPTOR_NOT_SET"
+        );
         string memory handle = _profileById[tokenId].handle;
         address subscribeNFT = _subscribeByProfileId[tokenId].subscribeNFT;
         uint256 subscribers;
