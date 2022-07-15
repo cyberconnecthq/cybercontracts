@@ -3,7 +3,7 @@ name: test
 on: [push]
 
 env:
-  FOUNDRY_PROFILE: ci
+  FOUNDRY_PROFILE: default
 
 jobs:
   check:
