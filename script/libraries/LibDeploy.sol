@@ -459,9 +459,9 @@ library LibDeploy {
             LINK3_NAME,
             LINK3_SYMBOL,
             LINK3_SALT,
-            addrs.essFac,
+            addrs.profileFac,
             addrs.subFac,
-            addrs.profileFac
+            addrs.essFac
         );
         if (params.writeFile) {
             _write(vm, "Link3 Profile", addrs.link3Profile);
@@ -677,40 +677,55 @@ library LibDeploy {
         );
     }
 
+    function computeProfileProxyAddr(
+        address engine,
+        address owner,
+        string memory name,
+        string memory symbol,
+        bytes32 salt,
+        address profileFac
+    ) internal returns (address profileProxy) {
+        address profileImpl;
+        profileImpl = _computeAddress(
+            type(ProfileNFT).creationCode,
+            salt,
+            profileFac
+        );
+
+        bytes memory data = abi.encodeWithSelector(
+            ProfileNFT.initialize.selector,
+            owner,
+            name,
+            symbol
+        );
+        profileProxy = _computeAddress(
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(profileImpl, data)
+            ),
+            salt,
+            engine
+        );
+    }
+
     function createNamespace(
         address engine,
         address owner,
         string memory name,
         string memory symbol,
         bytes32 salt,
-        address essFac,
+        address profileFac,
         address subFac,
-        address profileFac
+        address essFac
     ) internal returns (address profileProxy) {
-        address profileImpl;
-        {
-            profileImpl = _computeAddress(
-                type(ProfileNFT).creationCode,
-                salt,
-                profileFac
-            );
-
-            bytes memory data = abi.encodeWithSelector(
-                ProfileNFT.initialize.selector,
-                owner,
-                name,
-                symbol
-            );
-            profileProxy = _computeAddress(
-                abi.encodePacked(
-                    type(ERC1967Proxy).creationCode,
-                    abi.encode(profileImpl, data)
-                ),
-                salt,
-                engine
-            );
-        }
-
+        profileProxy = computeProfileProxyAddr(
+            engine,
+            owner,
+            name,
+            symbol,
+            salt,
+            profileFac
+        );
         address deployed = CyberEngine(engine).createNamespace(
             DataTypes.CreateNamespaceParams(
                 name,

@@ -14,6 +14,7 @@ abstract contract TestIntegrationBase is Test {
     address internal immutable link3Signer;
     address internal constant alice = address(0xDEADA11CE);
     address internal constant bob = address(0xDEADB0B);
+    address internal constant carly = address(0xDEADCA11);
 
     ProfileNFT profile;
     Link3ProfileDescriptor profileDescriptor;
