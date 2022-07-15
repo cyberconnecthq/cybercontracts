@@ -229,7 +229,7 @@ contract ProfileNFT is
         bytes calldata postData,
         address sender,
         DataTypes.EIP712Signature calldata sig
-    ) external returns (uint256 tokenId) {
+    ) external override returns (uint256 tokenId) {
         _requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(

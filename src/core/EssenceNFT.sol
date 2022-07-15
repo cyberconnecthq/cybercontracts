@@ -48,14 +48,14 @@ contract EssenceNFT is
         uint256 essenceId,
         string calldata name,
         string calldata symbol
-    ) external initializer {
+    ) external override initializer {
         _profileId = profileId;
         _essenceId = essenceId;
         CyberNFTBase._initialize(name, symbol);
     }
 
     /// @inheritdoc IEssenceNFT
-    function mint(address to) external returns (uint256) {
+    function mint(address to) external override returns (uint256) {
         require(msg.sender == PROFILE, "ONLY_PROFILE");
         return super._mint(to);
     }
