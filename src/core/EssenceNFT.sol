@@ -48,17 +48,30 @@ contract EssenceNFT is
         uint256 essenceId,
         string calldata name,
         string calldata symbol
-    ) external initializer {
+    ) external override initializer {
         _profileId = profileId;
         _essenceId = essenceId;
         CyberNFTBase._initialize(name, symbol);
     }
 
     /// @inheritdoc IEssenceNFT
-    function mint(address to) external returns (uint256) {
+    function mint(address to) external override returns (uint256) {
         require(msg.sender == PROFILE, "ONLY_PROFILE");
         return super._mint(to);
     }
+
+    /*//////////////////////////////////////////////////////////////
+                         EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /// @inheritdoc IUpgradeable
+    function version() external pure override returns (uint256) {
+        return _VERSION;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC VIEW
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Generates the metadata json object.
@@ -77,15 +90,5 @@ contract EssenceNFT is
         _requireMinted(tokenId);
         return
             IProfileNFT(PROFILE).getEssenceNFTTokenURI(_profileId, _essenceId);
-    }
-
-    /**
-     * @notice Contract version number.
-     *
-     * @return uint256 The version number.
-     * @dev This contract can be upgraded with UUPS upgradeability.
-     */
-    function version() external pure override returns (uint256) {
-        return _VERSION;
     }
 }
