@@ -17,15 +17,6 @@ contract PermissionedFeeCreationMw is
     PermissionedMw,
     FeeMw
 {
-    function _domainSeperatorName()
-        internal
-        pure
-        override
-        returns (string memory)
-    {
-        return "PermissionedFeeCreationMw";
-    }
-
     struct MiddlewareData {
         address signer;
         address recipient;
@@ -42,22 +33,10 @@ contract PermissionedFeeCreationMw is
         Tier5
     }
 
-    mapping(address => MiddlewareData) internal mwDataByNamespace;
-
-    function getSigner(address namespace) public view returns (address) {
-        return mwDataByNamespace[namespace].signer;
-    }
-
-    function getNonce(address namespace, address user)
-        public
-        view
-        returns (uint256)
-    {
-        return mwDataByNamespace[namespace].nonces[user];
-    }
+    mapping(address => MiddlewareData) internal _mwDataByNamespace;
 
     modifier onlyValidNamespace(address namespace) {
-        address mwData = mwDataByNamespace[namespace].recipient;
+        address mwData = _mwDataByNamespace[namespace].recipient;
         require(mwData != address(0), "INVALID_NAMESPACE");
         _;
     }
@@ -66,6 +45,42 @@ contract PermissionedFeeCreationMw is
         PermissionedMw(engine)
         FeeMw(treasury)
     {}
+
+    /**
+     * @inheritdoc IProfileMiddleware
+     */
+    function preProcess(
+        DataTypes.CreateProfileParams calldata params,
+        bytes calldata data
+    ) external payable onlyValidNamespace(msg.sender) {
+        MiddlewareData storage mwData = _mwDataByNamespace[msg.sender];
+
+        (uint8 v, bytes32 r, bytes32 s, uint256 deadline) = abi.decode(
+            data,
+            (uint8, bytes32, bytes32, uint256)
+        );
+
+        _requiresValidHandle(params.handle);
+        _requiresEnoughFee(msg.sender, params.handle, msg.value);
+        _requiresValidSig(params, v, r, s, deadline, mwData);
+
+        uint256 treasuryCollected = (msg.value * _treasuryFee()) /
+            Constants._MAX_BPS;
+        uint256 actualCollected = msg.value - treasuryCollected;
+
+        payable(mwData.recipient).transfer(actualCollected);
+        if (treasuryCollected > 0) {
+            payable(_treasuryAddress()).transfer(treasuryCollected);
+        }
+    }
+
+    /// @inheritdoc IProfileMiddleware
+    function postProcess(
+        DataTypes.CreateProfileParams calldata params,
+        bytes calldata data
+    ) external {
+        // do nothing
+    }
 
     function setProfileMwData(address namespace, bytes calldata data)
         external
@@ -98,7 +113,7 @@ contract PermissionedFeeCreationMw is
 
         require(
             signer != address(0) && recipient != address(0),
-            "ZERO_INPUT_ADDRESS"
+            "INVALID_SIGNER_OR_RECIPIENT_ADDRESS"
         );
 
         _setFeeByTier(namespace, Tier.Tier0, tier0Fee);
@@ -108,10 +123,34 @@ contract PermissionedFeeCreationMw is
         _setFeeByTier(namespace, Tier.Tier4, tier4Fee);
         _setFeeByTier(namespace, Tier.Tier5, tier5Fee);
 
-        mwDataByNamespace[namespace].signer = signer;
-        mwDataByNamespace[namespace].recipient = recipient;
+        _mwDataByNamespace[namespace].signer = signer;
+        _mwDataByNamespace[namespace].recipient = recipient;
 
         return data;
+    }
+
+    function getSigner(address namespace) public view returns (address) {
+        return _mwDataByNamespace[namespace].signer;
+    }
+
+    function getRecipient(address namespace) public view returns (address) {
+        return _mwDataByNamespace[namespace].recipient;
+    }
+
+    function getNonce(address namespace, address user)
+        public
+        view
+        returns (uint256)
+    {
+        return _mwDataByNamespace[namespace].nonces[user];
+    }
+
+    function getFeeByTier(address namespace, Tier tier)
+        public
+        view
+        returns (uint256)
+    {
+        return _mwDataByNamespace[namespace].feeMapping[tier];
     }
 
     function _setFeeByTier(
@@ -119,11 +158,7 @@ contract PermissionedFeeCreationMw is
         Tier tier,
         uint256 amount
     ) internal {
-        MiddlewareData storage mwData = mwDataByNamespace[namespace];
-        // uint256 preAmount = mwData.feeMapping[tier];
-        mwData.feeMapping[tier] = amount;
-
-        //emit SetFeeByTier(tier, preAmount, amount);
+        _mwDataByNamespace[namespace].feeMapping[tier] = amount;
     }
 
     function _requiresEnoughFee(
@@ -132,7 +167,7 @@ contract PermissionedFeeCreationMw is
         uint256 amount
     ) internal view {
         bytes memory byteHandle = bytes(handle);
-        MiddlewareData storage mwData = mwDataByNamespace[namespace];
+        MiddlewareData storage mwData = _mwDataByNamespace[namespace];
         uint256 fee = mwData.feeMapping[Tier.Tier5];
 
         if (byteHandle.length < 6) {
@@ -141,13 +176,12 @@ contract PermissionedFeeCreationMw is
         require(amount >= fee, "INSUFFICIENT_FEE");
     }
 
-    // TODO consider move it to a spearate mw
     function _requiresValidHandle(string calldata handle) internal pure {
         bytes memory byteHandle = bytes(handle);
         require(
             byteHandle.length <= Constants._MAX_HANDLE_LENGTH &&
                 byteHandle.length > 0,
-            "Handle has invalid length"
+            "HANDLE_INVALID_LENGTH"
         );
 
         uint256 byteHandleLength = byteHandle.length;
@@ -155,7 +189,7 @@ contract PermissionedFeeCreationMw is
             bytes1 b = byteHandle[i];
             require(
                 (b >= "0" && b <= "9") || (b >= "a" && b <= "z") || b == "_",
-                "Handle has invalid character"
+                "HANDLE_INVALID_CHARACTER"
             );
             unchecked {
                 ++i;
@@ -163,32 +197,13 @@ contract PermissionedFeeCreationMw is
         }
     }
 
-    /**
-     * @inheritdoc IProfileMiddleware
-     */
-    function preProcess(
-        DataTypes.CreateProfileParams calldata params,
-        bytes calldata data
-    ) external payable onlyValidNamespace(msg.sender) {
-        MiddlewareData storage mwData = mwDataByNamespace[msg.sender];
-
-        (uint8 v, bytes32 r, bytes32 s, uint256 deadline) = abi.decode(
-            data,
-            (uint8, bytes32, bytes32, uint256)
-        );
-
-        _requiresValidHandle(params.handle);
-        _requiresEnoughFee(msg.sender, params.handle, msg.value);
-        _requiresValidSig(params, v, r, s, deadline, mwData);
-
-        uint256 treasuryCollected = (msg.value * _treasuryFee()) /
-            Constants._MAX_BPS;
-        uint256 actualCollected = msg.value - treasuryCollected;
-
-        payable(mwData.recipient).transfer(actualCollected);
-        if (treasuryCollected > 0) {
-            payable(_treasuryAddress()).transfer(treasuryCollected);
-        }
+    function _domainSeperatorName()
+        internal
+        pure
+        override
+        returns (string memory)
+    {
+        return "PermissionedFeeCreationMw";
     }
 
     function _requiresValidSig(
@@ -219,13 +234,5 @@ contract PermissionedFeeCreationMw is
             s,
             deadline
         );
-    }
-
-    /// @inheritdoc IProfileMiddleware
-    function postProcess(
-        DataTypes.CreateProfileParams calldata params,
-        bytes calldata data
-    ) external {
-        // do nothing
     }
 }

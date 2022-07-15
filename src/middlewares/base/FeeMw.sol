@@ -16,7 +16,7 @@ abstract contract FeeMw {
         return ITreasury(TREASURY).getTreasuryAddress();
     }
 
-    function _treasuryFee() internal view returns (uint16) {
+    function _treasuryFee() internal view returns (uint256) {
         return ITreasury(TREASURY).getTreasuryFee();
     }
 }
