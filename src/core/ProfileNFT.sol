@@ -114,18 +114,12 @@ contract ProfileNFT is
                                  EXTERNAL
     //////////////////////////////////////////////////////////////*/
 
-    /**
-     * @notice Initializes the Profile NFT.
-     *
-     * @param _owner Owner of the Profile NFT.
-     * @param name Name to set for the Profile NFT.
-     * @param symbol Symbol to set for the Profile NFT.
-     */
+    /// @inheritdoc IProfileNFT
     function initialize(
         address _owner,
         string calldata name,
         string calldata symbol
-    ) external initializer {
+    ) external override initializer {
         require(_owner != address(0), "ZERO_ADDRESS");
         _namespaceOwner = _owner;
         CyberNFTBase._initialize(name, symbol);
@@ -165,24 +159,14 @@ contract ProfileNFT is
         );
     }
 
-    /**
-     * @notice Subscribe to an address(es) with a signature.
-     *
-     * @param sender The sender address.
-     * @param params The params for subscription.
-     * @param preDatas The subscription data for preprocess.
-     * @param postDatas The subscription data for postprocess.
-     * @param sig The EIP712 signature.
-     * @dev the function requires the stated to be not paused.
-     * @return uint256[] The subscription nft ids.
-     */
+    /// @inheritdoc IProfileNFT
     function subscribeWithSig(
         DataTypes.SubscribeParams calldata params,
         bytes[] calldata preDatas,
         bytes[] calldata postDatas,
         address sender,
         DataTypes.EIP712Signature calldata sig
-    ) external returns (uint256[] memory) {
+    ) external override returns (uint256[] memory) {
         // let _subscribe handle length check
         uint256 preLength = preDatas.length;
         bytes32[] memory preHashes = new bytes32[](preLength);
@@ -220,31 +204,25 @@ contract ProfileNFT is
         return _subscribe(sender, params, preDatas, postDatas);
     }
 
-    /**
-     * @notice The subscription functionality.
-     *
-     * @param params The params for subscription.
-     * @param preDatas The subscription data for preprocess.
-     * @param postDatas The subscription data for postprocess.
-     * @return uint256[] The subscription nft ids.
-     * @dev the function requires the stated to be not paused.
-     */
+    /// @inheritdoc IProfileNFT
     function subscribe(
         DataTypes.SubscribeParams calldata params,
         bytes[] calldata preDatas,
         bytes[] calldata postDatas
-    ) external returns (uint256[] memory) {
+    ) external override returns (uint256[] memory) {
         return _subscribe(msg.sender, params, preDatas, postDatas);
     }
 
+    /// @inheritdoc IProfileNFT
     function collect(
         DataTypes.CollectParams calldata params,
         bytes calldata preData,
         bytes calldata postData
-    ) external returns (uint256 tokenId) {
+    ) external override returns (uint256 tokenId) {
         return _collect(msg.sender, params, preData, postData);
     }
 
+    /// @inheritdoc IProfileNFT
     function collectWithSig(
         DataTypes.CollectParams calldata params,
         bytes calldata preData,
@@ -276,7 +254,12 @@ contract ProfileNFT is
     function registerEssence(
         DataTypes.RegisterEssenceParams calldata params,
         bytes calldata initData
-    ) external onlyProfileOwnerOrOperator(params.profileId) returns (uint256) {
+    )
+        external
+        override
+        onlyProfileOwnerOrOperator(params.profileId)
+        returns (uint256)
+    {
         require(
             params.essenceMw == address(0) ||
                 ICyberEngine(ENGINE).isEssenceMwAllowed(params.essenceMw),
@@ -308,12 +291,8 @@ contract ProfileNFT is
         return tokenID;
     }
 
-    /**
-     * @notice Changes the pause state of the profile nft.
-     *
-     * @param toPause The pause state.
-     */
-    function pause(bool toPause) external onlyNamespaceOwner {
+    /// @inheritdoc IProfileNFT
+    function pause(bool toPause) external override onlyNamespaceOwner {
         if (toPause) {
             super._pause();
         } else {
@@ -330,7 +309,12 @@ contract ProfileNFT is
         IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
     }
 
-    function setNamespaceOwner(address owner) external onlyNamespaceOwner {
+    /// @inheritdoc IProfileNFT
+    function setNamespaceOwner(address owner)
+        external
+        override
+        onlyNamespaceOwner
+    {
         require(owner != address(0), "ZERO_ADDRESS");
         address preOwner = _namespaceOwner;
         _namespaceOwner = owner;

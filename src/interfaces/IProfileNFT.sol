@@ -7,6 +7,19 @@ import { IProfileNFTEvents } from "./IProfileNFTEvents.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 interface IProfileNFT is IProfileNFTEvents {
+    /**
+     * @notice Initializes the Profile NFT.
+     *
+     * @param _owner Owner of the Profile NFT.
+     * @param name Name to set for the Profile NFT.
+     * @param symbol Symbol to set for the Profile NFT.
+     */
+    function initialize(
+        address _owner,
+        string calldata name,
+        string calldata symbol
+    ) external;
+
     /*
      * @notice Creates a profile and mints it to the recipient address.
      *
@@ -27,6 +40,68 @@ interface IProfileNFT is IProfileNFTEvents {
         bytes calldata preData,
         bytes calldata postData
     ) external payable returns (uint256);
+
+    /**
+     * @notice Subscribe to an address(es) with a signature.
+     *
+     * @param sender The sender address.
+     * @param params The params for subscription.
+     * @param preDatas The subscription data for preprocess.
+     * @param postDatas The subscription data for postprocess.
+     * @param sig The EIP712 signature.
+     * @dev the function requires the stated to be not paused.
+     * @return uint256[] The subscription nft ids.
+     */
+    function subscribeWithSig(
+        DataTypes.SubscribeParams calldata params,
+        bytes[] calldata preDatas,
+        bytes[] calldata postDatas,
+        address sender,
+        DataTypes.EIP712Signature calldata sig
+    ) external returns (uint256[] memory);
+
+    /**
+     * @notice The subscription functionality.
+     *
+     * @param params The params for subscription.
+     * @param preDatas The subscription data for preprocess.
+     * @param postDatas The subscription data for postprocess.
+     * @return uint256[] The subscription nft ids.
+     * @dev the function requires the stated to be not paused.
+     */
+    function subscribe(
+        DataTypes.SubscribeParams calldata params,
+        bytes[] calldata preDatas,
+        bytes[] calldata postDatas
+    ) external returns (uint256[] memory);
+
+    function collect(
+        DataTypes.CollectParams calldata params,
+        bytes calldata preData,
+        bytes calldata postData
+    ) external returns (uint256 tokenId);
+
+    function collectWithSig(
+        DataTypes.CollectParams calldata params,
+        bytes calldata preData,
+        bytes calldata postData,
+        address sender,
+        DataTypes.EIP712Signature calldata sig
+    ) external returns (uint256 tokenId);
+
+    function registerEssence(
+        DataTypes.RegisterEssenceParams calldata params,
+        bytes calldata initData
+    ) external returns (uint256);
+
+    /**
+     * @notice Changes the pause state of the profile nft.
+     *
+     * @param toPause The pause state.
+     */
+    function pause(bool toPause) external;
+
+    function setNamespaceOwner(address owner) external;
 
     /**
      * @notice Gets the profile handle by ID.

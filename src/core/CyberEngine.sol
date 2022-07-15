@@ -241,12 +241,7 @@ contract CyberEngine is
         return _subscribeMwAllowlist[mw];
     }
 
-    /**
-     * @notice Checks if the profile middleware is allowed.
-     *
-     * @param mw The middleware address.
-     * @return bool The allowance state.
-     */
+    /// @inheritdoc ICyberEngine
     function isProfileMwAllowed(address mw) external view returns (bool) {
         return _profileMwAllowlist[mw];
     }
@@ -270,6 +265,10 @@ contract CyberEngine is
     {
         return _namespaceInfo[namespace].profileMw;
     }
+
+    /*//////////////////////////////////////////////////////////////
+                              INTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override canUpgrade {}

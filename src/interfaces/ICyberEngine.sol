@@ -44,4 +44,12 @@ interface ICyberEngine is ICyberEngineEvents {
      * @return bool The allowance state.
      */
     function isSubscribeMwAllowed(address mw) external view returns (bool);
+
+    /**
+     * @notice Checks if the profile middleware is allowed.
+     *
+     * @param mw The middleware address.
+     * @return bool The allowance state.
+     */
+    function isProfileMwAllowed(address mw) external view returns (bool);
 }

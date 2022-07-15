@@ -42,6 +42,16 @@ contract EssenceNFT is
                                  EXTERNAL
     //////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice Contract version number.
+     *
+     * @return uint256 The version number.
+     * @dev This contract can be upgraded with UUPS upgradeability.
+     */
+    function version() external pure override returns (uint256) {
+        return _VERSION;
+    }
+
     /// @inheritdoc IEssenceNFT
     function initialize(
         uint256 profileId,
@@ -60,6 +70,10 @@ contract EssenceNFT is
         return super._mint(to);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC VIEW
+    //////////////////////////////////////////////////////////////*/
+
     /**
      * @notice Generates the metadata json object.
      *
@@ -77,15 +91,5 @@ contract EssenceNFT is
         _requireMinted(tokenId);
         return
             IProfileNFT(PROFILE).getEssenceNFTTokenURI(_profileId, _essenceId);
-    }
-
-    /**
-     * @notice Contract version number.
-     *
-     * @return uint256 The version number.
-     * @dev This contract can be upgraded with UUPS upgradeability.
-     */
-    function version() external pure override returns (uint256) {
-        return _VERSION;
     }
 }

@@ -63,6 +63,7 @@ contract Link3ProfileDescriptor is
         animationTemplate = template;
     }
 
+    /// @inheritdoc IProfileNFTDescriptor
     function tokenURI(DataTypes.ConstructTokenURIParams calldata params)
         external
         view
@@ -104,6 +105,10 @@ contract Link3ProfileDescriptor is
                 )
             );
     }
+
+    /*//////////////////////////////////////////////////////////////
+                              INTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     function genAttributes(
         string memory tokenId,
