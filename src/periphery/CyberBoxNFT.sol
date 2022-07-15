@@ -27,6 +27,10 @@ contract CyberBoxNFT is
     IUpgradeable,
     ICyberBoxEvents
 {
+    /*//////////////////////////////////////////////////////////////
+                              MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
     /**
      * @notice Checks that sender is owner address.
      */
@@ -34,6 +38,10 @@ contract CyberBoxNFT is
         require(msg.sender == owner, "Only Owner");
         _;
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                 EXTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Initializes the Box NFT.

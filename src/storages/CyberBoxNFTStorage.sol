@@ -6,6 +6,7 @@ abstract contract CyberBoxNFTStorage {
     // constant
     uint256 internal constant _VERSION = 1;
 
+    // storage
     address public signer;
     address public owner;
 }

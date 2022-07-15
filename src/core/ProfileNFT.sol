@@ -135,6 +135,7 @@ contract ProfileNFT is
         emit Initialize(_owner);
     }
 
+    /// @inheritdoc IProfileNFT
     function createProfile(
         DataTypes.CreateProfileParams calldata params,
         bytes calldata preData,

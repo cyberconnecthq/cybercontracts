@@ -35,6 +35,10 @@ contract CyberEngine is
     IUpgradeable,
     ICyberEngine
 {
+    /*//////////////////////////////////////////////////////////////
+                              MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
     /**
      * @notice Checks if the sender is authorized to upgrade the contract.
      */
@@ -47,9 +51,17 @@ contract CyberEngine is
         _;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
     constructor() {
         _disableInitializers();
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                 EXTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Initializes the CyberEngine.
@@ -100,6 +112,15 @@ contract CyberEngine is
         emit AllowEssenceMw(mw, preAllowed, allowed);
     }
 
+    /**
+     * @notice Creates a new namespace.
+     *
+     * @param params The namespace params:
+     *  name: The namespace name.
+     *  symbol: The namespace symbol.
+     *  owner: The namespace owner.
+     * @param profileProxy The profile proxy address.
+     */
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
         requiresAuth
@@ -171,12 +192,20 @@ contract CyberEngine is
      * @notice Contract version number.
      *
      * @return uint256 The version number.
-     * @dev This contract can be upgraded with UUPS upgradeability
+     * @dev This contract can be upgraded with UUPS upgradeability.
      */
     function version() external pure virtual override returns (uint256) {
         return _VERSION;
     }
 
+    /**
+     * @notice Sets the profile middleware.
+     *
+     * @param namespace The namespace address.
+     * @param mw The middleware address.
+     * @param data The middleware data.
+     * @dev the profile middleware needs to be allowed first.
+     */
     function setProfileMw(
         address namespace,
         address mw,
@@ -197,22 +226,12 @@ contract CyberEngine is
         emit SetProfileMw(namespace, mw, returnData);
     }
 
-    /**
-     * @notice Checks if the essence middleware is allowed.
-     *
-     * @param mw The middleware address.
-     * @return bool The allowance state.
-     */
+    /// @inheritdoc ICyberEngine
     function isEssenceMwAllowed(address mw) external view returns (bool) {
         return _essenceMwAllowlist[mw];
     }
 
-    /**
-     * @notice Checks if the subscriber middleware is allowed.
-     *
-     * @param mw The middleware address.
-     * @return bool The allowance state.
-     */
+    /// @inheritdoc ICyberEngine
     function isSubscribeMwAllowed(address mw)
         external
         view
@@ -222,10 +241,17 @@ contract CyberEngine is
         return _subscribeMwAllowlist[mw];
     }
 
+    /**
+     * @notice Checks if the profile middleware is allowed.
+     *
+     * @param mw The middleware address.
+     * @return bool The allowance state.
+     */
     function isProfileMwAllowed(address mw) external view returns (bool) {
         return _profileMwAllowlist[mw];
     }
 
+    /// @inheritdoc ICyberEngine
     function getNameByNamespace(address namespace)
         external
         view
@@ -235,6 +261,7 @@ contract CyberEngine is
         return _namespaceInfo[namespace].name;
     }
 
+    /// @inheritdoc ICyberEngine
     function getProfileMwByNamespace(address namespace)
         external
         view

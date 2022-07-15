@@ -6,6 +6,7 @@ contract EssenceNFTStorage {
     // constant
     uint256 internal constant _VERSION = 1;
 
+    // storage
     uint256 internal _profileId;
     uint256 internal _essenceId;
 }
