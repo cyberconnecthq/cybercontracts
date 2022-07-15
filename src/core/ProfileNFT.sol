@@ -321,15 +321,6 @@ contract ProfileNFT is
         }
     }
 
-    // TODO: remove
-    function setAnimationTemplate(string calldata template)
-        external
-        onlyNamespaceOwner
-    {
-        emit SetAnimationTemplate(template);
-        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
-    }
-
     function setNamespaceOwner(address owner) external onlyNamespaceOwner {
         require(owner != address(0), "ZERO_ADDRESS");
         address preOwner = _namespaceOwner;
@@ -493,8 +484,6 @@ contract ProfileNFT is
                          EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
 
-    // TODO: UUPS base contracts for functions
-    // TODO: write a test for upgrade profile nft
     function version() external pure virtual override returns (uint256) {
         return _VERSION;
     }

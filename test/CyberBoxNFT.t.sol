@@ -36,13 +36,13 @@ contract CyberBoxNFTTest is Test, ICyberBoxEvents {
     }
 
     function testCannotSetSignerNonOwner() public {
-        vm.expectRevert("Only Owner");
+        vm.expectRevert("UNAUTHORIZED");
         vm.prank(address(0));
         token.setSigner(alice);
     }
 
     function testCannotSetOwnerNonOwner() public {
-        vm.expectRevert("Only Owner");
+        vm.expectRevert("UNAUTHORIZED");
         vm.prank(address(0));
         token.setOwner(alice);
     }
@@ -55,16 +55,13 @@ contract CyberBoxNFTTest is Test, ICyberBoxEvents {
         token.setSigner(alice);
     }
 
-    function testSetOwnerNonOwner() public {
+    function testSetOwner() public {
         vm.prank(owner);
-
-        vm.expectEmit(true, true, false, true);
-        emit SetOwner(owner, alice);
         token.setOwner(alice);
     }
 
     function testCannotPauseFromNonOwner() public {
-        vm.expectRevert("Only Owner");
+        vm.expectRevert("UNAUTHORIZED");
         vm.prank(address(0));
         token.pause(true);
     }
