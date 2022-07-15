@@ -62,6 +62,10 @@ contract SubscribeNFT is
         return super._mint(to);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                         EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
     /// @inheritdoc IUpgradeable
     function version() external pure virtual override returns (uint256) {
         return 1;
