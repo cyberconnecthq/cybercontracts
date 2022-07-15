@@ -63,66 +63,52 @@ contract CyberEngine is
                                  EXTERNAL
     //////////////////////////////////////////////////////////////*/
 
-    /**
-     * @notice Initializes the CyberEngine.
-     *
-     * @param _owner Owner to set for CyberEngine.
-     * @param _rolesAuthority RolesAuthority address to manage access control
-     */
+    /// @inheritdoc ICyberEngine
     function initialize(address _owner, RolesAuthority _rolesAuthority)
         external
+        override
         initializer
     {
         Auth.__Auth_Init(_owner, _rolesAuthority);
     }
 
-    /**
-     * @notice Allows the profile middleware.
-     *
-     * @param mw The middleware address.
-     * @param allowed The allowance state.
-     */
-    function allowProfileMw(address mw, bool allowed) external requiresAuth {
+    /// @inheritdoc ICyberEngine
+    function allowProfileMw(address mw, bool allowed)
+        external
+        override
+        requiresAuth
+    {
         bool preAllowed = _profileMwAllowlist[mw];
         _profileMwAllowlist[mw] = allowed;
         emit AllowProfileMw(mw, preAllowed, allowed);
     }
 
-    /**
-     * @notice Allows the subscriber middleware.
-     *
-     * @param mw The middleware address.
-     * @param allowed The allowance state.
-     */
-    function allowSubscribeMw(address mw, bool allowed) external requiresAuth {
+    /// @inheritdoc ICyberEngine
+    function allowSubscribeMw(address mw, bool allowed)
+        external
+        override
+        requiresAuth
+    {
         bool preAllowed = _subscribeMwAllowlist[mw];
         _subscribeMwAllowlist[mw] = allowed;
         emit AllowSubscribeMw(mw, preAllowed, allowed);
     }
 
-    /**
-     * @notice Allows the essence middleware.
-     *
-     * @param mw The middleware address.
-     * @param allowed The allowance state.
-     */
-    function allowEssenceMw(address mw, bool allowed) external requiresAuth {
+    /// @inheritdoc ICyberEngine
+    function allowEssenceMw(address mw, bool allowed)
+        external
+        override
+        requiresAuth
+    {
         bool preAllowed = _essenceMwAllowlist[mw];
         _essenceMwAllowlist[mw] = allowed;
         emit AllowEssenceMw(mw, preAllowed, allowed);
     }
 
-    /**
-     * @notice Creates a new namespace.
-     *
-     * @param params The namespace params:
-     *  name: The namespace name.
-     *  symbol: The namespace symbol.
-     *  owner: The namespace owner.
-     * @param profileProxy The profile proxy address.
-     */
+    /// @inheritdoc ICyberEngine
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
+        override
         requiresAuth
         returns (address profileProxy)
     {
@@ -188,19 +174,12 @@ contract CyberEngine is
         emit CreateNamespace(profileProxy, params.name, params.symbol);
     }
 
-    /**
-     * @notice Sets the profile middleware.
-     *
-     * @param namespace The namespace address.
-     * @param mw The middleware address.
-     * @param data The middleware data.
-     * @dev the profile middleware needs to be allowed first.
-     */
+    /// @inheritdoc ICyberEngine
     function setProfileMw(
         address namespace,
         address mw,
         bytes calldata data
-    ) external requiresAuth {
+    ) external override requiresAuth {
         require(
             mw == address(0) || _profileMwAllowlist[mw],
             "PROFILE_MW_NOT_ALLOWED"

@@ -62,15 +62,14 @@ contract SubscribeNFT is
         return super._mint(to);
     }
 
-    /**
-     * @notice Contract version number.
-     *
-     * @return uint256 The version number.
-     * @dev This contract can be upgraded with UUPS upgradeability
-     */
+    /// @inheritdoc IUpgradeable
     function version() external pure virtual override returns (uint256) {
         return 1;
     }
+
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC VIEW
+    //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Generates the metadata json object.

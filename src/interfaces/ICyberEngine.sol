@@ -2,11 +2,73 @@
 
 pragma solidity 0.8.14;
 
+import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
+
 import { ICyberEngineEvents } from "../interfaces/ICyberEngineEvents.sol";
 
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 interface ICyberEngine is ICyberEngineEvents {
+    /**
+     * @notice Initializes the CyberEngine.
+     *
+     * @param _owner Owner to set for CyberEngine.
+     * @param _rolesAuthority RolesAuthority address to manage access control
+     */
+    function initialize(address _owner, RolesAuthority _rolesAuthority)
+        external;
+
+    /**
+     * @notice Allows the profile middleware.
+     *
+     * @param mw The middleware address.
+     * @param allowed The allowance state.
+     */
+    function allowProfileMw(address mw, bool allowed) external;
+
+    /**
+     * @notice Allows the subscriber middleware.
+     *
+     * @param mw The middleware address.
+     * @param allowed The allowance state.
+     */
+    function allowSubscribeMw(address mw, bool allowed) external;
+
+    /**
+     * @notice Allows the essence middleware.
+     *
+     * @param mw The middleware address.
+     * @param allowed The allowance state.
+     */
+    function allowEssenceMw(address mw, bool allowed) external;
+
+    /**
+     * @notice Creates a new namespace.
+     *
+     * @param params The namespace params:
+     *  name: The namespace name.
+     *  symbol: The namespace symbol.
+     *  owner: The namespace owner.
+     * @param profileProxy The profile proxy address.
+     */
+    function createNamespace(DataTypes.CreateNamespaceParams calldata params)
+        external
+        returns (address profileProxy);
+
+    /**
+     * @notice Sets the profile middleware.
+     *
+     * @param namespace The namespace address.
+     * @param mw The middleware address.
+     * @param data The middleware data.
+     * @dev the profile middleware needs to be allowed first.
+     */
+    function setProfileMw(
+        address namespace,
+        address mw,
+        bytes calldata data
+    ) external;
+
     /**
      * @notice Gets the profile name by the namespace.
      *
