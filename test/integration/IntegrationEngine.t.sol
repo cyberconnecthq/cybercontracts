@@ -63,6 +63,7 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
         vm.startPrank(namespaceOwner);
 
         link5Profile.setNFTDescriptor(address(new MockLink5NFTDescriptor()));
+        
         assertEq(link5Profile.tokenURI(profileIdBob), "Link5TokenURI");
         vm.stopPrank();
 
@@ -118,6 +119,7 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
 
         link5Profile.setNFTDescriptor(address(new MockLink5NFTDescriptor()));
         assertEq(link5Profile.tokenURI(profileIdCarlyTwo), "Link5TokenURI");
+
         vm.stopPrank();
     }
 }
