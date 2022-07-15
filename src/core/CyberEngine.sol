@@ -123,6 +123,10 @@ contract CyberEngine is
             byteSymbol.length <= Constants._MAX_SYMBOL_LENGTH,
             "SYMBOL_INVALID_LENGTH"
         );
+
+        _namespaceInfo[params.addrs.profileProxy].name = params.name;
+        _namespaceByName[salt] = params.addrs.profileProxy;
+
         {
             address subscribeImpl = ISubscribeDeployer(
                 params.addrs.subscribeFactory
@@ -159,9 +163,6 @@ contract CyberEngine is
             profileProxy == params.addrs.profileProxy,
             "PROFILE_PROXY_WRONG_ADDRESS"
         );
-
-        _namespaceInfo[params.addrs.profileProxy].name = params.name;
-        _namespaceByName[salt] = params.addrs.profileProxy;
 
         emit CreateNamespace(profileProxy, params.name, params.symbol);
     }

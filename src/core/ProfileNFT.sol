@@ -127,13 +127,12 @@ contract ProfileNFT is
         string calldata name,
         string calldata symbol
     ) external initializer {
+        require(_owner != address(0), "ZERO_ADDRESS");
+        _namespaceOwner = _owner;
         CyberNFTBase._initialize(name, symbol);
         ReentrancyGuard.__ReentrancyGuard_init();
-
-        _namespaceOwner = _owner;
-        emit Initialize(_owner);
-        // start with paused
         _pause();
+        emit Initialize(_owner);
     }
 
     function createProfile(
@@ -322,16 +321,17 @@ contract ProfileNFT is
         }
     }
 
+    // TODO: remove
     function setAnimationTemplate(string calldata template)
         external
         onlyNamespaceOwner
     {
-        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
-
         emit SetAnimationTemplate(template);
+        IProfileNFTDescriptor(_nftDescriptor).setAnimationTemplate(template);
     }
 
     function setNamespaceOwner(address owner) external onlyNamespaceOwner {
+        require(owner != address(0), "ZERO_ADDRESS");
         address preOwner = _namespaceOwner;
         _namespaceOwner = owner;
 
@@ -344,6 +344,7 @@ contract ProfileNFT is
         override
         onlyNamespaceOwner
     {
+        require(descriptor != address(0), "ZERO_ADDRESS");
         _nftDescriptor = descriptor;
         emit SetNFTDescriptor(descriptor);
     }

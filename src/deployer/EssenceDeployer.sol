@@ -13,7 +13,7 @@ contract EssenceDeployer is IEssenceDeployer {
 
     // TODO:
     function deployEssence(bytes32 salt, address profileProxy)
-        public
+        external
         override
         returns (address addr)
     {
