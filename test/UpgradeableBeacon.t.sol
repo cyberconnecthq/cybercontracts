@@ -2,8 +2,9 @@
 
 pragma solidity 0.8.14;
 
-import "../../src/upgradeability/UpgradeableBeacon.sol";
 import "openzeppelin-contracts/contracts/mocks/RegressionImplementation.sol";
+
+import "../src/upgradeability/UpgradeableBeacon.sol";
 import "forge-std/Test.sol";
 
 contract UpgradeableBeaconTest is Test {
@@ -20,7 +21,7 @@ contract UpgradeableBeaconTest is Test {
 
     function testCannotCreatedWithNonContractImplementation() public {
         vm.expectRevert("UpgradeableBeacon: implementation is not a contract");
-        UpgradeableBeacon temp = new UpgradeableBeacon(owner, address(0));
+        new UpgradeableBeacon(owner, address(0));
     }
 
     function testReturnsImplementation() public {

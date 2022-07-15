@@ -71,7 +71,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             essenceBeacon,
             subscribeBeacon
         );
-        uint256 nonce = vm.getNonce(address(this));
         bytes memory data = abi.encodeWithSelector(
             ProfileNFT.initialize.selector,
             gov,

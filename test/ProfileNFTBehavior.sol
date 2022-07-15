@@ -41,7 +41,6 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     function setUp() public {
         vm.etch(descriptor, address(this).code);
 
-        uint256 nonce = vm.getNonce(address(this));
         // Need beacon proxy to work, must set up fake beacon with fake impl contract
         address impl = address(
             deploySubscribe(keccak256(bytes("salt")), address(0xdead))
