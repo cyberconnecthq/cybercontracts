@@ -21,6 +21,7 @@ import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/Permiss
 import { TestIntegrationBase } from "../utils/TestIntegrationBase.sol";
 import { ProfileNFTStorage } from "../../src/storages/ProfileNFTStorage.sol";
 import { Actions } from "../../src/libraries/Actions.sol";
+import { EssenceNFT } from "../../src/core/EssenceNFT.sol";
 
 pragma solidity 0.8.14;
 
@@ -150,5 +151,7 @@ contract IntegrationCollectTest is
             link5Profile.getEssenceNFT(profileIdBob, essenceId),
             essenceProxy
         );
+        assertEq(EssenceNFT(essenceProxy).balanceOf(carly), 1);
+        assertEq(EssenceNFT(essenceProxy).ownerOf(essenceId), carly);
     }
 }
