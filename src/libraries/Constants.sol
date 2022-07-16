@@ -23,7 +23,7 @@ library Constants {
         );
     bytes32 internal constant _COLLECT_TYPEHASH =
         keccak256(
-            "collectWithSig(uint256 profileId,uint256 essenceId,bytes data,bytes[] postDatas,uint256 nonce,uint256 deadline)"
+            "collectWithSig(uint256 profileId,uint256 essenceId,bytes data,bytes postDatas,uint256 nonce,uint256 deadline)"
         );
     bytes32 internal constant _REGISTER_ESSENCE_TYPEHASH =
         keccak256(

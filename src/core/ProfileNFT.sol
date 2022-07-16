@@ -159,34 +159,16 @@ contract ProfileNFT is
         );
     }
 
-    /**
-     * @notice The subscription functionality.
-     *
-     * @param params The params for subscription.
-     * @param preDatas The subscription data for preprocess.
-     * @param postDatas The subscription data for postprocess.
-     * @return uint256[] The subscription nft ids.
-     * @dev the function requires the stated to be not paused.
-     */
+    /// @inheritdoc IProfileNFT
     function subscribe(
         DataTypes.SubscribeParams calldata params,
         bytes[] calldata preDatas,
         bytes[] calldata postDatas
-    ) external returns (uint256[] memory) {
+    ) external override returns (uint256[] memory) {
         return _subscribe(msg.sender, params, preDatas, postDatas);
     }
 
-    /**
-     * @notice Subscribe to an address(es) with a signature.
-     *
-     * @param sender The sender address.
-     * @param params The params for subscription.
-     * @param preDatas The subscription data for preprocess.
-     * @param postDatas The subscription data for postprocess.
-     * @param sig The EIP712 signature.
-     * @dev the function requires the stated to be not paused.
-     * @return uint256[] The subscription nft ids.
-     */
+    /// @inheritdoc IProfileNFT
     function subscribeWithSig(
         DataTypes.SubscribeParams calldata params,
         bytes[] calldata preDatas,
@@ -231,6 +213,7 @@ contract ProfileNFT is
         return _subscribe(sender, params, preDatas, postDatas);
     }
 
+    /// @inheritdoc IProfileNFT
     function collect(
         DataTypes.CollectParams calldata params,
         bytes calldata preData,
@@ -267,18 +250,25 @@ contract ProfileNFT is
         return _collect(sender, params, preData, postData);
     }
 
+    /// @inheritdoc IProfileNFT
     function registerEssence(
         DataTypes.RegisterEssenceParams calldata params,
         bytes calldata initData
-    ) external override onlyProfileOwnerOrOperator(params.profileId) returns (uint256) {
+    )
+        external
+        override
+        onlyProfileOwnerOrOperator(params.profileId)
+        returns (uint256)
+    {
         return _registerEssence(params, initData);
     }
 
+    /// @inheritdoc IProfileNFT
     function registerEssenceWithSig(
         DataTypes.RegisterEssenceParams calldata params,
         bytes calldata initData,
         DataTypes.EIP712Signature calldata sig
-    ) external returns (uint256 tokenId) {
+    ) external override returns (uint256 tokenId) {
         address owner = ownerOf(params.profileId);
         _requiresExpectedSigner(
             _hashTypedDataV4(
@@ -344,11 +334,12 @@ contract ProfileNFT is
         _setAvatar(profileId, avatar);
     }
 
+    /// @inheritdoc IProfileNFT
     function setAvatarWithSig(
         uint256 profileId,
         string calldata avatar,
         DataTypes.EIP712Signature calldata sig
-    ) external {
+    ) external override {
         address owner = ownerOf(profileId);
         _requiresExpectedSigner(
             _hashTypedDataV4(
@@ -437,21 +428,23 @@ contract ProfileNFT is
         );
         _setMetadata(profileId, metadata);
     }
-    
+
+    /// @inheritdoc IProfileNFT
     function setSubscribeMw(
         uint256 profileId,
         address mw,
         bytes calldata prepareData
-    ) external onlyProfileOwner(profileId) {
+    ) external override onlyProfileOwner(profileId) {
         _setSubscribeMw(profileId, mw, prepareData);
     }
 
+    /// @inheritdoc IProfileNFT
     function setSubscribeMwWithSig(
         uint256 profileId,
         address mw,
         bytes calldata prepareData,
         DataTypes.EIP712Signature calldata sig
-    ) external {
+    ) external override {
         address owner = ownerOf(profileId);
         _requiresExpectedSigner(
             _hashTypedDataV4(
@@ -481,10 +474,11 @@ contract ProfileNFT is
         _setPrimaryProfile(profileId);
     }
 
+    /// @inheritdoc IProfileNFT
     function setPrimaryProfileWithSig(
         uint256 profileId,
         DataTypes.EIP712Signature calldata sig
-    ) external {
+    ) external override {
         address owner = ownerOf(profileId);
         _requiresExpectedSigner(
             _hashTypedDataV4(
@@ -503,18 +497,20 @@ contract ProfileNFT is
         _setPrimaryProfile(profileId);
     }
 
+    /// @inheritdoc IProfileNFT
     function setSubscribeTokenURI(
         uint256 profileId,
         string calldata subscribeTokenURI
-    ) external onlyProfileOwnerOrOperator(profileId) {
+    ) external override onlyProfileOwnerOrOperator(profileId) {
         _setSubscribeTokenURI(profileId, subscribeTokenURI);
     }
 
+    /// @inheritdoc IProfileNFT
     function setSubscribeTokenURIWithSig(
         uint256 profileId,
         string calldata subscribeTokenURI,
         DataTypes.EIP712Signature calldata sig
-    ) external {
+    ) external override {
         address owner = ownerOf(profileId);
         _requiresExpectedSigner(
             _hashTypedDataV4(
@@ -723,18 +719,8 @@ contract ProfileNFT is
                               INTERNAL
     //////////////////////////////////////////////////////////////*/
 
-    // UUPS upgradeability
     function _authorizeUpgrade(address) internal override onlyEngine {}
 
-    /**
-     * @notice The subscription functionality.
-     *
-     * @param sender The sender address.
-     * @param params The params for subscription.
-     * @param preDatas The subscription data used in pre process.
-     * @param postDatas The subscription data used in post process.
-     * @return result The subscription nft ids.
-     */
     function _subscribe(
         address sender,
         DataTypes.SubscribeParams calldata params,
