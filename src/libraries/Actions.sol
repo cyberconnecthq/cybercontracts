@@ -97,7 +97,12 @@ library Actions {
                 _essenceByIdByProfileId[data.profileId][data.essenceId].name,
                 _essenceByIdByProfileId[data.profileId][data.essenceId].symbol
             );
-            essenceNFT = address(new BeaconProxy(data.essBeacon, initData));
+            essenceNFT = address(
+                new BeaconProxy{ salt: bytes32(data.profileId) }(
+                    data.essBeacon,
+                    initData
+                )
+            );
             _essenceByIdByProfileId[data.profileId][data.essenceId]
                 .essenceNFT = essenceNFT;
             deployedEssenceNFT = essenceNFT;

@@ -3,7 +3,6 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Vm.sol";
-import "forge-std/console.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 
 import { IProfileNFT } from "../../src/interfaces/IProfileNFT.sol";

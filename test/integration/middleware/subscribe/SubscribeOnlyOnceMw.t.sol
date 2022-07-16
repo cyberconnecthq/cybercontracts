@@ -52,7 +52,7 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
         ids[0] = bobProfileId;
         bytes[] memory data = new bytes[](1);
 
-        address subscribeProxy = getDeployedProxyAddress(
+        address subscribeProxy = getDeployedSubProxyAddress(
             addrs.subBeacon,
             bobProfileId,
             address(profile),
@@ -69,6 +69,8 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
 
         vm.prank(alice);
         profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+
+        assertEq(profile.getSubscribeNFT(bobProfileId), subscribeProxy);
 
         // Second subscribe will fail
         vm.expectRevert("Already subscribed");

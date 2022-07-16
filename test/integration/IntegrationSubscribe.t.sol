@@ -40,7 +40,7 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         ids[0] = bobProfileId;
         bytes[] memory data = new bytes[](1);
 
-        address subscribeProxy = getDeployedProxyAddress(
+        address subscribeProxy = getDeployedSubProxyAddress(
             addrs.subBeacon,
             bobProfileId,
             address(profile),
@@ -61,6 +61,7 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
 
         // check bob sub nft supply
         address bobSubNFT = profile.getSubscribeNFT(bobProfileId);
+        assertEq(bobSubNFT, subscribeProxy);
         assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 1);
 
         // check ownership of first sub nft
@@ -111,14 +112,14 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         ids[1] = bobProfileId;
         bytes[] memory data = new bytes[](2);
 
-        address aliceSubProxy = getDeployedProxyAddress(
+        address aliceSubProxy = getDeployedSubProxyAddress(
             addrs.subBeacon,
             aliceProfileId,
             address(profile),
             aliceHandle
         );
 
-        address bobSubProxy = getDeployedProxyAddress(
+        address bobSubProxy = getDeployedSubProxyAddress(
             addrs.subBeacon,
             bobProfileId,
             address(profile),
@@ -135,6 +136,8 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         emit Subscribe(alice, ids, data, data);
 
         profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        assertEq(profile.getSubscribeNFT(aliceProfileId), aliceSubProxy);
+        assertEq(profile.getSubscribeNFT(bobProfileId), bobSubProxy);
 
         vm.stopPrank();
 

@@ -43,20 +43,24 @@ contract IntegrationCollectTest is
     ProfileNFT link5Profile;
     bytes returnData = new bytes(111);
     bytes dataBobEssence = new bytes(0);
+    address link5SubBeacon;
+    address link5EssBeacon;
 
     function setUp() public {
         // create an engine
         _setUp();
-        (address link5Namespace, , ) = LibDeploy.createNamespace(
-            addrs.engineProxyAddress,
-            namespaceOwner,
-            LINK5_NAME,
-            LINK5_SYMBOL,
-            LINK5_SALT,
-            addrs.profileFac,
-            addrs.subFac,
-            addrs.essFac
-        );
+        address link5Namespace;
+        (link5Namespace, link5SubBeacon, link5EssBeacon) = LibDeploy
+            .createNamespace(
+                addrs.engineProxyAddress,
+                namespaceOwner,
+                LINK5_NAME,
+                LINK5_SYMBOL,
+                LINK5_SALT,
+                addrs.profileFac,
+                addrs.subFac,
+                addrs.essFac
+            );
 
         link5Profile = ProfileNFT(link5Namespace);
 
@@ -133,11 +137,13 @@ contract IntegrationCollectTest is
         vm.expectEmit(true, true, false, false);
         emit CollectEssence(carly, 1, profileIdBob, new bytes(0), new bytes(0));
 
-        uint256 nonce = vm.getNonce(address(link5Profile));
-
-        address essenceProxy = LibDeploy._calcContractAddress(
+        address essenceProxy = getDeployedEssProxyAddress(
+            link5EssBeacon,
+            profileIdBob,
+            essenceId,
             address(link5Profile),
-            nonce
+            ESSENCE_NAME,
+            ESSENCE_SYMBOL
         );
 
         uint256 tokenId = link5Profile.collect(
