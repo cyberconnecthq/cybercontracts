@@ -110,7 +110,11 @@ contract CyberEngine is
         external
         override
         requiresAuth
-        returns (address profileProxy)
+        returns (
+            address profileProxy,
+            address subBeacon,
+            address essBeacon
+        )
     {
         bytes memory byteName = bytes(params.name);
         bytes memory byteSymbol = bytes(params.symbol);
@@ -142,13 +146,13 @@ contract CyberEngine is
             address essImpl = IEssenceDeployer(params.addrs.essenceFactory)
                 .deployEssence(salt, params.addrs.profileProxy);
 
-            address subBeacon = address(
+            subBeacon = address(
                 new UpgradeableBeacon{ salt: salt }(
                     subscribeImpl,
                     address(this)
                 )
             );
-            address essBeacon = address(
+            essBeacon = address(
                 new UpgradeableBeacon{ salt: salt }(essImpl, address(this))
             );
 

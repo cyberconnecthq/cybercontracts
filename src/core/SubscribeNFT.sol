@@ -58,7 +58,7 @@ contract SubscribeNFT is
 
     /// @inheritdoc ISubscribeNFT
     function mint(address to) external override returns (uint256) {
-        require(msg.sender == address(PROFILE), "Only profile could mint");
+        require(msg.sender == address(PROFILE), "ONLY_PROFILE");
         return super._mint(to);
     }
 

@@ -41,6 +41,8 @@ library LibDeploy {
         address essFac;
         address subFac;
         address profileFac;
+        address subBeacon;
+        address essBeacon;
     }
     struct DeployParams {
         // address deployer; // 1. in test it is the Test contract. 2. in deployment it is msg.sender (deployer)
@@ -456,7 +458,11 @@ library LibDeploy {
             _write(vm, "Subscribe Factory", addrs.subFac);
         }
         // 6. Deploy Link3
-        addrs.link3Profile = createNamespace(
+        (
+            addrs.link3Profile,
+            addrs.subBeacon,
+            addrs.essBeacon
+        ) = createNamespace(
             addrs.engineProxyAddress,
             params.link3Owner,
             LINK3_NAME,
@@ -720,16 +726,39 @@ library LibDeploy {
         address profileFac,
         address subFac,
         address essFac
-    ) internal returns (address profileProxy) {
-        profileProxy = computeProfileProxyAddr(
-            engine,
-            owner,
-            name,
-            symbol,
-            salt,
-            profileFac
-        );
-        address deployed = CyberEngine(engine).createNamespace(
+    )
+        internal
+        returns (
+            address profileProxy,
+            address subBeacon,
+            address essBeacon
+        )
+    {
+        address profileImpl;
+        {
+            profileImpl = _computeAddress(
+                type(ProfileNFT).creationCode,
+                salt,
+                profileFac
+            );
+
+            bytes memory data = abi.encodeWithSelector(
+                ProfileNFT.initialize.selector,
+                owner,
+                name,
+                symbol
+            );
+            profileProxy = _computeAddress(
+                abi.encodePacked(
+                    type(ERC1967Proxy).creationCode,
+                    abi.encode(profileImpl, data)
+                ),
+                salt,
+                engine
+            );
+        }
+        address deployed;
+        (deployed, subBeacon, essBeacon) = CyberEngine(engine).createNamespace(
             DataTypes.CreateNamespaceParams(
                 name,
                 symbol,

@@ -25,7 +25,7 @@ contract IntegrationBaseTest is TestIntegrationBase, IProfileNFTEvents {
         // Register bob profile
         vm.expectEmit(true, true, false, true);
         emit SetPrimaryProfile(to, 2); // hardcode profileid
-        uint256 bobProfileId = TestLibFixture.registerBobProfile(
+        uint256 bobProfileId = TestLibFixture.registerProfile(
             vm,
             profile,
             profileMw,
@@ -58,7 +58,7 @@ contract IntegrationBaseTest is TestIntegrationBase, IProfileNFTEvents {
         assertEq(profile.getPrimaryProfile(to), bobProfileId);
 
         // register second time will not set primary profile
-        uint256 secondId = TestLibFixture.registerBobProfile(
+        uint256 secondId = TestLibFixture.registerProfile(
             vm,
             profile,
             profileMw,

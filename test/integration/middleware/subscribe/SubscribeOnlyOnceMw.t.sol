@@ -33,7 +33,7 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
         string memory handle = "bob";
         address to = bob;
 
-        bobProfileId = TestLibFixture.registerBobProfile(
+        bobProfileId = TestLibFixture.registerProfile(
             vm,
             profile,
             profileMw,
@@ -52,12 +52,12 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
         ids[0] = bobProfileId;
         bytes[] memory data = new bytes[](1);
 
-        uint256 nonce = vm.getNonce(address(profile));
-        address subscribeProxy = LibDeploy._calcContractAddress(
+        address subscribeProxy = getDeployedProxyAddress(
+            addrs.subBeacon,
+            bobProfileId,
             address(profile),
-            nonce
+            "bob"
         );
-
         vm.expectEmit(true, true, false, true, address(profile));
         emit DeploySubscribeNFT(bobProfileId, address(subscribeProxy));
 

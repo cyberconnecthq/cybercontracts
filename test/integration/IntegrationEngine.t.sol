@@ -25,7 +25,7 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
         // don't check first arg in event
         vm.expectEmit(false, false, false, false);
         emit CreateNamespace(address(0), LINK5_NAME, LINK5_SYMBOL);
-        address link5Namespace = LibDeploy.createNamespace(
+        (address link5Namespace, , ) = LibDeploy.createNamespace(
             addrs.engineProxyAddress,
             namespaceOwner,
             LINK5_NAME,

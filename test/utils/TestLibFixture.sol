@@ -23,7 +23,7 @@ library TestLibFixture {
     string private constant avatar = "avatar";
     string private constant metadata = "metadata";
 
-    function registerBobProfile(
+    function registerProfile(
         Vm vm,
         ProfileNFT profile,
         PermissionedFeeCreationMw mw,
@@ -58,7 +58,6 @@ library TestLibFixture {
             abi.encode(v, r, s, deadline),
             new bytes(0)
         );
-        // require(profileId == 1);
         require(mw.getNonce(address(profile), mintToEOA) == nonce + 1);
     }
 }
