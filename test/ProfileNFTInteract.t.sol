@@ -53,6 +53,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     address essenceMw = address(0xCA112);
     bytes internal profileData = "0x1";
 
+    string internal handle = "bob";
+
     function setUp() public {
         vm.etch(subscribeMw, address(this).code);
         vm.etch(essenceMw, address(this).code);
@@ -82,9 +84,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         profile = MockProfile(address(profileProxy));
 
         assertEq(profile.nonces(bob), 0);
-        string memory handle = "bob";
-        string memory avatar = "avatar";
-        string memory metadata = "metadata";
+        string memory avatar = "bob's avatar";
+        string memory metadata = "bob's metadata";
 
         profileId = profile.createProfile(
             DataTypes.CreateProfileParams(bob, handle, avatar, metadata)
@@ -138,18 +139,18 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testSubscribeDeployProxy() public {
+        address subscribeProxy = getDeployedProxyAddress(
+            subscribeBeacon,
+            profileId,
+            address(profile),
+            handle
+        );
         uint256[] memory ids = new uint256[](1);
-        ids[0] = 1;
+        ids[0] = profileId;
         bytes[] memory datas = new bytes[](1);
 
         uint256 result = 100;
 
-        // Assuming the newly deployed subscribe proxy is always at the same address;
-        uint256 nonce = vm.getNonce(address(profile));
-        address subscribeProxy = LibDeploy._calcContractAddress(
-            address(profile),
-            nonce
-        );
         vm.mockCall(
             subscribeProxy,
             abi.encodeWithSelector(ISubscribeNFT.mint.selector, address(this)),
@@ -169,8 +170,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         assertEq(profile.getSubscribeNFT(1), subscribeProxy);
     }
-
-    // TODO: add test for subscribe to multiple profiles
 
     function testCannotSetOperatorIfNotOwner() public {
         vm.expectRevert("ONLY_PROFILE_OWNER");
@@ -261,11 +260,11 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
 
-        // Assuming the newly deployed subscribe proxy is always at the same address;
-        uint256 nonce = vm.getNonce(address(profile));
-        address subscribeProxy = LibDeploy._calcContractAddress(
+        address subscribeProxy = getDeployedProxyAddress(
+            subscribeBeacon,
+            profileId,
             address(profile),
-            nonce
+            handle
         );
 
         vm.mockCall(

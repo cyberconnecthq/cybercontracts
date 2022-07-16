@@ -1,20 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 pragma solidity 0.8.14;
+
 import "forge-std/Test.sol";
 
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
+
 import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
 
-abstract contract TestIntegrationBase is Test {
+import { TestProxy } from "./TestProxy.sol";
+
+abstract contract TestIntegrationBase is Test, TestProxy {
     uint256 internal constant link3SignerPk = 1890;
     address internal immutable link3Signer;
     address internal constant alice = address(0xDEADA11CE);
     address internal constant bob = address(0xDEADB0B);
     address internal constant carly = address(0xDEADCA11);
+    address internal constant dixon = address(0xDEADD1);
 
     ProfileNFT profile;
     Link3ProfileDescriptor profileDescriptor;

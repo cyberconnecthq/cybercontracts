@@ -27,7 +27,7 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
     function testSubscription() public {
         string memory handle = "bob";
         address to = bob;
-        uint256 bobProfileId = TestLibFixture.registerBobProfile(
+        uint256 bobProfileId = TestLibFixture.registerProfile(
             vm,
             profile,
             profileMw,
@@ -40,10 +40,11 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         ids[0] = bobProfileId;
         bytes[] memory data = new bytes[](1);
 
-        uint256 nonce = vm.getNonce(address(profile));
-        address subscribeProxy = LibDeploy._calcContractAddress(
+        address subscribeProxy = getDeployedProxyAddress(
+            addrs.subBeacon,
+            bobProfileId,
             address(profile),
-            nonce
+            handle
         );
 
         vm.expectEmit(true, true, false, true, address(profile));
@@ -79,5 +80,72 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
 
         // check ownership of second sub nft
         assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(alice));
+    }
+
+    function subscribeToTwoProfileFromTwoWallet() public {
+        string memory bobHandle = "bob";
+        uint256 bobProfileId = TestLibFixture.registerProfile(
+            vm,
+            profile,
+            profileMw,
+            bobHandle,
+            bob,
+            link3SignerPk
+        );
+
+        string memory aliceHandle = "alice";
+        uint256 aliceProfileId = TestLibFixture.registerProfile(
+            vm,
+            profile,
+            profileMw,
+            aliceHandle,
+            alice,
+            link3SignerPk
+        );
+
+        // charlie subscribes to alice and bob
+        vm.startPrank(carly);
+
+        uint256[] memory ids = new uint256[](2);
+        ids[0] = aliceProfileId;
+        ids[1] = bobProfileId;
+        bytes[] memory data = new bytes[](2);
+
+        address aliceSubProxy = getDeployedProxyAddress(
+            addrs.subBeacon,
+            aliceProfileId,
+            address(profile),
+            aliceHandle
+        );
+
+        address bobSubProxy = getDeployedProxyAddress(
+            addrs.subBeacon,
+            bobProfileId,
+            address(profile),
+            bobHandle
+        );
+
+        vm.expectEmit(true, true, false, true, address(profile));
+        emit DeploySubscribeNFT(ids[0], aliceSubProxy);
+
+        vm.expectEmit(true, true, false, true, address(profile));
+        emit DeploySubscribeNFT(ids[1], bobSubProxy);
+
+        vm.expectEmit(true, false, false, true, address(profile));
+        emit Subscribe(alice, ids, data, data);
+
+        profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+
+        vm.stopPrank();
+
+        // dixon subscribes to alice to bob
+        vm.startPrank(dixon);
+
+        vm.expectEmit(true, false, false, true, address(profile));
+        emit Subscribe(bob, ids, data, data);
+
+        profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+
+        vm.stopPrank();
     }
 }

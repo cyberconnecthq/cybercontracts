@@ -49,11 +49,17 @@ interface ICyberEngine is ICyberEngineEvents {
      *  name: The namespace name.
      *  symbol: The namespace symbol.
      *  owner: The namespace owner.
-     * @param profileProxy The profile proxy address.
+     * @return profileProxy The profile proxy address.
+     * @return subBeacon The Subscribe beacon address.
+     * @return essBeacon The Essence beacon address.
      */
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
-        returns (address profileProxy);
+        returns (
+            address profileProxy,
+            address subBeacon,
+            address essBeacon
+        );
 
     /**
      * @notice Sets the profile middleware.

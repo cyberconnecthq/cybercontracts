@@ -13,11 +13,13 @@ import { EssenceNFT } from "../../src/core/EssenceNFT.sol";
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 
 import { MockProfile } from "./MockProfile.sol";
+import { TestProxy } from "./TestProxy.sol";
 
 contract TestDeployer is
     IProfileDeployer,
     ISubscribeDeployer,
-    IEssenceDeployer
+    IEssenceDeployer,
+    TestProxy
 {
     bytes32 internal _salt = keccak256(bytes("salt"));
 

@@ -78,7 +78,7 @@ contract SubscribeNFTTest is Test, TestDeployer {
     }
 
     function testCannotMintFromNonProfile() public {
-        vm.expectRevert("Only profile could mint");
+        vm.expectRevert("ONLY_PROFILE");
         c.mint(alice);
     }
 

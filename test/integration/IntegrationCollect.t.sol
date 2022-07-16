@@ -47,7 +47,7 @@ contract IntegrationCollectTest is
     function setUp() public {
         // create an engine
         _setUp();
-        address link5Namespace = LibDeploy.createNamespace(
+        (address link5Namespace, , ) = LibDeploy.createNamespace(
             addrs.engineProxyAddress,
             namespaceOwner,
             LINK5_NAME,

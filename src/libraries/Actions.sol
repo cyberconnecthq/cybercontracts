@@ -154,28 +154,31 @@ library Actions {
         mapping(uint256 => DataTypes.SubscribeStruct)
             storage _subscribeByProfileId,
         mapping(uint256 => DataTypes.ProfileStruct) storage _profileById
-    ) internal returns (address) {
+    ) private returns (address) {
+        string memory name = string(
+            abi.encodePacked(
+                _profileById[profileId].handle,
+                Constants._SUBSCRIBE_NFT_NAME_SUFFIX
+            )
+        );
+        string memory symbol = string(
+            abi.encodePacked(
+                LibString.toUpper(_profileById[profileId].handle),
+                Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
+            )
+        );
         address subscribeNFT = address(
-            new BeaconProxy(
+            new BeaconProxy{ salt: bytes32(profileId) }(
                 subBeacon,
                 abi.encodeWithSelector(
                     ISubscribeNFT.initialize.selector,
                     profileId,
-                    string(
-                        abi.encodePacked(
-                            _profileById[profileId].handle,
-                            Constants._SUBSCRIBE_NFT_NAME_SUFFIX
-                        )
-                    ),
-                    string(
-                        abi.encodePacked(
-                            LibString.toUpper(_profileById[profileId].handle),
-                            Constants._SUBSCRIBE_NFT_SYMBOL_SUFFIX
-                        )
-                    )
+                    name,
+                    symbol
                 )
             )
         );
+
         _subscribeByProfileId[profileId].subscribeNFT = subscribeNFT;
         return subscribeNFT;
     }
