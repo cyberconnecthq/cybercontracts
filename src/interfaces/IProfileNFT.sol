@@ -42,6 +42,21 @@ interface IProfileNFT is IProfileNFTEvents {
     ) external payable returns (uint256);
 
     /**
+     * @notice The subscription functionality.
+     *
+     * @param params The params for subscription.
+     * @param preDatas The subscription data for preprocess.
+     * @param postDatas The subscription data for postprocess.
+     * @return uint256[] The subscription nft ids.
+     * @dev the function requires the stated to be not paused.
+     */
+    function subscribe(
+        DataTypes.SubscribeParams calldata params,
+        bytes[] calldata preDatas,
+        bytes[] calldata postDatas
+    ) external returns (uint256[] memory);
+
+    /**
      * @notice Subscribe to an address(es) with a signature.
      *
      * @param sender The sender address.
@@ -61,37 +76,63 @@ interface IProfileNFT is IProfileNFTEvents {
     ) external returns (uint256[] memory);
 
     /**
-     * @notice The subscription functionality.
+     * @notice Collect a profile's essence.
      *
-     * @param params The params for subscription.
-     * @param preDatas The subscription data for preprocess.
-     * @param postDatas The subscription data for postprocess.
-     * @return uint256[] The subscription nft ids.
-     * @dev the function requires the stated to be not paused.
+     * @param params The params for collect.
+     * @param preData The collect data for preprocess.
+     * @param postData The collect data for postprocess.
+     * @return uint256 The collected essence nft id.
      */
-    function subscribe(
-        DataTypes.SubscribeParams calldata params,
-        bytes[] calldata preDatas,
-        bytes[] calldata postDatas
-    ) external returns (uint256[] memory);
-
     function collect(
         DataTypes.CollectParams calldata params,
         bytes calldata preData,
         bytes calldata postData
-    ) external returns (uint256 tokenId);
+    ) external returns (uint256);
 
+    /**
+     * @notice Collect a profile's essence with signature.
+     *
+     * @param sender The sender address.
+     * @param params The params for collect.
+     * @param preData The collect data for preprocess.
+     * @param postData The collect data for postprocess.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     * @return uint256 The collected essence nft id.
+     */
     function collectWithSig(
         DataTypes.CollectParams calldata params,
         bytes calldata preData,
         bytes calldata postData,
         address sender,
         DataTypes.EIP712Signature calldata sig
-    ) external returns (uint256 tokenId);
+    ) external returns (uint256);
 
+    /**
+     * @notice Register an essence.
+     *
+     * @param params The params for registration.
+     * @param initData The registration initial data.
+     * @return uint256 The new essence count.
+     */
     function registerEssence(
         DataTypes.RegisterEssenceParams calldata params,
         bytes calldata initData
+    ) external returns (uint256);
+
+    /**
+     * @notice Register an essence with signature.
+     *
+     * @param params The params for registration.
+     * @param initData The registration initial data.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     * @return uint256 The new essence count.
+     */
+    function registerEssenceWithSig(
+        DataTypes.RegisterEssenceParams calldata params,
+        bytes calldata initData,
+        DataTypes.EIP712Signature calldata sig
     ) external returns (uint256);
 
     /**
@@ -101,29 +142,12 @@ interface IProfileNFT is IProfileNFTEvents {
      */
     function pause(bool toPause) external;
 
+    /**
+     * @notice Set new namespace owner.
+     *
+     * @param owner The new owner.
+     */
     function setNamespaceOwner(address owner) external;
-
-    /**
-     * @notice Gets the profile handle by ID.
-     *
-     * @param profileId The profile ID.
-     * @return string the profile handle.
-     */
-    function getHandleByProfileId(uint256 profileId)
-        external
-        view
-        returns (string memory);
-
-    /**
-     * @notice Gets the profile ID by handle.
-     *
-     * @param handle The profile handle.
-     * @return uint256 the profile ID.
-     */
-    function getProfileIdByHandle(string calldata handle)
-        external
-        view
-        returns (uint256);
 
     /**
      * @notice Sets the Profile NFT Descriptor.
@@ -141,12 +165,141 @@ interface IProfileNFT is IProfileNFTEvents {
     function setMetadata(uint256 profileId, string calldata metadata) external;
 
     /**
+     * @notice Sets the profile metadata with a signture.
+     *
+     * @param profileId The profile ID.
+     * @param metadata The new metadata to be set.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     */
+    function setMetadataWithSig(
+        uint256 profileId,
+        string calldata metadata,
+        DataTypes.EIP712Signature calldata sig
+    ) external;
+
+    /**
+     * @notice Sets subscribe middleware for a profile.
+     *
+     * @param profileId The profile ID.
+     * @param mw The new middleware to be set.
+     * @param prepareData The data for prepare.
+     */
+    function setSubscribeMw(
+        uint256 profileId,
+        address mw,
+        bytes calldata prepareData
+    ) external;
+
+    /**
+     * @notice Sets subscribe middleware for a profile with signature.
+     *
+     * @param profileId The profile ID.
+     * @param mw The new middleware to be set.
+     * @param prepareData The data for prepare.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     */
+    function setSubscribeMwWithSig(
+        uint256 profileId,
+        address mw,
+        bytes calldata prepareData,
+        DataTypes.EIP712Signature calldata sig
+    ) external;
+
+    /**
+     * @notice Sets subscribeNFT tokenURI.
+     *
+     * @param profileId The profile ID.
+     * @param subscribeTokenURI The new tokenURI to be set.
+     */
+    function setSubscribeTokenURI(
+        uint256 profileId,
+        string calldata subscribeTokenURI
+    ) external;
+
+    /**
+     * @notice Sets subscribeNFT tokenURI.
+     *
+     * @param profileId The profile ID.
+     * @param subscribeTokenURI The new tokenURI to be set.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     */
+    function setSubscribeTokenURIWithSig(
+        uint256 profileId,
+        string calldata subscribeTokenURI,
+        DataTypes.EIP712Signature calldata sig
+    ) external;
+
+    /**
+     * @notice Sets the primary profile for the user.
+     *
+     * @param profileId The profile ID that is set to be primary.
+     */
+    function setPrimaryProfile(uint256 profileId) external;
+
+    /**
+     * @notice Sets the primary profile for the user with signature.
+     *
+     * @param profileId The profile ID that is set to be primary.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     */
+    function setPrimaryProfileWithSig(
+        uint256 profileId,
+        DataTypes.EIP712Signature calldata sig
+    ) external;
+
+    /**
      * @notice Sets the NFT avatar as IPFS hash.
      *
      * @param profileId The profile ID.
      * @param avatar The new avatar to set.
      */
     function setAvatar(uint256 profileId, string calldata avatar) external;
+
+    /**
+     * @notice Sets the NFT avatar as IPFS hash with signature.
+     *
+     * @param profileId The profile ID.
+     * @param avatar The new avatar to set.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     */
+    function setAvatarWithSig(
+        uint256 profileId,
+        string calldata avatar,
+        DataTypes.EIP712Signature calldata sig
+    ) external;
+
+    /**
+     * @notice Sets the operator approval.
+     *
+     * @param profileId The profile ID.
+     * @param operator The operator address.
+     * @param approved The approval status.
+     */
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved
+    ) external;
+
+    /**
+     * @notice Sets the operator approval with a signature.
+     *
+     * @param profileId The profile ID.
+     * @param operator The operator address.
+     * @param approved The new state of the approval.
+     * @param sig The EIP712 signature.
+     */
+    function setOperatorApprovalWithSig(
+        uint256 profileId,
+        address operator,
+        bool approved,
+        DataTypes.EIP712Signature calldata sig
+    ) external;
 
     /**
      * @notice Gets the profile metadata.
@@ -187,64 +340,26 @@ interface IProfileNFT is IProfileNFTEvents {
         returns (bool);
 
     /**
-     * @notice Sets the operator approval.
+     * @notice Gets the profile handle by ID.
      *
      * @param profileId The profile ID.
-     * @param operator The operator address.
-     * @param approved The approval status.
+     * @return string the profile handle.
      */
-    function setOperatorApproval(
-        uint256 profileId,
-        address operator,
-        bool approved
-    ) external;
+    function getHandleByProfileId(uint256 profileId)
+        external
+        view
+        returns (string memory);
 
     /**
-     * @notice Sets the operator approval with a signature.
+     * @notice Gets the profile ID by handle.
      *
-     * @param profileId The profile ID.
-     * @param operator The operator address.
-     * @param approved The new state of the approval.
-     * @param sig The EIP712 signature.
+     * @param handle The profile handle.
+     * @return uint256 the profile ID.
      */
-    function setOperatorApprovalWithSig(
-        uint256 profileId,
-        address operator,
-        bool approved,
-        DataTypes.EIP712Signature calldata sig
-    ) external;
-
-    /**
-     * @notice Sets the profile metadata with a signture.
-     *
-     * @param profileId The profile ID.
-     * @param metadata The new metadata to be set.
-     * @param sig The EIP712 signature.
-     * @dev Only owner's signature works.
-     */
-    function setMetadataWithSig(
-        uint256 profileId,
-        string calldata metadata,
-        DataTypes.EIP712Signature calldata sig
-    ) external;
-
-    function setSubscribeMw(
-        uint256 profileId,
-        address mw,
-        bytes calldata prepareData
-    ) external;
-
-    function setSubscribeTokenURI(
-        uint256 profileId,
-        string calldata subscribeTokenURI
-    ) external;
-
-    /**
-     * @notice Sets the primary profile for the user.
-     *
-     * @param profileId The profile ID that is set to be primary.
-     */
-    function setPrimaryProfile(uint256 profileId) external;
+    function getProfileIdByHandle(string calldata handle)
+        external
+        view
+        returns (uint256);
 
     /**
      * @notice Gets a profile subscribe middleware address.
