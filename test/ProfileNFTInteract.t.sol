@@ -646,6 +646,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             new bytes(0)
         );
         assertEq(essenceId, expectedEssenceId);
+        assertEq(profile.getEssenceNFTTokenURI(profileId, essenceId), "uri");
 
         uint256 tokenId = 1890;
 
