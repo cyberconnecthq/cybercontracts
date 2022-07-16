@@ -15,16 +15,21 @@ import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { CyberNFTBase } from "../src/base/CyberNFTBase.sol";
 import { MockProfile } from "./utils/MockProfile.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
+import { TestLib712 } from "./utils/TestLib712.sol";
 
 contract ProfileNFTTest is Test, TestDeployer {
     MockProfile internal token;
-    address constant alice = address(0xA11CE);
+
+    uint256 constant alicePk = 100;
     address constant bob = address(0xA12CE);
     address constant minter = address(0xB0B);
     string constant imageUri = "https://example.com/image.png";
     address constant subscribeMw = address(0xD);
     address constant gov = address(0x8888);
     bytes constant profileData = "0x1";
+    address alice = vm.addr(alicePk);
+    uint256 validDeadline;
+
     DataTypes.CreateProfileParams internal createProfileDataAlice =
         DataTypes.CreateProfileParams(
             alice,
@@ -65,6 +70,7 @@ contract ProfileNFTTest is Test, TestDeployer {
         );
         ERC1967Proxy profileProxy = new ERC1967Proxy(address(tokenImpl), data);
         token = MockProfile(address(profileProxy));
+        validDeadline = block.timestamp + 60 * 60;
     }
 
     function testBasic() public {

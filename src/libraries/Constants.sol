@@ -25,6 +25,10 @@ library Constants {
         keccak256(
             "collectWithSig(uint256 profileId,uint256 essenceId, bytes data,bytes[] postDatas,uint256 nonce,uint256 deadline)"
         );
+    bytes32 internal constant _REGISTER_ESSENCE_TYPEHASH =
+        keccak256(
+            "registerEssenceWithSig(uint256 profileId,string name,string symbol,string essenceTokenURI,address essenceMw,bytes initData,uint256 nonce,uint256 deadline)"
+        );
     bytes32 internal constant _SET_METADATA_TYPEHASH =
         keccak256(
             "setMetadataWithSig(uint256 profileId,string metadata,uint256 nonce,uint256 deadline)"
@@ -32,6 +36,22 @@ library Constants {
     bytes32 internal constant _SET_OPERATOR_APPROVAL_TYPEHASH =
         keccak256(
             "setOperatorApprovalWithSign(uint256 profileId,address operator,bool approved,uint256 nonce,uint256 deadline)"
+        );
+    bytes32 internal constant _SET_SUBSCRIBE_MW_TYPEHASH =
+        keccak256(
+            "setSubscribeMwWithSig(uint256 profileId,address mw,bytes prepareData,uint256 nonce,uint256 deadline)"
+        );
+    bytes32 internal constant _SET_SUBSCRIBE_TOKENURI_TYPEHASH =
+        keccak256(
+            "setSubscribeTokenURIWithSig(uint256 profileId,string subscribeTokenURI,uint256 nonce,uint256 deadline)"
+        );
+    bytes32 internal constant _SET_AVATAR_TYPEHASH =
+        keccak256(
+            "setAvatarWithSig(uint256 profileId,string avatar,uint256 nonce,uint256 deadline)"
+        );
+    bytes32 internal constant _SET_PRIMARY_PROFILE_TYPEHASH =
+        keccak256(
+            "setPrimaryProfileWithSig(uint256 profileId,uint256 nonce,uint256 deadline)"
         );
     bytes32 internal constant _CLAIM_BOX_TYPEHASH =
         keccak256("claimBox(address to,uint256 nonce,uint256 deadline)");
