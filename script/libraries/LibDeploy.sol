@@ -170,7 +170,7 @@ library LibDeploy {
         return address(uint160(uint256(hash_)));
     }
 
-    // create
+    // no longer used but kept for reference
     function _calcContractAddress(address _origin, uint256 _nonce)
         internal
         pure
@@ -224,20 +224,6 @@ library LibDeploy {
                 uint32(_nonce)
             );
         return address(uint160(uint256(keccak256(data))));
-    }
-
-    function _requiresContractAddress(
-        address deployer,
-        uint256 nonce,
-        address c
-    ) internal view {
-        address calc = _calcContractAddress(deployer, nonce);
-        if (c != calc) {
-            console.log("nonce ", nonce);
-            console.log("calc ", calc);
-            console.log("got ", c);
-            revert("contract address mismatch");
-        }
     }
 
     // for testing, link3 signer has private key = 1890
@@ -575,9 +561,6 @@ library LibDeploy {
             ),
             "ENGINE_GOV_ROLE"
         );
-        console.log(RolesAuthority(addrs.engineAuthority).owner());
-        console.log(engineAuthOwner);
-        console.log(msg.sender);
         require(
             RolesAuthority(addrs.engineAuthority).owner() == engineAuthOwner,
             "ENGINE_AUTH_OWNER_WRONG"
@@ -599,7 +582,6 @@ library LibDeploy {
         address originSigner = mw.getSigner(address(profile));
         uint256 startingLink3 = LINK3_TREASURY.balance;
         uint256 startingEngine = ENGINE_TREASURY.balance;
-        console.log(startingEngine);
         address signer = vm.addr(TEST_SIGNER_PK);
 
         // change signer to tempory signer
@@ -663,7 +645,6 @@ library LibDeploy {
             LINK3_TREASURY.balance == startingLink3 + 0.00975 ether,
             "LINK3_TREASURY_BALANCE_INCORRECT"
         );
-        console.log(ENGINE_TREASURY.balance);
         require(
             ENGINE_TREASURY.balance == startingEngine + 0.00025 ether,
             "ENGINE_TREASURY_BALANCE_INCORRECT"

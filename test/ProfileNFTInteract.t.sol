@@ -139,7 +139,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testSubscribeDeployProxy() public {
-        address subscribeProxy = getDeployedProxyAddress(
+        address subscribeProxy = getDeployedSubProxyAddress(
             subscribeBeacon,
             profileId,
             address(profile),
@@ -164,6 +164,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             datas,
             datas
         );
+        assertEq(profile.getSubscribeNFT(profileId), subscribeProxy);
 
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
@@ -226,7 +227,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testSubscribeWithSig() public {
-        //let Charlie subscribe Bob's profile while the sender is Alice
+        // let Charlie subscribe Bob's profile while the sender is Alice
         vm.startPrank(alice);
 
         uint256 charliePk = 100;
@@ -242,47 +243,53 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.warp(50);
         uint256 deadline = 100;
 
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._SUBSCRIBE_TYPEHASH,
-                    keccak256(abi.encodePacked(profileIds)),
-                    keccak256(abi.encodePacked(hashes)),
-                    keccak256(abi.encodePacked(hashes)),
-                    profile.nonces(bob),
-                    deadline
-                )
-            ),
-            profile.name(),
-            "1"
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            charliePk,
+            TestLib712.hashTypedDataV4(
+                address(profile),
+                keccak256(
+                    abi.encode(
+                        Constants._SUBSCRIBE_TYPEHASH,
+                        keccak256(abi.encodePacked(profileIds)),
+                        keccak256(abi.encodePacked(hashes)),
+                        keccak256(abi.encodePacked(hashes)),
+                        profile.nonces(bob),
+                        deadline
+                    )
+                ),
+                profile.name(),
+                "1"
+            )
         );
 
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(charliePk, digest);
-
-        address subscribeProxy = getDeployedProxyAddress(
+        address subscribeProxy = getDeployedSubProxyAddress(
             subscribeBeacon,
             profileId,
             address(profile),
             handle
         );
 
+        uint256 result = 1890;
+
         vm.mockCall(
             subscribeProxy,
             abi.encodeWithSelector(ISubscribeNFT.mint.selector, charlie),
-            abi.encode(1)
+            abi.encode(result)
         );
 
         vm.expectEmit(true, false, false, true);
         emit Subscribe(charlie, profileIds, subDatas, subDatas);
-
-        profile.subscribeWithSig(
+        uint256[] memory got = profile.subscribeWithSig(
             DataTypes.SubscribeParams(profileIds),
             subDatas,
             subDatas,
             charlie,
             DataTypes.EIP712Signature(v, r, s, deadline)
         );
+
+        assertEq(got.length, 1);
+        assertEq(got[0], result);
+        assertEq(profile.getSubscribeNFT(profileId), subscribeProxy);
     }
 
     function testSetOperatorApprovalWithSig() public {
@@ -633,12 +640,14 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.prank(bob);
         uint256 expectedEssenceId = 1;
 
+        string memory name = "Essence Name";
+        string memory symbol = "1890";
         // register without middleware
         uint256 essenceId = profile.registerEssence(
             DataTypes.RegisterEssenceParams(
                 profileId,
-                "name",
-                "symbol",
+                name,
+                symbol,
                 "uri",
                 address(0)
             ),
@@ -650,10 +659,13 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         uint256 tokenId = 1890;
 
         address minter = address(0x1890);
-        uint256 nonce = vm.getNonce(address(profile));
-        address essenceProxy = LibDeploy._calcContractAddress(
+        address essenceProxy = getDeployedEssProxyAddress(
+            essenceBeacon,
+            profileId,
+            essenceId,
             address(profile),
-            nonce
+            name,
+            symbol
         );
         vm.mockCall(
             essenceProxy,
@@ -682,18 +694,21 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             ),
             tokenId
         );
+        assertEq(profile.getEssenceNFT(profileId, essenceId), essenceProxy);
     }
 
     function testCollectEssenceWithSig() public {
         vm.prank(bob);
         uint256 expectedEssenceId = 1;
+        string memory name = "Essence Name";
+        string memory symbol = "1890";
 
         // register without middleware
         uint256 essenceId = profile.registerEssence(
             DataTypes.RegisterEssenceParams(
                 profileId,
-                "name",
-                "symbol",
+                name,
+                symbol,
                 "uri",
                 address(0)
             ),
@@ -703,10 +718,15 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         uint256 tokenId = 1890;
 
-        address essenceProxy = LibDeploy._calcContractAddress(
+        address essenceProxy = getDeployedEssProxyAddress(
+            essenceBeacon,
+            profileId,
+            essenceId,
             address(profile),
-            vm.getNonce(address(profile))
+            name,
+            symbol
         );
+
         vm.mockCall(
             essenceProxy,
             abi.encodeWithSelector(IEssenceNFT.mint.selector, bob),
@@ -754,6 +774,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             ),
             tokenId
         );
+        assertEq(profile.getEssenceNFT(profileId, essenceId), essenceProxy);
     }
 
     function testPermit() public {
