@@ -2,14 +2,16 @@
 
 pragma solidity 0.8.14;
 
-import "../src/periphery/CyberBoxNFT.sol";
 import "forge-std/Test.sol";
-import "../src/libraries/Constants.sol";
-import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
-import { Authority } from "../src/dependencies/solmate/Auth.sol";
-import { ICyberBoxEvents } from "../src/interfaces/ICyberBoxEvents.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { TestLib712 } from "./utils/TestLib712.sol";
+
+import { ICyberBoxEvents } from "../../src/interfaces/ICyberBoxEvents.sol";
+
+import { Constants } from "../../src/libraries/Constants.sol";
+import { DataTypes } from "../../src/libraries/DataTypes.sol";
+
+import { TestLib712 } from "../utils/TestLib712.sol";
+import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
 
 contract CyberBoxNFTTest is Test, ICyberBoxEvents {
     CyberBoxNFT internal token;

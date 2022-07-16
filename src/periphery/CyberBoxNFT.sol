@@ -82,13 +82,9 @@ contract CyberBoxNFT is
      * @return uint256 The version number.
      * @dev This contract can be upgraded with UUPS upgradeability
      */
-    // TODO: write a test for upgrade box nft
     function version() external pure virtual override returns (uint256) {
         return _VERSION;
     }
-
-    // UUPS upgradeability
-    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     /**
      * @notice Changes the pause state of the box nft.
@@ -101,22 +97,6 @@ contract CyberBoxNFT is
         } else {
             super._unpause();
         }
-    }
-
-    /**
-     * @notice Transfers the box nft.
-     *
-     * @param from The initial owner address.
-     * @param to The receipient address.
-     * @param from The nft id.
-     * @dev It requires the state to be unpaused
-     */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) public override whenNotPaused {
-        super.transferFrom(from, to, id);
     }
 
     /**
@@ -165,4 +145,23 @@ contract CyberBoxNFT is
 
         emit SetSigner(preSigner, _signer);
     }
+
+    /**
+     * @notice Transfers the box nft.
+     *
+     * @param from The initial owner address.
+     * @param to The receipient address.
+     * @param from The nft id.
+     * @dev It requires the state to be unpaused
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public override whenNotPaused {
+        super.transferFrom(from, to, id);
+    }
+
+    // UUPS upgradeability
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }
