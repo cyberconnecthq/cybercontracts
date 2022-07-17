@@ -37,6 +37,7 @@ library DataTypes {
     }
 
     struct CollectParams {
+        address to;
         uint256 profileId;
         uint256 essenceId;
     }

@@ -217,7 +217,7 @@ contract ProfileNFT is
         bytes calldata preData,
         bytes calldata postData
     ) external override returns (uint256 tokenId) {
-        return _collect(msg.sender, params, preData, postData);
+        return _collect(params, preData, postData);
     }
 
     /// @inheritdoc IProfileNFT
@@ -233,6 +233,7 @@ contract ProfileNFT is
                 keccak256(
                     abi.encode(
                         Constants._COLLECT_TYPEHASH,
+                        params.to,
                         params.profileId,
                         params.essenceId,
                         keccak256(preData),
@@ -245,7 +246,7 @@ contract ProfileNFT is
             sender,
             sig
         );
-        return _collect(sender, params, preData, postData);
+        return _collect(params, preData, postData);
     }
 
     /// @inheritdoc IProfileNFT
@@ -751,14 +752,10 @@ contract ProfileNFT is
         );
 
         emit Subscribe(sender, params.profileIds, preDatas, postDatas);
-        // if (deployedSubscribeNFT != address(0)) {
-        //     emit DeploySubscribeNFT(profileId, deployedSubscribeNFT);
-        // }
         return result;
     }
 
     function _collect(
-        address collector,
         DataTypes.CollectParams calldata params,
         bytes calldata preData,
         bytes calldata postData
@@ -767,7 +764,7 @@ contract ProfileNFT is
 
         (uint256 tokenId, address deployedEssenceNFT) = Actions.collect(
             DataTypes.CollectData(
-                collector,
+                params.to,
                 params.profileId,
                 params.essenceId,
                 preData,
@@ -777,14 +774,6 @@ contract ProfileNFT is
             _essenceByIdByProfileId
         );
 
-        emit CollectEssence(
-            collector,
-            tokenId,
-            params.profileId,
-            preData,
-            postData
-        );
-
         if (deployedEssenceNFT != address(0)) {
             emit DeployEssenceNFT(
                 params.profileId,
@@ -792,6 +781,14 @@ contract ProfileNFT is
                 deployedEssenceNFT
             );
         }
+
+        emit CollectEssence(
+            params.to,
+            tokenId,
+            params.profileId,
+            preData,
+            postData
+        );
         return tokenId;
     }
 

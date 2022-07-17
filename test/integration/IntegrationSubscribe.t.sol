@@ -29,7 +29,7 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         address to = bob;
         uint256 bobProfileId = TestLibFixture.registerProfile(
             vm,
-            profile,
+            link3Profile,
             profileMw,
             handle,
             to,
@@ -43,24 +43,24 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         address subscribeProxy = getDeployedSubProxyAddress(
             addrs.subBeacon,
             bobProfileId,
-            address(profile),
+            address(link3Profile),
             handle
         );
 
-        vm.expectEmit(true, true, false, true, address(profile));
+        vm.expectEmit(true, true, false, true, address(link3Profile));
         emit DeploySubscribeNFT(ids[0], subscribeProxy);
-        vm.expectEmit(true, false, false, true, address(profile));
+        vm.expectEmit(true, false, false, true, address(link3Profile));
         emit Subscribe(alice, ids, data, data);
 
         vm.prank(alice);
-        uint256 nftid = profile.subscribe(
+        uint256 nftid = link3Profile.subscribe(
             DataTypes.SubscribeParams(ids),
             data,
             data
         )[0];
 
         // check bob sub nft supply
-        address bobSubNFT = profile.getSubscribeNFT(bobProfileId);
+        address bobSubNFT = link3Profile.getSubscribeNFT(bobProfileId);
         assertEq(bobSubNFT, subscribeProxy);
         assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 1);
 
@@ -68,12 +68,14 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(alice));
 
         // alice subscribes again to bob
-        vm.expectEmit(true, false, false, true, address(profile));
+        vm.expectEmit(true, false, false, true, address(link3Profile));
         emit Subscribe(alice, ids, data, data);
         vm.prank(alice);
-        nftid = profile.subscribe(DataTypes.SubscribeParams(ids), data, data)[
-            0
-        ];
+        nftid = link3Profile.subscribe(
+            DataTypes.SubscribeParams(ids),
+            data,
+            data
+        )[0];
 
         // check bob sub nft supply
         assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 2);
@@ -87,7 +89,7 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         string memory bobHandle = "bob";
         uint256 bobProfileId = TestLibFixture.registerProfile(
             vm,
-            profile,
+            link3Profile,
             profileMw,
             bobHandle,
             bob,
@@ -97,7 +99,7 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         string memory aliceHandle = "alice";
         uint256 aliceProfileId = TestLibFixture.registerProfile(
             vm,
-            profile,
+            link3Profile,
             profileMw,
             aliceHandle,
             alice,
@@ -115,39 +117,39 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         address aliceSubProxy = getDeployedSubProxyAddress(
             addrs.subBeacon,
             aliceProfileId,
-            address(profile),
+            address(link3Profile),
             aliceHandle
         );
 
         address bobSubProxy = getDeployedSubProxyAddress(
             addrs.subBeacon,
             bobProfileId,
-            address(profile),
+            address(link3Profile),
             bobHandle
         );
 
-        vm.expectEmit(true, true, false, true, address(profile));
+        vm.expectEmit(true, true, false, true, address(link3Profile));
         emit DeploySubscribeNFT(ids[0], aliceSubProxy);
 
-        vm.expectEmit(true, true, false, true, address(profile));
+        vm.expectEmit(true, true, false, true, address(link3Profile));
         emit DeploySubscribeNFT(ids[1], bobSubProxy);
 
-        vm.expectEmit(true, false, false, true, address(profile));
+        vm.expectEmit(true, false, false, true, address(link3Profile));
         emit Subscribe(alice, ids, data, data);
 
-        profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
-        assertEq(profile.getSubscribeNFT(aliceProfileId), aliceSubProxy);
-        assertEq(profile.getSubscribeNFT(bobProfileId), bobSubProxy);
+        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        assertEq(link3Profile.getSubscribeNFT(aliceProfileId), aliceSubProxy);
+        assertEq(link3Profile.getSubscribeNFT(bobProfileId), bobSubProxy);
 
         vm.stopPrank();
 
         // dixon subscribes to alice to bob
         vm.startPrank(dixon);
 
-        vm.expectEmit(true, false, false, true, address(profile));
+        vm.expectEmit(true, false, false, true, address(link3Profile));
         emit Subscribe(bob, ids, data, data);
 
-        profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
 
         vm.stopPrank();
     }

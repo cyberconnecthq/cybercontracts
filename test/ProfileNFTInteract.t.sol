@@ -943,7 +943,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     function testCannotCollectEssenceIfNotRegistered() public {
         vm.expectRevert("ESSENCE_NOT_REGISTERED");
         profile.collect(
-            DataTypes.CollectParams(profileId, 1),
+            DataTypes.CollectParams(address(this), profileId, 1),
             new bytes(0),
             new bytes(0)
         );
@@ -991,7 +991,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.prank(minter);
         assertEq(
             profile.collect(
-                DataTypes.CollectParams(profileId, essenceId),
+                DataTypes.CollectParams(minter, profileId, essenceId),
                 new bytes(0),
                 new bytes(0)
             ),
@@ -1037,6 +1037,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.expectEmit(true, true, false, true);
+        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
+
+        vm.expectEmit(true, true, false, true);
         emit CollectEssence(
             minter,
             tokenId,
@@ -1045,13 +1048,10 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             new bytes(0)
         );
 
-        vm.expectEmit(true, true, false, true);
-        emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
-
         vm.prank(minter);
         assertEq(
             profile.collect(
-                DataTypes.CollectParams(profileId, essenceId),
+                DataTypes.CollectParams(minter, profileId, essenceId),
                 new bytes(0),
                 new bytes(0)
             ),
@@ -1098,11 +1098,11 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         bytes memory data = new bytes(0);
 
-        vm.expectEmit(true, false, false, true);
-        emit CollectEssence(bob, tokenId, profileId, data, data);
-
         vm.expectEmit(true, true, false, true);
         emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
+
+        vm.expectEmit(true, false, false, true);
+        emit CollectEssence(bob, tokenId, profileId, data, data);
 
         vm.warp(50);
         uint256 deadline = 100;
@@ -1113,6 +1113,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 keccak256(
                     abi.encode(
                         Constants._COLLECT_TYPEHASH,
+                        bob,
                         profileId,
                         essenceId,
                         keccak256(data),
@@ -1128,7 +1129,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         assertEq(
             profile.collectWithSig(
-                DataTypes.CollectParams(profileId, essenceId),
+                DataTypes.CollectParams(bob, profileId, essenceId),
                 data,
                 data,
                 bob,
