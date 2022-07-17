@@ -106,6 +106,7 @@ contract CyberNFTBaseTest is Test {
 
     function testCannotBurnAsNonOwnerOrApproved() public {
         token.mint(alice);
+        assertEq(token.ownerOf(1), alice);
 
         vm.expectRevert("NOT_OWNER_OR_APPROVED");
         token.burn(1);
