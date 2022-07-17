@@ -16,7 +16,6 @@ contract PausableTest is Test {
         pausableContract = new MockPausable();
     }
 
-    //unpaused
     function testcanPerformNormalProcessInNonPause() public {
         assertEq(pausableContract.count(), 0);
         pausableContract.normalProcess();
@@ -28,7 +27,6 @@ contract PausableTest is Test {
         pausableContract.drasticMeasure();
     }
 
-    //paused
     function testEmitPauseEvent() public {
         vm.expectEmit(true, false, false, true);
         emit Paused(address(this));
@@ -53,7 +51,6 @@ contract PausableTest is Test {
         pausableContract.pause();
     }
 
-    //unpausing
     function testIsUnpausableByThePauser() public {
         pausableContract.pause();
         pausableContract.unpause();

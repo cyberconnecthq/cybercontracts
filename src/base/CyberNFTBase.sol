@@ -13,16 +13,12 @@ import { EIP712 } from "./EIP712.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 
 abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
-    uint256 internal _totalCount = 0;
+    uint256 internal _currentIndex = 0;
+    uint256 internal _burnCount = 0;
     mapping(address => uint256) public nonces;
 
     constructor() {
         _disableInitializers();
-    }
-
-    /// @inheritdoc ICyberNFTBase
-    function totalSupply() external view virtual override returns (uint256) {
-        return _totalCount;
     }
 
     /// @inheritdoc ICyberNFTBase
@@ -53,6 +49,32 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
         emit Approval(owner, spender, tokenId);
     }
 
+    /// @inheritdoc ICyberNFTBase
+    function totalSupply() external view virtual override returns (uint256) {
+        return _currentIndex - _burnCount;
+    }
+
+    /// @inheritdoc ICyberNFTBase
+    function totalMinted() external view virtual override returns (uint256) {
+        return _currentIndex;
+    }
+
+    /// @inheritdoc ICyberNFTBase
+    function totalBurned() external view virtual override returns (uint256) {
+        return _burnCount;
+    }
+
+    /// @inheritdoc ICyberNFTBase
+    function burn(uint256 tokenId) public virtual override {
+        address owner = ownerOf(tokenId);
+        require(
+            msg.sender == owner || msg.sender == getApproved[tokenId],
+            "NOT_OWNER_OR_APPROVED"
+        );
+        super._burn(tokenId);
+        _burnCount++;
+    }
+
     function _initialize(string calldata _name, string calldata _symbol)
         internal
         onlyInitializing
@@ -61,8 +83,8 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
     }
 
     function _mint(address _to) internal virtual returns (uint256) {
-        super._safeMint(_to, ++_totalCount);
-        return _totalCount;
+        super._safeMint(_to, ++_currentIndex);
+        return _currentIndex;
     }
 
     function _exists(uint256 tokenId) internal view returns (bool) {
