@@ -233,7 +233,7 @@ contract ProfileNFT is
                 keccak256(
                     abi.encode(
                         Constants._COLLECT_TYPEHASH,
-                        params.to,
+                        params.collector,
                         params.profileId,
                         params.essenceId,
                         keccak256(preData),
@@ -764,7 +764,7 @@ contract ProfileNFT is
 
         (uint256 tokenId, address deployedEssenceNFT) = Actions.collect(
             DataTypes.CollectData(
-                params.to,
+                params.collector,
                 params.profileId,
                 params.essenceId,
                 preData,
@@ -783,7 +783,7 @@ contract ProfileNFT is
         }
 
         emit CollectEssence(
-            params.to,
+            params.collector,
             tokenId,
             params.profileId,
             preData,
