@@ -31,7 +31,7 @@ interface IEssenceNFT {
     /**
      * @notice Check if this essence NFT is transferable.
      *
-     * @return bool is transferable.
+     * @return bool Whether this Essence NFT is transferable.
      */
     function isTransferable() external returns (bool);
 }
