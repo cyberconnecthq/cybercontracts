@@ -16,6 +16,10 @@ contract DeploySetting {
     DeployParameters internal deployParams;
 
     function _setDeployParams() internal {
+        // Anvil accounts
+        // (0) 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (10000 ETH)
+        // (1) 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (10000 ETH)
+        // (2) 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc (10000 ETH)
         if (block.chainid == 31337) {
             // use the same address that runs the deployment script
             deployParams.link3Owner = address(
@@ -25,7 +29,7 @@ contract DeploySetting {
                 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             );
             deployParams.link3Treasury = address(
-                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+                0x70997970C51812dc3A010C7d01b50e0d17dc79C8 // use different wallet to pass balance delta check
             );
             deployParams.engineAuthOwner = address(
                 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
@@ -34,7 +38,7 @@ contract DeploySetting {
                 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
             );
             deployParams.engineTreasury = address(
-                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+                0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC // use different wallet to pass balance delta check (gas paying)
             );
             deployParams.deployerContract = address(0);
         } else if (block.chainid == 5) {
@@ -45,7 +49,7 @@ contract DeploySetting {
                 0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
             );
             deployParams.link3Treasury = address(
-                0x927f355117721e0E8A7b5eA20002b65B8a551890
+                0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
             );
             deployParams.engineAuthOwner = address(
                 0x927f355117721e0E8A7b5eA20002b65B8a551890
