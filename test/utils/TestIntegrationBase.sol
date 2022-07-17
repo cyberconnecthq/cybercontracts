@@ -21,6 +21,9 @@ abstract contract TestIntegrationBase is Test, TestProxy {
     address internal constant carly = address(0xDEADCA11);
     address internal constant dixon = address(0xDEADD1);
 
+    address internal constant link3Treasury = address(0xDEAD3333);
+    address internal constant engineTreasury = address(0xDEADEEEE);
+
     ProfileNFT profile;
     Link3ProfileDescriptor profileDescriptor;
     PermissionedFeeCreationMw profileMw;
@@ -32,7 +35,12 @@ abstract contract TestIntegrationBase is Test, TestProxy {
     }
 
     function _setUp() internal {
-        addrs = LibDeploy.deployInTest(vm, link3Signer);
+        addrs = LibDeploy.deployInTest(
+            vm,
+            link3Signer,
+            link3Treasury,
+            engineTreasury
+        );
         profile = ProfileNFT(addrs.link3Profile);
         profileDescriptor = Link3ProfileDescriptor(addrs.link3DescriptorProxy);
         profileMw = PermissionedFeeCreationMw(addrs.link3ProfileMw);

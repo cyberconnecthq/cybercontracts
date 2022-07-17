@@ -18,16 +18,8 @@ contract DeployScript is Script, DeploySetting {
 
         LibDeploy.deploy(
             vm,
-            LibDeploy.DeployParams(
-                true,
-                deployParams.deployerContract,
-                true,
-                deployParams.link3Owner,
-                deployParams.link3Signer,
-                deployParams.engineAuthOwner,
-                deployParams.engineGov,
-                deployParams.link3Signer
-            )
+            LibDeploy.DeployParams(true, true, deployParams),
+            deployParams.link3Signer // mint test profile to signer
         );
 
         vm.stopBroadcast();
