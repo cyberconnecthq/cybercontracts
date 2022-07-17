@@ -93,7 +93,7 @@ contract EssenceNFT is
     }
 
     /**
-     * @notice Disallows the transfer of the subscribe nft.
+     * @notice Disallows the transfer of the essence nft.
      */
     function transferFrom(
         address,
