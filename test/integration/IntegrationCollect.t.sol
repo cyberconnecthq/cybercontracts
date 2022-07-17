@@ -66,10 +66,10 @@ contract IntegrationEssenceTest is
     bool constant CARLY_ESSENCE_2_TRANSFERABLE = false;
     uint256 carlyFirstEssenceId;
     uint256 carlyFirstEssenceTokenId; // bob mint this
-    address carlyFirstEssenceAddr;
+    address carlyTransferableEssenceAddr;
     uint256 carlySecondEssenceId;
     uint256 carlySecondEssenceTokenId; // bob mint this
-    address carlySecondEssenceAddr;
+    address carlyNontransferableEssenceAddr;
 
     function setUp() public {
         // create an engine
@@ -157,7 +157,7 @@ contract IntegrationEssenceTest is
                 address(0),
                 CARLY_ESSENCE_1_TRANSFERABLE
             ),
-            dataCarly
+            new bytes(0)
         );
         // carly registers a non-transferable essence
         carlySecondEssenceId = link5Profile.registerEssence(
@@ -169,11 +169,11 @@ contract IntegrationEssenceTest is
                 address(0),
                 CARLY_ESSENCE_2_TRANSFERABLE
             ),
-            dataCarly
+            new bytes(0)
         );
         vm.stopPrank();
 
-        // bob collects a both carly's essences #1
+        // bob collects carly's essences #1
         vm.startPrank(bob);
         address essenceProxy;
         essenceProxy = getDeployedEssProxyAddress(
@@ -190,30 +190,32 @@ contract IntegrationEssenceTest is
             new bytes(0),
             new bytes(0)
         );
-        carlyFirstEssenceAddr = link5Profile.getEssenceNFT(
+        carlyTransferableEssenceAddr = link5Profile.getEssenceNFT(
             profileIdCarly,
             carlyFirstEssenceId
         );
-        assertEq(carlyFirstEssenceAddr, essenceProxy);
+        assertEq(carlyTransferableEssenceAddr, essenceProxy);
         assertEq(
-            EssenceNFT(carlyFirstEssenceAddr).name(),
+            EssenceNFT(carlyTransferableEssenceAddr).name(),
             CARLY_ESSENCE_1_NAME
         );
         assertEq(
-            EssenceNFT(carlyFirstEssenceAddr).symbol(),
+            EssenceNFT(carlyTransferableEssenceAddr).symbol(),
             CARLY_ESSENCE_1_SYMBOL
         );
         assertEq(
-            EssenceNFT(carlyFirstEssenceAddr).isTransferable(),
+            EssenceNFT(carlyTransferableEssenceAddr).isTransferable(),
             CARLY_ESSENCE_1_TRANSFERABLE
         );
         assertEq(
-            EssenceNFT(carlyFirstEssenceAddr).ownerOf(carlyFirstEssenceTokenId),
+            EssenceNFT(carlyTransferableEssenceAddr).ownerOf(
+                carlyFirstEssenceTokenId
+            ),
             bob
         );
-        assertEq(EssenceNFT(carlyFirstEssenceAddr).balanceOf(bob), 1);
+        assertEq(EssenceNFT(carlyTransferableEssenceAddr).balanceOf(bob), 1);
 
-        // bob collects a both carly's essences #2
+        // bob collects carly's essences #2
         essenceProxy = getDeployedEssProxyAddress(
             link5EssBeacon,
             profileIdCarly,
@@ -228,30 +230,30 @@ contract IntegrationEssenceTest is
             new bytes(0),
             new bytes(0)
         );
-        carlySecondEssenceAddr = link5Profile.getEssenceNFT(
+        carlyNontransferableEssenceAddr = link5Profile.getEssenceNFT(
             profileIdCarly,
             carlySecondEssenceId
         );
-        assertEq(carlySecondEssenceAddr, essenceProxy);
+        assertEq(carlyNontransferableEssenceAddr, essenceProxy);
         assertEq(
-            EssenceNFT(carlySecondEssenceAddr).name(),
+            EssenceNFT(carlyNontransferableEssenceAddr).name(),
             CARLY_ESSENCE_2_NAME
         );
         assertEq(
-            EssenceNFT(carlySecondEssenceAddr).symbol(),
+            EssenceNFT(carlyNontransferableEssenceAddr).symbol(),
             CARLY_ESSENCE_2_SYMBOL
         );
         assertEq(
-            EssenceNFT(carlySecondEssenceAddr).isTransferable(),
+            EssenceNFT(carlyNontransferableEssenceAddr).isTransferable(),
             CARLY_ESSENCE_2_TRANSFERABLE
         );
         assertEq(
-            EssenceNFT(carlySecondEssenceAddr).ownerOf(
+            EssenceNFT(carlyNontransferableEssenceAddr).ownerOf(
                 carlySecondEssenceTokenId
             ),
             bob
         );
-        assertEq(EssenceNFT(carlySecondEssenceAddr).balanceOf(bob), 1);
+        assertEq(EssenceNFT(carlyNontransferableEssenceAddr).balanceOf(bob), 1);
 
         vm.stopPrank();
     }
@@ -446,7 +448,7 @@ contract IntegrationEssenceTest is
     }
 
     function testEssenceTransfer() public {
-        EssenceNFT essence = EssenceNFT(carlyFirstEssenceAddr);
+        EssenceNFT essence = EssenceNFT(carlyTransferableEssenceAddr);
         vm.prank(bob);
         essence.transferFrom(bob, alice, carlyFirstEssenceTokenId);
         assertEq(essence.balanceOf(bob), 0);
@@ -456,7 +458,7 @@ contract IntegrationEssenceTest is
 
     function testEssencePermitAndTransfer() public {
         // permit
-        EssenceNFT essence = EssenceNFT(carlyFirstEssenceAddr);
+        EssenceNFT essence = EssenceNFT(carlyTransferableEssenceAddr);
         vm.warp(50);
         uint256 deadline = 100;
         bytes32 data = keccak256(
@@ -491,7 +493,7 @@ contract IntegrationEssenceTest is
     }
 
     function testCannotTransferNonTransferableEssence() public {
-        EssenceNFT essence = EssenceNFT(carlySecondEssenceAddr);
+        EssenceNFT essence = EssenceNFT(carlyNontransferableEssenceAddr);
         vm.prank(bob);
         vm.expectRevert("TRANSFER_NOT_ALLOWED");
         essence.transferFrom(bob, alice, carlySecondEssenceTokenId);
@@ -502,7 +504,7 @@ contract IntegrationEssenceTest is
 
     function testCannotPermitAndTransferNonTransferableEssence() public {
         // permit
-        EssenceNFT essence = EssenceNFT(carlySecondEssenceAddr);
+        EssenceNFT essence = EssenceNFT(carlyNontransferableEssenceAddr);
         vm.warp(50);
         uint256 deadline = 100;
         bytes32 data = keccak256(
