@@ -11,12 +11,20 @@ import { EIP712 } from "../../base/EIP712.sol";
 import { PermissionedMw } from "../base/PermissionedMw.sol";
 import { FeeMw } from "../base/FeeMw.sol";
 
+/**
+ * @title Permissioned Fee Creation Middleware
+ * @author CyberConnect
+ * @notice This contract is a middleware to create permissioned fee.
+ */
 contract PermissionedFeeCreationMw is
     IProfileMiddleware,
     EIP712,
     PermissionedMw,
     FeeMw
 {
+    /*//////////////////////////////////////////////////////////////
+                                STATES
+    //////////////////////////////////////////////////////////////*/
     struct MiddlewareData {
         address signer;
         address recipient;
@@ -35,20 +43,33 @@ contract PermissionedFeeCreationMw is
 
     mapping(address => MiddlewareData) internal _mwDataByNamespace;
 
+    /*//////////////////////////////////////////////////////////////
+                              MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Checks that the namespace is valid.
+     */
     modifier onlyValidNamespace(address namespace) {
         address mwData = _mwDataByNamespace[namespace].recipient;
         require(mwData != address(0), "INVALID_NAMESPACE");
         _;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
     constructor(address engine, address treasury)
         PermissionedMw(engine)
         FeeMw(treasury)
     {}
 
-    /**
-     * @inheritdoc IProfileMiddleware
-     */
+    /*//////////////////////////////////////////////////////////////
+                                 EXTERNAL
+    //////////////////////////////////////////////////////////////*/
+
+    /// @inheritdoc IProfileMiddleware
     function preProcess(
         DataTypes.CreateProfileParams calldata params,
         bytes calldata data
@@ -82,6 +103,7 @@ contract PermissionedFeeCreationMw is
         // do nothing
     }
 
+    /// @inheritdoc IProfileMiddleware
     function setProfileMwData(address namespace, bytes calldata data)
         external
         override
@@ -129,14 +151,37 @@ contract PermissionedFeeCreationMw is
         return data;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Gets the signer address.
+     *
+     * @param namespace The namespace address.
+     * @return address The signer address.
+     */
     function getSigner(address namespace) public view returns (address) {
         return _mwDataByNamespace[namespace].signer;
     }
 
+    /**
+     * @notice Gets the recipient address.
+     *
+     * @param namespace The namespace address.
+     * @return address The recipient address.
+     */
     function getRecipient(address namespace) public view returns (address) {
         return _mwDataByNamespace[namespace].recipient;
     }
 
+    /**
+     * @notice Gets the nonce of the address.
+     *
+     * @param namespace The namespace address.
+     * @param user The user address.
+     * @return uint256 The nonce.
+     */
     function getNonce(address namespace, address user)
         public
         view
@@ -145,6 +190,13 @@ contract PermissionedFeeCreationMw is
         return _mwDataByNamespace[namespace].nonces[user];
     }
 
+    /**
+     * @notice Gets the tier's fee.
+     *
+     * @param namespace The namespace address.
+     * @param tier The tier.
+     * @return uint256 The fee amount.
+     */
     function getFeeByTier(address namespace, Tier tier)
         public
         view
@@ -152,6 +204,10 @@ contract PermissionedFeeCreationMw is
     {
         return _mwDataByNamespace[namespace].feeMapping[tier];
     }
+
+    /*//////////////////////////////////////////////////////////////
+                              INTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     function _setFeeByTier(
         address namespace,

@@ -12,6 +12,10 @@ import { ISubscribeMiddleware } from "../../interfaces/ISubscribeMiddleware.sol"
  * @notice This contract is a middleware to allow the address to subscribe only once to another address.
  */
 contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
+    /*//////////////////////////////////////////////////////////////
+                         EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
     /// @inheritdoc ISubscribeMiddleware
     function setSubscribeMwData(uint256, bytes calldata)
         external

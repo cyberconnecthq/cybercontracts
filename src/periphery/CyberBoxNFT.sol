@@ -60,33 +60,6 @@ contract CyberBoxNFT is
     }
 
     /**
-     * @notice Generates the metadata json object.
-     *
-     * @param tokenId The profile NFT token ID.
-     * @return string The metadata json object.
-     * @dev It requires the tokenId to be already minted.
-     */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        _requireMinted(tokenId);
-        return "";
-    }
-
-    /**
-     * @notice Contract version number.
-     *
-     * @return uint256 The version number.
-     * @dev This contract can be upgraded with UUPS upgradeability
-     */
-    function version() external pure virtual override returns (uint256) {
-        return _VERSION;
-    }
-
-    /**
      * @notice Changes the pause state of the box nft.
      *
      * @param toPause The pause state.
@@ -97,6 +70,16 @@ contract CyberBoxNFT is
         } else {
             super._unpause();
         }
+    }
+
+    /**
+     * @notice Contract version number.
+     *
+     * @return uint256 The version number.
+     * @dev This contract can be upgraded with UUPS upgradeability
+     */
+    function version() external pure virtual override returns (uint256) {
+        return _VERSION;
     }
 
     /**
@@ -146,12 +129,29 @@ contract CyberBoxNFT is
         emit SetSigner(preSigner, signer);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                         EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Gets the signer address.
+     *
+     * @return address The signer address.
+     */
+    function getSigner() external view override returns (address) {
+        return _signer;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                 PUBLIC
+    //////////////////////////////////////////////////////////////*/
+
     /**
      * @notice Transfers the box nft.
      *
      * @param from The initial owner address.
      * @param to The receipient address.
-     * @param from The nft id.
+     * @param id The nft id.
      * @dev It requires the state to be unpaused
      */
     function transferFrom(
@@ -162,9 +162,30 @@ contract CyberBoxNFT is
         super.transferFrom(from, to, id);
     }
 
-    function getSigner() external view override returns (address) {
-        return _signer;
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Generates the metadata json object.
+     *
+     * @param tokenId The profile NFT token ID.
+     * @return string The metadata json object.
+     * @dev It requires the tokenId to be already minted.
+     */
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        _requireMinted(tokenId);
+        return "";
     }
+
+    /*//////////////////////////////////////////////////////////////
+                              INTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     // UUPS upgradeability
     function _authorizeUpgrade(address) internal override onlyOwner {}

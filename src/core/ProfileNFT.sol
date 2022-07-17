@@ -654,6 +654,15 @@ contract ProfileNFT is
     /*//////////////////////////////////////////////////////////////
                                  PUBLIC
     //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Transfers the profile nft.
+     *
+     * @param from The initial owner address.
+     * @param to The receipient address.
+     * @param id The nft id.
+     * @dev It requires the state to be unpaused
+     */
     function transferFrom(
         address from,
         address to,
