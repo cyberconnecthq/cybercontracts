@@ -6,7 +6,7 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 
 interface ICyberNFTBase {
     /**
-     * @notice The total number of tokens in existence, burned tokens will reduce the count.
+     * @notice Gets total number of tokens in existence, burned tokens will reduce the count.
      *
      * @return uint256 The total supply.
      */
