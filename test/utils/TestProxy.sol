@@ -52,7 +52,8 @@ contract TestProxy {
         uint256 essenceId,
         address profile,
         string memory name,
-        string memory symbol
+        string memory symbol,
+        bool transferable
     ) internal pure returns (address) {
         return
             LibDeploy._computeAddress(
@@ -65,7 +66,8 @@ contract TestProxy {
                             profileId,
                             essenceId,
                             name,
-                            symbol
+                            symbol,
+                            transferable
                         )
                     )
                 ),

@@ -47,10 +47,12 @@ contract EssenceNFT is
         uint256 profileId,
         uint256 essenceId,
         string calldata name,
-        string calldata symbol
+        string calldata symbol,
+        bool transferable
     ) external override initializer {
         _profileId = profileId;
         _essenceId = essenceId;
+        _transferable = transferable;
         CyberNFTBase._initialize(name, symbol);
     }
 
@@ -67,6 +69,11 @@ contract EssenceNFT is
     /// @inheritdoc IUpgradeable
     function version() external pure override returns (uint256) {
         return _VERSION;
+    }
+
+    // @inheritdoc IEssenceNFT
+    function isTransferable() external view override returns (bool) {
+        return _transferable;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -96,10 +103,13 @@ contract EssenceNFT is
      * @notice Disallows the transfer of the essence nft.
      */
     function transferFrom(
-        address,
-        address,
-        uint256
-    ) public pure override {
-        revert("TRANSFER_NOT_ALLOWED");
+        address from,
+        address to,
+        uint256 id
+    ) public override {
+        if (!_transferable) {
+            revert("TRANSFER_NOT_ALLOWED");
+        }
+        super.transferFrom(from, to, id);
     }
 }

@@ -9,4 +9,5 @@ contract EssenceNFTStorage {
     // storage
     uint256 internal _profileId;
     uint256 internal _essenceId;
+    bool internal _transferable;
 }

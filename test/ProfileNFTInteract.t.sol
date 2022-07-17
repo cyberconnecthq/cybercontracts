@@ -778,7 +778,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 "name",
                 "symbol",
                 "uri",
-                essenceMw
+                essenceMw,
+                true
             ),
             new bytes(0)
         );
@@ -794,7 +795,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 "name",
                 "symbol",
                 "uri",
-                essenceMw
+                essenceMw,
+                true
             ),
             new bytes(0)
         );
@@ -819,7 +821,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 "name",
                 "symbol",
                 "uri",
-                notMw
+                notMw,
+                true
             ),
             new bytes(0)
         );
@@ -868,7 +871,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 name,
                 symbol,
                 uri,
-                essenceMw
+                essenceMw,
+                true
             ),
             new bytes(0)
         );
@@ -905,7 +909,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 "name",
                 "symbol",
                 "uri",
-                essenceMw
+                essenceMw,
+                true
             );
         bytes memory data = new bytes(0);
 
@@ -960,7 +965,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 "name",
                 "symbol",
                 "uri",
-                address(0)
+                address(0),
+                true
             ),
             new bytes(0)
         );
@@ -1012,7 +1018,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 name,
                 symbol,
                 "uri",
-                address(0)
+                address(0),
+                true
             ),
             new bytes(0)
         );
@@ -1028,7 +1035,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             essenceId,
             address(profile),
             name,
-            symbol
+            symbol,
+            true
         );
         vm.mockCall(
             essenceProxy,
@@ -1073,7 +1081,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 name,
                 symbol,
                 "uri",
-                address(0)
+                address(0),
+                true
             ),
             new bytes(0)
         );
@@ -1087,7 +1096,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             essenceId,
             address(profile),
             name,
-            symbol
+            symbol,
+            true
         );
 
         vm.mockCall(

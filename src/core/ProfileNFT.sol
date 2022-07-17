@@ -828,8 +828,9 @@ contract ProfileNFT is
                 params.name,
                 params.symbol,
                 params.essenceTokenURI,
+                initData,
                 params.essenceMw,
-                initData
+                params.transferable
             ),
             _profileById,
             _essenceByIdByProfileId
