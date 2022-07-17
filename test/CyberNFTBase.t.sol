@@ -119,10 +119,10 @@ contract CyberNFTBaseTest is Test {
         assertEq(token.totalMinted(), 1);
         assertEq(token.totalBurned(), 0);
         assertEq(token.balanceOf(bob), 1);
-        assertEq(token.ownerOf(1), bob);
+        assertEq(token.ownerOf(tokenId), bob);
 
         vm.prank(alice);
-        token.burn(1);
+        token.burn(tokenId);
 
         assertEq(token.totalSupply(), 0);
         assertEq(token.totalMinted(), 1);
