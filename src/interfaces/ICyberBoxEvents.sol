@@ -12,14 +12,6 @@ interface ICyberBoxEvents {
     event SetSigner(address indexed preSigner, address indexed newSigner);
 
     /**
-     * @dev Emitted when a new owner has been set.
-     *
-     * @param preOwner The previous owner address.
-     * @param newOwner The newly set owner address.
-     */
-    event SetOwner(address indexed preOwner, address indexed newOwner);
-
-    /**
      * @notice Emitted when a profile claims a box nft.
      *
      * @param to The claimer address.

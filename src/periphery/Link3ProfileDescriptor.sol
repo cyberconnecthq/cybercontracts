@@ -85,11 +85,11 @@ contract Link3ProfileDescriptor is
                             '","description":"Link3 profile for ',
                             formattedName,
                             '","image":"',
-                            drawStaticImage(params.handle),
+                            _drawStaticImage(params.handle),
                             '","animation_url":"',
                             animationURL,
                             '","attributes":',
-                            genAttributes(
+                            _genAttributes(
                                 LibString.toString(params.tokenId),
                                 LibString.toString(bytes(params.handle).length),
                                 LibString.toString(params.subscribers),
@@ -106,7 +106,7 @@ contract Link3ProfileDescriptor is
                               INTERNAL
     //////////////////////////////////////////////////////////////*/
 
-    function genAttributes(
+    function _genAttributes(
         string memory tokenId,
         string memory length,
         string memory subscribers,
@@ -126,7 +126,7 @@ contract Link3ProfileDescriptor is
             );
     }
 
-    function drawStaticImage(string memory handle)
+    function _drawStaticImage(string memory handle)
         internal
         pure
         returns (string memory)
@@ -139,13 +139,13 @@ contract Link3ProfileDescriptor is
         );
 
         if (bytes(handle).length > 13) {
-            string memory headString = substring(handle, 0, 13);
+            string memory headString = _substring(handle, 0, 13);
 
             handleSVGElement = string(
                 abi.encodePacked(
-                    getHandleSVGtext(headString, 0),
-                    getHandleSVGtext(
-                        substring(handle, 13, bytes(handle).length),
+                    _getHandleSVGtext(headString, 0),
+                    _getHandleSVGtext(
+                        _substring(handle, 13, bytes(handle).length),
                         90
                     )
                 )
@@ -153,19 +153,19 @@ contract Link3ProfileDescriptor is
             handleInLink = string(abi.encodePacked(headString, ".."));
             handleBackgroundWidth = 188;
         } else {
-            handleSVGElement = getHandleSVGtext(handle, 0);
+            handleSVGElement = _getHandleSVGtext(handle, 0);
             handleBackgroundWidth = uint16(bytes(handle).length - 1) * 13 + 30;
         }
 
-        string memory fontStyleSVGElement = getFontStyleSVGElement();
-        string memory backgroundPath = getBackgroundPath();
-        string memory qrCodeSVGElement = getQRCodeSVGElement(qrCode);
-        string memory linkSVGElement = getLinkSVGElement(
+        string memory fontStyleSVGElement = _getFontStyleSVGElement();
+        string memory backgroundPath = _getBackgroundPath();
+        string memory qrCodeSVGElement = _getQRCodeSVGElement(qrCode);
+        string memory linkSVGElement = _getLinkSVGElement(
             handleBackgroundWidth,
             handleInLink
         );
 
-        string memory svg = compose(
+        string memory svg = _compose(
             fontStyleSVGElement,
             handleSVGElement,
             backgroundPath,
@@ -183,7 +183,7 @@ contract Link3ProfileDescriptor is
         return uri;
     }
 
-    function substring(
+    function _substring(
         string memory str,
         uint256 startIndex,
         uint256 endIndex
@@ -196,17 +196,17 @@ contract Link3ProfileDescriptor is
         return string(result);
     }
 
-    function getFontStyleSVGElement() internal pure returns (string memory) {
+    function _getFontStyleSVGElement() internal pure returns (string memory) {
         return
             "<style>@font-face {font-family='\"Outfit\", sans-serif;'}</style>";
     }
 
-    function getBackgroundPath() internal pure returns (string memory) {
+    function _getBackgroundPath() internal pure returns (string memory) {
         return
             "<path d='M59 104.826C59 92.0806 62.0452 79.5197 67.882 68.1894L84.3299 36.2613C89.4741 26.2754 99.766 20 110.999 20H177.569H421.276C432.322 20 441.276 28.9543 441.276 40V428.566C441.276 437.981 436.856 446.85 429.339 452.519L406.262 469.921C397.588 476.462 387.02 480 376.157 480H182.724H79C67.9543 480 59 471.046 59 460V104.826Z' fill='black'/>";
     }
 
-    function getQRCodeSVGElement(string memory base64String)
+    function _getQRCodeSVGElement(string memory base64String)
         internal
         pure
         returns (string memory)
@@ -221,7 +221,7 @@ contract Link3ProfileDescriptor is
             );
     }
 
-    function getLinkSVGElement(uint16 backgroundWidth, string memory handle)
+    function _getLinkSVGElement(uint16 backgroundWidth, string memory handle)
         internal
         pure
         returns (string memory)
@@ -241,7 +241,7 @@ contract Link3ProfileDescriptor is
             );
     }
 
-    function compose(
+    function _compose(
         string memory fontStyleSVGElement,
         string memory handleSVGElement,
         string memory backgroundPath,
@@ -262,7 +262,7 @@ contract Link3ProfileDescriptor is
             );
     }
 
-    function getHandleSVGtext(string memory handle, uint16 yValue)
+    function _getHandleSVGtext(string memory handle, uint16 yValue)
         internal
         pure
         returns (string memory)

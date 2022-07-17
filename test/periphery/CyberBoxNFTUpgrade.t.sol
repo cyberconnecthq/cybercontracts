@@ -14,8 +14,6 @@ import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
 
 contract CyberBoxNFTUpgradeTest is Test, ICyberBoxEvents {
     CyberBoxNFT internal cyberBox;
-    address constant alice = address(0xA11CE);
-    address constant bob = address(0xB0B);
     address constant owner = address(0xe);
 
     function setUp() public {

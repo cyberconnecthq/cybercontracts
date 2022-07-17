@@ -10,7 +10,6 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 import { EIP712 } from "./EIP712.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 
-// Sequential mint ERC721
 abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
     uint256 internal _totalCount = 0;
     mapping(address => uint256) public nonces;
@@ -23,27 +22,6 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
         return _totalCount;
     }
 
-    function _initialize(string calldata _name, string calldata _symbol)
-        internal
-        onlyInitializing
-    {
-        ERC721.__ERC721_Init(_name, _symbol);
-    }
-
-    function _mint(address _to) internal virtual returns (uint256) {
-        super._safeMint(_to, ++_totalCount);
-        return _totalCount;
-    }
-
-    function _exists(uint256 tokenId) internal view returns (bool) {
-        return _ownerOf[tokenId] != address(0);
-    }
-
-    function _requireMinted(uint256 tokenId) internal view virtual {
-        require(_exists(tokenId), "NOT_MINTED");
-    }
-
-    // Permit
     function permit(
         address spender,
         uint256 tokenId,
@@ -66,9 +44,29 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
             owner,
             sig
         );
-        // approve and emit
+
         getApproved[tokenId] = spender;
         emit Approval(owner, spender, tokenId);
+    }
+
+    function _initialize(string calldata _name, string calldata _symbol)
+        internal
+        onlyInitializing
+    {
+        ERC721.__ERC721_Init(_name, _symbol);
+    }
+
+    function _mint(address _to) internal virtual returns (uint256) {
+        super._safeMint(_to, ++_totalCount);
+        return _totalCount;
+    }
+
+    function _exists(uint256 tokenId) internal view returns (bool) {
+        return _ownerOf[tokenId] != address(0);
+    }
+
+    function _requireMinted(uint256 tokenId) internal view virtual {
+        require(_exists(tokenId), "NOT_MINTED");
     }
 
     function _domainSeperatorName()

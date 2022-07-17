@@ -2,8 +2,9 @@
 
 pragma solidity 0.8.14;
 
-import "./utils/MockPausable.sol";
 import "forge-std/Test.sol";
+
+import { MockPausable } from "./utils/MockPausable.sol";
 
 contract PausableTest is Test {
     event Paused(address account);

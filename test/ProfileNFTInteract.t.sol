@@ -4,9 +4,7 @@ pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { ERC721 } from "../src/dependencies/solmate/ERC721.sol";
 
-import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { ICyberEngine } from "../src/interfaces/ICyberEngine.sol";
 import { ISubscribeNFT } from "../src/interfaces/ISubscribeNFT.sol";
 import { IEssenceNFT } from "../src/interfaces/IEssenceNFT.sol";
@@ -23,7 +21,6 @@ import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { EssenceNFT } from "../src/core/EssenceNFT.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
-import { LibDeploy } from "../script/libraries/LibDeploy.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 

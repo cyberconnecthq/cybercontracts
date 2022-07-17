@@ -6,18 +6,13 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
-import { IProfileNFTDescriptor } from "../src/interfaces/IProfileNFTDescriptor.sol";
 
-import { Constants } from "../src/libraries/Constants.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 import { MockProfile } from "./utils/MockProfile.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
-import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
-import { Link3ProfileDescriptor } from "../src/periphery/Link3ProfileDescriptor.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 
 contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
@@ -25,17 +20,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     address internal essenceBeacon = address(0xC);
     address internal subscribeBeacon;
     address constant alice = address(0xA11CE);
-    address constant bob = address(0xB0B);
     address constant gov = address(0x8888);
-    string constant handle = "handle";
-    string constant handle2 = "handle2";
-    string constant avatar = "avatar";
-    string constant metadata = "metadata";
-    event Transfer(
-        address indexed from,
-        address indexed to,
-        uint256 indexed id
-    );
     address descriptor = address(0x233);
     DataTypes.CreateProfileParams internal createProfileDataAlice =
         DataTypes.CreateProfileParams(

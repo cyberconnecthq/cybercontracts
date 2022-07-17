@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../../src/upgradeability/Initializable.sol";
+import { Initializable } from "../../src/upgradeability/Initializable.sol";
 
 /**
  * @title MockInitializable

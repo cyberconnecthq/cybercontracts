@@ -8,7 +8,6 @@ import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { ISubscribeDeployer } from "../interfaces/ISubscribeDeployer.sol";
 
 import { Constants } from "../libraries/Constants.sol";
-import { LibString } from "../libraries/LibString.sol";
 
 import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 import { SubscribeNFTStorage } from "../storages/SubscribeNFTStorage.sol";

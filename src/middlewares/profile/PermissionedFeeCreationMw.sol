@@ -52,7 +52,7 @@ contract PermissionedFeeCreationMw is
     function preProcess(
         DataTypes.CreateProfileParams calldata params,
         bytes calldata data
-    ) external payable onlyValidNamespace(msg.sender) {
+    ) external payable override onlyValidNamespace(msg.sender) {
         MiddlewareData storage mwData = _mwDataByNamespace[msg.sender];
 
         (uint8 v, bytes32 r, bytes32 s, uint256 deadline) = abi.decode(
@@ -78,7 +78,7 @@ contract PermissionedFeeCreationMw is
     function postProcess(
         DataTypes.CreateProfileParams calldata params,
         bytes calldata data
-    ) external {
+    ) external override {
         // do nothing
     }
 

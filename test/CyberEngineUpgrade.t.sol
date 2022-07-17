@@ -3,16 +3,13 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
-import "forge-std/console2.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { Authority } from "../src/dependencies/solmate/Auth.sol";
 
 import { Constants } from "../src/libraries/Constants.sol";
 
 import { CyberEngine } from "../src/core/CyberEngine.sol";
-import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { MockEngineV2 } from "./utils/MockEngineV2.sol";
 
 contract CyberEngineUpgradeTest is Test {

@@ -14,12 +14,10 @@ import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
-import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
 
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
-import { LibString } from "../libraries/LibString.sol";
 import { Actions } from "../libraries/Actions.sol";
 
 import { CyberNFTBase } from "../base/CyberNFTBase.sol";

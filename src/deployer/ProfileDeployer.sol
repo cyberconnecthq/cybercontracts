@@ -11,6 +11,7 @@ import { ProfileNFT } from "../core/ProfileNFT.sol";
 contract ProfileDeployer is IProfileDeployer {
     DataTypes.ProfileDeployParameters public override profileParams;
 
+    /// @inheritdoc IProfileDeployer
     function deployProfile(
         bytes32 salt,
         address engine,

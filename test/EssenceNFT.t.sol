@@ -3,15 +3,17 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
+import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
+
+import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
+
+import { Constants } from "../src/libraries/Constants.sol";
+import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
-import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { EssenceNFT } from "../src/core/EssenceNFT.sol";
-import { Constants } from "../src/libraries/Constants.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
-import { DataTypes } from "../src/libraries/DataTypes.sol";
-import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 
 contract EssenceNFTTest is Test, TestDeployer {

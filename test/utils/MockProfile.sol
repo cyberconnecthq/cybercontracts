@@ -2,11 +2,9 @@
 
 pragma solidity 0.8.14;
 
-import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
-import { Actions } from "../../src/libraries/Actions.sol";
-import { LibString } from "../../src/libraries/LibString.sol";
-import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
+
+import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 
 contract MockProfile is ProfileNFT {
     // set internal states for testing

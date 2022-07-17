@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.14;
 
+import "forge-std/Test.sol";
 import "openzeppelin-contracts/contracts/mocks/RegressionImplementation.sol";
 
 import "../src/upgradeability/UpgradeableBeacon.sol";
-import "forge-std/Test.sol";
 
 contract UpgradeableBeaconTest is Test {
     address internal owner = address(0xA11CE);

@@ -30,10 +30,12 @@ contract Treasury is Owned, ITreasury {
         _treasuryFee = treasuryFee;
     }
 
+    /// @inheritdoc ITreasury
     function getTreasuryAddress() external view override returns (address) {
         return _treasuryAddress;
     }
 
+    /// @inheritdoc ITreasury
     function getTreasuryFee() external view override returns (uint256) {
         return _treasuryFee;
     }

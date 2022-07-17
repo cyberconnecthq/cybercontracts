@@ -3,6 +3,7 @@
 pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
+
 import { ProfileDeployer } from "../src/deployer/ProfileDeployer.sol";
 import { SubscribeDeployer } from "../src/deployer/SubscribeDeployer.sol";
 import { EssenceDeployer } from "../src/deployer/EssenceDeployer.sol";

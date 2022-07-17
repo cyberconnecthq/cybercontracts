@@ -2,20 +2,14 @@
 
 pragma solidity 0.8.14;
 
-import "../../src/periphery/Link3ProfileDescriptor.sol";
 import "forge-std/Test.sol";
-import "../../src/libraries/Constants.sol";
-import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
-import { Authority } from "../../src/dependencies/solmate/Auth.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { TestLib712 } from "../utils/TestLib712.sol";
-import { MockProfile } from "../utils/MockProfile.sol";
+
+import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
-import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
 
 contract Link3ProfileDescriptorTest is Test {
     Link3ProfileDescriptor internal descriptor;
-    MockProfile internal profile;
     address constant owner = address(0xA11CE);
     string animationTemplate = "https://animation.example.com";
 

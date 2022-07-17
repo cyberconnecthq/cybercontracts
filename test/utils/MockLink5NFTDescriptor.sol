@@ -3,6 +3,7 @@
 pragma solidity 0.8.14;
 
 import { IProfileNFTDescriptor } from "../../src/interfaces/IProfileNFTDescriptor.sol";
+
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 
 contract MockLink5NFTDescriptor is IProfileNFTDescriptor {
