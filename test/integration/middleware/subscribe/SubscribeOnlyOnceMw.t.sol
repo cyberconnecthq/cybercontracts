@@ -35,7 +35,7 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
 
         bobProfileId = TestLibFixture.registerProfile(
             vm,
-            profile,
+            link3Profile,
             profileMw,
             handle,
             to,
@@ -44,7 +44,7 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
 
         engine.allowSubscribeMw(address(subMw), true);
         vm.prank(bob);
-        profile.setSubscribeMw(bobProfileId, address(subMw), new bytes(0));
+        link3Profile.setSubscribeMw(bobProfileId, address(subMw), new bytes(0));
     }
 
     function testSubscribeOnlyOnce() public {
@@ -55,26 +55,26 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
         address subscribeProxy = getDeployedSubProxyAddress(
             addrs.subBeacon,
             bobProfileId,
-            address(profile),
+            address(link3Profile),
             "bob"
         );
-        vm.expectEmit(true, true, false, true, address(profile));
+        vm.expectEmit(true, true, false, true, address(link3Profile));
         emit DeploySubscribeNFT(bobProfileId, address(subscribeProxy));
 
         vm.expectEmit(true, true, true, true, address(subscribeProxy));
         emit Transfer(address(0), alice, 1);
 
-        vm.expectEmit(true, false, false, true, address(profile));
+        vm.expectEmit(true, false, false, true, address(link3Profile));
         emit Subscribe(alice, ids, data, data);
 
         vm.prank(alice);
-        profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
 
-        assertEq(profile.getSubscribeNFT(bobProfileId), subscribeProxy);
+        assertEq(link3Profile.getSubscribeNFT(bobProfileId), subscribeProxy);
 
         // Second subscribe will fail
         vm.expectRevert("Already subscribed");
         vm.prank(alice);
-        profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
     }
 }

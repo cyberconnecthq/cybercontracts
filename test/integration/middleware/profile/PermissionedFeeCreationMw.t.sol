@@ -227,7 +227,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
 
     function testCannotSetMwDataAsNonEngine() public {
         vm.expectRevert("NON_ENGINE_ADDRESS");
-        profileMw.setProfileMwData(address(profile), new bytes(0));
+        profileMw.setProfileMwData(address(link3Profile), new bytes(0));
     }
 
     function testCreateProfileTreasury() public {
@@ -246,7 +246,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
         vm.prank(addrs.engineProxyAddress);
         vm.expectRevert("INVALID_SIGNER_OR_RECIPIENT_ADDRESS");
         profileMw.setProfileMwData(
-            address(profile),
+            address(link3Profile),
             abi.encode(
                 address(0),
                 address(0x111),
@@ -264,7 +264,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
         vm.prank(addrs.engineProxyAddress);
         vm.expectRevert("INVALID_SIGNER_OR_RECIPIENT_ADDRESS");
         profileMw.setProfileMwData(
-            address(profile),
+            address(link3Profile),
             abi.encode(
                 address(0x111),
                 address(0),
@@ -282,46 +282,46 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
         address newSigner = address(0x555);
         address newTreasury = address(0x444);
 
-        assertEq(profileMw.getSigner(address(profile)), link3Signer);
-        assertEq(profileMw.getRecipient(address(profile)), link3Treasury);
+        assertEq(profileMw.getSigner(address(link3Profile)), link3Signer);
+        assertEq(profileMw.getRecipient(address(link3Profile)), link3Treasury);
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier0
             ),
             LibDeploy._INITIAL_FEE_TIER0
         );
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier1
             ),
             LibDeploy._INITIAL_FEE_TIER1
         );
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier2
             ),
             LibDeploy._INITIAL_FEE_TIER2
         );
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier3
             ),
             LibDeploy._INITIAL_FEE_TIER3
         );
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier4
             ),
             LibDeploy._INITIAL_FEE_TIER4
         );
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier5
             ),
             LibDeploy._INITIAL_FEE_TIER5
@@ -329,7 +329,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
 
         vm.prank(addrs.engineProxyAddress);
         profileMw.setProfileMwData(
-            address(profile),
+            address(link3Profile),
             abi.encode(
                 newSigner,
                 newTreasury,
@@ -342,46 +342,46 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
             )
         );
 
-        assertEq(profileMw.getSigner(address(profile)), newSigner);
-        assertEq(profileMw.getRecipient(address(profile)), newTreasury);
+        assertEq(profileMw.getSigner(address(link3Profile)), newSigner);
+        assertEq(profileMw.getRecipient(address(link3Profile)), newTreasury);
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier0
             ),
             tier0Fee
         );
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier1
             ),
             tier1Fee
         );
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier2
             ),
             tier2Fee
         );
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier3
             ),
             tier3Fee
         );
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier4
             ),
             tier4Fee
         );
         assertEq(
             profileMw.getFeeByTier(
-                address(profile),
+                address(link3Profile),
                 PermissionedFeeCreationMw.Tier.Tier5
             ),
             tier5Fee
@@ -406,7 +406,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
             .CreateProfileParams(bob, handle, avatar, metadata);
         (v, r, s) = _generateValidSig(
             params,
-            address(profile),
+            address(link3Profile),
             signer,
             deadline
         );
@@ -415,7 +415,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
         if (byteReason.length > 0) {
             vm.expectRevert(byteReason);
         }
-        profile.createProfile{ value: fee }(
+        link3Profile.createProfile{ value: fee }(
             params,
             abi.encode(v, r, s, deadline),
             new bytes(0)

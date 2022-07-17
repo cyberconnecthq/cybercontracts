@@ -19,7 +19,7 @@ contract IntegrationBaseTest is TestIntegrationBase, IProfileNFTEvents {
     }
 
     function testRegistrationTwice() public {
-        assertEq(profileMw.getSigner(address(profile)), link3Signer);
+        assertEq(profileMw.getSigner(address(link3Profile)), link3Signer);
         string memory handle = "bob";
         address to = bob;
         // Register bob profile
@@ -27,7 +27,7 @@ contract IntegrationBaseTest is TestIntegrationBase, IProfileNFTEvents {
         emit SetPrimaryProfile(to, 2); // hardcode profileid
         uint256 bobProfileId = TestLibFixture.registerProfile(
             vm,
-            profile,
+            link3Profile,
             profileMw,
             handle,
             to,
@@ -35,32 +35,34 @@ contract IntegrationBaseTest is TestIntegrationBase, IProfileNFTEvents {
         );
 
         // check bob profile details
-        string memory gotHandle = profile.getHandleByProfileId(bobProfileId);
-        string memory avatar = profile.getAvatar(bobProfileId);
-        string memory metadata = profile.getMetadata(bobProfileId);
-        address descriptor = profile.getNFTDescriptor();
+        string memory gotHandle = link3Profile.getHandleByProfileId(
+            bobProfileId
+        );
+        string memory avatar = link3Profile.getAvatar(bobProfileId);
+        string memory metadata = link3Profile.getMetadata(bobProfileId);
+        address descriptor = link3Profile.getNFTDescriptor();
         assertEq(gotHandle, handle);
         assertEq(avatar, "avatar");
         assertEq(metadata, "metadata");
         assertEq(descriptor, address(0));
 
         // check bob balance
-        assertEq(profile.balanceOf(to), 1);
+        assertEq(link3Profile.balanceOf(to), 1);
 
         // check bob profile ownership
-        assertEq(profile.ownerOf(bobProfileId), to);
+        assertEq(link3Profile.ownerOf(bobProfileId), to);
 
         // check tokenURI should revert before setting descriptor
         vm.expectRevert("NFT_DESCRIPTOR_NOT_SET");
-        profile.tokenURI(bobProfileId);
+        link3Profile.tokenURI(bobProfileId);
 
-        assertEq(profile.getPrimaryProfile(to), bobProfileId);
-        assertEq(profile.getPrimaryProfile(to), bobProfileId);
+        assertEq(link3Profile.getPrimaryProfile(to), bobProfileId);
+        assertEq(link3Profile.getPrimaryProfile(to), bobProfileId);
 
         // register second time will not set primary profile
         uint256 secondId = TestLibFixture.registerProfile(
             vm,
-            profile,
+            link3Profile,
             profileMw,
             "handle2",
             to,
@@ -69,6 +71,6 @@ contract IntegrationBaseTest is TestIntegrationBase, IProfileNFTEvents {
         assertEq(secondId, 3);
 
         // primary profile is still 2
-        assertEq(profile.getPrimaryProfile(to), 2);
+        assertEq(link3Profile.getPrimaryProfile(to), 2);
     }
 }

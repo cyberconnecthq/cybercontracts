@@ -15,24 +15,21 @@ import { TestProxy } from "./TestProxy.sol";
 
 abstract contract TestIntegrationBase is Test, TestProxy {
     uint256 internal constant link3SignerPk = 1890;
-    address internal immutable link3Signer;
+    address internal immutable link3Signer = vm.addr(link3SignerPk);
     address internal constant alice = address(0xDEADA11CE);
-    address internal constant bob = address(0xDEADB0B);
+    uint256 internal constant bobPk = 548;
+    address internal immutable bob = vm.addr(bobPk);
     address internal constant carly = address(0xDEADCA11);
     address internal constant dixon = address(0xDEADD1);
 
     address internal constant link3Treasury = address(0xDEAD3333);
     address internal constant engineTreasury = address(0xDEADEEEE);
 
-    ProfileNFT profile;
+    ProfileNFT link3Profile;
     Link3ProfileDescriptor profileDescriptor;
     PermissionedFeeCreationMw profileMw;
     CyberEngine engine;
     LibDeploy.ContractAddresses addrs;
-
-    constructor() {
-        link3Signer = vm.addr(link3SignerPk);
-    }
 
     function _setUp() internal {
         addrs = LibDeploy.deployInTest(
@@ -41,7 +38,7 @@ abstract contract TestIntegrationBase is Test, TestProxy {
             link3Treasury,
             engineTreasury
         );
-        profile = ProfileNFT(addrs.link3Profile);
+        link3Profile = ProfileNFT(addrs.link3Profile);
         profileDescriptor = Link3ProfileDescriptor(addrs.link3DescriptorProxy);
         profileMw = PermissionedFeeCreationMw(addrs.link3ProfileMw);
         engine = CyberEngine(addrs.engineProxyAddress);
