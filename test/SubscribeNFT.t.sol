@@ -10,7 +10,6 @@ import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 
-import { MockProfile } from "./utils/MockProfile.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";

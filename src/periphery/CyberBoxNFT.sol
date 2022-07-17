@@ -7,7 +7,7 @@ import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 import { Owned } from "../dependencies/solmate/Owned.sol";
 
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
-import { ICyberBoxEvents } from "../interfaces/ICyberBoxEvents.sol";
+import { ICyberBox } from "../interfaces/ICyberBox.sol";
 
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
@@ -27,7 +27,7 @@ contract CyberBoxNFT is
     Owned,
     CyberBoxNFTStorage,
     IUpgradeable,
-    ICyberBoxEvents
+    ICyberBox
 {
     /*//////////////////////////////////////////////////////////////
                                  CONSTRUCTOR
@@ -43,18 +43,18 @@ contract CyberBoxNFT is
 
     /**
      * @notice Initializes the Box NFT.
-     *
-     * @param _name_ The name to set for the Box NFT.
-     * @param _symbol_ The symbol to set for the Box NFT.
+     * @param owner The owner to set for the Box NFT.
+     * @param name The name to set for the Box NFT.
+     * @param symbol The symbol to set for the Box NFT.
      */
     function initialize(
-        address _owner,
-        string calldata _name_,
-        string calldata _symbol_
+        address owner,
+        string calldata name,
+        string calldata symbol
     ) external initializer {
-        CyberNFTBase._initialize(_name_, _symbol_);
-        Owned.__Owned_Init(_owner);
-        signer = _owner;
+        CyberNFTBase._initialize(name, symbol);
+        Owned.__Owned_Init(owner);
+        _signer = owner;
         // start with paused
         _pause();
     }
@@ -82,13 +82,9 @@ contract CyberBoxNFT is
      * @return uint256 The version number.
      * @dev This contract can be upgraded with UUPS upgradeability
      */
-    // TODO: write a test for upgrade box nft
     function version() external pure virtual override returns (uint256) {
         return _VERSION;
     }
-
-    // UUPS upgradeability
-    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     /**
      * @notice Changes the pause state of the box nft.
@@ -101,22 +97,6 @@ contract CyberBoxNFT is
         } else {
             super._unpause();
         }
-    }
-
-    /**
-     * @notice Transfers the box nft.
-     *
-     * @param from The initial owner address.
-     * @param to The receipient address.
-     * @param from The nft id.
-     * @dev It requires the state to be unpaused
-     */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) public override whenNotPaused {
-        super.transferFrom(from, to, id);
     }
 
     /**
@@ -142,7 +122,7 @@ contract CyberBoxNFT is
                     )
                 )
             ),
-            signer,
+            _signer,
             sig
         );
 
@@ -155,14 +135,37 @@ contract CyberBoxNFT is
     /**
      * @notice Sets the new signer address.
      *
-     * @param _signer The signer address.
+     * @param signer The signer address.
      * @dev The address can not be zero address.
      */
-    function setSigner(address _signer) external onlyOwner {
-        require(_signer != address(0), "zero address signer");
-        address preSigner = signer;
-        signer = _signer;
+    function setSigner(address signer) external onlyOwner {
+        require(signer != address(0), "zero address signer");
+        address preSigner = _signer;
+        _signer = signer;
 
-        emit SetSigner(preSigner, _signer);
+        emit SetSigner(preSigner, signer);
     }
+
+    /**
+     * @notice Transfers the box nft.
+     *
+     * @param from The initial owner address.
+     * @param to The receipient address.
+     * @param from The nft id.
+     * @dev It requires the state to be unpaused
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public override whenNotPaused {
+        super.transferFrom(from, to, id);
+    }
+
+    function getSigner() external view override returns (address) {
+        return _signer;
+    }
+
+    // UUPS upgradeability
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

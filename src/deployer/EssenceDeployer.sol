@@ -11,7 +11,7 @@ import { EssenceNFT } from "../core/EssenceNFT.sol";
 contract EssenceDeployer is IEssenceDeployer {
     DataTypes.EssenceDeployParameters public override essParams;
 
-    // TODO:
+    /// @inheritdoc IEssenceDeployer
     function deployEssence(bytes32 salt, address profileProxy)
         external
         override

@@ -10,7 +10,6 @@ abstract contract CyberEngineStorage {
     uint256 internal constant _VERSION = 1;
 
     // storage
-    address public profileAddress;
     mapping(address => bool) internal _profileMwAllowlist;
     mapping(address => bool) internal _essenceMwAllowlist;
     mapping(address => bool) internal _subscribeMwAllowlist;

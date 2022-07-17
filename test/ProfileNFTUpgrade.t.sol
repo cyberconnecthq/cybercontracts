@@ -4,7 +4,6 @@ pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { MockProfileV2 } from "./utils/MockProfileV2.sol";
@@ -13,7 +12,6 @@ import { TestDeployer } from "./utils/TestDeployer.sol";
 
 contract ProfileNFTUpgradeTest is Test, TestDeployer {
     MockProfile internal profile;
-    RolesAuthority internal rolesAuthority;
     ERC1967Proxy internal proxy;
     address constant gov = address(0x888);
     address constant engine = address(0x666);

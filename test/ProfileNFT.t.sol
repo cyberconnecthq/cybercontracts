@@ -22,11 +22,7 @@ contract ProfileNFTTest is Test, TestDeployer {
 
     uint256 constant alicePk = 100;
     address constant bob = address(0xA12CE);
-    address constant minter = address(0xB0B);
-    string constant imageUri = "https://example.com/image.png";
-    address constant subscribeMw = address(0xD);
     address constant gov = address(0x8888);
-    bytes constant profileData = "0x1";
     address alice = vm.addr(alicePk);
     uint256 validDeadline;
 

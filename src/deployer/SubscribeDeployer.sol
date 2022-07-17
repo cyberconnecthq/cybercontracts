@@ -11,6 +11,7 @@ import { SubscribeNFT } from "../core/SubscribeNFT.sol";
 contract SubscribeDeployer is ISubscribeDeployer {
     DataTypes.SubscribeDeployParameters public override subParams;
 
+    /// @inheritdoc ISubscribeDeployer
     function deploySubscribe(bytes32 salt, address profileProxy)
         external
         override
