@@ -232,17 +232,14 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
 
     function testCreateProfileTreasury() public {
         uint256 treasuryFee = ITreasury(addrs.cyberTreasury).getTreasuryFee();
-        uint256 startingLink3 = LibDeploy.LINK3_TREASURY.balance;
+        uint256 startingLink3 = link3Treasury.balance;
         uint256 registerFee = LibDeploy._INITIAL_FEE_TIER0;
-        uint256 startingEngine = LibDeploy.ENGINE_TREASURY.balance;
+        uint256 startingEngine = engineTreasury.balance;
 
         _createProfile("a", registerFee, link3SignerPk, validDeadline, "");
         uint256 cut = (registerFee * treasuryFee) / Constants._MAX_BPS;
-        assertEq(
-            LibDeploy.LINK3_TREASURY.balance,
-            startingLink3 + registerFee - cut
-        );
-        assertEq(LibDeploy.ENGINE_TREASURY.balance, startingEngine + cut);
+        assertEq(link3Treasury.balance, startingLink3 + registerFee - cut);
+        assertEq(engineTreasury.balance, startingEngine + cut);
     }
 
     function testCannotSetMwDataInvalidSigner() public {
@@ -286,10 +283,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
         address newTreasury = address(0x444);
 
         assertEq(profileMw.getSigner(address(profile)), link3Signer);
-        assertEq(
-            profileMw.getRecipient(address(profile)),
-            LibDeploy.LINK3_TREASURY
-        );
+        assertEq(profileMw.getRecipient(address(profile)), link3Treasury);
         assertEq(
             profileMw.getFeeByTier(
                 address(profile),

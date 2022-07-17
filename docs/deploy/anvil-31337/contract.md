@@ -2,11 +2,11 @@
 | -------------------------------------------- | ------------------------------------------ |
 | Create2Deployer                              | 0xe7f1725e7734ce288f8367e1bb143e90bb3f0512 |
 | RolesAuthority                               | 0x793e44eb3004ac1a67d75cb518babb3b5899dbf5 |
-| EngineImpl                                   | 0x047d3534bff324211d0a43356ff5a90724b7efbc |
-| EngineProxy                                  | 0x6c6afd98b8a70c9d3d18ae50b82d730f2ca6f71b |
-| Profile Factory                              | 0xb1abaca34ec86a281fc6a3209f3d112ce17a90fe |
-| Essence Factory                              | 0x52207a580357beb3a537cde892d0ad9a7db0ec6d |
-| Subscribe Factory                            | 0xec6da994e651a69db37d12dab368d402f018efcb |
-| Link3 Profile                                | 0x5529b9c57c9ec39d5e38abc72e15dd0deef6c37c |
-| CyberConnect Treasury                        | 0x710f5b3d2e452f41f3f54f71f525014a73efe7d1 |
-| Link3 Profile MW (PermissionedFeeCreationMw) | 0xe26b422eb3d4f3be6fd49875950bbe9f3fbea4ba |
+| EngineImpl                                   | 0xf148a28549ec6ff725abac75b066ff7d66b01c04 |
+| EngineProxy                                  | 0x3543b0f93c34dd577d2f8a179da08a47e222d540 |
+| Profile Factory                              | 0x64f35f88ae83e82525f8c081353ebcd71e509e21 |
+| Essence Factory                              | 0xe1e703c98a939fe61d9eda478a16cecd277500a4 |
+| Subscribe Factory                            | 0xc6721e4057716ee8154192bc91a5cdb1e7966d33 |
+| Link3 Profile                                | 0x52e4ad5553169c9f33de6faaeb5db7c2ab8dfb45 |
+| CyberConnect Treasury                        | 0x58c09ad14ed443aa4b1b9f8f198a1e2b0dd675ed |
+| Link3 Profile MW (PermissionedFeeCreationMw) | 0x75a47145332550aa52cf7488f95e0e9192edb897 |
