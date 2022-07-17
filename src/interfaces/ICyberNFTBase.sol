@@ -17,7 +17,7 @@ interface ICyberNFTBase {
      *
      * @param spender The spender address.
      * @param tokenId The token ID to approve.
-     * @param sig Must produce valid EIP712 signature with `s`, `r`, `v` and `deadlien`.
+     * @param sig Must produce valid EIP712 signature with `s`, `r`, `v` and `deadline`.
      */
     function permit(
         address spender,
