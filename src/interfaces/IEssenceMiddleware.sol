@@ -4,6 +4,19 @@ pragma solidity 0.8.14;
 
 interface IEssenceMiddleware {
     /**
+     * @notice Sets essence related data for middleware.
+     *
+     * @param profileId The profile id that owns this middleware.
+     * @param essenceId The essence id that owns this middleware.
+     * @param data Extra data to set.
+     */
+    function setEssenceMwData(
+        uint256 profileId,
+        uint256 essenceId,
+        bytes calldata data
+    ) external returns (bytes memory);
+
+    /**
      * @notice Proccess that runs before the essenceeNFT mint happens.
      *
      * @param profileId The profile Id.
@@ -36,10 +49,4 @@ interface IEssenceMiddleware {
         address essenceNFT,
         bytes calldata data
     ) external;
-
-    function prepare(
-        uint256 profileId,
-        uint256 essenceId,
-        bytes calldata prepareData
-    ) external returns (bytes memory);
 }

@@ -4,6 +4,16 @@ pragma solidity 0.8.14;
 
 interface ISubscribeMiddleware {
     /**
+     * @notice Sets subscribe related data for middleware.
+     *
+     * @param profileId The profile id that owns this middleware.
+     * @param data Extra data to set.
+     */
+    function setSubscribeMwData(uint256 profileId, bytes calldata data)
+        external
+        returns (bytes memory);
+
+    /**
      * @notice Proccess that runs before the subscribeNFT mint happens.
      *
      * @param profileId The profile Id.
@@ -32,8 +42,4 @@ interface ISubscribeMiddleware {
         address subscrbeNFT,
         bytes calldata data
     ) external;
-
-    function prepare(uint256 profileId, bytes calldata prepareReturnData)
-        external
-        returns (bytes memory);
 }

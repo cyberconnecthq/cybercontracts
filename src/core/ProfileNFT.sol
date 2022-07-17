@@ -875,7 +875,7 @@ contract ProfileNFT is
         _subscribeByProfileId[profileId].subscribeMw = mw;
         bytes memory returnData;
         if (mw != address(0)) {
-            returnData = ISubscribeMiddleware(mw).prepare(
+            returnData = ISubscribeMiddleware(mw).setSubscribeMwData(
                 profileId,
                 prepareData
             );
