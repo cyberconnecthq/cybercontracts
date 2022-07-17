@@ -20,6 +20,11 @@ contract DeploySetting {
         // (0) 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (10000 ETH)
         // (1) 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (10000 ETH)
         // (2) 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc (10000 ETH)
+
+        // Testnet accounts
+        // deployer: 0x927f355117721e0E8A7b5eA20002b65B8a551890
+        // engine treasury: 0x1890a1625d837A809b0e77EdE1a999a161df085d
+        // link3 treasury + signer: 0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
         if (block.chainid == 31337) {
             // use the same address that runs the deployment script
             deployParams.link3Owner = address(
@@ -58,7 +63,7 @@ contract DeploySetting {
                 0x927f355117721e0E8A7b5eA20002b65B8a551890
             );
             deployParams.engineTreasury = address(
-                0x927f355117721e0E8A7b5eA20002b65B8a551890
+                0x1890a1625d837A809b0e77EdE1a999a161df085d
             );
             deployParams.deployerContract = address(0);
         }
