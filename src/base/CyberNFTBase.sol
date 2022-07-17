@@ -4,13 +4,15 @@ pragma solidity 0.8.14;
 
 import { ERC721 } from "../dependencies/solmate/ERC721.sol";
 
+import { ICyberNFTBase } from "../interfaces/ICyberNFTBase.sol";
+
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 import { EIP712 } from "./EIP712.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 
-abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
+abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
     uint256 internal _totalCount = 0;
     mapping(address => uint256) public nonces;
 
@@ -18,15 +20,17 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721 {
         _disableInitializers();
     }
 
-    function totalSupply() external view virtual returns (uint256) {
+    /// @inheritdoc ICyberNFTBase
+    function totalSupply() external view virtual override returns (uint256) {
         return _totalCount;
     }
 
+    /// @inheritdoc ICyberNFTBase
     function permit(
         address spender,
         uint256 tokenId,
         DataTypes.EIP712Signature calldata sig
-    ) external {
+    ) external override {
         address owner = ownerOf(tokenId);
         require(owner != spender, "CANNOT_PERMIT_OWNER");
         _requiresExpectedSigner(

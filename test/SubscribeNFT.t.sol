@@ -84,11 +84,11 @@ contract SubscribeNFTTest is Test, TestDeployer {
     function testTransferIsNotAllowed() public {
         vm.prank(address(profile));
         c.mint(alice);
-        vm.expectRevert("Transfer is not allowed");
+        vm.expectRevert("TRANSFER_NOT_ALLOWED");
         c.transferFrom(alice, bob, 1);
-        vm.expectRevert("Transfer is not allowed");
+        vm.expectRevert("TRANSFER_NOT_ALLOWED");
         c.safeTransferFrom(alice, bob, 1);
-        vm.expectRevert("Transfer is not allowed");
+        vm.expectRevert("TRANSFER_NOT_ALLOWED");
         c.safeTransferFrom(alice, bob, 1, "");
     }
 

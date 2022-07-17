@@ -207,4 +207,27 @@ contract ProfileNFTTest is Test, TestDeployer {
         uint256 primaryIdAlice2 = token.getPrimaryProfile(alice);
         assertEq(profileIdAlice2, primaryIdAlice2);
     }
+
+    function testCannotTransferWhenPaused() public {
+        uint256 id = token.createProfile(createProfileDataAlice);
+        vm.prank(alice);
+
+        vm.expectRevert("Pausable: paused");
+        token.transferFrom(alice, bob, id);
+        vm.expectRevert("Pausable: paused");
+        token.safeTransferFrom(alice, bob, id);
+        vm.expectRevert("Pausable: paused");
+        token.safeTransferFrom(alice, bob, id, "");
+    }
+
+    function testTransferWhenUnpaused() public {
+        uint256 id = token.createProfile(createProfileDataAlice);
+        vm.prank(gov);
+        token.pause(false);
+        assertEq(token.paused(), false);
+
+        vm.prank(alice);
+        token.transferFrom(alice, bob, id);
+        assertEq(token.ownerOf(id), bob);
+    }
 }
