@@ -95,7 +95,9 @@ library Actions {
                 data.profileId,
                 data.essenceId,
                 _essenceByIdByProfileId[data.profileId][data.essenceId].name,
-                _essenceByIdByProfileId[data.profileId][data.essenceId].symbol
+                _essenceByIdByProfileId[data.profileId][data.essenceId].symbol,
+                _essenceByIdByProfileId[data.profileId][data.essenceId]
+                    .transferable
             );
             essenceNFT = address(
                 new BeaconProxy{ salt: bytes32(data.profileId) }(
@@ -140,6 +142,8 @@ library Actions {
         _essenceByIdByProfileId[data.profileId][id].symbol = data.symbol;
         _essenceByIdByProfileId[data.profileId][id].tokenURI = data
             .essenceTokenURI;
+        _essenceByIdByProfileId[data.profileId][id].transferable = data
+            .transferable;
         bytes memory returnData;
         if (data.essenceMw != address(0)) {
             _essenceByIdByProfileId[data.profileId][id].essenceMw = data

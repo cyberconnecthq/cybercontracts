@@ -30,6 +30,7 @@ library DataTypes {
         string symbol;
         string essenceTokenURI;
         address essenceMw;
+        bool transferable;
     }
 
     struct SubscribeParams {
@@ -47,9 +48,11 @@ library DataTypes {
         string name;
         string symbol;
         string essenceTokenURI;
-        address essenceMw;
         bytes initData;
+        address essenceMw;
+        bool transferable;
     }
+
     struct SubscribeData {
         address sender;
         uint256[] profileIds;
@@ -85,6 +88,7 @@ library DataTypes {
         string name;
         string symbol;
         string tokenURI;
+        bool transferable;
     }
 
     struct NamespaceStruct {

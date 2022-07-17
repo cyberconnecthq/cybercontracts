@@ -27,18 +27,24 @@ import { Constants } from "../../src/libraries/Constants.sol";
 
 pragma solidity 0.8.14;
 
-contract IntegrationCollectTest is
+contract IntegrationEssenceTest is
     TestIntegrationBase,
     IProfileNFTEvents,
     ICyberEngineEvents,
     ProfileNFTStorage
 {
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 indexed id
+    );
+
     address namespaceOwner = alice;
     string constant LINK5_NAME = "Link5";
     string constant LINK5_SYMBOL = "L5";
     bytes32 constant LINK5_SALT = keccak256(bytes(LINK5_NAME));
-    string constant ESSENCE_NAME = "Arzuros Carapace";
-    string constant ESSENCE_SYMBOL = "AC";
+    string constant BOB_ESSENCE_NAME = "Arzuros Carapace";
+    string constant BOB_ESSENCE_SYMBOL = "AC";
     address essenceMw = address(0); //change this
     uint256 profileIdBob;
     uint256 profileIdCarly;
@@ -48,7 +54,22 @@ contract IntegrationCollectTest is
     address link5SubBeacon;
     address link5EssBeacon;
 
-    uint256 essenceId;
+    uint256 bobEssenceId;
+
+    string constant CARLY_ESSENCE_1_NAME = "Malzeno Fellwing";
+    string constant CARLY_ESSENCE_1_SYMBOL = "MF";
+    string constant CARLY_ESSENCE_1_URL = "mf.com";
+    bool constant CARLY_ESSENCE_1_TRANSFERABLE = true;
+    string constant CARLY_ESSENCE_2_NAME = "Nargacuga Tail";
+    string constant CARLY_ESSENCE_2_SYMBOL = "NFT";
+    string constant CARLY_ESSENCE_2_URL = "nt.com";
+    bool constant CARLY_ESSENCE_2_TRANSFERABLE = false;
+    uint256 carlyFirstEssenceId;
+    uint256 carlyFirstEssenceTokenId; // bob mint this
+    address carlyTransferableEssenceAddr;
+    uint256 carlySecondEssenceId;
+    uint256 carlySecondEssenceTokenId; // bob mint this
+    address carlyNontransferableEssenceAddr;
 
     function setUp() public {
         // create an engine
@@ -86,27 +107,28 @@ contract IntegrationCollectTest is
         emit RegisterEssence(
             profileIdBob,
             1,
-            ESSENCE_NAME,
-            ESSENCE_SYMBOL,
+            BOB_ESSENCE_NAME,
+            BOB_ESSENCE_SYMBOL,
             "uri",
             essenceMw,
             returnData
         );
 
         // register essence with no essence middleware
-        essenceId = link5Profile.registerEssence(
+        bobEssenceId = link5Profile.registerEssence(
             DataTypes.RegisterEssenceParams(
                 profileIdBob,
-                ESSENCE_NAME,
-                ESSENCE_SYMBOL,
+                BOB_ESSENCE_NAME,
+                BOB_ESSENCE_SYMBOL,
                 "uri",
-                essenceMw
+                essenceMw,
+                true
             ),
             dataBobEssence
         );
 
         assertEq(
-            link5Profile.getEssenceNFTTokenURI(profileIdBob, essenceId),
+            link5Profile.getEssenceNFTTokenURI(profileIdBob, bobEssenceId),
             "uri"
         );
 
@@ -125,6 +147,114 @@ contract IntegrationCollectTest is
             dataCarly,
             dataCarly
         );
+        // carly registers a transferable essence
+        carlyFirstEssenceId = link5Profile.registerEssence(
+            DataTypes.RegisterEssenceParams(
+                profileIdCarly,
+                CARLY_ESSENCE_1_NAME,
+                CARLY_ESSENCE_1_SYMBOL,
+                CARLY_ESSENCE_1_URL,
+                address(0),
+                CARLY_ESSENCE_1_TRANSFERABLE
+            ),
+            new bytes(0)
+        );
+        // carly registers a non-transferable essence
+        carlySecondEssenceId = link5Profile.registerEssence(
+            DataTypes.RegisterEssenceParams(
+                profileIdCarly,
+                CARLY_ESSENCE_2_NAME,
+                CARLY_ESSENCE_2_SYMBOL,
+                CARLY_ESSENCE_2_URL,
+                address(0),
+                CARLY_ESSENCE_2_TRANSFERABLE
+            ),
+            new bytes(0)
+        );
+        vm.stopPrank();
+
+        // bob collects carly's essences #1
+        vm.startPrank(bob);
+        address essenceProxy;
+        essenceProxy = getDeployedEssProxyAddress(
+            link5EssBeacon,
+            profileIdCarly,
+            carlyFirstEssenceId,
+            address(link5Profile),
+            CARLY_ESSENCE_1_NAME,
+            CARLY_ESSENCE_1_SYMBOL,
+            CARLY_ESSENCE_1_TRANSFERABLE
+        );
+        carlyFirstEssenceTokenId = link5Profile.collect(
+            DataTypes.CollectParams(bob, profileIdCarly, carlyFirstEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+        carlyTransferableEssenceAddr = link5Profile.getEssenceNFT(
+            profileIdCarly,
+            carlyFirstEssenceId
+        );
+        assertEq(carlyTransferableEssenceAddr, essenceProxy);
+        assertEq(
+            EssenceNFT(carlyTransferableEssenceAddr).name(),
+            CARLY_ESSENCE_1_NAME
+        );
+        assertEq(
+            EssenceNFT(carlyTransferableEssenceAddr).symbol(),
+            CARLY_ESSENCE_1_SYMBOL
+        );
+        assertEq(
+            EssenceNFT(carlyTransferableEssenceAddr).isTransferable(),
+            CARLY_ESSENCE_1_TRANSFERABLE
+        );
+        assertEq(
+            EssenceNFT(carlyTransferableEssenceAddr).ownerOf(
+                carlyFirstEssenceTokenId
+            ),
+            bob
+        );
+        assertEq(EssenceNFT(carlyTransferableEssenceAddr).balanceOf(bob), 1);
+
+        // bob collects carly's essences #2
+        essenceProxy = getDeployedEssProxyAddress(
+            link5EssBeacon,
+            profileIdCarly,
+            carlySecondEssenceId,
+            address(link5Profile),
+            CARLY_ESSENCE_2_NAME,
+            CARLY_ESSENCE_2_SYMBOL,
+            CARLY_ESSENCE_2_TRANSFERABLE
+        );
+        carlySecondEssenceTokenId = link5Profile.collect(
+            DataTypes.CollectParams(bob, profileIdCarly, carlySecondEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+        carlyNontransferableEssenceAddr = link5Profile.getEssenceNFT(
+            profileIdCarly,
+            carlySecondEssenceId
+        );
+        assertEq(carlyNontransferableEssenceAddr, essenceProxy);
+        assertEq(
+            EssenceNFT(carlyNontransferableEssenceAddr).name(),
+            CARLY_ESSENCE_2_NAME
+        );
+        assertEq(
+            EssenceNFT(carlyNontransferableEssenceAddr).symbol(),
+            CARLY_ESSENCE_2_SYMBOL
+        );
+        assertEq(
+            EssenceNFT(carlyNontransferableEssenceAddr).isTransferable(),
+            CARLY_ESSENCE_2_TRANSFERABLE
+        );
+        assertEq(
+            EssenceNFT(carlyNontransferableEssenceAddr).ownerOf(
+                carlySecondEssenceTokenId
+            ),
+            bob
+        );
+        assertEq(EssenceNFT(carlyNontransferableEssenceAddr).balanceOf(bob), 1);
+
         vm.stopPrank();
     }
 
@@ -141,30 +271,31 @@ contract IntegrationCollectTest is
         address essenceProxy = getDeployedEssProxyAddress(
             link5EssBeacon,
             profileIdBob,
-            essenceId,
+            bobEssenceId,
             address(link5Profile),
-            ESSENCE_NAME,
-            ESSENCE_SYMBOL
+            BOB_ESSENCE_NAME,
+            BOB_ESSENCE_SYMBOL,
+            true
         );
         vm.expectEmit(true, true, false, true);
-        emit DeployEssenceNFT(profileIdBob, essenceId, essenceProxy);
+        emit DeployEssenceNFT(profileIdBob, bobEssenceId, essenceProxy);
 
         vm.expectEmit(true, true, false, false);
         emit CollectEssence(carly, 1, profileIdBob, new bytes(0), new bytes(0));
 
         uint256 tokenId = link5Profile.collect(
-            DataTypes.CollectParams(carly, profileIdBob, essenceId),
+            DataTypes.CollectParams(carly, profileIdBob, bobEssenceId),
             new bytes(0),
             new bytes(0)
         );
 
         assertEq(tokenId, 1);
         assertEq(
-            link5Profile.getEssenceNFT(profileIdBob, essenceId),
+            link5Profile.getEssenceNFT(profileIdBob, bobEssenceId),
             essenceProxy
         );
         assertEq(EssenceNFT(essenceProxy).balanceOf(carly), 1);
-        assertEq(EssenceNFT(essenceProxy).ownerOf(essenceId), carly);
+        assertEq(EssenceNFT(essenceProxy).ownerOf(bobEssenceId), carly);
         vm.stopPrank();
     }
 
@@ -175,31 +306,32 @@ contract IntegrationCollectTest is
         address essenceProxy = getDeployedEssProxyAddress(
             link5EssBeacon,
             profileIdBob,
-            essenceId,
+            bobEssenceId,
             address(link5Profile),
-            ESSENCE_NAME,
-            ESSENCE_SYMBOL
+            BOB_ESSENCE_NAME,
+            BOB_ESSENCE_SYMBOL,
+            true
         );
 
         vm.expectEmit(true, true, false, true);
-        emit DeployEssenceNFT(profileIdBob, essenceId, essenceProxy);
+        emit DeployEssenceNFT(profileIdBob, bobEssenceId, essenceProxy);
 
         vm.expectEmit(true, true, false, false);
         emit CollectEssence(dixon, 1, profileIdBob, new bytes(0), new bytes(0));
 
         uint256 tokenId = link5Profile.collect(
-            DataTypes.CollectParams(dixon, profileIdBob, essenceId),
+            DataTypes.CollectParams(dixon, profileIdBob, bobEssenceId),
             new bytes(0),
             new bytes(0)
         );
 
         assertEq(tokenId, 1);
         assertEq(
-            link5Profile.getEssenceNFT(profileIdBob, essenceId),
+            link5Profile.getEssenceNFT(profileIdBob, bobEssenceId),
             essenceProxy
         );
         assertEq(EssenceNFT(essenceProxy).balanceOf(dixon), 1);
-        assertEq(EssenceNFT(essenceProxy).ownerOf(essenceId), dixon);
+        assertEq(EssenceNFT(essenceProxy).ownerOf(bobEssenceId), dixon);
         vm.stopPrank();
     }
 
@@ -208,13 +340,14 @@ contract IntegrationCollectTest is
         address essenceProxy = getDeployedEssProxyAddress(
             link5EssBeacon,
             profileIdBob,
-            essenceId,
+            bobEssenceId,
             address(link5Profile),
-            ESSENCE_NAME,
-            ESSENCE_SYMBOL
+            BOB_ESSENCE_NAME,
+            BOB_ESSENCE_SYMBOL,
+            true
         );
         vm.expectEmit(true, true, false, true);
-        emit DeployEssenceNFT(profileIdBob, essenceId, essenceProxy);
+        emit DeployEssenceNFT(profileIdBob, bobEssenceId, essenceProxy);
 
         vm.expectEmit(true, true, false, false);
         emit CollectEssence(bob, 1, profileIdBob, new bytes(0), new bytes(0));
@@ -229,7 +362,7 @@ contract IntegrationCollectTest is
                         Constants._COLLECT_TYPEHASH,
                         bob,
                         profileIdBob,
-                        essenceId,
+                        bobEssenceId,
                         keccak256(new bytes(0)),
                         keccak256(new bytes(0)),
                         link5Profile.nonces(bob),
@@ -242,7 +375,7 @@ contract IntegrationCollectTest is
         );
         vm.startPrank(carly);
         uint256 tokenId = link5Profile.collectWithSig(
-            DataTypes.CollectParams(bob, profileIdBob, essenceId),
+            DataTypes.CollectParams(bob, profileIdBob, bobEssenceId),
             new bytes(0),
             new bytes(0),
             bob,
@@ -250,11 +383,11 @@ contract IntegrationCollectTest is
         );
         assertEq(tokenId, 1);
         assertEq(
-            link5Profile.getEssenceNFT(profileIdBob, essenceId),
+            link5Profile.getEssenceNFT(profileIdBob, bobEssenceId),
             essenceProxy
         );
         assertEq(EssenceNFT(essenceProxy).balanceOf(bob), 1);
-        assertEq(EssenceNFT(essenceProxy).ownerOf(essenceId), bob);
+        assertEq(EssenceNFT(essenceProxy).ownerOf(bobEssenceId), bob);
         vm.stopPrank();
     }
 
@@ -263,13 +396,14 @@ contract IntegrationCollectTest is
         address essenceProxy = getDeployedEssProxyAddress(
             link5EssBeacon,
             profileIdBob,
-            essenceId,
+            bobEssenceId,
             address(link5Profile),
-            ESSENCE_NAME,
-            ESSENCE_SYMBOL
+            BOB_ESSENCE_NAME,
+            BOB_ESSENCE_SYMBOL,
+            true
         );
         vm.expectEmit(true, true, false, true);
-        emit DeployEssenceNFT(profileIdBob, essenceId, essenceProxy);
+        emit DeployEssenceNFT(profileIdBob, bobEssenceId, essenceProxy);
 
         vm.expectEmit(true, true, false, false);
         emit CollectEssence(dixon, 1, profileIdBob, new bytes(0), new bytes(0));
@@ -284,7 +418,7 @@ contract IntegrationCollectTest is
                         Constants._COLLECT_TYPEHASH,
                         dixon,
                         profileIdBob,
-                        essenceId,
+                        bobEssenceId,
                         keccak256(new bytes(0)),
                         keccak256(new bytes(0)),
                         link5Profile.nonces(bob),
@@ -297,7 +431,7 @@ contract IntegrationCollectTest is
         );
         vm.startPrank(carly);
         uint256 tokenId = link5Profile.collectWithSig(
-            DataTypes.CollectParams(dixon, profileIdBob, essenceId),
+            DataTypes.CollectParams(dixon, profileIdBob, bobEssenceId),
             new bytes(0),
             new bytes(0),
             bob,
@@ -305,11 +439,103 @@ contract IntegrationCollectTest is
         );
         assertEq(tokenId, 1);
         assertEq(
-            link5Profile.getEssenceNFT(profileIdBob, essenceId),
+            link5Profile.getEssenceNFT(profileIdBob, bobEssenceId),
             essenceProxy
         );
         assertEq(EssenceNFT(essenceProxy).balanceOf(dixon), 1);
-        assertEq(EssenceNFT(essenceProxy).ownerOf(essenceId), dixon);
+        assertEq(EssenceNFT(essenceProxy).ownerOf(bobEssenceId), dixon);
         vm.stopPrank();
+    }
+
+    function testEssenceTransfer() public {
+        EssenceNFT essence = EssenceNFT(carlyTransferableEssenceAddr);
+        vm.prank(bob);
+        essence.transferFrom(bob, alice, carlyFirstEssenceTokenId);
+        assertEq(essence.balanceOf(bob), 0);
+        assertEq(essence.balanceOf(alice), 1);
+        assertEq(essence.ownerOf(carlyFirstEssenceTokenId), alice);
+    }
+
+    function testEssencePermitAndTransfer() public {
+        // permit
+        EssenceNFT essence = EssenceNFT(carlyTransferableEssenceAddr);
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 data = keccak256(
+            abi.encode(
+                Constants._PERMIT_TYPEHASH,
+                alice,
+                carlyFirstEssenceTokenId,
+                essence.nonces(bob),
+                deadline
+            )
+        );
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(essence),
+            data,
+            CARLY_ESSENCE_1_NAME,
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+        emit Approval(bob, alice, carlyFirstEssenceTokenId);
+        essence.permit(
+            alice,
+            carlyFirstEssenceTokenId,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+        assertEq(essence.getApproved(carlyFirstEssenceTokenId), alice);
+        // transfer
+        vm.prank(alice);
+        essence.transferFrom(bob, alice, carlyFirstEssenceTokenId);
+        assertEq(essence.balanceOf(bob), 0);
+        assertEq(essence.balanceOf(alice), 1);
+        assertEq(essence.ownerOf(carlyFirstEssenceTokenId), alice);
+    }
+
+    function testCannotTransferNonTransferableEssence() public {
+        EssenceNFT essence = EssenceNFT(carlyNontransferableEssenceAddr);
+        vm.prank(bob);
+        vm.expectRevert("TRANSFER_NOT_ALLOWED");
+        essence.transferFrom(bob, alice, carlySecondEssenceTokenId);
+        assertEq(essence.balanceOf(bob), 1);
+        assertEq(essence.balanceOf(alice), 0);
+        assertEq(essence.ownerOf(carlySecondEssenceTokenId), bob);
+    }
+
+    function testCannotPermitAndTransferNonTransferableEssence() public {
+        // permit
+        EssenceNFT essence = EssenceNFT(carlyNontransferableEssenceAddr);
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 data = keccak256(
+            abi.encode(
+                Constants._PERMIT_TYPEHASH,
+                alice,
+                carlySecondEssenceTokenId,
+                essence.nonces(bob),
+                deadline
+            )
+        );
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(essence),
+            data,
+            CARLY_ESSENCE_2_NAME,
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+        emit Approval(bob, alice, carlySecondEssenceTokenId);
+        essence.permit(
+            alice,
+            carlySecondEssenceTokenId,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+        assertEq(essence.getApproved(carlySecondEssenceTokenId), alice);
+        // transfer initiated by permitted address
+        vm.prank(bob);
+        vm.expectRevert("TRANSFER_NOT_ALLOWED");
+        essence.transferFrom(bob, alice, carlySecondEssenceTokenId);
+        assertEq(essence.balanceOf(bob), 1);
+        assertEq(essence.balanceOf(alice), 0);
+        assertEq(essence.ownerOf(carlySecondEssenceTokenId), bob);
     }
 }
