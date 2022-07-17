@@ -214,7 +214,6 @@ library LibDeploy {
         return address(uint160(uint256(keccak256(data))));
     }
 
-    // for testing, link3 signer has private key = 1890
     function deployInTest(
         Vm vm,
         address link3Signer,
@@ -225,10 +224,10 @@ library LibDeploy {
             .DeployParameters(
                 address(this),
                 link3Signer,
-                link3Treasury, // link3 treasury
+                link3Treasury,
                 address(this),
                 address(this),
-                engineTreasury, // engine treasury
+                engineTreasury,
                 address(0) // deployer contract address. use 0 address to deploy create2 contract on the fly
             );
         DeployParams memory params = DeployParams(false, false, setting);
@@ -304,7 +303,6 @@ library LibDeploy {
             _write(vm, "CyberBoxNFT (Impl)", boxImpl);
         }
 
-        // 12. Deploy Proxy for BoxNFT
         bytes memory _data = abi.encodeWithSelector(
             CyberBoxNFT.initialize.selector,
             link3Owner,
@@ -342,7 +340,7 @@ library LibDeploy {
                 abi.encode(
                     params.setting.engineAuthOwner,
                     Authority(address(0))
-                ) // use deployer here so that 1. in test, deployer is Test contract 2. in deployment, deployer is the msg.sender
+                )
             ),
             SALT
         );
@@ -399,7 +397,7 @@ library LibDeploy {
             "ENGINE_PROXY_MISMATCH"
         );
 
-        // 5. Set Governance Role
+        // 3. Set Governance Role
         RolesAuthority(addrs.engineAuthority).setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
             addrs.engineProxyAddress,
@@ -444,7 +442,7 @@ library LibDeploy {
             _write(vm, "Essence Factory", addrs.essFac);
             _write(vm, "Subscribe Factory", addrs.subFac);
         }
-        // 6. Deploy Link3
+        // 4. Deploy Link3
         (
             addrs.link3Profile,
             addrs.subBeacon,
@@ -463,7 +461,7 @@ library LibDeploy {
             _write(vm, "Link3 Profile", addrs.link3Profile);
         }
 
-        // 7. Deploy Protocol Treasury
+        // 5. Deploy Protocol Treasury
         addrs.cyberTreasury = dc.deploy(
             abi.encodePacked(
                 type(Treasury).creationCode,
@@ -479,7 +477,7 @@ library LibDeploy {
             _write(vm, "CyberConnect Treasury", addrs.cyberTreasury);
         }
 
-        // 8. Deploy Profile Middleware
+        // 6. Deploy Profile Middleware
         addrs.link3ProfileMw = dc.deploy(
             abi.encodePacked(
                 type(PermissionedFeeCreationMw).creationCode,
@@ -496,13 +494,13 @@ library LibDeploy {
             );
         }
 
-        // 9. Engine Allow Middleware
+        // 7. Engine Allow Middleware
         CyberEngine(addrs.engineProxyAddress).allowProfileMw(
             addrs.link3ProfileMw,
             true
         );
 
-        // 1o. Engine Config Link3 Profile Middleware
+        // 8. Engine Config Link3 Profile Middleware
         CyberEngine(addrs.engineProxyAddress).setProfileMw(
             addrs.link3Profile,
             addrs.link3ProfileMw,
@@ -572,8 +570,8 @@ library LibDeploy {
         );
     }
 
+    // avoid stack too deep
     string constant TEST_HANDLE = "cyberconnect";
-    // set signer
     uint256 constant TEST_SIGNER_PK = 1;
     struct RegisterLink3TestProfileParams {
         ProfileNFT profile;
@@ -584,7 +582,7 @@ library LibDeploy {
         address engineTreasury;
     }
 
-    // for testnet, profile owner is all deployer, signer is fake
+    // for testnet and test fixture
     function registerLink3TestProfile(
         Vm vm,
         RegisterLink3TestProfileParams memory params
@@ -620,7 +618,7 @@ library LibDeploy {
             bytes32 data = keccak256(
                 abi.encode(
                     Constants._CREATE_PROFILE_TYPEHASH,
-                    params.mintToEOA, // mint to this address
+                    params.mintToEOA,
                     keccak256(bytes(TEST_HANDLE)),
                     keccak256(
                         bytes(
@@ -646,7 +644,7 @@ library LibDeploy {
         );
         params.profile.createProfile{ value: _INITIAL_FEE_TIER5 }(
             DataTypes.CreateProfileParams(
-                params.mintToEOA, // use LINK3_SIGNER instead of deployer since deployer could be a contract in anvil environment and safeMint will fail
+                params.mintToEOA,
                 TEST_HANDLE,
                 "bafkreibcwcqcdf2pgwmco3pfzdpnfj3lijexzlzrbfv53sogz5uuydmvvu",
                 "metadata"
