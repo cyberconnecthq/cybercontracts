@@ -674,7 +674,7 @@ library LibDeploy {
         string memory symbol,
         bytes32 salt,
         address profileFac
-    ) internal returns (address profileProxy) {
+    ) internal pure returns (address profileProxy) {
         address profileImpl;
         profileImpl = _computeAddress(
             type(ProfileNFT).creationCode,

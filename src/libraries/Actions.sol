@@ -144,7 +144,7 @@ library Actions {
         if (data.essenceMw != address(0)) {
             _essenceByIdByProfileId[data.profileId][id].essenceMw = data
                 .essenceMw;
-            returnData = IEssenceMiddleware(data.essenceMw).prepare(
+            returnData = IEssenceMiddleware(data.essenceMw).setEssenceMwData(
                 data.profileId,
                 id,
                 data.initData

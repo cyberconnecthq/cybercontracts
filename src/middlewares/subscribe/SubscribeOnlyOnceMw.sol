@@ -12,6 +12,17 @@ import { ISubscribeMiddleware } from "../../interfaces/ISubscribeMiddleware.sol"
  * @notice This contract is a middleware to allow the address to subscribe only once to another address.
  */
 contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
+    /// @inheritdoc ISubscribeMiddleware
+    function setSubscribeMwData(uint256, bytes calldata)
+        external
+        pure
+        override
+        returns (bytes memory)
+    {
+        // do nothing
+        return new bytes(0);
+    }
+
     /**
      * @inheritdoc ISubscribeMiddleware
      * @notice Proccess that checks if the subscriber is aready subscribed.
@@ -36,16 +47,5 @@ contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
         bytes calldata data
     ) external override {
         // do nothing
-    }
-
-    /// @inheritdoc ISubscribeMiddleware
-    function prepare(uint256, bytes calldata)
-        external
-        pure
-        override
-        returns (bytes memory)
-    {
-        // do nothing
-        return new bytes(0);
     }
 }

@@ -568,7 +568,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.mockCall(
             subscribeMw,
             abi.encodeWithSelector(
-                ISubscribeMiddleware.prepare.selector,
+                ISubscribeMiddleware.setSubscribeMwData.selector,
                 profileId,
                 data
             ),
@@ -583,7 +583,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testSetSubscribeMwWithSig() public {
-        string memory avatar = "avatar";
         uint256 nonce = profile.nonces(bob);
 
         vm.warp(50);
@@ -602,7 +601,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.mockCall(
             subscribeMw,
             abi.encodeWithSelector(
-                ISubscribeMiddleware.prepare.selector,
+                ISubscribeMiddleware.setSubscribeMwData.selector,
                 profileId,
                 data
             ),
@@ -639,7 +638,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testCannotSetSubscribeMwInvalidSig() public {
-        string memory avatar = "avatar";
         uint256 nonce = profile.nonces(bob);
 
         vm.warp(50);
@@ -658,7 +656,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.mockCall(
             subscribeMw,
             abi.encodeWithSelector(
-                ISubscribeMiddleware.prepare.selector,
+                ISubscribeMiddleware.setSubscribeMwData.selector,
                 profileId,
                 data
             ),
@@ -843,7 +841,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.mockCall(
             essenceMw,
             abi.encodeWithSelector(
-                IEssenceMiddleware.prepare.selector,
+                IEssenceMiddleware.setEssenceMwData.selector,
                 profileId,
                 expectedEssenceId,
                 new bytes(0)
@@ -893,7 +891,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.mockCall(
             essenceMw,
             abi.encodeWithSelector(
-                IEssenceMiddleware.prepare.selector,
+                IEssenceMiddleware.setEssenceMwData.selector,
                 profileId,
                 expectedEssenceId,
                 new bytes(0)
