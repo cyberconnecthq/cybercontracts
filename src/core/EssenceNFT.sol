@@ -91,4 +91,15 @@ contract EssenceNFT is
         return
             IProfileNFT(PROFILE).getEssenceNFTTokenURI(_profileId, _essenceId);
     }
+
+    /**
+     * @notice Disallows the transfer of the subscribe nft.
+     */
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) public pure override {
+        revert("TRANSFER_NOT_ALLOWED");
+    }
 }

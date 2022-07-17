@@ -11,6 +11,20 @@ abstract contract EIP712 {
             "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
         );
 
+    // solhint-disable-next-line func-name-mixedcase
+    function DOMAIN_SEPARATOR() public view returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    _TYPE_HASH,
+                    keccak256(bytes(_domainSeperatorName())),
+                    _HASHED_VERSION,
+                    block.chainid,
+                    address(this)
+                )
+            );
+    }
+
     function _requiresExpectedSigner(
         bytes32 digest,
         address expectedSigner,
@@ -37,20 +51,6 @@ abstract contract EIP712 {
             sig.s,
             sig.deadline
         );
-    }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function DOMAIN_SEPARATOR() public view returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    _TYPE_HASH,
-                    keccak256(bytes(_domainSeperatorName())),
-                    _HASHED_VERSION,
-                    block.chainid,
-                    address(this)
-                )
-            );
     }
 
     function _hashTypedDataV4(bytes32 structHash)

@@ -119,4 +119,16 @@ contract EssenceNFTTest is Test, TestDeployer {
         );
         assertEq(essence.tokenURI(1), tokenUri);
     }
+
+    function testTransferIsNotAllowed() public {
+        vm.prank(address(profile));
+        assertEq(essence.mint(alice), 1);
+
+        vm.expectRevert("TRANSFER_NOT_ALLOWED");
+        essence.transferFrom(alice, bob, 1);
+        vm.expectRevert("TRANSFER_NOT_ALLOWED");
+        essence.safeTransferFrom(alice, bob, 1);
+        vm.expectRevert("TRANSFER_NOT_ALLOWED");
+        essence.safeTransferFrom(alice, bob, 1, "");
+    }
 }

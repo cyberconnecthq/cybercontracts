@@ -99,6 +99,6 @@ contract SubscribeNFT is
         address,
         uint256
     ) public pure override {
-        revert("Transfer is not allowed");
+        revert("TRANSFER_NOT_ALLOWED");
     }
 }
