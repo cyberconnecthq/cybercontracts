@@ -101,6 +101,7 @@ contract CyberNFTBaseTest is Test {
         assertEq(token.totalMinted(), 1);
         assertEq(token.totalBurned(), 1);
         assertEq(token.balanceOf(bobAddr), 0);
+        assertEq(token.getApproved(1), address(0));
     }
 
     function testCannotBurnAsNonOwnerOrApproved() public {
