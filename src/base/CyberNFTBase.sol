@@ -68,7 +68,9 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
     function burn(uint256 tokenId) public virtual override {
         address owner = ownerOf(tokenId);
         require(
-            msg.sender == owner || msg.sender == getApproved[tokenId],
+            msg.sender == owner ||
+                msg.sender == getApproved[tokenId] ||
+                isApprovedForAll[owner][msg.sender],
             "NOT_OWNER_OR_APPROVED"
         );
         super._burn(tokenId);

@@ -93,6 +93,7 @@ contract CyberNFTBaseTest is Test {
         assertEq(token.balanceOf(bobAddr), 1);
         assertEq(token.ownerOf(1), bobAddr);
         assertEq(token.getApproved(1), alice);
+        assertEq(token.isApprovedForAll(bobAddr, alice), false);
 
         vm.prank(alice);
         token.burn(1);
@@ -102,6 +103,32 @@ contract CyberNFTBaseTest is Test {
         assertEq(token.totalBurned(), 1);
         assertEq(token.balanceOf(bobAddr), 0);
         assertEq(token.getApproved(1), address(0));
+    }
+
+    function testBurnAsApprovedForAll() public {
+        address bob = address(0xB0B);
+        uint256 tokenId = 1;
+        assertEq(token.mint(bob), tokenId);
+
+        vm.prank(bob);
+        token.setApprovalForAll(alice, true);
+
+        assertEq(token.isApprovedForAll(bob, alice), true);
+        assertEq(token.getApproved(tokenId), address(0));
+        assertEq(token.totalSupply(), 1);
+        assertEq(token.totalMinted(), 1);
+        assertEq(token.totalBurned(), 0);
+        assertEq(token.balanceOf(bob), 1);
+        assertEq(token.ownerOf(1), bob);
+
+        vm.prank(alice);
+        token.burn(1);
+
+        assertEq(token.totalSupply(), 0);
+        assertEq(token.totalMinted(), 1);
+        assertEq(token.totalBurned(), 1);
+        assertEq(token.balanceOf(bob), 0);
+        assertEq(token.isApprovedForAll(bob, alice), true);
     }
 
     function testCannotBurnAsNonOwnerOrApproved() public {
