@@ -801,10 +801,10 @@ contract ProfileNFT is
 
         tokenID = _mint(params.to);
 
-        _profileById[_totalCount].handle = params.handle;
-        _profileById[_totalCount].avatar = params.avatar;
-        _metadataById[_totalCount] = params.metadata;
-        _profileIdByHandleHash[handleHash] = _totalCount;
+        _profileById[_currentIndex].handle = params.handle;
+        _profileById[_currentIndex].avatar = params.avatar;
+        _metadataById[_currentIndex] = params.metadata;
+        _profileIdByHandleHash[handleHash] = _currentIndex;
 
         if (_addressToPrimaryProfile[params.to] == 0) {
             _addressToPrimaryProfile[params.to] = tokenID;
