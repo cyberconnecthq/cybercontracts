@@ -135,7 +135,7 @@ contract PermissionedFeeCreationMw is
 
         require(
             signer != address(0) && recipient != address(0),
-            "INVALID_SIGNER_OR_RECIPIENT_ADDRESS"
+            "INVALID_SIGNER_OR_RECIPIENT"
         );
 
         _setFeeByTier(namespace, Tier.Tier0, tier0Fee);
