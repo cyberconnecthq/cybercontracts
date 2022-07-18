@@ -3,7 +3,7 @@
 pragma solidity 0.8.14;
 
 import { ERC721 } from "../../src/dependencies/solmate/ERC721.sol";
-import { Base64 } from "../../src/dependencies/openzeppelin/Base64.sol";
+import { Base64 } from "openzeppelin-contracts/contracts/utils/Base64.sol";
 
 import { IProfileNFTEvents } from "../../src/interfaces/IProfileNFTEvents.sol";
 

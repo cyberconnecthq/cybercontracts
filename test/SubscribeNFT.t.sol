@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
+import { ISubscribeNFTEvents } from "../src/interfaces/ISubscribeNFTEvents.sol";
 
 import { Constants } from "../src/libraries/Constants.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
@@ -15,7 +16,7 @@ import { TestDeployer } from "./utils/TestDeployer.sol";
 import { UpgradeableBeacon } from "../src/upgradeability/UpgradeableBeacon.sol";
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 
-contract SubscribeNFTTest is Test, TestDeployer {
+contract SubscribeNFTTest is Test, TestDeployer, ISubscribeNFTEvents {
     event Approval(
         address indexed owner,
         address indexed spender,
@@ -44,6 +45,8 @@ contract SubscribeNFTTest is Test, TestDeployer {
             name,
             symbol
         );
+        vm.expectEmit(true, false, false, true);
+        emit Initialize(profileId, name, symbol);
         proxy = new BeaconProxy(address(beacon), functionData);
 
         c = SubscribeNFT(address(proxy));

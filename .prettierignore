@@ -2,3 +2,4 @@ node_modules
 lib
 src/dependencies/
 misc/qrcode/html/
+src/upgradeability/

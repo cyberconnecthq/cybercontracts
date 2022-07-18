@@ -244,7 +244,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
 
     function testCannotSetMwDataInvalidSigner() public {
         vm.prank(addrs.engineProxyAddress);
-        vm.expectRevert("INVALID_SIGNER_OR_RECIPIENT_ADDRESS");
+        vm.expectRevert("INVALID_SIGNER_OR_RECIPIENT");
         profileMw.setProfileMwData(
             address(link3Profile),
             abi.encode(
@@ -262,7 +262,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
 
     function testCannotSetMwDataInvalidRecipent() public {
         vm.prank(addrs.engineProxyAddress);
-        vm.expectRevert("INVALID_SIGNER_OR_RECIPIENT_ADDRESS");
+        vm.expectRevert("INVALID_SIGNER_OR_RECIPIENT");
         profileMw.setProfileMwData(
             address(link3Profile),
             abi.encode(

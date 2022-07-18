@@ -10,7 +10,7 @@ interface IProfileNFTEvents {
      *
      * @param owner Namespace owner.
      */
-    event Initialize(address indexed owner);
+    event Initialize(address indexed owner, string name, string symbol);
 
     /**
      * @notice Emitted when a new Profile NFT Descriptor has been set.

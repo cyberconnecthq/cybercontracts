@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// OpenZeppelin Contracts v4.4.1 (security/Pausable.sol)
+// OpenZeppelin Contracts (last updated v4.7.0) (security/Pausable.sol)
 
 pragma solidity ^0.8.0;
 
 /**
- * @dev modified from OpenZeppelin Pausable.sol
+ * @dev modified from OpenZeppelin Pausable.sol, removing Context
+ *
  * @dev Contract module which allows children to implement an emergency stop
  * mechanism that can be triggered by an authorized account.
  *

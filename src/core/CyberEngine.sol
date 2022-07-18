@@ -70,6 +70,7 @@ contract CyberEngine is
         initializer
     {
         Auth.__Auth_Init(_owner, _rolesAuthority);
+        emit Initialize(_owner, address(_rolesAuthority));
     }
 
     /// @inheritdoc ICyberEngine

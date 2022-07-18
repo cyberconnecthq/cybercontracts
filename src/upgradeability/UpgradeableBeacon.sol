@@ -7,8 +7,7 @@ import "openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol";
 import "openzeppelin-contracts/contracts/utils/Address.sol";
 
 /**
- * Adapted from Openzepelin's UpgradeableBeacon.sol with RolesAuthority auth
- * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/83277ff916ac4f58fec072b8f28a252c1245c2f1/contracts/proxy/beacon/UpgradeableBeacon.sol
+ * @dev Adapted from Openzepelin's UpgradeableBeacon.sol with RolesAuthority auth
  *
  * @dev This contract is used in conjunction with one or more instances of {BeaconProxy} to determine their
  * implementation contract, which is where they will delegate all function calls.
@@ -64,10 +63,7 @@ contract UpgradeableBeacon is IBeacon {
      * - `newImplementation` must be a contract.
      */
     function _setImplementation(address newImplementation) private {
-        require(
-            Address.isContract(newImplementation),
-            "UpgradeableBeacon: implementation is not a contract"
-        );
+        require(Address.isContract(newImplementation), "UpgradeableBeacon: implementation is not a contract");
         _implementation = newImplementation;
     }
 }

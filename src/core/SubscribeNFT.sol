@@ -53,6 +53,7 @@ contract SubscribeNFT is
     ) external override initializer {
         _profileId = profileId;
         CyberNFTBase._initialize(name, symbol);
+        emit Initialize(profileId, name, symbol);
     }
 
     /// @inheritdoc ISubscribeNFT

@@ -135,7 +135,7 @@ contract PermissionedFeeCreationMw is
 
         require(
             signer != address(0) && recipient != address(0),
-            "INVALID_SIGNER_OR_RECIPIENT_ADDRESS"
+            "INVALID_SIGNER_OR_RECIPIENT"
         );
 
         _setFeeByTier(namespace, Tier.Tier0, tier0Fee);
@@ -161,7 +161,7 @@ contract PermissionedFeeCreationMw is
      * @param namespace The namespace address.
      * @return address The signer address.
      */
-    function getSigner(address namespace) public view returns (address) {
+    function getSigner(address namespace) external view returns (address) {
         return _mwDataByNamespace[namespace].signer;
     }
 
@@ -171,7 +171,7 @@ contract PermissionedFeeCreationMw is
      * @param namespace The namespace address.
      * @return address The recipient address.
      */
-    function getRecipient(address namespace) public view returns (address) {
+    function getRecipient(address namespace) external view returns (address) {
         return _mwDataByNamespace[namespace].recipient;
     }
 
@@ -183,7 +183,7 @@ contract PermissionedFeeCreationMw is
      * @return uint256 The nonce.
      */
     function getNonce(address namespace, address user)
-        public
+        external
         view
         returns (uint256)
     {
@@ -198,7 +198,7 @@ contract PermissionedFeeCreationMw is
      * @return uint256 The fee amount.
      */
     function getFeeByTier(address namespace, Tier tier)
-        public
+        external
         view
         returns (uint256)
     {

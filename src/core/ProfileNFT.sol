@@ -123,7 +123,7 @@ contract ProfileNFT is
         CyberNFTBase._initialize(name, symbol);
         ReentrancyGuard.__ReentrancyGuard_init();
         _pause();
-        emit Initialize(_owner);
+        emit Initialize(_owner, name, symbol);
     }
 
     /// @inheritdoc IProfileNFT

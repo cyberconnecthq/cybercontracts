@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import "../dependencies/openzeppelin/Base64.sol";
+import { Base64 } from "openzeppelin-contracts/contracts/utils/Base64.sol";
 
 import "./LibString.sol";
 
