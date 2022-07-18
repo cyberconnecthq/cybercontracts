@@ -53,7 +53,13 @@ library TestLibFixture {
         profileId = profile.createProfile{
             value: LibDeploy._INITIAL_FEE_TIER2
         }(
-            DataTypes.CreateProfileParams(mintToEOA, handle, avatar, metadata),
+            DataTypes.CreateProfileParams(
+                mintToEOA,
+                handle,
+                avatar,
+                metadata,
+                address(0)
+            ),
             abi.encode(v, r, s, deadline),
             new bytes(0)
         );

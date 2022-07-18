@@ -31,7 +31,8 @@ contract ProfileNFTTest is Test, TestDeployer {
             alice,
             "alice",
             "https://example.com/alice.jpg",
-            "metadata"
+            "metadata",
+            address(0)
         );
 
     DataTypes.CreateProfileParams internal createProfileDataBob =
@@ -39,7 +40,8 @@ contract ProfileNFTTest is Test, TestDeployer {
             alice,
             "bob",
             "https://example.com/bob.jpg",
-            "metadata"
+            "metadata",
+            address(0)
         );
     string bobMetadata =
         string(
@@ -101,6 +103,36 @@ contract ProfileNFTTest is Test, TestDeployer {
     function testGetOperatorApproval() public {
         uint256 id = token.createProfile(createProfileDataAlice);
         assertEq(token.getOperatorApproval(id, address(0)), false);
+    }
+
+    function testCreateProfileWithOperator() public {
+        address operator = address(0x12345);
+        DataTypes.CreateProfileParams memory params = DataTypes
+            .CreateProfileParams(
+                alice,
+                "alice",
+                "https://example.com/alice.jpg",
+                "metadata",
+                operator
+            );
+
+        uint256 id = token.createProfile(params);
+        assertEq(token.getOperatorApproval(id, operator), true);
+    }
+
+    function testCannotCreateProfileWithOwnerAsOperator() public {
+        address operator = address(0x12345);
+        DataTypes.CreateProfileParams memory params = DataTypes
+            .CreateProfileParams(
+                alice,
+                "alice",
+                "https://example.com/alice.jpg",
+                "metadata",
+                alice
+            );
+
+        vm.expectRevert("INVALID_OPERATOR");
+        uint256 id = token.createProfile(params);
     }
 
     function testCannotGetOperatorApprovalForNonexistentProfile() public {

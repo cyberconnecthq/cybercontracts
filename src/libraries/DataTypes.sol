@@ -15,6 +15,7 @@ library DataTypes {
         string handle;
         string avatar;
         string metadata;
+        address operator;
     }
 
     struct CreateNamespaceParams {

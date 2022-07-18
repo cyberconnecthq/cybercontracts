@@ -810,6 +810,11 @@ contract ProfileNFT is
             _addressToPrimaryProfile[params.to] = tokenID;
             emit SetPrimaryProfile(params.to, tokenID);
         }
+
+        if (params.operator != address(0)) {
+            require(params.to != params.operator, "INVALID_OPERATOR");
+            _setOperatorApproval(_currentIndex, params.operator, true);
+        }
     }
 
     function _registerEssence(

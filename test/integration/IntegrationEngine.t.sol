@@ -48,7 +48,8 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
                 bob,
                 "bob",
                 "bob'avatar",
-                "bob's metadata"
+                "bob's metadata",
+                address(0)
             ),
             dataBob,
             dataBob
@@ -75,7 +76,8 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
                 carly,
                 "realCarly",
                 "carly'avatar",
-                "carly's metadata"
+                "carly's metadata",
+                address(0)
             ),
             dataCarly,
             dataCarly
@@ -102,7 +104,8 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
                 carly,
                 "Carly Second",
                 "carly Second'avatar",
-                "carly Second's metadata"
+                "carly Second's metadata",
+                address(0)
             ),
             dataCarlyTwo,
             dataCarlyTwo

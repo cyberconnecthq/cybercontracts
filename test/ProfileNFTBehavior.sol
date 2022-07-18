@@ -27,7 +27,8 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
             alice,
             "alice",
             "https://example.com/alice.jpg",
-            "metadata"
+            "metadata",
+            address(0)
         );
 
     function setUp() public {

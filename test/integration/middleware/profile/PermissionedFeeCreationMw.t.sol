@@ -403,7 +403,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
         )
     {
         DataTypes.CreateProfileParams memory params = DataTypes
-            .CreateProfileParams(bob, handle, avatar, metadata);
+            .CreateProfileParams(bob, handle, avatar, metadata, address(0));
         (v, r, s) = _generateValidSig(
             params,
             address(link3Profile),

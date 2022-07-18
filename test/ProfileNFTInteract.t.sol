@@ -84,7 +84,13 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         string memory metadata = "bob's metadata";
 
         profileId = profile.createProfile(
-            DataTypes.CreateProfileParams(bob, handle, avatar, metadata)
+            DataTypes.CreateProfileParams(
+                bob,
+                handle,
+                avatar,
+                metadata,
+                address(0)
+            )
         );
         assertEq(profileId, 1);
         assertEq(profile.nonces(bob), 0);
