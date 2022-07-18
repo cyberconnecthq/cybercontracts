@@ -46,16 +46,16 @@ contract DeploySetting {
                 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC // use different wallet to pass balance delta check (gas paying)
             );
             deployParams.deployerContract = address(0);
-        } else if (block.chainid == 5) {
+        } else if (block.chainid == 5 || block.chainid == 4) {
             // goerli
             deployParams.link3Owner = address(
-                0x927f355117721e0E8A7b5eA20002b65B8a551890
+                0x1890a1625d837A809b0e77EdE1a999a161df085d
             );
             deployParams.link3Signer = address(
                 0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
             );
             deployParams.link3Treasury = address(
-                0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
+                0xF17CacbD8ca7e4Ec46F98C0eB898C0F0DEA07802
             );
             deployParams.engineAuthOwner = address(
                 0x927f355117721e0E8A7b5eA20002b65B8a551890
@@ -64,32 +64,19 @@ contract DeploySetting {
                 0x927f355117721e0E8A7b5eA20002b65B8a551890
             );
             deployParams.engineTreasury = address(
-                0x1890a1625d837A809b0e77EdE1a999a161df085d
+                0x78020361856816382501E444600A29519fb3B107
             );
-            deployParams.deployerContract = address(0);
-        } else if (block.chainid == 4) {
-            deployParams.link3Owner = address(
-                0x927f355117721e0E8A7b5eA20002b65B8a551890
-            );
-            deployParams.link3Signer = address(
-                0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
-            );
-            deployParams.link3Treasury = address(
-                0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
-            );
-            deployParams.engineAuthOwner = address(
-                0x927f355117721e0E8A7b5eA20002b65B8a551890
-            );
-            deployParams.engineGov = address(
-                0x927f355117721e0E8A7b5eA20002b65B8a551890
-            );
-            deployParams.engineTreasury = address(
-                0x1890a1625d837A809b0e77EdE1a999a161df085d
-            );
-            deployParams.deployerContract = address(
-                0xe19061D4Dd38ac3B67eeC28E90bdFB68065DbF7c
-            );
-        } else if (block.chainid == 1) {
+            //goerli
+            if (block.chainid == 5) {
+                deployParams.deployerContract = address(
+                    0x701A5baBA0701e3B1Dd3107dF47dDC68eaC019bf
+                );
+            } else if (block.chainid == 4) {
+                deployParams.deployerContract = address(0);
+            }
+        } else if (
+            block.chainid == 1 || block.chainid == 137 || block.chainid == 56
+        ) {
             deployParams.link3Owner = address(
                 0x39e0c6E610A8D7F408dD688011591583cbc1c3ce
             );
@@ -108,7 +95,9 @@ contract DeploySetting {
             deployParams.engineTreasury = address(
                 0xa4E52748fAcCA028D163941f3Bd52F4B204f8019
             );
-            deployParams.deployerContract = address(0);
+            deployParams.deployerContract = address(
+                0xEFb8369Fb33bA67832B7120C94698e5372eE61C3
+            );
         } else {
             revert("PARAMS_NOT_SET");
         }

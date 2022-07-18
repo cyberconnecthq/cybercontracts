@@ -430,17 +430,17 @@ contract ProfileNFT is
     /// @inheritdoc IProfileNFT
     function setSubscribeData(
         uint256 profileId,
-        string calldata tokenURI,
+        string calldata uri,
         address mw,
         bytes calldata prepareData
     ) external override onlyProfileOwnerOrOperator(profileId) {
-        _setSubscribeData(profileId, tokenURI, mw, prepareData);
+        _setSubscribeData(profileId, uri, mw, prepareData);
     }
 
     /// @inheritdoc IProfileNFT
     function setSubscribeDataWithSig(
         uint256 profileId,
-        string calldata tokenURI,
+        string calldata uri,
         address mw,
         bytes calldata prepareData,
         DataTypes.EIP712Signature calldata sig
@@ -452,7 +452,7 @@ contract ProfileNFT is
                     abi.encode(
                         Constants._SET_SUBSCRIBE_DATA_TYPEHASH,
                         profileId,
-                        keccak256(bytes(tokenURI)),
+                        keccak256(bytes(uri)),
                         mw,
                         keccak256(prepareData),
                         nonces[owner]++,
@@ -463,7 +463,7 @@ contract ProfileNFT is
             owner,
             sig
         );
-        _setSubscribeData(profileId, tokenURI, mw, prepareData);
+        _setSubscribeData(profileId, uri, mw, prepareData);
     }
 
     /// @inheritdoc IProfileNFT
@@ -814,7 +814,7 @@ contract ProfileNFT is
 
     function _setSubscribeData(
         uint256 profileId,
-        string calldata tokenURI,
+        string calldata uri,
         address mw,
         bytes calldata prepareData
     ) internal {
@@ -830,8 +830,8 @@ contract ProfileNFT is
                 prepareData
             );
         }
-        _subscribeByProfileId[profileId].tokenURI = tokenURI;
-        emit SetSubscribeData(profileId, tokenURI, mw, returnData);
+        _subscribeByProfileId[profileId].tokenURI = uri;
+        emit SetSubscribeData(profileId, uri, mw, returnData);
     }
 
     function _setAvatar(uint256 profileId, string calldata avatar) internal {

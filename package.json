@@ -26,10 +26,12 @@
     "qrtest": "rm -rf ./test/qrcode ./misc/qrcode/html ./misc/qrcode/svg && node misc/qrcode/gen-sol.js && mkdir -pv misc/qrcode/svg && forge test --match-contract QRSVGIntegration -vvv && node misc/qrcode/gen-html.js  && node misc/qrcode/puppet.js",
     "deploy_deployer:rinkeby": "source .env.rinkeby && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_deployer:goerli": "source .env.goerli && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "deploy_deployer:mainnet": "source .env.mainnet && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $MAINNET_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "deploy_deployer:polygon": "source .env.polygon && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $POLYGON_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "deploy_deployer:bsc": "source .env.bsc && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $BSC_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_deployer:anvil": "source .env.anvil && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
     "size": "hardhat size-contracts",
-    "deploy_full:anvil": "yarn deploy:anvil && yarn upload_animation:anvil && yarn set_animation_url:anvil",
-    "deploy_full:goerli": "yarn deploy:goerli && yarn upload_animation:goerli && yarn set_animation_url:goerli"
+    "deploy_full:anvil": "yarn deploy:anvil && yarn upload_animation:anvil && yarn set_animation_url:anvil"
   },
   "devDependencies": {
     "axios": "^0.27.2",

@@ -126,7 +126,6 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
     }
 
     function testCannotCreateProfileWithOwnerAsOperator() public {
-        address operator = address(0x12345);
         DataTypes.CreateProfileParams memory params = DataTypes
             .CreateProfileParams(
                 alice,
@@ -137,7 +136,7 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
             );
 
         vm.expectRevert("INVALID_OPERATOR");
-        uint256 id = token.createProfile(params);
+        token.createProfile(params);
     }
 
     function testCannotGetOperatorApprovalForNonexistentProfile() public {
