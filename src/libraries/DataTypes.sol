@@ -78,9 +78,9 @@ library DataTypes {
     }
 
     struct SubscribeStruct {
+        string tokenURI;
         address subscribeNFT;
         address subscribeMw;
-        string tokenURI;
     }
 
     struct EssenceStruct {

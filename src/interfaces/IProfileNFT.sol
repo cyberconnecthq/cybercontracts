@@ -182,11 +182,13 @@ interface IProfileNFT is IProfileNFTEvents {
      * @notice Sets subscribe middleware for a profile.
      *
      * @param profileId The profile ID.
+     * @param tokenURI The new token URI.
      * @param mw The new middleware to be set.
      * @param prepareData The data for prepare.
      */
-    function setSubscribeMw(
+    function setSubscribeData(
         uint256 profileId,
+        string calldata tokenURI,
         address mw,
         bytes calldata prepareData
     ) external;
@@ -195,40 +197,17 @@ interface IProfileNFT is IProfileNFTEvents {
      * @notice Sets subscribe middleware for a profile with signature.
      *
      * @param profileId The profile ID.
+     * @param tokenURI The new token URI.
      * @param mw The new middleware to be set.
      * @param prepareData The data for prepare.
      * @param sig The EIP712 signature.
      * @dev Only owner's signature works.
      */
-    function setSubscribeMwWithSig(
+    function setSubscribeDataWithSig(
         uint256 profileId,
+        string calldata tokenURI,
         address mw,
         bytes calldata prepareData,
-        DataTypes.EIP712Signature calldata sig
-    ) external;
-
-    /**
-     * @notice Sets subscribeNFT tokenURI.
-     *
-     * @param profileId The profile ID.
-     * @param subscribeTokenURI The new tokenURI to be set.
-     */
-    function setSubscribeTokenURI(
-        uint256 profileId,
-        string calldata subscribeTokenURI
-    ) external;
-
-    /**
-     * @notice Sets subscribeNFT tokenURI.
-     *
-     * @param profileId The profile ID.
-     * @param subscribeTokenURI The new tokenURI to be set.
-     * @param sig The EIP712 signature.
-     * @dev Only owner's signature works.
-     */
-    function setSubscribeTokenURIWithSig(
-        uint256 profileId,
-        string calldata subscribeTokenURI,
         DataTypes.EIP712Signature calldata sig
     ) external;
 

@@ -76,24 +76,15 @@ interface IProfileNFTEvents {
      * @notice Emitted when a subscription middleware has been set to a profile.
      *
      * @param profileId The profile id.
+     * @param tokenURI The new token URI.
      * @param mw The new middleware.
      * @param prepareReturnData The data used to prepare middleware.
      */
-    event SetSubscribeMw(
+    event SetSubscribeData(
         uint256 indexed profileId,
+        string tokenURI,
         address mw,
         bytes prepareReturnData
-    );
-
-    /**
-     * @notice Emitted when a subscription tokenURI has been set to a profile.
-     *
-     * @param profileId The profile id.
-     * @param subscribeTokenURI The token URI for subscribe NFT.
-     */
-    event SetSubscribeTokenURI(
-        uint256 indexed profileId,
-        string subscribeTokenURI
     );
 
     /**
