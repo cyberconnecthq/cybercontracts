@@ -7,7 +7,9 @@ import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 
 contract TempScript is Script {
     function run() external {
-        ProfileNFT p = ProfileNFT(0xb9FDA6C1C56dC7AC3aE787a46fD3434DA991626D);
-        console.log(p.tokenURI(1));
+        ProfileNFT p = ProfileNFT(0x5A1Bd07533677D389EcAd9C4B1C5D8A3bce99418);
+        // console.log(p.tokenURI(2));
+        // console.log(p.getMetadata(2));
+        console.log(p.getAvatar(2));
     }
 }

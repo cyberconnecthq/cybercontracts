@@ -74,7 +74,9 @@ contract DeploySetting {
             } else if (block.chainid == 4) {
                 deployParams.deployerContract = address(0);
             }
-        } else if (block.chainid == 1) {
+        } else if (
+            block.chainid == 1 || block.chainid == 137 || block.chainid == 56
+        ) {
             deployParams.link3Owner = address(
                 0x39e0c6E610A8D7F408dD688011591583cbc1c3ce
             );
@@ -93,7 +95,9 @@ contract DeploySetting {
             deployParams.engineTreasury = address(
                 0xa4E52748fAcCA028D163941f3Bd52F4B204f8019
             );
-            deployParams.deployerContract = address(0);
+            deployParams.deployerContract = address(
+                0xEFb8369Fb33bA67832B7120C94698e5372eE61C3
+            );
         } else {
             revert("PARAMS_NOT_SET");
         }
