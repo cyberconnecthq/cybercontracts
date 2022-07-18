@@ -151,7 +151,7 @@
       const nodeURL =
         "https://goerli.infura.io/v3/a606847a1dd5461c9081be56bd0ffe71";
       const provider = new ethers.providers.JsonRpcProvider(nodeURL);
-      const contractAddress = "0x5A1Bd07533677D389EcAd9C4B1C5D8A3bce99418";
+      const contractAddress = "0x6b51550e363D0eB4d8008d944b355F832d415E76";
       const abi = [
         {
           inputs: [
