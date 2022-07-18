@@ -81,7 +81,7 @@ contract DeploySetting {
                 0x39e0c6E610A8D7F408dD688011591583cbc1c3ce
             );
             deployParams.link3Signer = address(
-                0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
+                0x2A2EA826102c067ECE82Bc6E2B7cf38D7EbB1B82
             );
             deployParams.link3Treasury = address(
                 0xe75Fe33b0fB1441a11C5c1296e5Ca83B72cfE00d
