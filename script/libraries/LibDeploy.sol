@@ -616,6 +616,7 @@ library LibDeploy {
         );
 
         uint256 deadline = block.timestamp + 60 * 60 * 24 * 30; // 30 days
+        address operator = address(0);
         bytes32 digest;
         {
             bytes32 data = keccak256(
@@ -629,6 +630,7 @@ library LibDeploy {
                         )
                     ),
                     keccak256(bytes("metadata")),
+                    operator,
                     0,
                     deadline
                 )

@@ -483,6 +483,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
                     keccak256(bytes(params.handle)),
                     keccak256(bytes(params.avatar)),
                     keccak256(bytes(params.metadata)),
+                    params.operator,
                     nonce,
                     deadline
                 )
