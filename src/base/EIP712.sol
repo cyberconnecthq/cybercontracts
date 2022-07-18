@@ -5,12 +5,24 @@ pragma solidity 0.8.14;
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 abstract contract EIP712 {
+    /*//////////////////////////////////////////////////////////////
+                                STATES
+    //////////////////////////////////////////////////////////////*/
     bytes32 internal constant _HASHED_VERSION = keccak256("1");
     bytes32 private constant _TYPE_HASH =
         keccak256(
             "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
         );
 
+    /*//////////////////////////////////////////////////////////////
+                            PUBLIC VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Returns the contract's {EIP712} domain separator.
+     *
+     * @return bytes32 the contract's {EIP712} domain separator.
+     */
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() public view returns (bytes32) {
         return
@@ -24,6 +36,10 @@ abstract contract EIP712 {
                 )
             );
     }
+
+    /*//////////////////////////////////////////////////////////////
+                              INTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     function _requiresExpectedSigner(
         bytes32 digest,
