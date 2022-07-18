@@ -78,6 +78,24 @@ contract EssenceNFT is
     }
 
     /*//////////////////////////////////////////////////////////////
+                                 PUBLIC
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Disallows the transfer of the essence nft.
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public override {
+        if (!_transferable) {
+            revert("TRANSFER_NOT_ALLOWED");
+        }
+        super.transferFrom(from, to, id);
+    }
+
+    /*//////////////////////////////////////////////////////////////
                             PUBLIC VIEW
     //////////////////////////////////////////////////////////////*/
 
@@ -98,19 +116,5 @@ contract EssenceNFT is
         _requireMinted(tokenId);
         return
             IProfileNFT(PROFILE).getEssenceNFTTokenURI(_profileId, _essenceId);
-    }
-
-    /**
-     * @notice Disallows the transfer of the essence nft.
-     */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) public override {
-        if (!_transferable) {
-            revert("TRANSFER_NOT_ALLOWED");
-        }
-        super.transferFrom(from, to, id);
     }
 }
