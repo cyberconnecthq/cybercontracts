@@ -47,6 +47,7 @@ contract DeploySetting {
             );
             deployParams.deployerContract = address(0);
         } else if (block.chainid == 5) {
+            // goerli
             deployParams.link3Owner = address(
                 0x927f355117721e0E8A7b5eA20002b65B8a551890
             );
@@ -88,6 +89,28 @@ contract DeploySetting {
             deployParams.deployerContract = address(
                 0xe19061D4Dd38ac3B67eeC28E90bdFB68065DbF7c
             );
+        } else if (block.chainid == 1) {
+            deployParams.link3Owner = address(
+                0x39e0c6E610A8D7F408dD688011591583cbc1c3ce
+            );
+            deployParams.link3Signer = address(
+                0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
+            );
+            deployParams.link3Treasury = address(
+                0xe75Fe33b0fB1441a11C5c1296e5Ca83B72cfE00d
+            );
+            deployParams.engineAuthOwner = address(
+                0xA7b6bEf855c1c57Df5b7C9c7a4e1eB757e544e7f
+            );
+            deployParams.engineGov = address(
+                0xA7b6bEf855c1c57Df5b7C9c7a4e1eB757e544e7f
+            );
+            deployParams.engineTreasury = address(
+                0xa4E52748fAcCA028D163941f3Bd52F4B204f8019
+            );
+            deployParams.deployerContract = address(0);
+        } else {
+            revert("PARAMS_NOT_SET");
         }
     }
 }

@@ -37,13 +37,9 @@ library Constants {
         keccak256(
             "setOperatorApprovalWithSign(uint256 profileId,address operator,bool approved,uint256 nonce,uint256 deadline)"
         );
-    bytes32 internal constant _SET_SUBSCRIBE_MW_TYPEHASH =
+    bytes32 internal constant _SET_SUBSCRIBE_DATA_TYPEHASH =
         keccak256(
-            "setSubscribeMwWithSig(uint256 profileId,address mw,bytes prepareData,uint256 nonce,uint256 deadline)"
-        );
-    bytes32 internal constant _SET_SUBSCRIBE_TOKENURI_TYPEHASH =
-        keccak256(
-            "setSubscribeTokenURIWithSig(uint256 profileId,string subscribeTokenURI,uint256 nonce,uint256 deadline)"
+            "setSubscribeDataWithSig(uint256 profileId,string tokenURI,address mw,bytes prepareData,uint256 nonce,uint256 deadline)"
         );
     bytes32 internal constant _SET_AVATAR_TYPEHASH =
         keccak256(

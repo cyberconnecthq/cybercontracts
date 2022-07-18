@@ -456,97 +456,16 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         assertEq(profile.nonces(bob), nonce);
     }
 
-    function testSetSubTokenURIAsOwner() public {
-        string memory uri = "url";
-        vm.prank(bob);
-        profile.setSubscribeTokenURI(profileId, uri);
-        assertEq(profile.getSubscribeNFTTokenURI(profileId), uri);
-    }
-
-    function testCannotSetSubTokenURIAsNonOwnerAndOperator() public {
-        vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
-        profile.setSubscribeTokenURI(profileId, "url");
-    }
-
-    function testSetSubscribeTokenURIAsOperator() public {
-        string memory uri = "url";
-        vm.prank(bob);
-        profile.setOperatorApproval(profileId, alice, true);
-        vm.prank(alice);
-        profile.setSubscribeTokenURI(profileId, uri);
-        assertEq(profile.getSubscribeNFTTokenURI(profileId), uri);
-    }
-
-    function testSetSubTokenURIWithSig() public {
-        uint256 nonce = profile.nonces(bob);
-        string memory uri = "url";
-        vm.warp(50);
-        uint256 deadline = 100;
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._SET_SUBSCRIBE_TOKENURI_TYPEHASH,
-                    profileId,
-                    keccak256(bytes(uri)),
-                    nonce,
-                    deadline
-                )
-            ),
-            "Name",
-            "1"
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
-        vm.prank(bob);
-        profile.setSubscribeTokenURIWithSig(
-            profileId,
-            uri,
-            DataTypes.EIP712Signature(v, r, s, deadline)
-        );
-        assertEq(profile.getSubscribeNFTTokenURI(profileId), uri);
-        assertEq(profile.nonces(bob), nonce + 1);
-    }
-
-    function testCannotSetSubTokenURIInvalidSig() public {
-        uint256 nonce = profile.nonces(bob);
-        string memory uri = "url";
-        vm.warp(50);
-        uint256 deadline = 100;
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._SET_SUBSCRIBE_TOKENURI_TYPEHASH,
-                    profileId,
-                    keccak256(bytes(uri)),
-                    nonce + 1,
-                    deadline
-                )
-            ),
-            "Name",
-            "1"
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
-        vm.prank(bob);
-        vm.expectRevert("INVALID_SIGNATURE");
-        profile.setSubscribeTokenURIWithSig(
-            profileId,
-            uri,
-            DataTypes.EIP712Signature(v, r, s, deadline)
-        );
-        assertEq(profile.nonces(bob), nonce);
-    }
-
-    function testCannotSetSubscribeMwIfNotOwnerOrOperator() public {
+    function testCannotSetSubscribeDataIfNotOwnerOrOperator() public {
         address maliciousUser = address(0xD);
         assertEq(profile.getOperatorApproval(profileId, maliciousUser), false);
 
         vm.prank(maliciousUser);
         vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
-        profile.setSubscribeMw(profileId, subscribeMw, new bytes(0));
+        profile.setSubscribeData(profileId, "uri", subscribeMw, new bytes(0));
     }
 
-    function testCannotSetSubscribeMwIfNotAllowed() public {
+    function testCannotSetSubscribeDataIfMwNotAllowed() public {
         vm.expectRevert("SUB_MW_NOT_ALLOWED");
         address notMw = address(0xDEEAAAD);
 
@@ -560,11 +479,11 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         vm.prank(bob);
-        profile.setSubscribeMw(profileId, notMw, new bytes(0));
+        profile.setSubscribeData(profileId, "uri", notMw, new bytes(0));
         assertEq(profile.getSubscribeMw(profileId), address(0));
     }
 
-    function testSetSubscribeMw() public {
+    function testSetSubscribeData() public {
         vm.mockCall(
             engine,
             abi.encodeWithSelector(
@@ -575,6 +494,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(111);
+        string memory uri = "url";
+
         vm.mockCall(
             subscribeMw,
             abi.encodeWithSelector(
@@ -585,14 +506,15 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             abi.encode(returnData)
         );
         vm.expectEmit(true, false, false, true);
-        emit SetSubscribeMw(profileId, subscribeMw, returnData);
+        emit SetSubscribeData(profileId, uri, subscribeMw, returnData);
         vm.prank(bob);
-        profile.setSubscribeMw(profileId, subscribeMw, data);
+        profile.setSubscribeData(profileId, uri, subscribeMw, data);
 
         assertEq(profile.getSubscribeMw(profileId), subscribeMw);
+        assertEq(profile.getSubscribeNFTTokenURI(profileId), uri);
     }
 
-    function testSetSubscribeMwAsOperator() public {
+    function testSetSubscribeDataAsOperator() public {
         vm.mockCall(
             engine,
             abi.encodeWithSelector(
@@ -603,6 +525,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(111);
+        string memory uri = "url";
+
         vm.mockCall(
             subscribeMw,
             abi.encodeWithSelector(
@@ -618,12 +542,13 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         profile.setOperatorApproval(profileId, operator, true);
 
         vm.prank(operator);
-        profile.setSubscribeMw(profileId, subscribeMw, data);
+        profile.setSubscribeData(profileId, uri, subscribeMw, data);
 
         assertEq(profile.getSubscribeMw(profileId), subscribeMw);
+        assertEq(profile.getSubscribeNFTTokenURI(profileId), uri);
     }
 
-    function testSetSubscribeMwWithSig() public {
+    function testSetSubscribeDataWithSig() public {
         uint256 nonce = profile.nonces(bob);
 
         vm.warp(50);
@@ -639,6 +564,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(111);
+        string memory uri = "url";
         vm.mockCall(
             subscribeMw,
             abi.encodeWithSelector(
@@ -653,8 +579,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             address(profile),
             keccak256(
                 abi.encode(
-                    Constants._SET_SUBSCRIBE_MW_TYPEHASH,
+                    Constants._SET_SUBSCRIBE_DATA_TYPEHASH,
                     profileId,
+                    keccak256(bytes(uri)),
                     subscribeMw,
                     keccak256(data),
                     nonce,
@@ -667,8 +594,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
         vm.prank(bob);
-        profile.setSubscribeMwWithSig(
+        profile.setSubscribeDataWithSig(
             profileId,
+            uri,
             subscribeMw,
             data,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -676,6 +604,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         assertEq(profile.getSubscribeMw(profileId), subscribeMw);
         assertEq(profile.nonces(bob), nonce + 1);
+        assertEq(profile.getSubscribeNFTTokenURI(profileId), uri);
     }
 
     function testCannotSetSubscribeMwInvalidSig() public {
@@ -694,6 +623,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(111);
+        string memory uri = "url";
         vm.mockCall(
             subscribeMw,
             abi.encodeWithSelector(
@@ -708,8 +638,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             address(profile),
             keccak256(
                 abi.encode(
-                    Constants._SET_SUBSCRIBE_MW_TYPEHASH,
+                    Constants._SET_SUBSCRIBE_DATA_TYPEHASH,
                     profileId,
+                    keccak256(bytes(uri)),
                     subscribeMw,
                     keccak256(data),
                     nonce + 1,
@@ -723,8 +654,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         vm.prank(bob);
         vm.expectRevert("INVALID_SIGNATURE");
-        profile.setSubscribeMwWithSig(
+        profile.setSubscribeDataWithSig(
             profileId,
+            uri,
             subscribeMw,
             data,
             DataTypes.EIP712Signature(v, r, s, deadline)
@@ -732,14 +664,16 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         assertEq(profile.nonces(bob), nonce);
     }
 
-    function testSetSubscribeMwZeroAddress() public {
+    function testSetSubscribeDataMwZeroAddress() public {
         address zeroAddress = address(0);
 
         bytes memory data = new bytes(0);
+        string memory uri = "url";
+
         vm.expectEmit(true, false, false, true);
-        emit SetSubscribeMw(profileId, zeroAddress, new bytes(0));
+        emit SetSubscribeData(profileId, uri, zeroAddress, new bytes(0));
         vm.prank(bob);
-        profile.setSubscribeMw(profileId, zeroAddress, data);
+        profile.setSubscribeData(profileId, uri, zeroAddress, data);
 
         assertEq(profile.getSubscribeMw(profileId), zeroAddress);
     }

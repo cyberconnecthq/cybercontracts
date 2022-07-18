@@ -14,10 +14,40 @@ import { Constants } from "./Constants.sol";
 import { LibString } from "./LibString.sol";
 
 library Actions {
-    // same as IProfielNFTEvents
+    /**
+     * @dev Watch ProfileNFT contract for events, see comments in IProfileNFTEvents.sol for the
+     * following events
+     */
     event DeploySubscribeNFT(
         uint256 indexed profileId,
         address indexed subscribeNFT
+    );
+    event RegisterEssence(
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        string name,
+        string symbol,
+        string essenceTokenURI,
+        address essenceMw,
+        bytes prepareReturnData
+    );
+    event DeployEssenceNFT(
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        address indexed essenceNFT
+    );
+    event CollectEssence(
+        address indexed collector,
+        uint256 indexed tokenId,
+        uint256 indexed profileId,
+        bytes preData,
+        bytes postData
+    );
+    event Subscribe(
+        address indexed sender,
+        uint256[] profileIds,
+        bytes[] preDatas,
+        bytes[] postDatas
     );
 
     function subscribe(
@@ -68,13 +98,19 @@ library Actions {
                 );
             }
         }
+        emit Subscribe(
+            data.sender,
+            data.profileIds,
+            data.preDatas,
+            data.postDatas
+        );
     }
 
     function collect(
         DataTypes.CollectData calldata data,
         mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
             storage _essenceByIdByProfileId
-    ) external returns (uint256 tokenId, address deployedEssenceNFT) {
+    ) external returns (uint256 tokenId) {
         require(
             bytes(
                 _essenceByIdByProfileId[data.profileId][data.essenceId].tokenURI
@@ -107,7 +143,7 @@ library Actions {
             );
             _essenceByIdByProfileId[data.profileId][data.essenceId]
                 .essenceNFT = essenceNFT;
-            deployedEssenceNFT = essenceNFT;
+            emit DeployEssenceNFT(data.profileId, data.essenceId, essenceNFT);
         }
         // run middleware before collectign essence
         if (essenceMw != address(0)) {
@@ -129,6 +165,13 @@ library Actions {
                 data.postData
             );
         }
+        emit CollectEssence(
+            data.collector,
+            tokenId,
+            data.profileId,
+            data.preData,
+            data.postData
+        );
     }
 
     function registerEssence(
@@ -136,7 +179,7 @@ library Actions {
         mapping(uint256 => DataTypes.ProfileStruct) storage _profileById,
         mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
             storage _essenceByIdByProfileId
-    ) external returns (uint256, bytes memory) {
+    ) external returns (uint256) {
         uint256 id = ++_profileById[data.profileId].essenceCount;
         _essenceByIdByProfileId[data.profileId][id].name = data.name;
         _essenceByIdByProfileId[data.profileId][id].symbol = data.symbol;
@@ -154,7 +197,16 @@ library Actions {
                 data.initData
             );
         }
-        return (id, returnData);
+        emit RegisterEssence(
+            data.profileId,
+            id,
+            data.name,
+            data.symbol,
+            data.essenceTokenURI,
+            data.essenceMw,
+            returnData
+        );
+        return id;
     }
 
     function _deploySubscribeNFT(

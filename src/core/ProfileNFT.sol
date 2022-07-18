@@ -307,10 +307,9 @@ contract ProfileNFT is
         onlyNamespaceOwner
     {
         require(owner != address(0), "ZERO_ADDRESS");
-        address preOwner = _namespaceOwner;
         _namespaceOwner = owner;
 
-        emit SetNamespaceOwner(preOwner, owner);
+        emit SetNamespaceOwner(msg.sender, owner);
     }
 
     /// @inheritdoc IProfileNFT
@@ -429,17 +428,19 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function setSubscribeMw(
+    function setSubscribeData(
         uint256 profileId,
+        string calldata tokenURI,
         address mw,
         bytes calldata prepareData
     ) external override onlyProfileOwnerOrOperator(profileId) {
-        _setSubscribeMw(profileId, mw, prepareData);
+        _setSubscribeData(profileId, tokenURI, mw, prepareData);
     }
 
     /// @inheritdoc IProfileNFT
-    function setSubscribeMwWithSig(
+    function setSubscribeDataWithSig(
         uint256 profileId,
+        string calldata tokenURI,
         address mw,
         bytes calldata prepareData,
         DataTypes.EIP712Signature calldata sig
@@ -449,8 +450,9 @@ contract ProfileNFT is
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
-                        Constants._SET_SUBSCRIBE_MW_TYPEHASH,
+                        Constants._SET_SUBSCRIBE_DATA_TYPEHASH,
                         profileId,
+                        keccak256(bytes(tokenURI)),
                         mw,
                         keccak256(prepareData),
                         nonces[owner]++,
@@ -461,7 +463,7 @@ contract ProfileNFT is
             owner,
             sig
         );
-        _setSubscribeMw(profileId, mw, prepareData);
+        _setSubscribeData(profileId, tokenURI, mw, prepareData);
     }
 
     /// @inheritdoc IProfileNFT
@@ -470,7 +472,7 @@ contract ProfileNFT is
         override
         onlyProfileOwnerOrOperator(profileId)
     {
-        _setPrimaryProfile(profileId);
+        _setPrimaryProfile(msg.sender, profileId);
     }
 
     /// @inheritdoc IProfileNFT
@@ -493,40 +495,7 @@ contract ProfileNFT is
             owner,
             sig
         );
-        _setPrimaryProfile(profileId);
-    }
-
-    /// @inheritdoc IProfileNFT
-    function setSubscribeTokenURI(
-        uint256 profileId,
-        string calldata subscribeTokenURI
-    ) external override onlyProfileOwnerOrOperator(profileId) {
-        _setSubscribeTokenURI(profileId, subscribeTokenURI);
-    }
-
-    /// @inheritdoc IProfileNFT
-    function setSubscribeTokenURIWithSig(
-        uint256 profileId,
-        string calldata subscribeTokenURI,
-        DataTypes.EIP712Signature calldata sig
-    ) external override {
-        address owner = ownerOf(profileId);
-        _requiresExpectedSigner(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        Constants._SET_SUBSCRIBE_TOKENURI_TYPEHASH,
-                        profileId,
-                        keccak256(bytes(subscribeTokenURI)),
-                        nonces[owner]++,
-                        sig.deadline
-                    )
-                )
-            ),
-            owner,
-            sig
-        );
-        _setSubscribeTokenURI(profileId, subscribeTokenURI);
+        _setPrimaryProfile(owner, profileId);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -643,8 +612,7 @@ contract ProfileNFT is
         override
         returns (uint256)
     {
-        bytes32 handleHash = keccak256(bytes(handle));
-        return _profileIdByHandleHash[handleHash];
+        return _profileIdByHandleHash[keccak256(bytes(handle))];
     }
 
     /// @inheritdoc IProfileNFT
@@ -694,12 +662,9 @@ contract ProfileNFT is
             address(_nftDescriptor) != address(0),
             "NFT_DESCRIPTOR_NOT_SET"
         );
-        string memory handle = _profileById[tokenId].handle;
         address subscribeNFT = _subscribeByProfileId[tokenId].subscribeNFT;
         uint256 subscribers;
-        if (subscribeNFT == address(0)) {
-            subscribers = 0;
-        } else {
+        if (subscribeNFT != address(0)) {
             subscribers = CyberNFTBase(subscribeNFT).totalSupply();
         }
 
@@ -707,7 +672,7 @@ contract ProfileNFT is
             IProfileNFTDescriptor(_nftDescriptor).tokenURI(
                 DataTypes.ConstructTokenURIParams({
                     tokenId: tokenId,
-                    handle: handle,
+                    handle: _profileById[tokenId].handle,
                     subscribers: subscribers
                 })
             );
@@ -739,20 +704,18 @@ contract ProfileNFT is
             _requireMinted(params.profileIds[i]);
         }
 
-        uint256[] memory result = Actions.subscribe(
-            DataTypes.SubscribeData(
-                sender,
-                params.profileIds,
-                preDatas,
-                postDatas,
-                SUBSCRIBE_BEACON
-            ),
-            _subscribeByProfileId,
-            _profileById
-        );
-
-        emit Subscribe(sender, params.profileIds, preDatas, postDatas);
-        return result;
+        return
+            Actions.subscribe(
+                DataTypes.SubscribeData(
+                    sender,
+                    params.profileIds,
+                    preDatas,
+                    postDatas,
+                    SUBSCRIBE_BEACON
+                ),
+                _subscribeByProfileId,
+                _profileById
+            );
     }
 
     function _collect(
@@ -762,34 +725,18 @@ contract ProfileNFT is
     ) internal returns (uint256) {
         _requireMinted(params.profileId);
 
-        (uint256 tokenId, address deployedEssenceNFT) = Actions.collect(
-            DataTypes.CollectData(
-                params.collector,
-                params.profileId,
-                params.essenceId,
-                preData,
-                postData,
-                ESSENCE_BEACON
-            ),
-            _essenceByIdByProfileId
-        );
-
-        if (deployedEssenceNFT != address(0)) {
-            emit DeployEssenceNFT(
-                params.profileId,
-                params.essenceId,
-                deployedEssenceNFT
+        return
+            Actions.collect(
+                DataTypes.CollectData(
+                    params.collector,
+                    params.profileId,
+                    params.essenceId,
+                    preData,
+                    postData,
+                    ESSENCE_BEACON
+                ),
+                _essenceByIdByProfileId
             );
-        }
-
-        emit CollectEssence(
-            params.collector,
-            tokenId,
-            params.profileId,
-            preData,
-            postData
-        );
-        return tokenId;
     }
 
     function _createProfile(DataTypes.CreateProfileParams calldata params)
@@ -827,30 +774,20 @@ contract ProfileNFT is
             "ESSENCE_MW_NOT_ALLOWED"
         );
 
-        (uint256 tokenID, bytes memory returnData) = Actions.registerEssence(
-            DataTypes.RegisterEssenceData(
-                params.profileId,
-                params.name,
-                params.symbol,
-                params.essenceTokenURI,
-                initData,
-                params.essenceMw,
-                params.transferable
-            ),
-            _profileById,
-            _essenceByIdByProfileId
-        );
-
-        emit RegisterEssence(
-            params.profileId,
-            tokenID,
-            params.name,
-            params.symbol,
-            params.essenceTokenURI,
-            params.essenceMw,
-            returnData
-        );
-        return tokenID;
+        return
+            Actions.registerEssence(
+                DataTypes.RegisterEssenceData(
+                    params.profileId,
+                    params.name,
+                    params.symbol,
+                    params.essenceTokenURI,
+                    initData,
+                    params.essenceMw,
+                    params.transferable
+                ),
+                _profileById,
+                _essenceByIdByProfileId
+            );
     }
 
     function _setMetadata(uint256 profileId, string calldata metadata)
@@ -875,8 +812,9 @@ contract ProfileNFT is
         emit SetOperatorApproval(profileId, operator, prev, approved);
     }
 
-    function _setSubscribeMw(
+    function _setSubscribeData(
         uint256 profileId,
+        string calldata tokenURI,
         address mw,
         bytes calldata prepareData
     ) internal {
@@ -892,15 +830,8 @@ contract ProfileNFT is
                 prepareData
             );
         }
-        emit SetSubscribeMw(profileId, mw, returnData);
-    }
-
-    function _setSubscribeTokenURI(
-        uint256 profileId,
-        string calldata subscribeTokenURI
-    ) internal {
-        _subscribeByProfileId[profileId].tokenURI = subscribeTokenURI;
-        emit SetSubscribeTokenURI(profileId, subscribeTokenURI);
+        _subscribeByProfileId[profileId].tokenURI = tokenURI;
+        emit SetSubscribeData(profileId, tokenURI, mw, returnData);
     }
 
     function _setAvatar(uint256 profileId, string calldata avatar) internal {
@@ -912,9 +843,8 @@ contract ProfileNFT is
         emit SetAvatar(profileId, avatar);
     }
 
-    function _setPrimaryProfile(uint256 profileId) internal {
+    function _setPrimaryProfile(address owner, uint256 profileId) internal {
         _requireMinted(profileId);
-        address owner = ownerOf(profileId);
 
         _addressToPrimaryProfile[owner] = profileId;
         emit SetPrimaryProfile(owner, profileId);

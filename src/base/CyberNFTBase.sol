@@ -13,8 +13,8 @@ import { EIP712 } from "./EIP712.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 
 abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
-    uint256 internal _currentIndex = 0;
-    uint256 internal _burnCount = 0;
+    uint256 internal _currentIndex;
+    uint256 internal _burnCount;
     mapping(address => uint256) public nonces;
 
     constructor() {
