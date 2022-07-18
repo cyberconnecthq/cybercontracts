@@ -32,6 +32,7 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
         vm.label(address(subMw), "SubscribeMiddleware");
         string memory handle = "bob";
         address to = bob;
+        string memory uri = "uri";
 
         bobProfileId = TestLibFixture.registerProfile(
             vm,
@@ -44,7 +45,12 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
 
         engine.allowSubscribeMw(address(subMw), true);
         vm.prank(bob);
-        link3Profile.setSubscribeMw(bobProfileId, address(subMw), new bytes(0));
+        link3Profile.setSubscribeData(
+            bobProfileId,
+            uri,
+            address(subMw),
+            new bytes(0)
+        );
     }
 
     function testSubscribeOnlyOnce() public {

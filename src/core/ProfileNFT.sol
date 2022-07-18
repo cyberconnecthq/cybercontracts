@@ -452,6 +452,7 @@ contract ProfileNFT is
                     abi.encode(
                         Constants._SET_SUBSCRIBE_DATA_TYPEHASH,
                         profileId,
+                        keccak256(bytes(tokenURI)),
                         mw,
                         keccak256(prepareData),
                         nonces[owner]++,
