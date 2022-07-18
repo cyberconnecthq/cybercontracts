@@ -97,7 +97,8 @@ contract IntegrationEssenceTest is
                 bob,
                 "bob",
                 "bob'avatar",
-                "bob's metadata"
+                "bob's metadata",
+                address(0)
             ),
             dataBob,
             dataBob
@@ -142,7 +143,8 @@ contract IntegrationEssenceTest is
                 carly,
                 "realCarly",
                 "carly'avatar",
-                "carly's metadata"
+                "carly's metadata",
+                address(0)
             ),
             dataCarly,
             dataCarly

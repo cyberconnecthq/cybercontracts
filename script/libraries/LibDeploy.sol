@@ -647,7 +647,8 @@ library LibDeploy {
                 params.mintToEOA,
                 TEST_HANDLE,
                 "bafkreibcwcqcdf2pgwmco3pfzdpnfj3lijexzlzrbfv53sogz5uuydmvvu",
-                "metadata"
+                "metadata",
+                address(0)
             ),
             abi.encode(v, r, s, deadline),
             new bytes(0)
