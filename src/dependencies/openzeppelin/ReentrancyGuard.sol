@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// OpenZeppelin Contracts v4.4.1 (security/ReentrancyGuard.sol)
+// OpenZeppelin Contracts v4.7.0 (security/ReentrancyGuard.sol)
 
 pragma solidity ^0.8.0;
 
