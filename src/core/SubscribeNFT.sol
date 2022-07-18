@@ -72,6 +72,21 @@ contract SubscribeNFT is
     }
 
     /*//////////////////////////////////////////////////////////////
+                                 PUBLIC
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Disallows the transfer of the subscribe nft.
+     */
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) public pure override {
+        revert("TRANSFER_NOT_ALLOWED");
+    }
+
+    /*//////////////////////////////////////////////////////////////
                             PUBLIC VIEW
     //////////////////////////////////////////////////////////////*/
 
@@ -90,16 +105,5 @@ contract SubscribeNFT is
     {
         _requireMinted(tokenId);
         return IProfileNFT(PROFILE).getSubscribeNFTTokenURI(_profileId);
-    }
-
-    /**
-     * @notice Disallows the transfer of the subscribe nft.
-     */
-    function transferFrom(
-        address,
-        address,
-        uint256
-    ) public pure override {
-        revert("TRANSFER_NOT_ALLOWED");
     }
 }

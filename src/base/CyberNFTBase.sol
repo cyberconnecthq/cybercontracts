@@ -12,14 +12,30 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 import { EIP712 } from "./EIP712.sol";
 import { Initializable } from "../upgradeability/Initializable.sol";
 
+/**
+ * @title Cyber NFT Base
+ * @author CyberConnect
+ * @notice This contract is the base for all NFT contracts.
+ */
 abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
+    /*//////////////////////////////////////////////////////////////
+                                STATES
+    //////////////////////////////////////////////////////////////*/
     uint256 internal _currentIndex;
     uint256 internal _burnCount;
     mapping(address => uint256) public nonces;
 
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
     constructor() {
         _disableInitializers();
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                 EXTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc ICyberNFTBase
     function permit(
@@ -49,6 +65,10 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
         emit Approval(owner, spender, tokenId);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                         EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
     /// @inheritdoc ICyberNFTBase
     function totalSupply() external view virtual override returns (uint256) {
         return _currentIndex - _burnCount;
@@ -64,6 +84,10 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
         return _burnCount;
     }
 
+    /*//////////////////////////////////////////////////////////////
+                                 PUBLIC
+    //////////////////////////////////////////////////////////////*/
+
     /// @inheritdoc ICyberNFTBase
     function burn(uint256 tokenId) public virtual override {
         address owner = ownerOf(tokenId);
@@ -76,6 +100,10 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
         super._burn(tokenId);
         _burnCount++;
     }
+
+    /*//////////////////////////////////////////////////////////////
+                              INTERNAL
+    //////////////////////////////////////////////////////////////*/
 
     function _initialize(string calldata _name, string calldata _symbol)
         internal
