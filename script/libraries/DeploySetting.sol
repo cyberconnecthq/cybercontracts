@@ -66,6 +66,28 @@ contract DeploySetting {
                 0x1890a1625d837A809b0e77EdE1a999a161df085d
             );
             deployParams.deployerContract = address(0);
+        } else if (block.chainid == 4) {
+            deployParams.link3Owner = address(
+                0x927f355117721e0E8A7b5eA20002b65B8a551890
+            );
+            deployParams.link3Signer = address(
+                0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
+            );
+            deployParams.link3Treasury = address(
+                0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
+            );
+            deployParams.engineAuthOwner = address(
+                0x927f355117721e0E8A7b5eA20002b65B8a551890
+            );
+            deployParams.engineGov = address(
+                0x927f355117721e0E8A7b5eA20002b65B8a551890
+            );
+            deployParams.engineTreasury = address(
+                0x1890a1625d837A809b0e77EdE1a999a161df085d
+            );
+            deployParams.deployerContract = address(
+                0xe19061D4Dd38ac3B67eeC28E90bdFB68065DbF7c
+            );
         }
     }
 }

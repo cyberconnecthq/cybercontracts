@@ -151,7 +151,7 @@
       const nodeURL =
         "https://rinkeby.infura.io/v3/a606847a1dd5461c9081be56bd0ffe71";
       const provider = new ethers.providers.JsonRpcProvider(nodeURL);
-      const contractAddress = "0x98018e7Ed644c7C3aFd958F5B9040943Fed4F36B";
+      const contractAddress = "0xb9FDA6C1C56dC7AC3aE787a46fD3434DA991626D";
       const abi = [
         {
           inputs: [

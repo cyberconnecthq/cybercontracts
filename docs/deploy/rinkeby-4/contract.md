@@ -1,16 +1,14 @@
-|Contract|Address|
-|-|-|
-|RolesAuthority|0xbf236fddfeacbe3a7469c219d7c3b4cba694104f|
-|EngineImpl|0xea2a34c35b117b0a4f85858ac5142a0f0a2b46e5|
-|EngineProxy|0xcfa6a18acfd036019e13ed258f39263f7e3e5899|
-|Profile Factory|0x098d07daf0d1ef2e32764e0faa5949a2cc927834|
-|Essence Factory|0xfa46695cff9bd4d93df3be77b874c6db7a37bace|
-|Subscribe Factory|0x928489137c71ec54046b63cb860e52687d8a0cd3|
-|Link3 Profile|0x98018e7ed644c7c3afd958f5b9040943fed4f36b|
-|Link3 Authority|0x5f5c163bb02c3a79b6cbd8c7e265d0580c073a84|
-|CyberConnect Treasury|0xda44159f9dd037de2f39bb3406583749ca3c1a74|
-|Link3 Profile MW (PermissionedFeeCreationMw)|0xd3b6cc83a28fb6afb9ea9d2de84106347fbbffee|
-|CyberBoxNFT (Impl)|0x0d21711e830bc56ee4a2d6c7b39c8472b2627f8f|
-|CyberBoxNFT (Proxy)|0x0dd2b67d983daa49af11a0a1b7b5b9a99ef859df|
-|Link3 Descriptor (Impl)|0xae5477266e61526faf5942c8bf060fe1ddf255a9|
-|Link3 Descriptor (Proxy)|0x58bcc91fb5868af60b1e89ef73b4625955e1f78a|
+| Contract                                     | Address                                    |
+| -------------------------------------------- | ------------------------------------------ |
+| Create2Deployer                              | 0xe19061d4dd38ac3b67eec28e90bdfb68065dbf7c |
+| RolesAuthority                               | 0xfcb05c5e293c580b050d61e6b4879c3b2b0b5d5a |
+| EngineImpl                                   | 0xdeb5e5d04d3038b0915a9c4c58c69b9fa3a1f96f |
+| EngineProxy                                  | 0xe9052c70adc2632831bd55f243381c76f4f74a9a |
+| Profile Factory                              | 0x618cde2208b629fc06fe2e6070db0fa0d9dc6475 |
+| Essence Factory                              | 0x52ee568d2d2133771f16bcd9d8412607f04b90b1 |
+| Subscribe Factory                            | 0xe8a0439a4aada70df22f9c6597081c74c2d90dc1 |
+| Link3 Profile                                | 0xb9fda6c1c56dc7ac3ae787a46fd3434da991626d |
+| CyberConnect Treasury                        | 0x465496d2d13629e30d33c0ff5c1d07dfe4f3cbe7 |
+| Link3 Profile MW (PermissionedFeeCreationMw) | 0x1f0a079e95975e850962f325f337198034461eab |
+| Link3 Descriptor (Impl)                      | 0x1afa11e2f1882dc08422ee16449c6b80055d442f |
+| Link3 Descriptor (Proxy)                     | 0x9f41aa9542a08da825596df910d521daebea3c5d |
