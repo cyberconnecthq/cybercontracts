@@ -38,7 +38,8 @@ contract PermissionedFeeCreationMw is
         Tier2,
         Tier3,
         Tier4,
-        Tier5
+        Tier5,
+        Tier6
     }
 
     mapping(address => MiddlewareData) internal _mwDataByNamespace;
@@ -118,12 +119,14 @@ contract PermissionedFeeCreationMw is
             uint256 tier2Fee,
             uint256 tier3Fee,
             uint256 tier4Fee,
-            uint256 tier5Fee
+            uint256 tier5Fee,
+            uint256 tier6Fee
         ) = abi.decode(
                 data,
                 (
                     address,
                     address,
+                    uint256,
                     uint256,
                     uint256,
                     uint256,
@@ -144,6 +147,7 @@ contract PermissionedFeeCreationMw is
         _setFeeByTier(namespace, Tier.Tier3, tier3Fee);
         _setFeeByTier(namespace, Tier.Tier4, tier4Fee);
         _setFeeByTier(namespace, Tier.Tier5, tier5Fee);
+        _setFeeByTier(namespace, Tier.Tier6, tier6Fee);
 
         _mwDataByNamespace[namespace].signer = signer;
         _mwDataByNamespace[namespace].recipient = recipient;
@@ -224,9 +228,9 @@ contract PermissionedFeeCreationMw is
     ) internal view {
         bytes memory byteHandle = bytes(handle);
         MiddlewareData storage mwData = _mwDataByNamespace[namespace];
-        uint256 fee = mwData.feeMapping[Tier.Tier5];
+        uint256 fee = mwData.feeMapping[Tier.Tier6];
 
-        if (byteHandle.length < 6) {
+        if (byteHandle.length < 7) {
             fee = mwData.feeMapping[Tier(byteHandle.length - 1)];
         }
         require(amount >= fee, "INSUFFICIENT_FEE");

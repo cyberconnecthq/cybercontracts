@@ -27,6 +27,7 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
     uint256 constant tier3Fee = 400 ether;
     uint256 constant tier4Fee = 500 ether;
     uint256 constant tier5Fee = 600 ether;
+    uint256 constant tier6Fee = 700 ether;
 
     function setUp() public {
         validDeadline = block.timestamp + 60 * 60;
@@ -143,6 +144,16 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
         );
     }
 
+    function testCreateProfileFeeTier6() public {
+        _createProfile(
+            "abcdefg",
+            LibDeploy._INITIAL_FEE_TIER6,
+            link3SignerPk,
+            validDeadline,
+            ""
+        );
+    }
+
     function testCannotCreateProfileFeeTier0() public {
         _createProfile(
             "a",
@@ -203,6 +214,16 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
         );
     }
 
+    function testCannotCreateProfileFeeTier6() public {
+        _createProfile(
+            "abcdefg",
+            LibDeploy._INITIAL_FEE_TIER6 - 1,
+            link3SignerPk,
+            validDeadline,
+            "INSUFFICIENT_FEE"
+        );
+    }
+
     function testCannotCreateProfileInvalidSigner() public {
         uint256 invalidPk = 123;
         _createProfile(
@@ -255,7 +276,8 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
                 tier2Fee,
                 tier3Fee,
                 tier4Fee,
-                tier5Fee
+                tier5Fee,
+                tier6Fee
             )
         );
     }
@@ -273,7 +295,8 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
                 tier2Fee,
                 tier3Fee,
                 tier4Fee,
-                tier5Fee
+                tier5Fee,
+                tier6Fee
             )
         );
     }
@@ -326,6 +349,13 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
             ),
             LibDeploy._INITIAL_FEE_TIER5
         );
+        assertEq(
+            profileMw.getFeeByTier(
+                address(link3Profile),
+                PermissionedFeeCreationMw.Tier.Tier6
+            ),
+            LibDeploy._INITIAL_FEE_TIER6
+        );
 
         vm.prank(addrs.engineProxyAddress);
         profileMw.setProfileMwData(
@@ -338,7 +368,8 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
                 tier2Fee,
                 tier3Fee,
                 tier4Fee,
-                tier5Fee
+                tier5Fee,
+                tier6Fee
             )
         );
 
@@ -385,6 +416,13 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
                 PermissionedFeeCreationMw.Tier.Tier5
             ),
             tier5Fee
+        );
+        assertEq(
+            profileMw.getFeeByTier(
+                address(link3Profile),
+                PermissionedFeeCreationMw.Tier.Tier6
+            ),
+            tier6Fee
         );
     }
 
