@@ -283,6 +283,7 @@ contract PermissionedFeeCreationMw is
                         keccak256(bytes(params.handle)),
                         keccak256(bytes(params.avatar)),
                         keccak256(bytes(params.metadata)),
+                        params.operator,
                         mwData.nonces[params.to]++,
                         deadline
                     )

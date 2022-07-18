@@ -32,6 +32,7 @@ library TestLibFixture {
     ) internal returns (uint256 profileId) {
         uint256 deadline = block.timestamp + 60 * 60;
         uint256 nonce = mw.getNonce(address(profile), mintToEOA);
+        address operator = address(0);
 
         bytes32 digest = TestLib712.hashTypedDataV4(
             address(mw),
@@ -42,6 +43,7 @@ library TestLibFixture {
                     keccak256(bytes(handle)),
                     keccak256(bytes(avatar)),
                     keccak256(bytes(metadata)),
+                    operator,
                     nonce,
                     deadline
                 )
