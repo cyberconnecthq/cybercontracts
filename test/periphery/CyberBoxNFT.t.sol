@@ -27,6 +27,8 @@ contract CyberBoxNFTTest is Test, ICyberBoxEvents {
             "TestBox",
             "TB"
         );
+        vm.expectEmit(true, false, false, true);
+        emit Initialize(owner, "TestBox", "TB");
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), data);
         token = CyberBoxNFT(address(proxy));
     }

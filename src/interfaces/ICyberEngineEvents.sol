@@ -12,6 +12,7 @@ interface ICyberEngineEvents {
      * @param rolesAuthority The address of the role authority.
      */
     event Initialize(address indexed owner, address indexed rolesAuthority);
+
     /**
      * @notice Emitted when a profile middleware has been allowed.
      *

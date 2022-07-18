@@ -52,11 +52,11 @@ contract CyberBoxNFT is
         string calldata name,
         string calldata symbol
     ) external initializer {
+        _signer = owner;
+        _pause();
         CyberNFTBase._initialize(name, symbol);
         Owned.__Owned_Init(owner);
-        _signer = owner;
-        // start with paused
-        _pause();
+        emit Initialize(owner, name, symbol);
     }
 
     /**
