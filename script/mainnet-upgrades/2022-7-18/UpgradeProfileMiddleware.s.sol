@@ -10,9 +10,7 @@ import { PermissionedFeeCreationMw } from "../../../src/middlewares/profile/Perm
 import { DeploySetting } from "../.././libraries/DeploySetting.sol";
 import { Create2Deployer } from "../../libraries/Create2Deployer.sol";
 
-contract DeployScript is Script, DeploySetting {
-    Create2Deployer dc;
-
+contract UpgradeScript is Script, DeploySetting {
     function run() external {
         _setDeployParams();
 
@@ -25,6 +23,11 @@ contract DeployScript is Script, DeploySetting {
     }
 
     function deploy() internal {
+        Create2Deployer dc = Create2Deployer(deployParams.deployerContract);
+        require(
+            deployParams.deployerContract ==
+                0xEFb8369Fb33bA67832B7120C94698e5372eE61C3
+        );
         bytes32 SALT = keccak256(bytes("CyberConnect"));
         address engineProxy = address(
             0xE8805326f9DA84e70c680429eD46B924b3F158F2
@@ -65,15 +68,16 @@ contract DeployScript is Script, DeploySetting {
 
         require(
             keccak256(bytes(ProfileNFT(link3Profile).name())) ==
-                keccak256(bytes("Link3 Profile"))
+                keccak256(bytes("Link3"))
         );
         require(
             PermissionedFeeCreationMw(profileMw).getSigner((link3Profile)) ==
-                address(0x2A2EA826102c067ECE82Bc6E2B7cf38D7EbB1B82)
+                address(0x2A2EA826102c067ECE82Bc6E2B7cf38D7EbB1B82),
+            "WRONG_SIGNER"
         );
         require(
             PermissionedFeeCreationMw(profileMw).getRecipient((link3Profile)) ==
-                address(0xF17CacbD8ca7e4Ec46F98C0eB898C0F0DEA07802)
+                address(0xe75Fe33b0fB1441a11C5c1296e5Ca83B72cfE00d)
         );
         require(CyberEngine(engineProxy).isProfileMwAllowed(profileMw));
     }

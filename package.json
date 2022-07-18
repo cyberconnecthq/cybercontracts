@@ -15,6 +15,7 @@
     "deploy:rinkeby": "source .env.rinkeby && forge script script/Deploy.s.sol:DeployScript --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy:goerli": "source .env.goerli && forge script script/Deploy.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy:mainnet": "source .env.mainnet && forge script script/Deploy.s.sol:DeployScript --rpc-url $MAINNET_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv",
+    "deploy_dryrun:mainnet": "source .env.mainnet && forge script script/Deploy.s.sol:DeployScript --rpc-url $MAINNET_RPC_URL --private-key $PRIVATE_KEY -vvv",
     "pre_deploy": "node misc/pre_deploy.js",
     "post_deploy": "ts-node misc/post_deploy.ts",
     "upload_animation:anvil": "ts-node misc/set_animation_url.ts anvil-31337",
