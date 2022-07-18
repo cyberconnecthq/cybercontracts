@@ -67,7 +67,8 @@ library LibDeploy {
     uint256 internal constant _INITIAL_FEE_TIER2 = 1 ether;
     uint256 internal constant _INITIAL_FEE_TIER3 = 0.5 ether;
     uint256 internal constant _INITIAL_FEE_TIER4 = 0.1 ether;
-    uint256 internal constant _INITIAL_FEE_TIER5 = 0.01 ether;
+    uint256 internal constant _INITIAL_FEE_TIER5 = 0.05 ether;
+    uint256 internal constant _INITIAL_FEE_TIER6 = 0.01 ether;
 
     string internal constant OUTPUT_FILE = "docs/deploy/";
 
@@ -512,7 +513,8 @@ library LibDeploy {
                 _INITIAL_FEE_TIER2,
                 _INITIAL_FEE_TIER3,
                 _INITIAL_FEE_TIER4,
-                _INITIAL_FEE_TIER5
+                _INITIAL_FEE_TIER5,
+                _INITIAL_FEE_TIER6
             )
         );
     }
@@ -604,7 +606,8 @@ library LibDeploy {
                 _INITIAL_FEE_TIER2,
                 _INITIAL_FEE_TIER3,
                 _INITIAL_FEE_TIER4,
-                _INITIAL_FEE_TIER5
+                _INITIAL_FEE_TIER5,
+                _INITIAL_FEE_TIER6
             )
         );
         require(
@@ -642,7 +645,7 @@ library LibDeploy {
         require(
             params.mw.getNonce(address(params.profile), params.mintToEOA) == 0
         );
-        params.profile.createProfile{ value: _INITIAL_FEE_TIER5 }(
+        params.profile.createProfile{ value: _INITIAL_FEE_TIER6 }(
             DataTypes.CreateProfileParams(
                 params.mintToEOA,
                 TEST_HANDLE,
@@ -678,7 +681,8 @@ library LibDeploy {
                 _INITIAL_FEE_TIER2,
                 _INITIAL_FEE_TIER3,
                 _INITIAL_FEE_TIER4,
-                _INITIAL_FEE_TIER5
+                _INITIAL_FEE_TIER5,
+                _INITIAL_FEE_TIER6
             )
         );
     }
