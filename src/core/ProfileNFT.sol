@@ -433,7 +433,7 @@ contract ProfileNFT is
         uint256 profileId,
         address mw,
         bytes calldata prepareData
-    ) external override onlyProfileOwner(profileId) {
+    ) external override onlyProfileOwnerOrOperator(profileId) {
         _setSubscribeMw(profileId, mw, prepareData);
     }
 
@@ -468,7 +468,7 @@ contract ProfileNFT is
     function setPrimaryProfile(uint256 profileId)
         external
         override
-        onlyProfileOwner(profileId)
+        onlyProfileOwnerOrOperator(profileId)
     {
         _setPrimaryProfile(profileId);
     }

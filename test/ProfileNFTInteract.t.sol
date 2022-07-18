@@ -531,8 +531,12 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         assertEq(profile.nonces(bob), nonce);
     }
 
-    function testCannotSetSubscribeMwIfNotOwner() public {
-        vm.expectRevert("ONLY_PROFILE_OWNER");
+    function testCannotSetSubscribeMwIfNotOwnerOrOperator() public {
+        address maliciousUser = address(0xD);
+        assertEq(profile.getOperatorApproval(profileId, maliciousUser), false);
+
+        vm.prank(maliciousUser);
+        vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
         profile.setSubscribeMw(profileId, subscribeMw, new bytes(0));
     }
 
@@ -577,6 +581,37 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.expectEmit(true, false, false, true);
         emit SetSubscribeMw(profileId, subscribeMw, returnData);
         vm.prank(bob);
+        profile.setSubscribeMw(profileId, subscribeMw, data);
+
+        assertEq(profile.getSubscribeMw(profileId), subscribeMw);
+    }
+
+    function testSetSubscribeMwAsOperator() public {
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isSubscribeMwAllowed.selector,
+                subscribeMw
+            ),
+            abi.encode(true)
+        );
+        bytes memory data = new bytes(0);
+        bytes memory returnData = new bytes(111);
+        vm.mockCall(
+            subscribeMw,
+            abi.encodeWithSelector(
+                ISubscribeMiddleware.setSubscribeMwData.selector,
+                profileId,
+                data
+            ),
+            abi.encode(returnData)
+        );
+
+        vm.prank(bob);
+        address operator = address(0xDEEAAAD);
+        profile.setOperatorApproval(profileId, operator, true);
+
+        vm.prank(operator);
         profile.setSubscribeMw(profileId, subscribeMw, data);
 
         assertEq(profile.getSubscribeMw(profileId), subscribeMw);
@@ -712,7 +747,21 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testCannotSetPrimaryAsNonOwner() public {
-        vm.expectRevert("ONLY_PROFILE_OWNER");
+        address maliciousUser = address(0xD);
+        assertEq(profile.getOperatorApproval(profileId, maliciousUser), false);
+
+        vm.prank(maliciousUser);
+        vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
+        profile.setPrimaryProfile(profileId);
+    }
+
+    function testSetPrimaryAsOperator() public {
+        vm.prank(bob);
+        address operator = address(0xDEEAAAD);
+        profile.setOperatorApproval(profileId, operator, true);
+        assertEq(profile.getOperatorApproval(profileId, operator), true);
+
+        vm.prank(operator);
         profile.setPrimaryProfile(profileId);
     }
 
