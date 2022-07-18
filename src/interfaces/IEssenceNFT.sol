@@ -2,7 +2,9 @@
 
 pragma solidity 0.8.14;
 
-interface IEssenceNFT {
+import { IEssenceNFTEvents } from "./IEssenceNFTEvents.sol";
+
+interface IEssenceNFT is IEssenceNFTEvents {
     /**
      * @notice Mints the Essence NFT.
      *

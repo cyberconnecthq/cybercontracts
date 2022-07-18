@@ -14,24 +14,11 @@ contract RolesAuthority is Auth, Authority {
                                  EVENTS
     //////////////////////////////////////////////////////////////*/
 
-    event UserRoleUpdated(
-        address indexed user,
-        uint8 indexed role,
-        bool enabled
-    );
+    event UserRoleUpdated(address indexed user, uint8 indexed role, bool enabled);
 
-    event PublicCapabilityUpdated(
-        address indexed target,
-        bytes4 indexed functionSig,
-        bool enabled
-    );
+    event PublicCapabilityUpdated(address indexed target, bytes4 indexed functionSig, bool enabled);
 
-    event RoleCapabilityUpdated(
-        uint8 indexed role,
-        address indexed target,
-        bytes4 indexed functionSig,
-        bool enabled
-    );
+    event RoleCapabilityUpdated(uint8 indexed role, address indexed target, bytes4 indexed functionSig, bool enabled);
 
     /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
@@ -49,15 +36,9 @@ contract RolesAuthority is Auth, Authority {
 
     mapping(address => mapping(bytes4 => bool)) public isCapabilityPublic;
 
-    mapping(address => mapping(bytes4 => bytes32))
-        public getRolesWithCapability;
+    mapping(address => mapping(bytes4 => bytes32)) public getRolesWithCapability;
 
-    function doesUserHaveRole(address user, uint8 role)
-        public
-        view
-        virtual
-        returns (bool)
-    {
+    function doesUserHaveRole(address user, uint8 role) public view virtual returns (bool) {
         return (uint256(getUserRoles[user]) >> role) & 1 != 0;
     }
 
@@ -66,10 +47,7 @@ contract RolesAuthority is Auth, Authority {
         address target,
         bytes4 functionSig
     ) public view virtual returns (bool) {
-        return
-            (uint256(getRolesWithCapability[target][functionSig]) >> role) &
-                1 !=
-            0;
+        return (uint256(getRolesWithCapability[target][functionSig]) >> role) & 1 != 0;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -83,8 +61,7 @@ contract RolesAuthority is Auth, Authority {
     ) public view virtual override returns (bool) {
         return
             isCapabilityPublic[target][functionSig] ||
-            bytes32(0) !=
-            getUserRoles[user] & getRolesWithCapability[target][functionSig];
+            bytes32(0) != getUserRoles[user] & getRolesWithCapability[target][functionSig];
     }
 
     /*//////////////////////////////////////////////////////////////

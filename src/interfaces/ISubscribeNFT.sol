@@ -2,7 +2,9 @@
 
 pragma solidity 0.8.14;
 
-interface ISubscribeNFT {
+import { ISubscribeNFTEvents } from "./ISubscribeNFTEvents.sol";
+
+interface ISubscribeNFT is ISubscribeNFTEvents {
     /**
      * @notice Mints the Subscribe NFT.
      *

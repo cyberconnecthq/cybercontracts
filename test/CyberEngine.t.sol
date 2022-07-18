@@ -43,7 +43,10 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
             address(0),
             rolesAuthority
         );
+        vm.expectEmit(true, true, false, true);
+        emit Initialize(address(0), address(rolesAuthority));
         ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
+
         engine = CyberEngine(address(engineProxy));
 
         RolesAuthority(rolesAuthority).setRoleCapability(

@@ -4,11 +4,13 @@ pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { Base64 } from "../src/dependencies/openzeppelin/Base64.sol";
+import { Base64 } from "openzeppelin-contracts/contracts/utils/Base64.sol";
 
 import { LibString } from "../src/libraries/LibString.sol";
 import { Constants } from "../src/libraries/Constants.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
+
+import { IProfileNFTEvents } from "../src/interfaces/IProfileNFTEvents.sol";
 
 import { SubscribeNFT } from "../src/core/SubscribeNFT.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
@@ -17,7 +19,7 @@ import { MockProfile } from "./utils/MockProfile.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 
-contract ProfileNFTTest is Test, TestDeployer {
+contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
     MockProfile internal token;
 
     uint256 constant alicePk = 100;
@@ -66,7 +68,10 @@ contract ProfileNFTTest is Test, TestDeployer {
             address(0xdead),
             address(0xdead)
         );
+        vm.expectEmit(true, false, false, true);
+        emit Initialize(gov, "TestProfile", "TP");
         ERC1967Proxy profileProxy = new ERC1967Proxy(address(tokenImpl), data);
+
         token = MockProfile(address(profileProxy));
         validDeadline = block.timestamp + 60 * 60;
     }

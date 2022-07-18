@@ -54,6 +54,7 @@ contract EssenceNFT is
         _essenceId = essenceId;
         _transferable = transferable;
         CyberNFTBase._initialize(name, symbol);
+        emit Initialize(profileId, essenceId, name, symbol, transferable);
     }
 
     /// @inheritdoc IEssenceNFT

@@ -7,7 +7,7 @@ import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC
 import { IProfileNFTEvents } from "../../src/interfaces/IProfileNFTEvents.sol";
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { TestLibFixture } from "../utils/TestLibFixture.sol";
-import { Base64 } from "../../src/dependencies/openzeppelin/Base64.sol";
+import { Base64 } from "openzeppelin-contracts/contracts/utils/Base64.sol";
 import { LibString } from "../../src/libraries/LibString.sol";
 import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";

@@ -6,6 +6,13 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 
 interface ICyberEngineEvents {
     /**
+     * @notice Emiited when the engine is initialized
+     *
+     * @param owner The address of the engine owner.
+     * @param rolesAuthority The address of the role authority.
+     */
+    event Initialize(address indexed owner, address indexed rolesAuthority);
+    /**
      * @notice Emitted when a profile middleware has been allowed.
      *
      * @param mw The middleware address.

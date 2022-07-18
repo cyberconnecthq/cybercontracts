@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import { Base64 } from "../dependencies/openzeppelin/Base64.sol";
+import { Base64 } from "openzeppelin-contracts/contracts/utils/Base64.sol";
 import { Owned } from "../dependencies/solmate/Owned.sol";
 
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";

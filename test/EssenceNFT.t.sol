@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import { BeaconProxy } from "openzeppelin-contracts/contracts/proxy/beacon/BeaconProxy.sol";
 
 import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
+import { IEssenceNFTEvents } from "../src/interfaces/IEssenceNFTEvents.sol";
 
 import { Constants } from "../src/libraries/Constants.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
@@ -16,7 +17,7 @@ import { EssenceNFT } from "../src/core/EssenceNFT.sol";
 import { TestLib712 } from "./utils/TestLib712.sol";
 import { TestDeployer } from "./utils/TestDeployer.sol";
 
-contract EssenceNFTTest is Test, TestDeployer {
+contract EssenceNFTTest is Test, TestDeployer, IEssenceNFTEvents {
     event Approval(
         address indexed owner,
         address indexed spender,
@@ -55,6 +56,8 @@ contract EssenceNFTTest is Test, TestDeployer {
             symbol,
             true
         );
+        vm.expectEmit(true, true, false, true);
+        emit Initialize(profileId, essenceId, name, symbol, true);
         proxy = new BeaconProxy(address(beacon), functionData);
         essence = EssenceNFT(address(proxy));
 
