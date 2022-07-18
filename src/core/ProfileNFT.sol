@@ -643,8 +643,7 @@ contract ProfileNFT is
         override
         returns (uint256)
     {
-        bytes32 handleHash = keccak256(bytes(handle));
-        return _profileIdByHandleHash[handleHash];
+        return _profileIdByHandleHash[keccak256(bytes(handle))];
     }
 
     /// @inheritdoc IProfileNFT
@@ -694,12 +693,9 @@ contract ProfileNFT is
             address(_nftDescriptor) != address(0),
             "NFT_DESCRIPTOR_NOT_SET"
         );
-        string memory handle = _profileById[tokenId].handle;
         address subscribeNFT = _subscribeByProfileId[tokenId].subscribeNFT;
         uint256 subscribers;
-        if (subscribeNFT == address(0)) {
-            subscribers = 0;
-        } else {
+        if (subscribeNFT != address(0)) {
             subscribers = CyberNFTBase(subscribeNFT).totalSupply();
         }
 
@@ -707,7 +703,7 @@ contract ProfileNFT is
             IProfileNFTDescriptor(_nftDescriptor).tokenURI(
                 DataTypes.ConstructTokenURIParams({
                     tokenId: tokenId,
-                    handle: handle,
+                    handle: _profileById[tokenId].handle,
                     subscribers: subscribers
                 })
             );
