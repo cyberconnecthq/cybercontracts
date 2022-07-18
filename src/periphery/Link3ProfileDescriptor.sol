@@ -154,7 +154,7 @@ contract Link3ProfileDescriptor is
             handleBackgroundWidth = 188;
         } else {
             handleSVGElement = _getHandleSVGtext(handle, 0);
-            handleBackgroundWidth = uint16(bytes(handle).length - 1) * 13 + 30;
+            handleBackgroundWidth = uint16(bytes(handle).length - 1) * 12 + 30;
         }
 
         string memory fontStyleSVGElement = _getFontStyleSVGElement();
@@ -230,11 +230,11 @@ contract Link3ProfileDescriptor is
             string(
                 abi.encodePacked(
                     "<g style='transform:translate(19.626%, 83.8%)'>",
-                    "<text dominant-baseline='hanging' x='0' y='0' fill='#fff' font-size='22px' font-weight='700' font-family='\"Outfit\", sans-serif'>link3.to/</text>",
+                    "<text dominant-baseline='hanging' x='0' y='0' fill='#fff' font-size='22px' font-weight='400' font-family='\"Outfit\", sans-serif'>link3.to/</text>",
                     "<rect width='",
                     LibString.toString(backgroundWidth),
-                    "px' height='24px' rx='4px' ry='4px' fill='#fff' transform='skewX(-25)' x='95' y='-3'/>",
-                    "<text dominant-baseline='hanging' text-anchor='start' x='100' y='-1' font-weight='400' font-family='\"Outfit\", sans-serif' font-size='22px' fill='#000'>",
+                    "px' height='24px' rx='4px' ry='4px' fill='#fff' transform='skewX(-25)' x='90' y='-3'/>",
+                    "<text dominant-baseline='hanging' text-anchor='start' x='94' y='0' font-weight='400' font-family='\"Outfit\", sans-serif' font-size='22px' fill='#000'>",
                     handle,
                     "</text></g>"
                 )
