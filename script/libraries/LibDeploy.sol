@@ -266,7 +266,7 @@ library LibDeploy {
         // 1. Deploy engine + link3 profile
         addrs = _deploy(vm, dc, params);
         // 2. Register a test profile
-        if (block.chainid != 1) {
+        if (block.chainid == 31337) {
             LibDeploy.registerLink3TestProfile(
                 vm,
                 RegisterLink3TestProfileParams(
