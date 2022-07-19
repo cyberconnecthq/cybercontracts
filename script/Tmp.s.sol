@@ -19,5 +19,9 @@ contract TempScript is Script {
         console.log(
             CyberEngine(engineProxy).getProfileMwByNamespace((link3Profile))
         );
+        console.log(ProfileNFT(link3Profile).getAvatar(4));
+        console.log(ProfileNFT(link3Profile).getMetadata(4));
+        console.log(ProfileNFT(link3Profile).tokenURI(4));
+        console.log(ProfileNFT(link3Profile).getHandleByProfileId(4));
     }
 }
