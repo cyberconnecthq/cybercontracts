@@ -69,7 +69,7 @@ contract DeploySetting {
             //goerli
             if (block.chainid == 5) {
                 deployParams.deployerContract = address(
-                    0x701A5baBA0701e3B1Dd3107dF47dDC68eaC019bf
+                    0xf08cFD541da2eA42ab0F9603aE1c2293CDF39e69
                 );
             } else if (block.chainid == 4) {
                 deployParams.deployerContract = address(0);
