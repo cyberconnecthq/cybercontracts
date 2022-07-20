@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.14;
 
+import "forge-std/console.sol";
 import { ERC721 } from "../../dependencies/solmate/ERC721.sol";
 
 import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
@@ -38,21 +39,19 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware {
         uint256,
         address collector,
         address,
-        bytes calldata addressData
+        bytes calldata
     ) external view override {
-        address link5Profile = abi.decode(addressData, (address));
-
-        address essenceOwnerSubscribeNFT = IProfileNFT(link5Profile)
+        address essenceOwnerSubscribeNFT = IProfileNFT(msg.sender)
             .getSubscribeNFT(profileId);
 
         require(
             essenceOwnerSubscribeNFT != address(0),
-            "Essence Owner does not have subscribe NFT"
+            "ESSENCE_OWNER_HAS_NO_SUBSCRIBE_NFT"
         );
 
         require(
             ERC721(essenceOwnerSubscribeNFT).balanceOf(collector) != 0,
-            "Not subscribed to Essence owner"
+            "NOT_SUBSCRIBED_TO_ESSENCE_OWNER"
         );
     }
 

@@ -102,6 +102,23 @@ contract IntegrationEssenceTest is
         emit AllowEssenceMw(address(collectMw), false, true);
         engine.allowEssenceMw(address(collectMw), true);
 
+        // create dixon's profile
+        vm.startPrank(dixon);
+
+        bytes memory dataDixon = new bytes(0);
+        profileIdBob = link5Profile.createProfile(
+            DataTypes.CreateProfileParams(
+                dixon,
+                "dixon",
+                "dixon'avatar",
+                "dixon's metadata",
+                address(0)
+            ),
+            dataDixon,
+            dataDixon
+        );
+        vm.stopPrank();
+
         // create bob's profile
         vm.startPrank(bob);
         bytes memory dataBob = new bytes(0);
@@ -341,16 +358,16 @@ contract IntegrationEssenceTest is
 
     function testCannotCollectWithoutSubscribeNFT() public {
         // should revert, carly cannot subscribe without subscribing to bob
-        vm.expectRevert("Essence Owner does not have subscribe NFT");
+        vm.expectRevert("ESSENCE_OWNER_HAS_NO_SUBSCRIBE_NFT");
         vm.startPrank(carly);
         uint256 tokenId = link5Profile.collect(
             DataTypes.CollectParams(carly, profileIdBob, bobEssenceMWId),
-            abi.encode(address(link5Profile)),
+            new bytes(0),
             new bytes(0)
         );
     }
 
-    function testCollectAfterSubscribed() public {
+    function testCanOnlyCollectAfterSubscribed() public {
         // carly subscribes to bob
         uint256[] memory ids = new uint256[](1);
         ids[0] = profileIdBob;
@@ -396,25 +413,31 @@ contract IntegrationEssenceTest is
         emit DeployEssenceNFT(profileIdBob, bobEssenceMWId, essenceMWProxy);
 
         vm.expectEmit(true, true, true, false);
-        emit CollectEssence(
-            carly,
-            1,
-            profileIdBob,
-            abi.encode(address(link5Profile)),
-            new bytes(0)
-        );
+        emit CollectEssence(carly, 1, profileIdBob, new bytes(0), new bytes(0));
 
         // carly then collects bob's "super fan NFT"
         vm.startPrank(carly);
         uint256 bobSuperFanTokenId = link5Profile.collect(
             DataTypes.CollectParams(carly, profileIdBob, bobEssenceMWId),
-            abi.encode(address(link5Profile)),
+            new bytes(0),
             new bytes(0)
         );
 
         assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(carly));
         assertEq(EssenceNFT(essenceMWProxy).balanceOf(carly), 1);
         assertEq(EssenceNFT(essenceMWProxy).ownerOf(bobSuperFanTokenId), carly);
+        vm.stopPrank();
+
+        // dixon has to subscribe to bob first to be their "super fan"
+        vm.expectRevert("NOT_SUBSCRIBED_TO_ESSENCE_OWNER");
+
+        vm.startPrank(dixon);
+        uint256 tokenId = link5Profile.collect(
+            DataTypes.CollectParams(dixon, profileIdBob, bobEssenceMWId),
+            new bytes(0),
+            new bytes(0)
+        );
+
         vm.stopPrank();
     }
 
