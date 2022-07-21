@@ -2,13 +2,10 @@
 
 pragma solidity 0.8.14;
 
-import "forge-std/console.sol";
 import { ERC721 } from "../../dependencies/solmate/ERC721.sol";
 
 import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
 import { IProfileNFT } from "../../interfaces/IProfileNFT.sol";
-
-import { ProfileNFTStorage } from "../../storages/ProfileNFTStorage.sol";
 
 /**
  * @title Collect only when subscribed Middleware
@@ -44,14 +41,11 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware {
         address essenceOwnerSubscribeNFT = IProfileNFT(msg.sender)
             .getSubscribeNFT(profileId);
 
-        require(
-            essenceOwnerSubscribeNFT != address(0),
-            "ESSENCE_OWNER_HAS_NO_SUBSCRIBE_NFT"
-        );
+        require(essenceOwnerSubscribeNFT != address(0), "NO_SUBSCRIBE_NFT");
 
         require(
             ERC721(essenceOwnerSubscribeNFT).balanceOf(collector) != 0,
-            "NOT_SUBSCRIBED_TO_ESSENCE_OWNER"
+            "NOT_SUBSCRIBED"
         );
     }
 

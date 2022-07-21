@@ -334,7 +334,7 @@ contract IntegrationEssenceTest is
             BOB_ESSENCE_SYMBOL,
             true
         );
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(true, true, true, false);
         emit DeployEssenceNFT(profileIdBob, bobEssenceId, essenceProxy);
 
         vm.expectEmit(true, true, true, false);
@@ -358,7 +358,7 @@ contract IntegrationEssenceTest is
 
     function testCannotCollectWithoutSubscribeNFT() public {
         // should revert, carly cannot subscribe without subscribing to bob
-        vm.expectRevert("ESSENCE_OWNER_HAS_NO_SUBSCRIBE_NFT");
+        vm.expectRevert("NO_SUBSCRIBE_NFT");
         vm.startPrank(carly);
         uint256 tokenId = link5Profile.collect(
             DataTypes.CollectParams(carly, profileIdBob, bobEssenceMWId),
@@ -429,7 +429,7 @@ contract IntegrationEssenceTest is
         vm.stopPrank();
 
         // dixon has to subscribe to bob first to be their "super fan"
-        vm.expectRevert("NOT_SUBSCRIBED_TO_ESSENCE_OWNER");
+        vm.expectRevert("NOT_SUBSCRIBED");
 
         vm.startPrank(dixon);
         uint256 tokenId = link5Profile.collect(
