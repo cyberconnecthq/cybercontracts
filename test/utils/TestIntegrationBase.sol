@@ -8,6 +8,7 @@ import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
+import { CollectOnlySubscribedMw } from "../../src/middlewares/essence/CollectOnlySubscribedMw.sol";
 
 import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
 
@@ -28,6 +29,7 @@ abstract contract TestIntegrationBase is Test, TestProxy {
     ProfileNFT link3Profile;
     Link3ProfileDescriptor profileDescriptor;
     PermissionedFeeCreationMw profileMw;
+    CollectOnlySubscribedMw collectMw;
     CyberEngine engine;
     LibDeploy.ContractAddresses addrs;
 
