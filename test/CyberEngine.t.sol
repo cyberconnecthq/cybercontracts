@@ -206,7 +206,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         assertEq(engine.isProfileMwAllowed(mw), true);
     }
 
-    function testSetProfileMwAsGov() public {
+    function testSetProfileMwAsOwner() public {
         address mw = address(0xCA11);
         address namespace = address(0x888);
         address nsOwner = address(0x66666);
