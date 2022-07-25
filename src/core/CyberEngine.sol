@@ -56,6 +56,8 @@ contract CyberEngine is
      * @notice Checks that the namespace owner is the sender address.
      */
     modifier onlyNamespaceOwner(address namespace) {
+        bytes memory byteName = bytes(_namespaceInfo[namespace].name);
+        require(byteName.length > 0, "INVALID_NAMESPACE");
         require(
             IProfileNFT(namespace).getNamespaceOwner() == msg.sender,
             "ONLY_NAMESPACE_OWNER"
@@ -140,11 +142,13 @@ contract CyberEngine is
         );
 
         require(
-            byteName.length <= Constants._MAX_NAME_LENGTH,
+            byteName.length <= Constants._MAX_NAME_LENGTH &&
+                byteName.length > 0,
             "NAME_INVALID_LENGTH"
         );
         require(
-            byteSymbol.length <= Constants._MAX_SYMBOL_LENGTH,
+            byteSymbol.length <= Constants._MAX_SYMBOL_LENGTH &&
+                byteSymbol.length > 0,
             "SYMBOL_INVALID_LENGTH"
         );
 

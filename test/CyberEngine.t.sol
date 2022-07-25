@@ -14,9 +14,10 @@ import { Constants } from "../src/libraries/Constants.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 import { CyberEngine } from "../src/core/CyberEngine.sol";
+import { MockEngine } from "./utils/MockEngine.sol";
 
 contract CyberEngineTest is Test, ICyberEngineEvents {
-    CyberEngine engine;
+    MockEngine engine;
     RolesAuthority rolesAuthority;
     address constant alice = address(0xA11CE);
 
@@ -34,7 +35,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
 
     function setUp() public {
-        CyberEngine engineImpl = new CyberEngine();
+        MockEngine engineImpl = new MockEngine();
         rolesAuthority = new RolesAuthority(
             address(this),
             Authority(address(0))
@@ -48,7 +49,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         emit Initialize(address(0), address(rolesAuthority));
         ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
 
-        engine = CyberEngine(address(engineProxy));
+        engine = MockEngine(address(engineProxy));
 
         RolesAuthority(rolesAuthority).setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
@@ -104,6 +105,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     function testCannotSetProfileMwAsNonOwner() public {
         address namespace = address(0x888);
         address nsOwner = address(0x777);
+        engine.setNamespaceInfo("TEST", address(0), namespace);
         vm.mockCall(
             namespace,
             abi.encodeWithSelector(IProfileNFT.getNamespaceOwner.selector),
@@ -111,6 +113,19 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
         vm.prank(alice);
         vm.expectRevert("ONLY_NAMESPACE_OWNER");
+        engine.setProfileMw(namespace, address(0), new bytes(0));
+    }
+
+    function testCannotSetProfileMwInvalidNs() public {
+        address namespace = address(0x888);
+        address nsOwner = address(0x777);
+        vm.mockCall(
+            namespace,
+            abi.encodeWithSelector(IProfileNFT.getNamespaceOwner.selector),
+            abi.encode(nsOwner)
+        );
+        vm.prank(alice);
+        vm.expectRevert("INVALID_NAMESPACE");
         engine.setProfileMw(namespace, address(0), new bytes(0));
     }
 
@@ -185,6 +200,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
 
         engine.allowProfileMw(mw, true);
 
+        engine.setNamespaceInfo("TEST", address(0), namespace);
         vm.mockCall(
             namespace,
             abi.encodeWithSelector(IProfileNFT.getNamespaceOwner.selector),
