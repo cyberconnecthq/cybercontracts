@@ -10,6 +10,7 @@ import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
+import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { ISubscribeDeployer } from "../interfaces/ISubscribeDeployer.sol";
 import { IEssenceDeployer } from "../interfaces/IEssenceDeployer.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
@@ -48,6 +49,19 @@ contract CyberEngine is
             "UNAUTHORIZED"
         );
 
+        _;
+    }
+
+    /**
+     * @notice Checks that the namespace owner is the sender address.
+     */
+    modifier onlyNamespaceOwner(address namespace) {
+        bytes memory byteName = bytes(_namespaceInfo[namespace].name);
+        require(byteName.length > 0, "INVALID_NAMESPACE");
+        require(
+            IProfileNFT(namespace).getNamespaceOwner() == msg.sender,
+            "ONLY_NAMESPACE_OWNER"
+        );
         _;
     }
 
@@ -128,11 +142,13 @@ contract CyberEngine is
         );
 
         require(
-            byteName.length <= Constants._MAX_NAME_LENGTH,
+            byteName.length <= Constants._MAX_NAME_LENGTH &&
+                byteName.length > 0,
             "NAME_INVALID_LENGTH"
         );
         require(
-            byteSymbol.length <= Constants._MAX_SYMBOL_LENGTH,
+            byteSymbol.length <= Constants._MAX_SYMBOL_LENGTH &&
+                byteSymbol.length > 0,
             "SYMBOL_INVALID_LENGTH"
         );
 
@@ -184,7 +200,7 @@ contract CyberEngine is
         address namespace,
         address mw,
         bytes calldata data
-    ) external override requiresAuth {
+    ) external override onlyNamespaceOwner(namespace) {
         require(
             mw == address(0) || _profileMwAllowlist[mw],
             "PROFILE_MW_NOT_ALLOWED"

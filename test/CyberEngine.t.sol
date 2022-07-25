@@ -8,14 +8,16 @@ import { RolesAuthority, Authority } from "../src/dependencies/solmate/RolesAuth
 
 import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 import { IProfileMiddleware } from "../src/interfaces/IProfileMiddleware.sol";
+import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 
 import { Constants } from "../src/libraries/Constants.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 import { CyberEngine } from "../src/core/CyberEngine.sol";
+import { MockEngine } from "./utils/MockEngine.sol";
 
 contract CyberEngineTest is Test, ICyberEngineEvents {
-    CyberEngine engine;
+    MockEngine engine;
     RolesAuthority rolesAuthority;
     address constant alice = address(0xA11CE);
 
@@ -33,7 +35,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         );
 
     function setUp() public {
-        CyberEngine engineImpl = new CyberEngine();
+        MockEngine engineImpl = new MockEngine();
         rolesAuthority = new RolesAuthority(
             address(this),
             Authority(address(0))
@@ -47,7 +49,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         emit Initialize(address(0), address(rolesAuthority));
         ERC1967Proxy engineProxy = new ERC1967Proxy(address(engineImpl), data);
 
-        engine = CyberEngine(address(engineProxy));
+        engine = MockEngine(address(engineProxy));
 
         RolesAuthority(rolesAuthority).setRoleCapability(
             Constants._ENGINE_GOV_ROLE,
@@ -100,9 +102,31 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.allowProfileMw(address(0), true);
     }
 
-    function testCannotSetProfileMwAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        engine.setProfileMw(address(0), address(0), new bytes(0));
+    function testCannotSetProfileMwAsNonOwner() public {
+        address namespace = address(0x888);
+        address nsOwner = address(0x777);
+        engine.setNamespaceInfo("TEST", address(0), namespace);
+        vm.mockCall(
+            namespace,
+            abi.encodeWithSelector(IProfileNFT.getNamespaceOwner.selector),
+            abi.encode(nsOwner)
+        );
+        vm.prank(alice);
+        vm.expectRevert("ONLY_NAMESPACE_OWNER");
+        engine.setProfileMw(namespace, address(0), new bytes(0));
+    }
+
+    function testCannotSetProfileMwInvalidNs() public {
+        address namespace = address(0x888);
+        address nsOwner = address(0x777);
+        vm.mockCall(
+            namespace,
+            abi.encodeWithSelector(IProfileNFT.getNamespaceOwner.selector),
+            abi.encode(nsOwner)
+        );
+        vm.prank(alice);
+        vm.expectRevert("INVALID_NAMESPACE");
+        engine.setProfileMw(namespace, address(0), new bytes(0));
     }
 
     function testCannotCreateNamespaceAsNonGov() public {
@@ -124,6 +148,24 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         vm.prank(alice);
 
         namespaceParams.symbol = "AAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        vm.expectRevert("SYMBOL_INVALID_LENGTH");
+        engine.createNamespace(namespaceParams);
+    }
+
+    function testCannotCreateNamespaceEmptyName() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+
+        namespaceParams.name = "";
+        vm.expectRevert("NAME_INVALID_LENGTH");
+        engine.createNamespace(namespaceParams);
+    }
+
+    function testCannotCreateNamespaceEmptySymbol() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+
+        namespaceParams.symbol = "";
         vm.expectRevert("SYMBOL_INVALID_LENGTH");
         engine.createNamespace(namespaceParams);
     }
@@ -164,16 +206,25 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         assertEq(engine.isProfileMwAllowed(mw), true);
     }
 
-    function testSetProfileMwAsGov() public {
+    function testSetProfileMwAsOwner() public {
         address mw = address(0xCA11);
         address namespace = address(0x888);
+        address nsOwner = address(0x66666);
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(1);
 
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.startPrank(alice);
+        vm.prank(alice);
 
         engine.allowProfileMw(mw, true);
+
+        engine.setNamespaceInfo("TEST", address(0), namespace);
+        vm.mockCall(
+            namespace,
+            abi.encodeWithSelector(IProfileNFT.getNamespaceOwner.selector),
+            abi.encode(nsOwner)
+        );
+
         vm.mockCall(
             mw,
             abi.encodeWithSelector(
@@ -184,6 +235,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
             abi.encode(returnData)
         );
 
+        vm.prank(nsOwner);
         vm.expectEmit(true, false, false, true);
         emit SetProfileMw(namespace, mw, returnData);
         engine.setProfileMw(namespace, mw, data);
