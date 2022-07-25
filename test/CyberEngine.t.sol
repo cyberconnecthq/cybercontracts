@@ -8,6 +8,7 @@ import { RolesAuthority, Authority } from "../src/dependencies/solmate/RolesAuth
 
 import { ICyberEngineEvents } from "../src/interfaces/ICyberEngineEvents.sol";
 import { IProfileMiddleware } from "../src/interfaces/IProfileMiddleware.sol";
+import { IProfileNFT } from "../src/interfaces/IProfileNFT.sol";
 
 import { Constants } from "../src/libraries/Constants.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
@@ -100,9 +101,17 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.allowProfileMw(address(0), true);
     }
 
-    function testCannotSetProfileMwAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        engine.setProfileMw(address(0), address(0), new bytes(0));
+    function testCannotSetProfileMwAsNonOwner() public {
+        address namespace = address(0x888);
+        address nsOwner = address(0x777);
+        vm.mockCall(
+            namespace,
+            abi.encodeWithSelector(IProfileNFT.getNamespaceOwner.selector),
+            abi.encode(nsOwner)
+        );
+        vm.prank(alice);
+        vm.expectRevert("ONLY_NAMESPACE_OWNER");
+        engine.setProfileMw(namespace, address(0), new bytes(0));
     }
 
     function testCannotCreateNamespaceAsNonGov() public {
@@ -167,13 +176,21 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
     function testSetProfileMwAsGov() public {
         address mw = address(0xCA11);
         address namespace = address(0x888);
+        address nsOwner = address(0x66666);
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(1);
 
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
-        vm.startPrank(alice);
+        vm.prank(alice);
 
         engine.allowProfileMw(mw, true);
+
+        vm.mockCall(
+            namespace,
+            abi.encodeWithSelector(IProfileNFT.getNamespaceOwner.selector),
+            abi.encode(nsOwner)
+        );
+
         vm.mockCall(
             mw,
             abi.encodeWithSelector(
@@ -184,6 +201,7 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
             abi.encode(returnData)
         );
 
+        vm.prank(nsOwner);
         vm.expectEmit(true, false, false, true);
         emit SetProfileMw(namespace, mw, returnData);
         engine.setProfileMw(namespace, mw, data);
