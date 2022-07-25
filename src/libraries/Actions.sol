@@ -145,7 +145,7 @@ library Actions {
                 .essenceNFT = essenceNFT;
             emit DeployEssenceNFT(data.profileId, data.essenceId, essenceNFT);
         }
-        // run middleware before collectign essence
+        // run middleware before collecting essence
         if (essenceMw != address(0)) {
             IEssenceMiddleware(essenceMw).preProcess(
                 data.profileId,

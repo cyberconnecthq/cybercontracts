@@ -24,6 +24,9 @@ import { ProfileNFTStorage } from "../../src/storages/ProfileNFTStorage.sol";
 import { Actions } from "../../src/libraries/Actions.sol";
 import { EssenceNFT } from "../../src/core/EssenceNFT.sol";
 import { Constants } from "../../src/libraries/Constants.sol";
+import { CollectOnlySubscribedMw } from "../../src/middlewares/essence/CollectOnlySubscribedMw.sol";
+
+import "forge-std/console.sol";
 
 pragma solidity 0.8.14;
 
@@ -45,6 +48,9 @@ contract IntegrationEssenceTest is
     bytes32 constant LINK5_SALT = keccak256(bytes(LINK5_NAME));
     string constant BOB_ESSENCE_NAME = "Arzuros Carapace";
     string constant BOB_ESSENCE_SYMBOL = "AC";
+    string constant BOB_ESSENCEMW_NAME = "Super Fan";
+    string constant BOB_ESSENCEMW_SYMBOL = "SF";
+
     address essenceMw = address(0); //change this
     uint256 profileIdBob;
     uint256 profileIdCarly;
@@ -55,6 +61,7 @@ contract IntegrationEssenceTest is
     address link5EssBeacon;
 
     uint256 bobEssenceId;
+    uint256 bobEssenceMWId;
 
     string constant CARLY_ESSENCE_1_NAME = "Malzeno Fellwing";
     string constant CARLY_ESSENCE_1_SYMBOL = "MF";
@@ -89,6 +96,29 @@ contract IntegrationEssenceTest is
 
         link5Profile = ProfileNFT(link5Namespace);
 
+        collectMw = new CollectOnlySubscribedMw();
+
+        vm.expectEmit(false, false, false, true);
+        emit AllowEssenceMw(address(collectMw), false, true);
+        engine.allowEssenceMw(address(collectMw), true);
+
+        // create dixon's profile
+        vm.startPrank(dixon);
+
+        bytes memory dataDixon = new bytes(0);
+        profileIdBob = link5Profile.createProfile(
+            DataTypes.CreateProfileParams(
+                dixon,
+                "dixon",
+                "dixon'avatar",
+                "dixon's metadata",
+                address(0)
+            ),
+            dataDixon,
+            dataDixon
+        );
+        vm.stopPrank();
+
         // create bob's profile
         vm.startPrank(bob);
         bytes memory dataBob = new bytes(0);
@@ -103,7 +133,8 @@ contract IntegrationEssenceTest is
             dataBob,
             dataBob
         );
-        //  bob register essence
+
+        // bob registers an essence without a middleware
         vm.expectEmit(true, true, false, false);
         emit RegisterEssence(
             profileIdBob,
@@ -115,7 +146,7 @@ contract IntegrationEssenceTest is
             returnData
         );
 
-        // register essence with no essence middleware
+        // bob registers an essence without a middleware
         bobEssenceId = link5Profile.registerEssence(
             DataTypes.RegisterEssenceParams(
                 profileIdBob,
@@ -131,6 +162,36 @@ contract IntegrationEssenceTest is
         assertEq(
             link5Profile.getEssenceNFTTokenURI(profileIdBob, bobEssenceId),
             "uri"
+        );
+
+        //  bob register essence with collect only subscribed middleware
+        vm.expectEmit(true, true, false, false);
+        emit RegisterEssence(
+            profileIdBob,
+            2,
+            BOB_ESSENCEMW_NAME,
+            BOB_ESSENCEMW_SYMBOL,
+            "uriMW",
+            address(collectMw),
+            returnData
+        );
+
+        // register essence with collect only subscribed middleware
+        bobEssenceMWId = link5Profile.registerEssence(
+            DataTypes.RegisterEssenceParams(
+                profileIdBob,
+                BOB_ESSENCEMW_NAME,
+                BOB_ESSENCEMW_SYMBOL,
+                "uriMW",
+                address(collectMw),
+                true
+            ),
+            dataBobEssence
+        );
+
+        assertEq(
+            link5Profile.getEssenceNFTTokenURI(profileIdBob, bobEssenceMWId),
+            "uriMW"
         );
 
         vm.stopPrank();
@@ -261,12 +322,6 @@ contract IntegrationEssenceTest is
     }
 
     function testCollect() public {
-        // TODO: test for essence Mw
-        // // Allow for EssenceMw
-        // vm.expectEmit(false, false, false, true);
-        // emit AllowEssenceMw(essenceMw, false, true);
-        // engine.allowEssenceMw(essenceMw, true);
-
         // carly wants to collect bob's essence "Arzuros Carapace"
         vm.startPrank(carly);
 
@@ -279,10 +334,10 @@ contract IntegrationEssenceTest is
             BOB_ESSENCE_SYMBOL,
             true
         );
-        vm.expectEmit(true, true, false, true);
+        vm.expectEmit(true, true, true, false);
         emit DeployEssenceNFT(profileIdBob, bobEssenceId, essenceProxy);
 
-        vm.expectEmit(true, true, false, false);
+        vm.expectEmit(true, true, true, false);
         emit CollectEssence(carly, 1, profileIdBob, new bytes(0), new bytes(0));
 
         uint256 tokenId = link5Profile.collect(
@@ -298,6 +353,91 @@ contract IntegrationEssenceTest is
         );
         assertEq(EssenceNFT(essenceProxy).balanceOf(carly), 1);
         assertEq(EssenceNFT(essenceProxy).ownerOf(bobEssenceId), carly);
+        vm.stopPrank();
+    }
+
+    function testCannotCollectWithoutSubscribeNFT() public {
+        // should revert, carly cannot subscribe without subscribing to bob
+        vm.expectRevert("NO_SUBSCRIBE_NFT");
+        vm.startPrank(carly);
+        uint256 tokenId = link5Profile.collect(
+            DataTypes.CollectParams(carly, profileIdBob, bobEssenceMWId),
+            new bytes(0),
+            new bytes(0)
+        );
+    }
+
+    function testCanOnlyCollectAfterSubscribed() public {
+        // carly subscribes to bob
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = profileIdBob;
+        bytes[] memory data = new bytes[](1);
+
+        address SubProxy = getDeployedSubProxyAddress(
+            link5SubBeacon,
+            profileIdBob,
+            address(link5Profile),
+            "bob"
+        );
+        vm.prank(carly);
+        vm.expectEmit(true, true, false, false);
+        emit DeploySubscribeNFT(ids[0], SubProxy);
+
+        vm.expectEmit(true, false, false, false);
+        emit Subscribe(carly, ids, data, data);
+
+        uint256 nftid = link5Profile.subscribe(
+            DataTypes.SubscribeParams(ids),
+            data,
+            data
+        )[0];
+
+        address bobSubNFT = link5Profile.getSubscribeNFT(profileIdBob);
+        assertEq(bobSubNFT, SubProxy);
+        assertEq(CyberNFTBase(bobSubNFT).totalSupply(), 1);
+
+        // check ownership of sub nft
+        assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(carly));
+
+        address essenceMWProxy = getDeployedEssProxyAddress(
+            link5EssBeacon,
+            profileIdBob,
+            bobEssenceMWId,
+            address(link5Profile),
+            BOB_ESSENCEMW_NAME,
+            BOB_ESSENCEMW_SYMBOL,
+            true
+        );
+
+        vm.expectEmit(true, true, true, false);
+        emit DeployEssenceNFT(profileIdBob, bobEssenceMWId, essenceMWProxy);
+
+        vm.expectEmit(true, true, true, false);
+        emit CollectEssence(carly, 1, profileIdBob, new bytes(0), new bytes(0));
+
+        // carly then collects bob's "super fan NFT"
+        vm.startPrank(carly);
+        uint256 bobSuperFanTokenId = link5Profile.collect(
+            DataTypes.CollectParams(carly, profileIdBob, bobEssenceMWId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        assertEq(ERC721(bobSubNFT).ownerOf(nftid), address(carly));
+        assertEq(EssenceNFT(essenceMWProxy).balanceOf(carly), 1);
+        assertEq(EssenceNFT(essenceMWProxy).ownerOf(bobSuperFanTokenId), carly);
+        vm.stopPrank();
+
+        // dixon has to subscribe to bob first to be their "super fan"
+        vm.expectRevert("NOT_SUBSCRIBED");
+
+        vm.startPrank(dixon);
+        uint256 tokenId = link5Profile.collect(
+            DataTypes.CollectParams(dixon, profileIdBob, bobEssenceMWId),
+            new bytes(0),
+            new bytes(0)
+        );
+
         vm.stopPrank();
     }
 
