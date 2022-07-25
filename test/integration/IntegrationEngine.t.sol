@@ -16,45 +16,9 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
     string constant LINK5_SYMBOL = "L5";
     bytes32 constant LINK5_SALT = keccak256(bytes(LINK5_NAME));
     ProfileNFT link5Profile;
-    DataTypes.CreateNamespaceParams params;
 
     function setUp() public {
         _setUp();
-        params = DataTypes.CreateNamespaceParams(
-            LINK5_NAME,
-            LINK5_SYMBOL,
-            namespaceOwner,
-            DataTypes.ComputedAddresses(
-                addrs.engineProxyAddress,
-                addrs.profileFac,
-                addrs.subFac,
-                addrs.essFac
-            )
-        );
-    }
-
-    function testCannotNamespaceEmptyName() public {
-        vm.expectRevert("NAME_INVALID_LENGTH");
-        params.name = "";
-        CyberEngine(addrs.engineProxyAddress).createNamespace(params);
-    }
-
-    function testCannotNamespaceNameTooLong() public {
-        vm.expectRevert("NAME_INVALID_LENGTH");
-        params.name = "AAAAAAAAAAAAAAAAAAAAAA";
-        CyberEngine(addrs.engineProxyAddress).createNamespace(params);
-    }
-
-    function testCannotNamespaceEmptySymbol() public {
-        vm.expectRevert("SYMBOL_INVALID_LENGTH");
-        params.symbol = "";
-        CyberEngine(addrs.engineProxyAddress).createNamespace(params);
-    }
-
-    function testCannotNamespaceSymbolTooLong() public {
-        vm.expectRevert("SYMBOL_INVALID_LENGTH");
-        params.symbol = "AAAAAAAAAAAAAAAAAAAAAA";
-        CyberEngine(addrs.engineProxyAddress).createNamespace(params);
     }
 
     function testCreatNamespaceAndCreateMultipleProfiles() public {

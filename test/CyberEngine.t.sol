@@ -152,6 +152,24 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.createNamespace(namespaceParams);
     }
 
+    function testCannotCreateNamespaceEmptyName() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+
+        namespaceParams.name = "";
+        vm.expectRevert("NAME_INVALID_LENGTH");
+        engine.createNamespace(namespaceParams);
+    }
+
+    function testCannotCreateNamespaceEmptySymbol() public {
+        rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
+        vm.prank(alice);
+
+        namespaceParams.symbol = "";
+        vm.expectRevert("SYMBOL_INVALID_LENGTH");
+        engine.createNamespace(namespaceParams);
+    }
+
     function testAllowSubscribeMwAsGov() public {
         address mw = address(0xCA11);
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
