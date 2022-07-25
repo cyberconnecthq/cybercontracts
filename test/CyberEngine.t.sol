@@ -105,11 +105,6 @@ contract CyberEngineTest is Test, ICyberEngineEvents {
         engine.setProfileMw(address(0), address(0), new bytes(0));
     }
 
-    function testCannotCreateNamespaceAsNonGov() public {
-        vm.expectRevert("UNAUTHORIZED");
-        engine.createNamespace(namespaceParams);
-    }
-
     function testCannotCreateNamespaceInvalidName() public {
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);

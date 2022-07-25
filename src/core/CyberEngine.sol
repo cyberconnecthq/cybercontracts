@@ -110,7 +110,6 @@ contract CyberEngine is
     function createNamespace(DataTypes.CreateNamespaceParams calldata params)
         external
         override
-        requiresAuth
         returns (
             address profileProxy,
             address subBeacon,
