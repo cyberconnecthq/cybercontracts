@@ -17,6 +17,7 @@ import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
+import { EssenceNFT } from "./EssenceNFT.sol";
 import { ProfileNFT } from "./ProfileNFT.sol";
 import { CyberEngineStorage } from "../storages/CyberEngineStorage.sol";
 import { UpgradeableBeacon } from "../upgradeability/UpgradeableBeacon.sol";
@@ -198,6 +199,22 @@ contract CyberEngine is
             );
         }
         emit SetProfileMw(namespace, mw, returnData);
+    }
+
+    /// @inheritdoc ICyberEngine
+    function upgradeEssence(address essBeacon, address newImplementation)
+        external
+        requiresAuth
+    {
+        ProfileNFT(essBeacon).upgradeTo(newImplementation);
+    }
+
+    /// @inheritdoc ICyberEngine
+    function upgradeSubscribe(address subBeacon, address newImplementation)
+        external
+        requiresAuth
+    {
+        ProfileNFT(subBeacon).upgradeTo(newImplementation);
     }
 
     /// @inheritdoc ICyberEngine

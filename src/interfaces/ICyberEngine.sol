@@ -120,4 +120,22 @@ interface ICyberEngine is ICyberEngineEvents {
      * @return bool The allowance state.
      */
     function isProfileMwAllowed(address mw) external view returns (bool);
+
+    /**
+     * @notice Uprades the essence to new implementation.
+     *
+     * @param essBeacon The essence beacon address.
+     * @param newImplementation The new implementation address.
+     */
+    function upgradeEssence(address essBeacon, address newImplementation)
+        external;
+
+    /**
+     * @notice Uprades the subscribe to new implementation.
+     *
+     * @param subBeacon The subscribe beacon address.
+     * @param newImplementation The new implementation address.
+     */
+    function upgradeSubscribe(address subBeacon, address newImplementation)
+        external;
 }
