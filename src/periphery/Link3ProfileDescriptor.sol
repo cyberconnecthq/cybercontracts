@@ -3,8 +3,10 @@
 pragma solidity 0.8.14;
 
 import { Base64 } from "openzeppelin-contracts/contracts/utils/Base64.sol";
+import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Owned } from "../dependencies/solmate/Owned.sol";
 
+import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 
 import { QRSVG } from "../libraries/QRSVG.sol";
@@ -20,10 +22,12 @@ import { Link3ProfileDescriptorStorage } from "../storages/Link3ProfileDescripto
  * @notice This contract is used to create profile NFT token uri.
  */
 contract Link3ProfileDescriptor is
-    Link3ProfileDescriptorStorage,
+    Initializable,
     Owned,
-    IProfileNFTDescriptor,
-    Initializable
+    UUPSUpgradeable,
+    Link3ProfileDescriptorStorage,
+    IUpgradeable,
+    IProfileNFTDescriptor
 {
     /*//////////////////////////////////////////////////////////////
                                  CONSTRUCTOR
@@ -57,6 +61,11 @@ contract Link3ProfileDescriptor is
         onlyOwner
     {
         animationTemplate = template;
+    }
+
+    /// @inheritdoc IUpgradeable
+    function version() external pure virtual override returns (uint256) {
+        return _VERSION;
     }
 
     /// @inheritdoc IProfileNFTDescriptor
@@ -135,7 +144,7 @@ contract Link3ProfileDescriptor is
         string memory handleSVGElement = "";
         string memory handleInLink = handle;
         string memory qrCode = QRSVG.generateQRCode(
-            string(abi.encodePacked(BASE_URL, handle))
+            string(abi.encodePacked(_BASE_URL, handle))
         );
 
         if (bytes(handle).length > 13) {
@@ -280,4 +289,11 @@ contract Link3ProfileDescriptor is
                 )
             );
     }
+
+    // UUPS upgradeability
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyOwner
+    {}
 }
