@@ -212,6 +212,43 @@ interface IProfileNFT is IProfileNFTEvents {
     ) external;
 
     /**
+     * @notice Sets subscribe middleware for a profile.
+     *
+     * @param profileId The profile ID.
+     * @param essenceId The profile ID.
+     * @param tokenURI The new token URI.
+     * @param mw The new middleware to be set.
+     * @param prepareData The data for prepare.
+     */
+    function setEssenceData(
+        uint256 profileId,
+        uint256 essenceId,
+        string calldata tokenURI,
+        address mw,
+        bytes calldata prepareData
+    ) external;
+
+    /**
+     * @notice Sets subscribe middleware for a profile with signature.
+     *
+     * @param profileId The profile ID.
+     * @param essenceId The profile ID.
+     * @param tokenURI The new token URI.
+     * @param mw The new middleware to be set.
+     * @param prepareData The data for prepare.
+     * @param sig The EIP712 signature.
+     * @dev Only owner's signature works.
+     */
+    function setEssenceDataWithSig(
+        uint256 profileId,
+        uint256 essenceId,
+        string calldata tokenURI,
+        address mw,
+        bytes calldata prepareData,
+        DataTypes.EIP712Signature calldata sig
+    ) external;
+
+    /**
      * @notice Sets the primary profile for the user.
      *
      * @param profileId The profile ID that is set to be primary.
@@ -398,6 +435,18 @@ interface IProfileNFT is IProfileNFTEvents {
      * @return address The Essence NFT address.
      */
     function getEssenceNFT(uint256 profileId, uint256 essenceId)
+        external
+        view
+        returns (address);
+
+    /**
+     * @notice Gets a profile essence middleware address.
+     *
+     * @param profileId The profile id.
+     * @param essenceId The Essence ID.
+     * @return address The middleware address.
+     */
+    function getEssenceMw(uint256 profileId, uint256 essenceId)
         external
         view
         returns (address);
