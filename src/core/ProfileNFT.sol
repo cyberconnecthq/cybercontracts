@@ -717,7 +717,6 @@ contract ProfileNFT is
         if (subscribeNFT != address(0)) {
             subscribers = CyberNFTBase(subscribeNFT).totalSupply();
         }
-        //string memory handle = _profileById[tokenId].handle;
 
         return
             IProfileNFTDescriptor(_nftDescriptor).tokenURI(
@@ -727,8 +726,6 @@ contract ProfileNFT is
                     subscribers: subscribers
                 })
             );
-
-        //return Actions.generateTokenURI(_nftDescriptor, tokenId, handle, subscribers);
     }
 
     /// @inheritdoc IProfileNFT
