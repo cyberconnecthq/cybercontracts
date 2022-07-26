@@ -430,9 +430,9 @@ contract ProfileNFT is
         uint256 profileId,
         string calldata uri,
         address mw,
-        bytes calldata prepareData
+        bytes calldata data
     ) external override onlyProfileOwnerOrOperator(profileId) {
-        _setSubscribeData(profileId, uri, mw, prepareData);
+        _setSubscribeData(profileId, uri, mw, data);
     }
 
     /// @inheritdoc IProfileNFT
@@ -440,7 +440,7 @@ contract ProfileNFT is
         uint256 profileId,
         string calldata uri,
         address mw,
-        bytes calldata prepareData,
+        bytes calldata data,
         DataTypes.EIP712Signature calldata sig
     ) external override {
         address owner = ownerOf(profileId);
@@ -452,7 +452,7 @@ contract ProfileNFT is
                         profileId,
                         keccak256(bytes(uri)),
                         mw,
-                        keccak256(prepareData),
+                        keccak256(data),
                         nonces[owner]++,
                         sig.deadline
                     )
@@ -461,7 +461,7 @@ contract ProfileNFT is
             owner,
             sig
         );
-        _setSubscribeData(profileId, uri, mw, prepareData);
+        _setSubscribeData(profileId, uri, mw, data);
     }
 
     /// @inheritdoc IProfileNFT

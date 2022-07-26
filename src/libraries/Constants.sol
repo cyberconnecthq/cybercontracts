@@ -39,11 +39,11 @@ library Constants {
         );
     bytes32 internal constant _SET_SUBSCRIBE_DATA_TYPEHASH =
         keccak256(
-            "setSubscribeDataWithSig(uint256 profileId,string tokenURI,address mw,bytes prepareData,uint256 nonce,uint256 deadline)"
+            "setSubscribeDataWithSig(uint256 profileId,string tokenURI,address mw,bytes data,uint256 nonce,uint256 deadline)"
         );
     bytes32 internal constant _SET_ESSENCE_DATA_TYPEHASH =
         keccak256(
-            "setEssenceDataWithSig(uint256 profileId,uint256 essenceId,string tokenURI,address mw,bytes prepareData,uint256 nonce,uint256 deadline)"
+            "setEssenceDataWithSig(uint256 profileId,uint256 essenceId,string tokenURI,address mw,bytes data,uint256 nonce,uint256 deadline)"
         );
     bytes32 internal constant _SET_AVATAR_TYPEHASH =
         keccak256(
