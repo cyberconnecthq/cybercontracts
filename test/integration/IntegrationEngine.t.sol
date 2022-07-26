@@ -2,15 +2,25 @@
 
 pragma solidity 0.8.14;
 
-import { TestIntegrationBase } from "../utils/TestIntegrationBase.sol";
+import { ICyberEngineEvents } from "../../src/interfaces/ICyberEngineEvents.sol";
+import { ICyberEngine } from "../../src/interfaces/ICyberEngine.sol";
+
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
+
+import { TestIntegrationBase } from "../utils/TestIntegrationBase.sol";
 import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
-import { ICyberEngineEvents } from "../../src/interfaces/ICyberEngineEvents.sol";
+import { EssenceNFT } from "../../src/core/EssenceNFT.sol";
+import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
+import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
 import { MockLink5NFTDescriptor } from "../utils/MockLink5NFTDescriptor.sol";
-import { CyberEngine } from "../../src/core/CyberEngine.sol";
+import { TestDeployer } from "../utils/TestDeployer.sol";
 
-contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
+contract IntegrationEngineTest is
+    TestIntegrationBase,
+    ICyberEngineEvents,
+    TestDeployer
+{
     address namespaceOwner = alice;
     string constant LINK5_NAME = "Link5";
     string constant LINK5_SYMBOL = "L5";
@@ -19,6 +29,56 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
 
     function setUp() public {
         _setUp();
+    }
+
+    function testUpgradeSubscribeNFT() public {
+        (address link5Namespace, address subBeacon, ) = LibDeploy
+            .createNamespace(
+                addrs.engineProxyAddress,
+                namespaceOwner,
+                LINK5_NAME,
+                LINK5_SYMBOL,
+                LINK5_SALT,
+                addrs.profileFac,
+                addrs.subFac,
+                addrs.essFac
+            );
+
+        SubscribeNFT subscribeNFTV2 = _deploySubV2(link5Namespace);
+        ICyberEngine(addrs.engineProxyAddress).upgradeSubscribeNFT(
+            address(subscribeNFTV2),
+            link5Namespace
+        );
+
+        assertEq(
+            UpgradeableBeacon(subBeacon).implementation(),
+            address(subscribeNFTV2)
+        );
+    }
+
+    function testUpgradeEssenceNFT() public {
+        (address link5Namespace, , address essBeacon) = LibDeploy
+            .createNamespace(
+                addrs.engineProxyAddress,
+                namespaceOwner,
+                LINK5_NAME,
+                LINK5_SYMBOL,
+                LINK5_SALT,
+                addrs.profileFac,
+                addrs.subFac,
+                addrs.essFac
+            );
+
+        EssenceNFT essenceNFTV2 = _deployEssV2(link5Namespace);
+        ICyberEngine(addrs.engineProxyAddress).upgradeEssenceNFT(
+            address(essenceNFTV2),
+            link5Namespace
+        );
+
+        assertEq(
+            UpgradeableBeacon(essBeacon).implementation(),
+            address(essenceNFTV2)
+        );
     }
 
     function testCreatNamespaceAndCreateMultipleProfiles() public {
@@ -125,5 +185,20 @@ contract IntegrationEngineTest is TestIntegrationBase, ICyberEngineEvents {
 
         assertEq(link5Profile.tokenURI(profileIdBob), "Link5TokenURI");
         vm.stopPrank();
+    }
+
+    function _deploySubV2(address profile)
+        internal
+        returns (SubscribeNFT addr)
+    {
+        subParams.profileProxy = profile;
+        addr = new SubscribeNFT{ salt: LINK5_SALT }();
+        delete subParams;
+    }
+
+    function _deployEssV2(address profile) internal returns (EssenceNFT addr) {
+        essParams.profileProxy = profile;
+        addr = new EssenceNFT{ salt: LINK5_SALT }();
+        delete essParams;
     }
 }

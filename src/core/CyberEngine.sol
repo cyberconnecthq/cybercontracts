@@ -196,6 +196,26 @@ contract CyberEngine is
     }
 
     /// @inheritdoc ICyberEngine
+    function upgradeSubscribeNFT(address newImpl, address namespace)
+        external
+        override
+        requiresAuth
+    {
+        address subscribeBeacon = ProfileNFT(namespace).SUBSCRIBE_BEACON();
+        UpgradeableBeacon(subscribeBeacon).upgradeTo(newImpl);
+    }
+
+    /// @inheritdoc ICyberEngine
+    function upgradeEssenceNFT(address newImpl, address namespace)
+        external
+        override
+        requiresAuth
+    {
+        address essenceBeacon = ProfileNFT(namespace).ESSENCE_BEACON();
+        UpgradeableBeacon(essenceBeacon).upgradeTo(newImpl);
+    }
+
+    /// @inheritdoc ICyberEngine
     function setProfileMw(
         address namespace,
         address mw,
