@@ -12,7 +12,6 @@ import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
 import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
-import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
@@ -708,23 +707,12 @@ contract ProfileNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
-        require(
-            address(_nftDescriptor) != address(0),
-            "NFT_DESCRIPTOR_NOT_SET"
-        );
-        address subscribeNFT = _subscribeByProfileId[tokenId].subscribeNFT;
-        uint256 subscribers;
-        if (subscribeNFT != address(0)) {
-            subscribers = CyberNFTBase(subscribeNFT).totalSupply();
-        }
-
         return
-            IProfileNFTDescriptor(_nftDescriptor).tokenURI(
-                DataTypes.ConstructTokenURIParams({
-                    tokenId: tokenId,
-                    handle: _profileById[tokenId].handle,
-                    subscribers: subscribers
-                })
+            Actions.generateTokenURI(
+                tokenId,
+                _nftDescriptor,
+                _profileById,
+                _subscribeByProfileId
             );
     }
 
