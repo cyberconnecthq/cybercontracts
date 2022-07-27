@@ -96,4 +96,19 @@ contract CyberEngineUpgradeTest is Test {
         );
         assertEq(CyberEngine(address(engine)).version(), 2);
     }
+
+    function testCannotUpgradeSubNFTAsNonGov() public {
+        vm.prank(alice);
+        vm.expectRevert("UNAUTHORIZED");
+        CyberEngine(address(engine)).upgradeSubscribeNFT(
+            address(0),
+            address(0)
+        );
+    }
+
+    function testCannotUpgradeEssNFTAsNonGov() public {
+        vm.prank(alice);
+        vm.expectRevert("UNAUTHORIZED");
+        CyberEngine(address(engine)).upgradeEssenceNFT(address(0), address(0));
+    }
 }
