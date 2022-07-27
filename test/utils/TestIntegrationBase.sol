@@ -25,12 +25,14 @@ abstract contract TestIntegrationBase is Test, TestProxy {
 
     address internal constant link3Treasury = address(0xDEAD3333);
     address internal constant engineTreasury = address(0xDEADEEEE);
+    address link3EssBeacon;
 
     ProfileNFT link3Profile;
     Link3ProfileDescriptor profileDescriptor;
     PermissionedFeeCreationMw profileMw;
     CollectOnlySubscribedMw collectMw;
     CyberEngine engine;
+
     LibDeploy.ContractAddresses addrs;
 
     function _setUp() internal {
@@ -44,5 +46,6 @@ abstract contract TestIntegrationBase is Test, TestProxy {
         profileDescriptor = Link3ProfileDescriptor(addrs.link3DescriptorProxy);
         profileMw = PermissionedFeeCreationMw(addrs.link3ProfileMw);
         engine = CyberEngine(addrs.engineProxyAddress);
+        link3EssBeacon = addrs.essBeacon;
     }
 }

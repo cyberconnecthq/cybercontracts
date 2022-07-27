@@ -1,0 +1,101 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+pragma solidity 0.8.14;
+
+import { ERC721 } from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import { MerkleProof } from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
+
+import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
+
+import { Constants } from "../../libraries/Constants.sol";
+import { DataTypes } from "../../libraries/DataTypes.sol";
+
+import { CyberEngineStorage } from "../../storages/CyberEngineStorage.sol";
+import { EIP712 } from "../../base/EIP712.sol";
+import { ProfileNFT } from "../../core/ProfileNFT.sol";
+
+import "forge-std/Test.sol";
+
+/**
+ * @title MerklePermission Middleware
+ * @author CyberConnect
+ * @notice This contract is a middleware to only allow users on the whitelist to collect an essence
+ */
+contract MerklePermissionMw is IEssenceMiddleware {
+    /*//////////////////////////////////////////////////////////////
+                                STATES
+    //////////////////////////////////////////////////////////////*/
+
+    mapping(address => mapping(uint256 => mapping(uint256 => bytes32))) rootStorage;
+
+    /*//////////////////////////////////////////////////////////////
+                         EXTERNAL VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /// @inheritdoc IEssenceMiddleware
+    function setEssenceMwData(
+        uint256 profileId,
+        uint256 essenceId,
+        bytes calldata root
+    ) external override returns (bytes memory) {
+        rootStorage[msg.sender][profileId][essenceId] = abi.decode(
+            root,
+            (bytes32)
+        );
+        return new bytes(0);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                 EXTERNAL
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @inheritdoc IEssenceMiddleware
+     * @notice Proccess that checks if
+     */
+    function preProcess(
+        uint256 profileId,
+        uint256 essenceId,
+        address collector,
+        address,
+        bytes calldata proof
+    ) external view override {
+        console.log("here1");
+
+        require(
+            _verify(
+                _leaf(collector),
+                rootStorage[msg.sender][profileId][essenceId],
+                abi.decode(proof, (bytes32[]))
+            ) == true,
+            "Invalid merkle proof"
+        );
+    }
+
+    /// @inheritdoc IEssenceMiddleware
+    function postProcess(
+        uint256,
+        uint256,
+        address,
+        address,
+        bytes calldata
+    ) external {
+        // do nothing
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                              INTERNAL
+    //////////////////////////////////////////////////////////////*/
+
+    function _leaf(address to) internal pure returns (bytes32) {
+        return keccak256(abi.encode(to));
+    }
+
+    function _verify(
+        bytes32 leaf,
+        bytes32 root,
+        bytes32[] memory proof
+    ) internal pure returns (bool) {
+        return MerkleProof.verify(proof, root, leaf);
+    }
+}
