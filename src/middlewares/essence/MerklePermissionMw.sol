@@ -2,19 +2,9 @@
 
 pragma solidity 0.8.14;
 
-import { ERC721 } from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import { MerkleProof } from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
 
 import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
-
-import { Constants } from "../../libraries/Constants.sol";
-import { DataTypes } from "../../libraries/DataTypes.sol";
-
-import { CyberEngineStorage } from "../../storages/CyberEngineStorage.sol";
-import { EIP712 } from "../../base/EIP712.sol";
-import { ProfileNFT } from "../../core/ProfileNFT.sol";
-
-import "forge-std/Test.sol";
 
 /**
  * @title MerklePermission Middleware
