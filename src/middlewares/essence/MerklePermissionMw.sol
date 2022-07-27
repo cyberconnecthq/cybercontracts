@@ -19,7 +19,7 @@ import "forge-std/Test.sol";
 /**
  * @title MerklePermission Middleware
  * @author CyberConnect
- * @notice This contract is a middleware to only allow users on the whitelist to collect an essence
+ * @notice This contract is a middleware to only allow users to collect an essence given the correct merkle proof
  */
 contract MerklePermissionMw is IEssenceMiddleware {
     /*//////////////////////////////////////////////////////////////
@@ -32,7 +32,10 @@ contract MerklePermissionMw is IEssenceMiddleware {
                          EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
 
-    /// @inheritdoc IEssenceMiddleware
+    /**
+     * @inheritdoc IEssenceMiddleware
+     * @notice Stores the root info when the Essence is registered
+     */
     function setEssenceMwData(
         uint256 profileId,
         uint256 essenceId,
@@ -51,7 +54,7 @@ contract MerklePermissionMw is IEssenceMiddleware {
 
     /**
      * @inheritdoc IEssenceMiddleware
-     * @notice Proccess that checks if
+     * @notice Proccess that checks if the collect is in the root given the correct proof
      */
     function preProcess(
         uint256 profileId,
@@ -60,15 +63,13 @@ contract MerklePermissionMw is IEssenceMiddleware {
         address,
         bytes calldata proof
     ) external view override {
-        console.log("here1");
-
         require(
             _verify(
                 _leaf(collector),
                 rootStorage[msg.sender][profileId][essenceId],
                 abi.decode(proof, (bytes32[]))
             ) == true,
-            "Invalid merkle proof"
+            "INVALID_PROOF"
         );
     }
 
