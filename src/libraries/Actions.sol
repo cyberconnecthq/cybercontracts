@@ -9,10 +9,12 @@ import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
+import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
 
 import { DataTypes } from "./DataTypes.sol";
 import { Constants } from "./Constants.sol";
 import { LibString } from "./LibString.sol";
+import { CyberNFTBase } from "../base/CyberNFTBase.sol";
 
 library Actions {
     /**
@@ -283,6 +285,30 @@ library Actions {
         }
         _essenceByIdByProfileId[profileId][essenceId].tokenURI = uri;
         emit SetEssenceData(profileId, essenceId, uri, mw, returnData);
+    }
+
+    function generateTokenURI(
+        uint256 tokenId,
+        address nftDescriptor,
+        mapping(uint256 => DataTypes.ProfileStruct) storage _profileById,
+        mapping(uint256 => DataTypes.SubscribeStruct)
+            storage _subscribeByProfileId
+    ) external view returns (string memory) {
+        require(address(nftDescriptor) != address(0), "NFT_DESCRIPTOR_NOT_SET");
+        address subscribeNFT = _subscribeByProfileId[tokenId].subscribeNFT;
+        uint256 subscribers;
+        if (subscribeNFT != address(0)) {
+            subscribers = CyberNFTBase(subscribeNFT).totalSupply();
+        }
+
+        return
+            IProfileNFTDescriptor(nftDescriptor).tokenURI(
+                DataTypes.ConstructTokenURIParams({
+                    tokenId: tokenId,
+                    handle: _profileById[tokenId].handle,
+                    subscribers: subscribers
+                })
+            );
     }
 
     function _deploySubscribeNFT(
