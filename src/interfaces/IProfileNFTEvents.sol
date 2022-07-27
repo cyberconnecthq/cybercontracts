@@ -88,6 +88,23 @@ interface IProfileNFTEvents {
     );
 
     /**
+     * @notice Emitted when a essence middleware has been set to a profile.
+     *
+     * @param profileId The profile id.
+     * @param essenceId The essence id.
+     * @param tokenURI The new token URI.
+     * @param mw The new middleware.
+     * @param prepareReturnData The data used to prepare middleware.
+     */
+    event SetEssenceData(
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        string tokenURI,
+        address mw,
+        bytes prepareReturnData
+    );
+
+    /**
      * @notice Emitted when a new profile been created.
      *
      * @param to The receiver address.

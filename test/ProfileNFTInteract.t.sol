@@ -678,6 +678,192 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         assertEq(profile.getSubscribeMw(profileId), zeroAddress);
     }
 
+    function testCannotSetEssenceDataIfNotOwnerOrOperator() public {
+        address maliciousUser = address(0xD);
+        assertEq(profile.getOperatorApproval(profileId, maliciousUser), false);
+
+        vm.prank(maliciousUser);
+        vm.expectRevert("ONLY_PROFILE_OWNER_OR_OPERATOR");
+        profile.setEssenceData(profileId, 1, "uri", subscribeMw, new bytes(0));
+    }
+
+    function testCannotSetEssenceDataIfMwNotAllowed() public {
+        vm.expectRevert("ESSENCE_MW_NOT_ALLOWED");
+        address notMw = address(0xDEEAAAD);
+        uint256 essenceId = 1;
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                notMw
+            ),
+            abi.encode(false)
+        );
+
+        vm.prank(bob);
+        profile.setEssenceData(
+            profileId,
+            essenceId,
+            "uri",
+            notMw,
+            new bytes(0)
+        );
+        assertEq(profile.getEssenceMw(profileId, essenceId), address(0));
+    }
+
+    function testSetEssenceDataMwZeroAddress() public {
+        address zeroAddress = address(0);
+        uint256 essenceId = 1;
+        bytes memory data = new bytes(0);
+        string memory uri = "url";
+
+        vm.expectEmit(true, false, false, true);
+        emit SetEssenceData(
+            profileId,
+            essenceId,
+            uri,
+            zeroAddress,
+            new bytes(0)
+        );
+        vm.prank(bob);
+        profile.setEssenceData(profileId, essenceId, uri, zeroAddress, data);
+
+        assertEq(profile.getEssenceMw(profileId, essenceId), zeroAddress);
+    }
+
+    function testSetEssenceData() public {
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                essenceMw
+            ),
+            abi.encode(true)
+        );
+        bytes memory data = new bytes(0);
+        bytes memory returnData = new bytes(111);
+        string memory uri = "url";
+        uint256 essenceId = 1;
+
+        vm.mockCall(
+            essenceMw,
+            abi.encodeWithSelector(
+                IEssenceMiddleware.setEssenceMwData.selector,
+                profileId,
+                essenceId,
+                data
+            ),
+            abi.encode(returnData)
+        );
+        vm.expectEmit(true, true, false, true);
+        emit SetEssenceData(profileId, essenceId, uri, essenceMw, returnData);
+        vm.prank(bob);
+        profile.setEssenceData(profileId, essenceId, uri, essenceMw, data);
+
+        assertEq(profile.getEssenceMw(profileId, essenceId), essenceMw);
+        assertEq(profile.getEssenceNFTTokenURI(profileId, essenceId), uri);
+    }
+
+    function testSetEssenceDataAsOperator() public {
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                essenceMw
+            ),
+            abi.encode(true)
+        );
+        bytes memory data = new bytes(0);
+        bytes memory returnData = new bytes(111);
+        string memory uri = "url";
+        uint256 essenceId = 1;
+
+        vm.mockCall(
+            essenceMw,
+            abi.encodeWithSelector(
+                IEssenceMiddleware.setEssenceMwData.selector,
+                profileId,
+                essenceId,
+                data
+            ),
+            abi.encode(returnData)
+        );
+
+        vm.prank(bob);
+        address operator = address(0xDEEAAAD);
+        profile.setOperatorApproval(profileId, operator, true);
+
+        vm.prank(operator);
+        profile.setEssenceData(profileId, essenceId, uri, essenceMw, data);
+
+        assertEq(profile.getEssenceMw(profileId, essenceId), essenceMw);
+        assertEq(profile.getEssenceNFTTokenURI(profileId, essenceId), uri);
+    }
+
+    function testSetEssenceDataWithSig() public {
+        uint256 nonce = profile.nonces(bob);
+
+        vm.warp(50);
+        uint256 deadline = 100;
+
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                essenceMw
+            ),
+            abi.encode(true)
+        );
+        bytes memory data = new bytes(0);
+        bytes memory returnData = new bytes(111);
+
+        uint256 essenceId = 1;
+
+        vm.mockCall(
+            essenceMw,
+            abi.encodeWithSelector(
+                IEssenceMiddleware.setEssenceMwData.selector,
+                profileId,
+                essenceId,
+                data
+            ),
+            abi.encode(returnData)
+        );
+
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(profile),
+            keccak256(
+                abi.encode(
+                    Constants._SET_ESSENCE_DATA_TYPEHASH,
+                    profileId,
+                    essenceId,
+                    keccak256(bytes("url")),
+                    essenceMw,
+                    keccak256(data),
+                    nonce,
+                    deadline
+                )
+            ),
+            "Name",
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+
+        vm.prank(bob);
+        profile.setEssenceDataWithSig(
+            profileId,
+            essenceId,
+            "url",
+            essenceMw,
+            data,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+
+        assertEq(profile.getEssenceMw(profileId, essenceId), essenceMw);
+        assertEq(profile.nonces(bob), nonce + 1);
+        assertEq(profile.getEssenceNFTTokenURI(profileId, essenceId), "url");
+    }
+
     function testSetPrimary() public {
         vm.prank(bob);
 

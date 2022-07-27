@@ -8,6 +8,7 @@ import { ISubscribeNFT } from "../interfaces/ISubscribeNFT.sol";
 import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
 import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
+import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 
 import { DataTypes } from "./DataTypes.sol";
 import { Constants } from "./Constants.sol";
@@ -48,6 +49,21 @@ library Actions {
         uint256[] profileIds,
         bytes[] preDatas,
         bytes[] postDatas
+    );
+
+    event SetSubscribeData(
+        uint256 indexed profileId,
+        string tokenURI,
+        address mw,
+        bytes prepareReturnData
+    );
+
+    event SetEssenceData(
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        string tokenURI,
+        address mw,
+        bytes prepareReturnData
     );
 
     function subscribe(
@@ -176,10 +192,17 @@ library Actions {
 
     function registerEssence(
         DataTypes.RegisterEssenceData calldata data,
+        address engine,
         mapping(uint256 => DataTypes.ProfileStruct) storage _profileById,
         mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
             storage _essenceByIdByProfileId
     ) external returns (uint256) {
+        require(
+            data.essenceMw == address(0) ||
+                ICyberEngine(engine).isEssenceMwAllowed(data.essenceMw),
+            "ESSENCE_MW_NOT_ALLOWED"
+        );
+
         uint256 id = ++_profileById[data.profileId].essenceCount;
         _essenceByIdByProfileId[data.profileId][id].name = data.name;
         _essenceByIdByProfileId[data.profileId][id].symbol = data.symbol;
@@ -197,6 +220,7 @@ library Actions {
                 data.initData
             );
         }
+
         emit RegisterEssence(
             data.profileId,
             id,
@@ -207,6 +231,58 @@ library Actions {
             returnData
         );
         return id;
+    }
+
+    function setSubscribeData(
+        uint256 profileId,
+        string calldata uri,
+        address mw,
+        bytes calldata data,
+        address engine,
+        mapping(uint256 => DataTypes.SubscribeStruct)
+            storage _subscribeByProfileId
+    ) external {
+        require(
+            mw == address(0) || ICyberEngine(engine).isSubscribeMwAllowed(mw),
+            "SUB_MW_NOT_ALLOWED"
+        );
+        _subscribeByProfileId[profileId].subscribeMw = mw;
+        bytes memory returnData;
+        if (mw != address(0)) {
+            returnData = ISubscribeMiddleware(mw).setSubscribeMwData(
+                profileId,
+                data
+            );
+        }
+        _subscribeByProfileId[profileId].tokenURI = uri;
+        emit SetSubscribeData(profileId, uri, mw, returnData);
+    }
+
+    function setEssenceData(
+        uint256 profileId,
+        uint256 essenceId,
+        string calldata uri,
+        address mw,
+        bytes calldata data,
+        address engine,
+        mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
+            storage _essenceByIdByProfileId
+    ) external {
+        require(
+            mw == address(0) || ICyberEngine(engine).isEssenceMwAllowed(mw),
+            "ESSENCE_MW_NOT_ALLOWED"
+        );
+        _essenceByIdByProfileId[profileId][essenceId].essenceMw = mw;
+        bytes memory returnData;
+        if (mw != address(0)) {
+            returnData = IEssenceMiddleware(mw).setEssenceMwData(
+                profileId,
+                essenceId,
+                data
+            );
+        }
+        _essenceByIdByProfileId[profileId][essenceId].tokenURI = uri;
+        emit SetEssenceData(profileId, essenceId, uri, mw, returnData);
     }
 
     function _deploySubscribeNFT(
