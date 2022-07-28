@@ -10,13 +10,13 @@ import { Constants } from "../../../../src/libraries/Constants.sol";
 
 import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
 import { ICyberEngineEvents } from "../../../../src/interfaces/ICyberEngineEvents.sol";
-import { MerklePermissionMw } from "../../../../src/middlewares/essence/MerklePermissionMw.sol";
+import { MerkleDropEssenceMw } from "../../../../src/middlewares/essence/MerkleDropEssenceMw.sol";
 import { TestIntegrationBase } from "../../../utils/TestIntegrationBase.sol";
 import { EssenceNFT } from "../../../../src/core/EssenceNFT.sol";
 import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
 import { TestLib712 } from "../../../utils/TestLib712.sol";
 
-contract MerklePermissionTest is
+contract MerkleDropEssenceMwTest is
     TestIntegrationBase,
     ICyberEngineEvents,
     IProfileNFTEvents
@@ -30,7 +30,7 @@ contract MerklePermissionTest is
     address andrew = 0xa826eC329B50D88EbE1ABB481aF28f35D22ACc2A;
     address denise = 0xD3ffA98133BBBD7f294bB07ed7Bf43C4e20CD481;
 
-    address MerkleEssenceProxy;
+    address merkleEssenceProxy;
     address bobbyEssNFT;
     string lilaHandle = "lila";
     string bobbyHandle = "bobby";
@@ -66,11 +66,11 @@ contract MerklePermissionTest is
     bytes32 root = rootHash;
     bytes32[] proofForLila = [bobbyLeaf, firstLayerNodeTwo, secondLayerNodeTwo];
 
-    MerklePermissionMw merkleMw;
+    MerkleDropEssenceMw merkleMw;
 
     function setUp() public {
         _setUp();
-        merkleMw = new MerklePermissionMw();
+        merkleMw = new MerkleDropEssenceMw();
         vm.label(address(merkleMw), "MerkleMiddleware");
 
         // bob registeres for their profile
@@ -125,7 +125,7 @@ contract MerklePermissionTest is
         );
 
         // predicts the addrs for the essenceNFT that is about to be deployed
-        MerkleEssenceProxy = getDeployedEssProxyAddress(
+        merkleEssenceProxy = getDeployedEssProxyAddress(
             link3EssBeacon,
             bobbyProfileId,
             bobbyEssenceId,
@@ -144,7 +144,7 @@ contract MerklePermissionTest is
         emit DeployEssenceNFT(
             bobbyProfileId,
             bobbyEssenceId,
-            MerkleEssenceProxy
+            merkleEssenceProxy
         );
 
         vm.expectEmit(true, true, true, false);
@@ -167,7 +167,7 @@ contract MerklePermissionTest is
             bobbyEssenceId
         );
 
-        assertEq(bobbyEssNFT, MerkleEssenceProxy);
+        assertEq(bobbyEssNFT, merkleEssenceProxy);
         assertEq(EssenceNFT(bobbyEssNFT).balanceOf(lila), 1);
         assertEq(EssenceNFT(bobbyEssNFT).ownerOf(merkleTokenId), lila);
     }

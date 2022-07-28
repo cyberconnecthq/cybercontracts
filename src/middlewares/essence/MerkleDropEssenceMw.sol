@@ -7,11 +7,11 @@ import { MerkleProof } from "openzeppelin-contracts/contracts/utils/cryptography
 import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
 
 /**
- * @title MerklePermission Middleware
+ * @title Merkle Drop Essence Middleware
  * @author CyberConnect
  * @notice This contract is a middleware to only allow users to collect an essence given the correct merkle proof
  */
-contract MerklePermissionMw is IEssenceMiddleware {
+contract MerkleDropEssenceMw is IEssenceMiddleware {
     /*//////////////////////////////////////////////////////////////
                                 STATES
     //////////////////////////////////////////////////////////////*/
@@ -58,7 +58,7 @@ contract MerklePermissionMw is IEssenceMiddleware {
                 _leaf(collector),
                 rootStorage[msg.sender][profileId][essenceId],
                 abi.decode(proof, (bytes32[]))
-            ) == true,
+            ),
             "INVALID_PROOF"
         );
     }
