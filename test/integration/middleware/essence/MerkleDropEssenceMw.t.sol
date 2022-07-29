@@ -174,7 +174,7 @@ contract MerkleDropEssenceMwTest is
 
     function testCannotCollectWhenNotOnWhitelist() public {
         vm.expectRevert("INVALID_PROOF");
-
+        vm.startPrank(lila);
         link3Profile.collect(
             DataTypes.CollectParams(ashley, bobbyProfileId, bobbyEssenceId),
             abi.encode(proofForLila),

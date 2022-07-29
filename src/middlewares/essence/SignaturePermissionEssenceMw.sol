@@ -11,15 +11,22 @@ import { EIP712 } from "../../base/EIP712.sol";
 /**
  * @title Signiture Permission Essence Middleware
  * @author CyberConnect
- * @notice This contract is a middleware to allow the address to collect an essence only if have a valid signiture
+ * @notice This contract is a middleware to allow an address to collect an essence only if they have a valid signiture from the
+ * essence owner
  */
-contract CollectOnlySubscribedMw is IEssenceMiddleware, EIP712 {
+contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
+    /*//////////////////////////////////////////////////////////////
+                                STATES
+    //////////////////////////////////////////////////////////////*/
+
+    mapping(address => mapping(uint256 => mapping(uint256 => MiddlewareData)))
+        internal _signerStorage;
+
     struct MiddlewareData {
         address signer;
         uint256 nonce;
     }
-
-    mapping(address => mapping(uint256 => mapping(uint256 => MiddlewareData))) signerStorage;
+    uint256 internal _nonce;
 
     bytes32 internal constant _ESSENCE_TYPEHASH =
         keccak256("mint(address to,uint256 nonce,uint256 deadline)");
@@ -34,16 +41,18 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware, EIP712 {
         uint256 essenceId,
         bytes calldata data
     ) external override returns (bytes memory) {
-        signerStorage[msg.sender][profileId][essenceId] = abi.decode(
-            data,
-            (MiddlewareData)
-        );
+        address signerAddr = abi.decode(data, (address));
+
+        MiddlewareData memory params = MiddlewareData(signerAddr, _nonce);
+
+        _signerStorage[msg.sender][profileId][essenceId] = params;
+
         return new bytes(0);
     }
 
     /**
      * @inheritdoc IEssenceMiddleware
-     * @notice Proccess that checks if the user is aready subscribed to the essence owner
+     * @notice Proccess that checks if the essence collector has the correct signature from the signer
      */
     function preProcess(
         uint256 profileId,
@@ -52,7 +61,7 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware, EIP712 {
         address,
         bytes calldata data
     ) external override {
-        MiddlewareData storage mwData = signerStorage[msg.sender][profileId][
+        MiddlewareData storage mwData = _signerStorage[msg.sender][profileId][
             essenceId
         ];
 
@@ -76,6 +85,25 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware, EIP712 {
     }
 
     /*//////////////////////////////////////////////////////////////
+                            PUBLIC VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Gets the nonce of the address.
+     *
+     * @param profileId The the user's profileId
+     * @param essenceId The user address.
+     * @return uint256 The nonce.
+     */
+    function getNonce(uint256 profileId, uint256 essenceId)
+        external
+        view
+        returns (uint256)
+    {
+        return _signerStorage[msg.sender][profileId][essenceId].nonce;
+    }
+
+    /*//////////////////////////////////////////////////////////////
                               INTERNAL
     //////////////////////////////////////////////////////////////*/
 
@@ -85,11 +113,11 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware, EIP712 {
         override
         returns (string memory)
     {
-        return "CollectOnlySubscribedMw";
+        return "SignaturePermissionEssenceMw";
     }
 
     function _requiresValidSig(
-        address to,
+        address collector,
         uint8 v,
         bytes32 r,
         bytes32 s,
@@ -99,7 +127,12 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware, EIP712 {
         _requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
-                    abi.encode(_ESSENCE_TYPEHASH, to, mwData.nonce++, deadline)
+                    abi.encode(
+                        _ESSENCE_TYPEHASH,
+                        collector,
+                        mwData.nonce++,
+                        deadline
+                    )
                 )
             ),
             mwData.signer,
