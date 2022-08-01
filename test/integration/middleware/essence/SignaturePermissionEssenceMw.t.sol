@@ -38,8 +38,9 @@ contract SignaturePermissionEssenceMwTest is
     uint256 davePk = 4096;
     address dave = vm.addr(davePk);
     uint256 validDeadline;
+    uint256 exceededTime;
 
-    address SigPermissionEssenceProxy;
+    address sigPermissionEssenceProxy;
     uint256 bobbyEssenceId;
     address bobbyEssNFT;
     string lilaHandle = "lila";
@@ -53,7 +54,8 @@ contract SignaturePermissionEssenceMwTest is
     SignaturePermissionEssenceMw sigMw;
 
     function setUp() public {
-        validDeadline = block.timestamp + 60 * 60;
+        validDeadline = block.timestamp + 100;
+        exceededTime = 300;
 
         _setUp();
         sigMw = new SignaturePermissionEssenceMw();
@@ -108,7 +110,7 @@ contract SignaturePermissionEssenceMwTest is
         );
 
         // predicts the addrs for the essenceNFT that is about to be deployed
-        SigPermissionEssenceProxy = getDeployedEssProxyAddress(
+        sigPermissionEssenceProxy = getDeployedEssProxyAddress(
             link3EssBeacon,
             bobbyProfileId,
             bobbyEssenceId,
@@ -138,7 +140,7 @@ contract SignaturePermissionEssenceMwTest is
         emit DeployEssenceNFT(
             bobbyProfileId,
             bobbyEssenceId,
-            SigPermissionEssenceProxy
+            sigPermissionEssenceProxy
         );
 
         vm.expectEmit(true, true, true, false);
@@ -161,7 +163,7 @@ contract SignaturePermissionEssenceMwTest is
             bobbyEssenceId
         );
 
-        assertEq(bobbyEssNFT, SigPermissionEssenceProxy);
+        assertEq(bobbyEssNFT, sigPermissionEssenceProxy);
         assertEq(EssenceNFT(bobbyEssNFT).balanceOf(lila), 1);
         assertEq(EssenceNFT(bobbyEssNFT).ownerOf(EssTokenId), lila);
     }
@@ -179,6 +181,26 @@ contract SignaturePermissionEssenceMwTest is
         );
 
         vm.expectRevert("INVALID_SIGNATURE");
+        link3Profile.collect(
+            DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
+            abi.encode(v, r, s, validDeadline),
+            new bytes(0)
+        );
+    }
+
+    function testCannotCollectBeyondDeadline() public {
+        vm.startPrank(lila);
+        (uint8 v, bytes32 r, bytes32 s) = _generateValidSig(
+            lila,
+            bobbyPk,
+            validDeadline,
+            bobbyProfileId,
+            bobbyEssenceId
+        );
+
+        skip(exceededTime);
+
+        vm.expectRevert("DEADLINE_EXCEEDED");
         link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
             abi.encode(v, r, s, validDeadline),

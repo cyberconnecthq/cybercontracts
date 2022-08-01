@@ -19,20 +19,19 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
                                 STATES
     //////////////////////////////////////////////////////////////*/
 
-    mapping(address => mapping(uint256 => mapping(uint256 => MiddlewareData)))
-        internal _signerStorage;
-
     struct MiddlewareData {
-        address signer;
         uint256 nonce;
+        address signer;
     }
-    uint256 internal _nonce;
 
     bytes32 internal constant _ESSENCE_TYPEHASH =
         keccak256("mint(address to,uint256 nonce,uint256 deadline)");
 
+    mapping(address => mapping(uint256 => mapping(uint256 => MiddlewareData)))
+        internal _signerStorage;
+
     /*//////////////////////////////////////////////////////////////
-                         EXTERNAL VIEW
+                                EXTERNAL
     //////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc IEssenceMiddleware
@@ -41,11 +40,10 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
         uint256 essenceId,
         bytes calldata data
     ) external override returns (bytes memory) {
-        address signerAddr = abi.decode(data, (address));
-
-        MiddlewareData memory params = MiddlewareData(signerAddr, _nonce);
-
-        _signerStorage[msg.sender][profileId][essenceId] = params;
+        _signerStorage[msg.sender][profileId][essenceId] = MiddlewareData(
+            0,
+            abi.decode(data, (address))
+        );
 
         return new bytes(0);
     }
@@ -61,16 +59,29 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
         address,
         bytes calldata data
     ) external override {
-        MiddlewareData storage mwData = _signerStorage[msg.sender][profileId][
-            essenceId
-        ];
-
         (uint8 v, bytes32 r, bytes32 s, uint256 deadline) = abi.decode(
             data,
             (uint8, bytes32, bytes32, uint256)
         );
 
-        _requiresValidSig(collector, v, r, s, deadline, mwData);
+        _requiresExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        _ESSENCE_TYPEHASH,
+                        collector,
+                        _signerStorage[msg.sender][profileId][essenceId]
+                            .nonce++,
+                        deadline
+                    )
+                )
+            ),
+            _signerStorage[msg.sender][profileId][essenceId].signer,
+            v,
+            r,
+            s,
+            deadline
+        );
     }
 
     /// @inheritdoc IEssenceMiddleware
@@ -85,7 +96,7 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
     }
 
     /*//////////////////////////////////////////////////////////////
-                            PUBLIC VIEW
+                            EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
 
     /**
@@ -114,32 +125,5 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
         returns (string memory)
     {
         return "SignaturePermissionEssenceMw";
-    }
-
-    function _requiresValidSig(
-        address collector,
-        uint8 v,
-        bytes32 r,
-        bytes32 s,
-        uint256 deadline,
-        MiddlewareData storage mwData
-    ) internal {
-        _requiresExpectedSigner(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        _ESSENCE_TYPEHASH,
-                        collector,
-                        mwData.nonce++,
-                        deadline
-                    )
-                )
-            ),
-            mwData.signer,
-            v,
-            r,
-            s,
-            deadline
-        );
     }
 }

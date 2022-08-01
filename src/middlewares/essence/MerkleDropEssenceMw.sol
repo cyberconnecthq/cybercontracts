@@ -19,7 +19,7 @@ contract MerkleDropEssenceMw is IEssenceMiddleware {
     mapping(address => mapping(uint256 => mapping(uint256 => bytes32))) rootStorage;
 
     /*//////////////////////////////////////////////////////////////
-                         EXTERNAL VIEW
+                                EXTERNAL 
     //////////////////////////////////////////////////////////////*/
 
     /**
@@ -37,10 +37,6 @@ contract MerkleDropEssenceMw is IEssenceMiddleware {
         );
         return new bytes(0);
     }
-
-    /*//////////////////////////////////////////////////////////////
-                                 EXTERNAL
-    //////////////////////////////////////////////////////////////*/
 
     /**
      * @inheritdoc IEssenceMiddleware
