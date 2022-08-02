@@ -51,7 +51,12 @@ contract PaidCollectEssenceMwTest is
         paidCollectMw = new PaidCollectMw(addrs.cyberTreasury);
         vm.label(address(paidCollectMw), "PaidCollectMw");
 
-        // note: we first call the MockERC20 contract and
+        // note: we first call the MockERC20 contract, in the contract, we mint x amount of shit coins to msg.sender
+        // which is this test contract, then we transfer 10000 shit coins from this test contract to lila
+        // then later lila first tells(approves) the token contract that the middleware can take x amount of shit coins out
+        // lastly, the middlware accesses the shit coin contract and asks to extract x amount
+        // it is successful because it is already extracted
+
         token.transfer(lila, 10000);
 
         // bob registeres for their profile
