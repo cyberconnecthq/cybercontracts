@@ -144,14 +144,6 @@ contract ProfileNFT is
         if (profileMw != address(0)) {
             IProfileMiddleware(profileMw).postProcess(params, postData);
         }
-
-        emit CreateProfile(
-            params.to,
-            tokenID,
-            params.handle,
-            params.avatar,
-            params.metadata
-        );
     }
 
     /// @inheritdoc IProfileNFT
@@ -790,6 +782,14 @@ contract ProfileNFT is
         _profileById[_currentIndex].avatar = params.avatar;
         _metadataById[_currentIndex] = params.metadata;
         _profileIdByHandleHash[handleHash] = _currentIndex;
+
+        emit CreateProfile(
+            params.to,
+            tokenID,
+            params.handle,
+            params.avatar,
+            params.metadata
+        );
 
         if (_addressToPrimaryProfile[params.to] == 0) {
             _addressToPrimaryProfile[params.to] = tokenID;

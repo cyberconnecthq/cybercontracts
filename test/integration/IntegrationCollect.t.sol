@@ -104,6 +104,16 @@ contract IntegrationEssenceTest is
 
         // create dixon's profile
         vm.startPrank(dixon);
+        vm.expectEmit(true, true, false, true);
+        emit CreateProfile(
+            dixon,
+            1,
+            "dixon",
+            "dixon'avatar",
+            "dixon's metadata"
+        );
+        vm.expectEmit(true, true, false, false);
+        emit SetPrimaryProfile(dixon, 1);
 
         bytes memory dataDixon = new bytes(0);
         profileIdBob = link5Profile.createProfile(
