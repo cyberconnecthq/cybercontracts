@@ -6,14 +6,16 @@ import "forge-std/Script.sol";
 import { DeploySetting } from "./libraries/DeploySetting.sol";
 import { LibDeploy } from "./libraries/LibDeploy.sol";
 
-contract DeployBox is Script, DeploySetting {
+contract DeployScript is Script, DeploySetting {
     function run() external {
         _setDeployParams();
+        vm.startBroadcast();
         LibDeploy.deployBox(
             vm,
             deployParams.deployerContract,
             deployParams.link3Owner,
             true
         );
+        vm.stopBroadcast();
     }
 }
