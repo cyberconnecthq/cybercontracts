@@ -8,7 +8,7 @@ import { ITreasury } from "../../interfaces/ITreasury.sol";
 import { Constants } from "../../libraries/Constants.sol";
 
 /**
- * @title Treasurt
+ * @title Treasury
  * @author CyberConnect
  * @notice This contract is used for treasury.
  */
@@ -16,8 +16,10 @@ contract Treasury is Owned, ITreasury {
     /*//////////////////////////////////////////////////////////////
                                 STATES
     //////////////////////////////////////////////////////////////*/
+
     address internal _treasuryAddress;
     uint16 internal _treasuryFee;
+    mapping(address => bool) internal _allowedCurrencyList;
 
     /*//////////////////////////////////////////////////////////////
                                  CONSTRUCTOR
@@ -58,6 +60,18 @@ contract Treasury is Owned, ITreasury {
         _treasuryFee = treasuryFee;
     }
 
+    /**
+     * @notice Allows a currency that will be used in a transaction.
+     *
+     * @param currency The ERC20 token contract address.
+     * @dev This function is only available to the owner.
+     */
+    function allowCurrency(address currency, bool allowed) external {
+        bool preAllowed = _allowedCurrencyList[currency];
+        _allowedCurrencyList[currency] = allowed;
+        emit AllowCurrency(currency, preAllowed, allowed);
+    }
+
     /*//////////////////////////////////////////////////////////////
                          EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
@@ -70,5 +84,15 @@ contract Treasury is Owned, ITreasury {
     /// @inheritdoc ITreasury
     function getTreasuryFee() external view override returns (uint256) {
         return _treasuryFee;
+    }
+
+    /// @inheritdoc ITreasury
+    function isCurrencyAllowed(address currency)
+        external
+        view
+        override
+        returns (bool)
+    {
+        return _allowedCurrencyList[currency];
     }
 }

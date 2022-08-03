@@ -6,6 +6,7 @@ import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol"
 import { SafeERC20 } from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
+import { ICyberEngine } from "../../interfaces/ICyberEngine.sol";
 
 import { Constants } from "../../libraries/Constants.sol";
 
@@ -13,15 +14,15 @@ import { FeeMw } from "../base/FeeMw.sol";
 import { SubscribeStatusMw } from "../base/SubscribeStatusMw.sol";
 
 /**
- * @title Merkle Drop Essence Middleware
+ * @title Paid Collect Essence Middleware
  * @author CyberConnect
- * @notice This contract is a middleware to only allow users to collect an essence given the correct merkle proof
+ * @notice This contract is a middleware to only allow users to collect when they pay a certain fee to the essence owner.
  */
 contract PaidCollectMw is IEssenceMiddleware, FeeMw {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
-                                STATES
+                               STATES
     //////////////////////////////////////////////////////////////*/
 
     struct PaidEssenceData {
@@ -35,19 +36,19 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         internal _paidEssenceStorage;
 
     /*//////////////////////////////////////////////////////////////
-                                 CONSTRUCTOR
+                            CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    // TODO: what do I have to have when I inherite some thing
     constructor(address treasury) FeeMw(treasury) {}
 
     /*//////////////////////////////////////////////////////////////
-                         EXTERNAL VIEW
+                              EXTERNAL
     //////////////////////////////////////////////////////////////*/
 
     /**
      * @inheritdoc IEssenceMiddleware
-     * @notice Stores the parameters for setting up the paid essence
+     * @notice Stores the parameters for setting up the paid essence middleware, checks if the amount, recipient, and
+     * currency is valid and approved
      */
     function setEssenceMwData(
         uint256 profileId,
@@ -63,6 +64,7 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
 
         require(amount != 0, "INVALID_AMOUNT");
         require(recipient != address(0), "INVALID_ADDRESS");
+        require(_currencyAllowed(currency), "CURRENCY_NOT_ALLOWED");
 
         _paidEssenceStorage[msg.sender][profileId][essenceId].amount = amount;
         _paidEssenceStorage[msg.sender][profileId][essenceId]
@@ -75,13 +77,10 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         return new bytes(0);
     }
 
-    /*//////////////////////////////////////////////////////////////
-                                 EXTERNAL
-    //////////////////////////////////////////////////////////////*/
-
     /**
      * @inheritdoc IEssenceMiddleware
-     * @notice Proccess ...
+     * @notice Determines whether the collection requires prior subscription, and processes the transaction from
+     * the essence collector to the essence owner.
      */
     function preProcess(
         uint256 profileId,
@@ -90,18 +89,13 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         address,
         bytes calldata
     ) external override {
-        // PaidEssenceData mwData = _paidEssenceStorage[msg.sender][profileId][
-        //     essenceId
-        // ];
         address currency = _paidEssenceStorage[msg.sender][profileId][essenceId]
             .currency;
-
         uint256 amount = _paidEssenceStorage[msg.sender][profileId][essenceId]
             .amount;
-
         uint256 treasuryCollected = (amount * _treasuryFee()) /
             Constants._MAX_BPS;
-        uint256 actualCollected = amount - treasuryCollected;
+        uint256 actualPaid = amount - treasuryCollected;
 
         if (
             _paidEssenceStorage[msg.sender][profileId][essenceId]
@@ -113,7 +107,7 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         IERC20(currency).safeTransferFrom(
             collector,
             _paidEssenceStorage[msg.sender][profileId][essenceId].recipient,
-            actualCollected
+            actualPaid
         );
 
         if (treasuryCollected > 0) {

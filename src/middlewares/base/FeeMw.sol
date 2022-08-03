@@ -6,12 +6,12 @@ import { ITreasury } from "../../interfaces/ITreasury.sol";
 
 abstract contract FeeMw {
     /*//////////////////////////////////////////////////////////////
-                                STATES
+                              STATES
     //////////////////////////////////////////////////////////////*/
     address public immutable TREASURY; // solhint-disable-line
 
     /*//////////////////////////////////////////////////////////////
-                                 CONSTRUCTOR
+                            CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
     constructor(address treasury) {
@@ -22,6 +22,10 @@ abstract contract FeeMw {
     /*//////////////////////////////////////////////////////////////
                               INTERNAL
     //////////////////////////////////////////////////////////////*/
+
+    function _currencyAllowed(address currency) internal view returns (bool) {
+        return ITreasury(TREASURY).isCurrencyAllowed(currency);
+    }
 
     function _treasuryAddress() internal view returns (address) {
         return ITreasury(TREASURY).getTreasuryAddress();
