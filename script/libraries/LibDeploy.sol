@@ -307,8 +307,8 @@ library LibDeploy {
         bytes memory _data = abi.encodeWithSelector(
             CyberBoxNFT.initialize.selector,
             link3Owner,
-            "CyberBox",
-            "CYBER_BOX"
+            "Link3 Mystery Box",
+            "LINK3_MYSTERY_BOX"
         );
         boxProxy = Create2Deployer(dc).deploy(
             abi.encodePacked(

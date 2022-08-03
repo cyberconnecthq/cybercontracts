@@ -180,7 +180,7 @@ contract CyberBoxNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
-        return "";
+        return "ipfs://QmUEiyAnjbR4Jaeg9Rjdg43Ra9wHnwcXmFsy1Wy5MdEmhP";
     }
 
     /*//////////////////////////////////////////////////////////////
