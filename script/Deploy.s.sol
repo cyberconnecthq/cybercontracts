@@ -10,7 +10,6 @@ contract DeployScript is Script, DeploySetting {
     function run() external {
         _setDeployParams();
 
-        console.log("vm.getNonce", vm.getNonce(msg.sender));
         vm.startBroadcast();
 
         LibDeploy.deploy(
