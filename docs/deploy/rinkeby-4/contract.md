@@ -12,3 +12,5 @@
 | Link3 Profile MW (PermissionedFeeCreationMw) | 0x1f0a079e95975e850962f325f337198034461eab |
 | Link3 Descriptor (Impl)                      | 0x1afa11e2f1882dc08422ee16449c6b80055d442f |
 | Link3 Descriptor (Proxy)                     | 0x9f41aa9542a08da825596df910d521daebea3c5d |
+| CyberBoxNFT (Impl)                           | 0xe33aeb3f4448db78fb3ca70a9ab6bf08a71c348d |
+| CyberBoxNFT (Proxy)                          | 0x406e4808ea8bcfa43a322d68cb2f7cbc54ba4b65 |
