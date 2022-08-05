@@ -1003,6 +1003,96 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
     }
 
+    function testCannotRegisterEssenceWithEmptyName() public {
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                essenceMw
+            ),
+            abi.encode(true)
+        );
+
+        vm.prank(bob);
+
+        vm.expectRevert("EMPTY_NAME");
+        string memory name = "";
+        string memory symbol = "symbol";
+        string memory uri = "uri";
+
+        profile.registerEssence(
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                name,
+                symbol,
+                uri,
+                essenceMw,
+                true
+            ),
+            new bytes(0)
+        );
+    }
+
+    function testCannotRegisterEssenceWithEmptySymbol() public {
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                essenceMw
+            ),
+            abi.encode(true)
+        );
+
+        vm.prank(bob);
+
+        vm.expectRevert("EMPTY_SYMBOL");
+        string memory name = "name";
+        string memory symbol = "";
+        string memory uri = "uri";
+
+        profile.registerEssence(
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                name,
+                symbol,
+                uri,
+                essenceMw,
+                true
+            ),
+            new bytes(0)
+        );
+    }
+
+    function testCannotRegisterEssenceWithEmptyTokenURI() public {
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                essenceMw
+            ),
+            abi.encode(true)
+        );
+
+        vm.prank(bob);
+
+        vm.expectRevert("EMPTY_URI");
+        string memory name = "name";
+        string memory symbol = "symbol";
+        string memory uri = "";
+
+        profile.registerEssence(
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                name,
+                symbol,
+                uri,
+                essenceMw,
+                true
+            ),
+            new bytes(0)
+        );
+    }
+
     function testRegisterEssenceAsProfileOwner() public {
         vm.mockCall(
             engine,
