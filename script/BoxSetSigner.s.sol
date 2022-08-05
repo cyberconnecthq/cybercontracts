@@ -14,7 +14,7 @@ contract SetSignerScript is Script {
         vm.startBroadcast();
         address deployer = 0x39e0c6E610A8D7F408dD688011591583cbc1c3ce;
         require(msg.sender == deployer);
-        address signer = 0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F;
+        address signer = 0x2A2EA826102c067ECE82Bc6E2B7cf38D7EbB1B82;
         address box = 0xcE4F341622340d56E397740d325Fd357E62b91CB;
         require(CyberBoxNFT(box).owner() == deployer);
 
