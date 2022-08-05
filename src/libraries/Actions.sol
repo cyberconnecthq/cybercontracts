@@ -205,6 +205,10 @@ library Actions {
             "ESSENCE_MW_NOT_ALLOWED"
         );
 
+        require(bytes(data.name).length != 0, "EMPTY_NAME");
+        require(bytes(data.symbol).length != 0, "EMPTY_SYMBOL");
+        require(bytes(data.essenceTokenURI).length != 0, "EMPTY_URI");
+
         uint256 id = ++_profileById[data.profileId].essenceCount;
         _essenceByIdByProfileId[data.profileId][id].name = data.name;
         _essenceByIdByProfileId[data.profileId][id].symbol = data.symbol;

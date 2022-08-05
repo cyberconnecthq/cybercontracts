@@ -72,7 +72,9 @@ contract DeploySetting {
                     0xf08cFD541da2eA42ab0F9603aE1c2293CDF39e69
                 );
             } else if (block.chainid == 4) {
-                deployParams.deployerContract = address(0);
+                deployParams.deployerContract = address(
+                    0xe19061D4Dd38ac3B67eeC28E90bdFB68065DbF7c
+                );
             }
         } else if (
             block.chainid == 1 || block.chainid == 137 || block.chainid == 56
