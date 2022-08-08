@@ -348,7 +348,14 @@ contract IntegrationEssenceTest is
         emit DeployEssenceNFT(profileIdBob, bobEssenceId, essenceProxy);
 
         vm.expectEmit(true, true, true, false);
-        emit CollectEssence(carly, 1, profileIdBob, new bytes(0), new bytes(0));
+        emit CollectEssence(
+            carly,
+            profileIdBob,
+            bobEssenceId,
+            1,
+            new bytes(0),
+            new bytes(0)
+        );
 
         uint256 tokenId = link5Profile.collect(
             DataTypes.CollectParams(carly, profileIdBob, bobEssenceId),
@@ -423,7 +430,14 @@ contract IntegrationEssenceTest is
         emit DeployEssenceNFT(profileIdBob, bobEssenceMWId, essenceMWProxy);
 
         vm.expectEmit(true, true, true, false);
-        emit CollectEssence(carly, 1, profileIdBob, new bytes(0), new bytes(0));
+        emit CollectEssence(
+            carly,
+            profileIdBob,
+            bobEssenceMWId,
+            1,
+            new bytes(0),
+            new bytes(0)
+        );
 
         // carly then collects bob's "super fan NFT"
         vm.startPrank(carly);
@@ -469,7 +483,14 @@ contract IntegrationEssenceTest is
         emit DeployEssenceNFT(profileIdBob, bobEssenceId, essenceProxy);
 
         vm.expectEmit(true, true, false, false);
-        emit CollectEssence(dixon, 1, profileIdBob, new bytes(0), new bytes(0));
+        emit CollectEssence(
+            dixon,
+            profileIdBob,
+            bobEssenceId,
+            1,
+            new bytes(0),
+            new bytes(0)
+        );
 
         uint256 tokenId = link5Profile.collect(
             DataTypes.CollectParams(dixon, profileIdBob, bobEssenceId),
@@ -502,7 +523,14 @@ contract IntegrationEssenceTest is
         emit DeployEssenceNFT(profileIdBob, bobEssenceId, essenceProxy);
 
         vm.expectEmit(true, true, false, false);
-        emit CollectEssence(bob, 1, profileIdBob, new bytes(0), new bytes(0));
+        emit CollectEssence(
+            bob,
+            profileIdBob,
+            bobEssenceId,
+            1,
+            new bytes(0),
+            new bytes(0)
+        );
 
         uint256 deadline = 100;
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
@@ -558,7 +586,14 @@ contract IntegrationEssenceTest is
         emit DeployEssenceNFT(profileIdBob, bobEssenceId, essenceProxy);
 
         vm.expectEmit(true, true, false, false);
-        emit CollectEssence(dixon, 1, profileIdBob, new bytes(0), new bytes(0));
+        emit CollectEssence(
+            dixon,
+            profileIdBob,
+            bobEssenceId,
+            1,
+            new bytes(0),
+            new bytes(0)
+        );
 
         uint256 deadline = 100;
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
