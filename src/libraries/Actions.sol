@@ -41,8 +41,9 @@ library Actions {
     );
     event CollectEssence(
         address indexed collector,
-        uint256 indexed tokenId,
         uint256 indexed profileId,
+        uint256 indexed essenceId,
+        uint256 tokenId,
         bytes preData,
         bytes postData
     );
@@ -185,8 +186,9 @@ library Actions {
         }
         emit CollectEssence(
             data.collector,
-            tokenId,
             data.profileId,
+            data.essenceId,
+            tokenId,
             data.preData,
             data.postData
         );

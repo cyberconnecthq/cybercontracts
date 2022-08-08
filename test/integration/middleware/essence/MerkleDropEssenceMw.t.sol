@@ -150,8 +150,9 @@ contract MerkleDropEssenceMwTest is
         vm.expectEmit(true, true, true, false);
         emit CollectEssence(
             lila,
-            1,
             bobbyProfileId,
+            bobbyEssenceId,
+            1,
             abi.encode(proofForLila),
             new bytes(0)
         );

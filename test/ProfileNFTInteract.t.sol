@@ -1253,8 +1253,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.expectEmit(true, false, false, true);
         emit CollectEssence(
             minter,
-            tokenId,
             profileId,
+            essenceId,
+            tokenId,
             new bytes(0),
             new bytes(0)
         );
@@ -1315,8 +1316,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.expectEmit(true, true, false, true);
         emit CollectEssence(
             minter,
-            tokenId,
             profileId,
+            essenceId,
+            tokenId,
             new bytes(0),
             new bytes(0)
         );
@@ -1377,7 +1379,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
 
         vm.expectEmit(true, false, false, true);
-        emit CollectEssence(bob, tokenId, profileId, data, data);
+        emit CollectEssence(bob, profileId, essenceId, tokenId, data, data);
 
         vm.warp(50);
         uint256 deadline = 100;
