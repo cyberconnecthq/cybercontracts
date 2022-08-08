@@ -28,13 +28,6 @@ interface IProfileNFTEvents {
     event SetNamespaceOwner(address indexed preOwner, address indexed newOwner);
 
     /**
-     * @notice Emitted when a new animation template has been set.
-     *
-     * @param newTemplate The newly set animation template.
-     */
-    event SetAnimationTemplate(string indexed newTemplate);
-
-    /**
      * @notice Emitted when a new metadata has been set to a profile.
      *
      * @param profileId The profile id.
@@ -48,7 +41,7 @@ interface IProfileNFTEvents {
      * @param profileId The profile id.
      * @param newAvatar The newly set avatar.
      */
-    event SetAvatar(uint256 indexed profileId, string indexed newAvatar);
+    event SetAvatar(uint256 indexed profileId, string newAvatar);
 
     /**
      * @notice Emitted when a primary profile has been set.
