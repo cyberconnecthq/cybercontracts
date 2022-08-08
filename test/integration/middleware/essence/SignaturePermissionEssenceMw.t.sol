@@ -121,7 +121,7 @@ contract SignaturePermissionEssenceMwTest is
         );
     }
 
-    function testCollectwithCorrectSig() public {
+    function testCollectWithCorrectSig() public {
         // lila wants to collect bob's essence
         vm.startPrank(lila);
 
