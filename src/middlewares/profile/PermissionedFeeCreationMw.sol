@@ -25,6 +25,7 @@ contract PermissionedFeeCreationMw is
     /*//////////////////////////////////////////////////////////////
                                 STATES
     //////////////////////////////////////////////////////////////*/
+
     struct MiddlewareData {
         address signer;
         address recipient;
@@ -156,7 +157,7 @@ contract PermissionedFeeCreationMw is
     }
 
     /*//////////////////////////////////////////////////////////////
-                            PUBLIC VIEW
+                            EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
 
     /**
