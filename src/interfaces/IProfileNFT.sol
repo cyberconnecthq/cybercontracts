@@ -76,7 +76,7 @@ interface IProfileNFT is IProfileNFTEvents {
     ) external returns (uint256[] memory);
 
     /**
-     * @notice Collect a profile's essence.
+     * @notice Collect a profile's essence. Anyone can collect to another wallet
      *
      * @param params The params for collect.
      * @param preData The collect data for preprocess.
