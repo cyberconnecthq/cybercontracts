@@ -9,6 +9,7 @@ import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import { CollectOnlySubscribedMw } from "../../src/middlewares/essence/CollectOnlySubscribedMw.sol";
+import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 
 import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
 
@@ -22,16 +23,19 @@ abstract contract TestIntegrationBase is Test, TestProxy {
     address internal immutable bob = vm.addr(bobPk);
     address internal constant carly = address(0xDEADCA11);
     address internal constant dixon = address(0xDEADD1);
-
     address internal constant link3Treasury = address(0xDEAD3333);
+
     address internal constant engineTreasury = address(0xDEADEEEE);
+
     address link3EssBeacon;
+    address link3SubBeacon;
 
     ProfileNFT link3Profile;
     Link3ProfileDescriptor profileDescriptor;
     PermissionedFeeCreationMw profileMw;
     CollectOnlySubscribedMw collectMw;
     CyberEngine engine;
+    Treasury treasury;
 
     LibDeploy.ContractAddresses addrs;
 
@@ -46,6 +50,8 @@ abstract contract TestIntegrationBase is Test, TestProxy {
         profileDescriptor = Link3ProfileDescriptor(addrs.link3DescriptorProxy);
         profileMw = PermissionedFeeCreationMw(addrs.link3ProfileMw);
         engine = CyberEngine(addrs.engineProxyAddress);
+        treasury = Treasury(addrs.cyberTreasury);
         link3EssBeacon = addrs.essBeacon;
+        link3SubBeacon = addrs.subBeacon;
     }
 }
