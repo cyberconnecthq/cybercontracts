@@ -57,11 +57,13 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.etch(essenceMw, address(this).code);
         vm.etch(engine, address(this).code);
 
-        address fakeImpl = deploySubscribe(_salt, address(0xdead));
+        // precalculated profile proxy address so that beacons could be deployed with correct proxy address
+        address profileProxyAddr = 0x5693a610120eEf35686DB1DC312a9ddc2dcBB893;
+        address fakeImpl = deploySubscribe(_salt, profileProxyAddr);
         subscribeBeacon = address(
             new UpgradeableBeacon(fakeImpl, address(profile))
         );
-        address fakeEssenceImpl = deployEssence(_salt, address(0xdead));
+        address fakeEssenceImpl = deployEssence(_salt, profileProxyAddr);
         essenceBeacon = address(
             new UpgradeableBeacon(fakeEssenceImpl, address(profile))
         );
@@ -77,6 +79,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             "Symbol"
         );
         ERC1967Proxy profileProxy = new ERC1967Proxy(profileImpl, data);
+        assertEq(address(profileProxy), profileProxyAddr);
         profile = MockProfile(address(profileProxy));
 
         assertEq(profile.nonces(bob), 0);
@@ -151,16 +154,11 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         ids[0] = profileId;
         bytes[] memory datas = new bytes[](1);
 
-        uint256 result = 100;
-
-        vm.mockCall(
-            subscribeProxy,
-            abi.encodeWithSelector(ISubscribeNFT.mint.selector, address(this)),
-            abi.encode(result)
-        );
-
         uint256[] memory expected = new uint256[](1);
-        expected[0] = result;
+        expected[0] = 1;
+
+        address minter = address(0x1890);
+        vm.prank(minter);
         uint256[] memory called = profile.subscribe(
             DataTypes.SubscribeParams(ids),
             datas,
@@ -170,8 +168,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
         assertEq(called.length, expected.length);
         assertEq(called[0], expected[0]);
-
-        assertEq(profile.getSubscribeNFT(1), subscribeProxy);
     }
 
     function testCannotSetOperatorIfNotOwner() public {
@@ -270,14 +266,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             handle
         );
 
-        uint256 result = 1890;
-
-        vm.mockCall(
-            subscribeProxy,
-            abi.encodeWithSelector(ISubscribeNFT.mint.selector, charlie),
-            abi.encode(result)
-        );
-
         vm.expectEmit(true, false, false, true);
         emit Subscribe(charlie, profileIds, subDatas, subDatas);
         uint256[] memory got = profile.subscribeWithSig(
@@ -289,7 +277,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         assertEq(got.length, 1);
-        assertEq(got[0], result);
+        assertEq(got[0], 1);
         assertEq(profile.getSubscribeNFT(profileId), subscribeProxy);
     }
 
@@ -1292,8 +1280,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         assertEq(essenceId, expectedEssenceId);
         assertEq(profile.getEssenceNFTTokenURI(profileId, essenceId), "uri");
 
-        uint256 tokenId = 1890;
-
         address minter = address(0x1890);
         address essenceProxy = getDeployedEssProxyAddress(
             essenceBeacon,
@@ -1304,11 +1290,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             symbol,
             true
         );
-        vm.mockCall(
-            essenceProxy,
-            abi.encodeWithSelector(IEssenceNFT.mint.selector, minter),
-            abi.encode(tokenId)
-        );
 
         vm.expectEmit(true, true, false, true);
         emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
@@ -1318,7 +1299,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             minter,
             profileId,
             essenceId,
-            tokenId,
+            1,
             new bytes(0),
             new bytes(0)
         );
@@ -1330,7 +1311,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 new bytes(0),
                 new bytes(0)
             ),
-            tokenId
+            1
         );
         assertEq(profile.getEssenceNFT(profileId, essenceId), essenceProxy);
     }
@@ -1355,8 +1336,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
         assertEq(essenceId, expectedEssenceId);
 
-        uint256 tokenId = 1890;
-
         address essenceProxy = getDeployedEssProxyAddress(
             essenceBeacon,
             profileId,
@@ -1367,19 +1346,13 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             true
         );
 
-        vm.mockCall(
-            essenceProxy,
-            abi.encodeWithSelector(IEssenceNFT.mint.selector, bob),
-            abi.encode(tokenId)
-        );
-
         bytes memory data = new bytes(0);
 
         vm.expectEmit(true, true, false, true);
         emit DeployEssenceNFT(profileId, essenceId, essenceProxy);
 
         vm.expectEmit(true, false, false, true);
-        emit CollectEssence(bob, profileId, essenceId, tokenId, data, data);
+        emit CollectEssence(bob, profileId, essenceId, 1, data, data);
 
         vm.warp(50);
         uint256 deadline = 100;
@@ -1412,7 +1385,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 bob,
                 DataTypes.EIP712Signature(v, r, s, deadline)
             ),
-            tokenId
+            1
         );
         assertEq(profile.getEssenceNFT(profileId, essenceId), essenceProxy);
     }
