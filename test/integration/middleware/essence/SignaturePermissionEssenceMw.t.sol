@@ -147,7 +147,7 @@ contract SignaturePermissionEssenceMwTest is
         emit CollectEssence(
             lila,
             bobbyProfileId,
-            1,
+            bobbyEssenceId,
             1,
             abi.encode(v, r, s, validDeadline),
             new bytes(0)
