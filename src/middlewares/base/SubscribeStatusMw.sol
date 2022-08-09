@@ -18,13 +18,7 @@ library SubscribeStatusMw {
     {
         address essenceOwnerSubscribeNFT = IProfileNFT(msg.sender)
             .getSubscribeNFT(profileId);
-        if (
-            essenceOwnerSubscribeNFT == address(0) ||
-            ERC721(essenceOwnerSubscribeNFT).balanceOf(collector) == 0
-        ) {
-            return false;
-        } else {
-            return true;
-        }
+        return (essenceOwnerSubscribeNFT != address(0) &&
+            ERC721(essenceOwnerSubscribeNFT).balanceOf(collector) != 0);
     }
 }
