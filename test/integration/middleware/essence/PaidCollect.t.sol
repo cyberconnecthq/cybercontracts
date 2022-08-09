@@ -184,8 +184,9 @@ contract PaidCollectEssenceMwTest is
         vm.expectEmit(true, true, true, false);
         emit CollectEssence(
             lila,
-            1,
             bobbyProfileId,
+            1,
+            1,
             new bytes(0),
             new bytes(0)
         );
@@ -327,8 +328,9 @@ contract PaidCollectEssenceMwTest is
         vm.expectEmit(true, true, true, false);
         emit CollectEssence(
             lila,
-            1,
             bobbyProfileId,
+            1,
+            1,
             new bytes(0),
             new bytes(0)
         );
@@ -408,7 +410,7 @@ contract PaidCollectEssenceMwTest is
         vm.startPrank(lila);
         token.approve(address(paidCollectMw), 5000);
 
-        vm.expectRevert("NO_SUBSCRIBE_NFT");
+        vm.expectRevert("NOT_SUBSCRIBED");
 
         link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),

@@ -146,8 +146,9 @@ contract SignaturePermissionEssenceMwTest is
         vm.expectEmit(true, true, true, false);
         emit CollectEssence(
             lila,
-            1,
             bobbyProfileId,
+            1,
+            1,
             abi.encode(v, r, s, validDeadline),
             new bytes(0)
         );

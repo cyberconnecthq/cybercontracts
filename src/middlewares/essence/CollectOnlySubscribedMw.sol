@@ -40,7 +40,10 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware {
         address,
         bytes calldata
     ) external view override {
-        SubscribeStatusMw.checkSubscribe(profileId, collector);
+        require(
+            SubscribeStatusMw.checkSubscribe(profileId, collector),
+            "NOT_SUBSCRIBED"
+        );
     }
 
     /// @inheritdoc IEssenceMiddleware

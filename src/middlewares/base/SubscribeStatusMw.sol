@@ -11,15 +11,20 @@ library SubscribeStatusMw {
                             PUBLIC VIEW
     //////////////////////////////////////////////////////////////*/
 
-    function checkSubscribe(uint256 profileId, address collector) public view {
+    function checkSubscribe(uint256 profileId, address collector)
+        internal
+        view
+        returns (bool)
+    {
         address essenceOwnerSubscribeNFT = IProfileNFT(msg.sender)
             .getSubscribeNFT(profileId);
-
-        require(essenceOwnerSubscribeNFT != address(0), "NO_SUBSCRIBE_NFT");
-
-        require(
-            ERC721(essenceOwnerSubscribeNFT).balanceOf(collector) != 0,
-            "NOT_SUBSCRIBED"
-        );
+        if (
+            essenceOwnerSubscribeNFT == address(0) ||
+            ERC721(essenceOwnerSubscribeNFT).balanceOf(collector) == 0
+        ) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

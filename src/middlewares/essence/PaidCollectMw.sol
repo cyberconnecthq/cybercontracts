@@ -101,7 +101,10 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
             _paidEssenceStorage[msg.sender][profileId][essenceId]
                 .subscribeRequired == true
         ) {
-            SubscribeStatusMw.checkSubscribe(profileId, collector);
+            require(
+                SubscribeStatusMw.checkSubscribe(profileId, collector),
+                "NOT_SUBSCRIBED"
+            );
         }
 
         IERC20(currency).safeTransferFrom(

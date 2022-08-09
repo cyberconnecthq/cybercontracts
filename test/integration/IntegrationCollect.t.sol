@@ -375,7 +375,7 @@ contract IntegrationEssenceTest is
 
     function testCannotCollectWithoutSubscribeNFT() public {
         // should revert, carly cannot subscribe without subscribing to bob
-        vm.expectRevert("NO_SUBSCRIBE_NFT");
+        vm.expectRevert("NOT_SUBSCRIBED");
         vm.startPrank(carly);
         uint256 tokenId = link5Profile.collect(
             DataTypes.CollectParams(carly, profileIdBob, bobEssenceMWId),
