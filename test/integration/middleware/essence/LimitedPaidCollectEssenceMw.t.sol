@@ -194,8 +194,9 @@ contract LimitedPaidCollectEssenceMwTest is
         vm.expectEmit(true, true, true, false);
         emit CollectEssence(
             lila,
-            1,
             bobbyProfileId,
+            1,
+            1,
             new bytes(0),
             new bytes(0)
         );
