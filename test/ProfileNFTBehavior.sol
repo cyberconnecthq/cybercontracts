@@ -22,6 +22,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     address constant alice = address(0xA11CE);
     address constant gov = address(0x8888);
     address descriptor = address(0x233);
+    address internal engine = address(0xdead);
     DataTypes.CreateProfileParams internal createProfileDataAlice =
         DataTypes.CreateProfileParams(
             alice,
@@ -43,7 +44,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
         );
 
         address profileImpl = deployMockProfile(
-            address(0xdead),
+            engine,
             essenceBeacon,
             subscribeBeacon
         );
@@ -76,12 +77,12 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testRegisterTwiceWillNotChangePrimaryProfile() public {
-        profile.createProfile(createProfileDataAlice);
+        _createProfile(vm, engine, address(profile), createProfileDataAlice);
         assertEq(profile.getHandleByProfileId(1), "alice");
         assertEq(profile.getPrimaryProfile(alice), 1);
 
         createProfileDataAlice.handle = "alice2";
-        profile.createProfile(createProfileDataAlice);
+        _createProfile(vm, engine, address(profile), createProfileDataAlice);
         assertEq(profile.getHandleByProfileId(2), "alice2");
         assertEq(profile.getPrimaryProfile(alice), 1);
     }

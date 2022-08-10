@@ -8,9 +8,7 @@ import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
 
 import { IProfileNFT } from "../interfaces/IProfileNFT.sol";
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
-import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { IEssenceNFT } from "../interfaces/IEssenceNFT.sol";
-import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 import { IProfileDeployer } from "../interfaces/IProfileDeployer.sol";
 
 import { Constants } from "../libraries/Constants.sol";
@@ -129,21 +127,7 @@ contract ProfileNFT is
         bytes calldata preData,
         bytes calldata postData
     ) external payable override nonReentrant returns (uint256 tokenID) {
-        address profileMw = ICyberEngine(ENGINE).getProfileMwByNamespace(
-            address(this)
-        );
-
-        if (profileMw != address(0)) {
-            IProfileMiddleware(profileMw).preProcess{ value: msg.value }(
-                params,
-                preData
-            );
-        }
-
-        tokenID = _createProfile(params);
-        if (profileMw != address(0)) {
-            IProfileMiddleware(profileMw).postProcess(params, postData);
-        }
+        return _createProfile(params, preData, postData);
     }
 
     /// @inheritdoc IProfileNFT
@@ -770,37 +754,34 @@ contract ProfileNFT is
             );
     }
 
-    function _createProfile(DataTypes.CreateProfileParams calldata params)
-        internal
-        returns (uint256 tokenID)
-    {
+    function _createProfile(
+        DataTypes.CreateProfileParams calldata params,
+        bytes calldata preData,
+        bytes calldata postData
+    ) internal returns (uint256 tokenID) {
+        address profileMw = Actions.createProfilePreProcess(
+            params,
+            preData,
+            ENGINE
+        );
         bytes32 handleHash = keccak256(bytes(params.handle));
         require(!_exists(_profileIdByHandleHash[handleHash]), "HANDLE_TAKEN");
-
         tokenID = _mint(params.to);
-
-        _profileById[_currentIndex].handle = params.handle;
-        _profileById[_currentIndex].avatar = params.avatar;
-        _metadataById[_currentIndex] = params.metadata;
-        _profileIdByHandleHash[handleHash] = _currentIndex;
-
-        emit CreateProfile(
-            params.to,
-            tokenID,
-            params.handle,
-            params.avatar,
-            params.metadata
+        Actions.createProfilePostProcess(
+            params,
+            postData,
+            DataTypes.CreateProfilePostProcessData(
+                tokenID,
+                _currentIndex,
+                handleHash,
+                profileMw
+            ),
+            _profileById,
+            _metadataById,
+            _profileIdByHandleHash,
+            _addressToPrimaryProfile,
+            _operatorApproval
         );
-
-        if (_addressToPrimaryProfile[params.to] == 0) {
-            _addressToPrimaryProfile[params.to] = tokenID;
-            emit SetPrimaryProfile(params.to, tokenID);
-        }
-
-        if (params.operator != address(0)) {
-            require(params.to != params.operator, "INVALID_OPERATOR");
-            _setOperatorApproval(_currentIndex, params.operator, true);
-        }
     }
 
     function _registerEssence(
@@ -842,10 +823,12 @@ contract ProfileNFT is
         address operator,
         bool approved
     ) internal {
-        require(operator != address(0), "ZERO_ADDRESS");
-        bool prev = _operatorApproval[profileId][operator];
-        _operatorApproval[profileId][operator] = approved;
-        emit SetOperatorApproval(profileId, operator, prev, approved);
+        Actions.setOperatorApproval(
+            profileId,
+            operator,
+            approved,
+            _operatorApproval
+        );
     }
 
     function _setSubscribeData(
@@ -893,8 +876,6 @@ contract ProfileNFT is
 
     function _setPrimaryProfile(address owner, uint256 profileId) internal {
         _requireMinted(profileId);
-
-        _addressToPrimaryProfile[owner] = profileId;
-        emit SetPrimaryProfile(owner, profileId);
+        Actions.setPrimaryProfile(owner, profileId, _addressToPrimaryProfile);
     }
 }
