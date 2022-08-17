@@ -229,6 +229,26 @@ library Actions {
             );
         }
 
+        // if the user chooses to deploy essence NFT at registration
+        if (data.deployAtRegister) {
+            bytes memory initData = abi.encodeWithSelector(
+                IEssenceNFT.initialize.selector,
+                data.profileId,
+                id,
+                _essenceByIdByProfileId[data.profileId][id].name,
+                _essenceByIdByProfileId[data.profileId][id].symbol,
+                _essenceByIdByProfileId[data.profileId][id].transferable
+            );
+            address essenceNFT = address(
+                new BeaconProxy{ salt: bytes32(data.profileId) }(
+                    data.essBeacon,
+                    initData
+                )
+            );
+            _essenceByIdByProfileId[data.profileId][id].essenceNFT = essenceNFT;
+            emit DeployEssenceNFT(data.profileId, id, essenceNFT);
+        }
+
         emit RegisterEssence(
             data.profileId,
             id,

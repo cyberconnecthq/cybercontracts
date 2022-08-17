@@ -942,7 +942,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 "symbol",
                 "uri",
                 essenceMw,
-                true
+                true,
+                false
             ),
             new bytes(0)
         );
@@ -959,7 +960,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 "symbol",
                 "uri",
                 essenceMw,
-                true
+                true,
+                false
             ),
             new bytes(0)
         );
@@ -985,7 +987,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 "symbol",
                 "uri",
                 notMw,
-                true
+                true,
+                false
             ),
             new bytes(0)
         );
@@ -1015,7 +1018,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 symbol,
                 uri,
                 essenceMw,
-                true
+                true,
+                false
             ),
             new bytes(0)
         );
@@ -1045,7 +1049,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 symbol,
                 uri,
                 essenceMw,
-                true
+                true,
+                false
             ),
             new bytes(0)
         );
@@ -1075,7 +1080,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 symbol,
                 uri,
                 essenceMw,
-                true
+                true,
+                false
             ),
             new bytes(0)
         );
@@ -1125,11 +1131,85 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 symbol,
                 uri,
                 essenceMw,
-                true
+                true,
+                false
             ),
             new bytes(0)
         );
         assertEq(essenceId, expectedEssenceId);
+    }
+
+    function testRegisterEssenceAndDeploy() public {
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                essenceMw
+            ),
+            abi.encode(true)
+        );
+
+        vm.prank(bob);
+        uint256 expectedEssenceId = 1;
+        bytes memory returnData = new bytes(111);
+
+        vm.mockCall(
+            essenceMw,
+            abi.encodeWithSelector(
+                IEssenceMiddleware.setEssenceMwData.selector,
+                profileId,
+                expectedEssenceId,
+                new bytes(0)
+            ),
+            abi.encode(returnData)
+        );
+        vm.expectEmit(true, true, false, false);
+        string memory name = "name";
+        string memory symbol = "symbol";
+        string memory uri = "uri";
+
+        address essenceProxy = getDeployedEssProxyAddress(
+            essenceBeacon,
+            profileId,
+            expectedEssenceId,
+            address(profile),
+            name,
+            symbol,
+            true
+        );
+
+        vm.expectEmit(true, true, false, true);
+        emit DeployEssenceNFT(profileId, expectedEssenceId, essenceProxy);
+
+        emit RegisterEssence(
+            profileId,
+            expectedEssenceId,
+            name,
+            symbol,
+            uri,
+            essenceMw,
+            returnData
+        );
+
+        // Users chooses to deploy the essence during the the registration process
+        uint256 essenceId = profile.registerEssence(
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                name,
+                symbol,
+                uri,
+                essenceMw,
+                true,
+                true
+            ),
+            new bytes(0)
+        );
+
+        assertEq(essenceId, expectedEssenceId);
+
+        assertEq(profile.getEssenceNFTTokenURI(profileId, essenceId), "uri");
+
+        assertEq(profile.getEssenceNFT(profileId, essenceId), essenceProxy);
     }
 
     function testRegisterEssenceWithSig() public {
@@ -1163,7 +1243,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 "symbol",
                 "uri",
                 essenceMw,
-                true
+                true,
+                false
             );
         bytes memory data = new bytes(0);
 
@@ -1219,7 +1300,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 "symbol",
                 "uri",
                 address(0),
-                true
+                true,
+                false
             ),
             new bytes(0)
         );
@@ -1273,7 +1355,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 symbol,
                 "uri",
                 address(0),
-                true
+                true,
+                false
             ),
             new bytes(0)
         );
@@ -1330,7 +1413,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 symbol,
                 "uri",
                 address(0),
-                true
+                true,
+                false
             ),
             new bytes(0)
         );
