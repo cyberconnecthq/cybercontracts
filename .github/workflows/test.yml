@@ -36,7 +36,23 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 14
+
       - name: Install modules
         run: yarn
+
       - name: Run lint
         run: yarn run lint:gh-check
+
+      - name: Run Coverage
+        run: forge coverage --report lcov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: 5988e766-42d2-43ef-813c-56f5b7cbcc6d
+          directory: .
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          files: ./lcov.info
+          name: cybercontracts-coverage
+          verbose: true
