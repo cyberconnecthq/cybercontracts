@@ -194,6 +194,7 @@ IntegrationEngineTest:testCreatNamespaceAndCreateMultipleProfiles() (gas: 928716
 IntegrationEngineTest:testUpgradeEssenceNFT() (gas: 9738202)
 IntegrationEngineTest:testUpgradeSubscribeNFT() (gas: 9615174)
 IntegrationSubscribeTest:testSubscription() (gas: 845272)
+CollectDisallowedMwTest:testCannotCollectWithMiddleware() (gas: 609563)
 MerkleDropEssenceMwTest:testCannotCollectWhenNotOnWhitelist() (gas: 438844)
 MerkleDropEssenceMwTest:testCollectwithCorrectProof() (gas: 557908)
 PaidCollectEssenceMwTest:testCannotCollectWithInsufficientFund() (gas: 776674)
