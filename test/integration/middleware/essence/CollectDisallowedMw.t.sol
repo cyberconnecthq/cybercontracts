@@ -40,7 +40,7 @@ contract CollectDisallowedMwTest is
         _setUp();
 
         collectDisallowedMw = new CollectDisallowedMw();
-        vm.label(address(collectDisallowedMw), "PaidCollectMw");
+        vm.label(address(collectDisallowedMw), "CollectDisallowedMw");
 
         // bob registeres for their profile
         bobbyProfileId = TestLibFixture.registerProfile(
@@ -88,6 +88,7 @@ contract CollectDisallowedMwTest is
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
                 address(collectDisallowedMw),
+                false,
                 false
             ),
             new bytes(0)
