@@ -15,18 +15,24 @@ library TestLib712 {
         string memory name,
         string memory version
     ) internal view returns (bytes32) {
-        bytes32 domainSeparator = keccak256(
-            abi.encode(
-                _TYPE_HASH,
-                keccak256(bytes(name)),
-                keccak256(bytes(version)),
-                block.chainid,
-                addr
-            )
-        );
+        bytes32 ds = domainSeparator(name, version, addr);
+        return keccak256(abi.encodePacked("\x19\x01", ds, structHash));
+    }
+
+    function domainSeparator(
+        string memory name,
+        string memory version,
+        address addr
+    ) internal view returns (bytes32) {
         return
             keccak256(
-                abi.encodePacked("\x19\x01", domainSeparator, structHash)
+                abi.encode(
+                    _TYPE_HASH,
+                    keccak256(bytes(name)),
+                    keccak256(bytes(version)),
+                    block.chainid,
+                    addr
+                )
             );
     }
 }

@@ -268,6 +268,7 @@ contract ProfileNFT is
                         keccak256(bytes(params.symbol)),
                         keccak256(bytes(params.essenceTokenURI)),
                         params.essenceMw,
+                        params.transferable,
                         keccak256(initData),
                         nonces[owner]++,
                         sig.deadline

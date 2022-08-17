@@ -1261,6 +1261,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                         keccak256(bytes(params.symbol)),
                         keccak256(bytes(params.essenceTokenURI)),
                         essenceMw,
+                        true,
                         keccak256(data),
                         profile.nonces(bob),
                         100
