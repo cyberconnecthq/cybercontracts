@@ -104,6 +104,7 @@ contract SignaturePermissionEssenceMwTest is
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
                 address(sigMw),
+                false,
                 false
             ),
             abi.encode(bobby)

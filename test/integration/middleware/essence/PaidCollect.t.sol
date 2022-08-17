@@ -106,6 +106,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
                 address(paidCollectMw),
+                false,
                 false
             ),
             abi.encode(amountRequired, bobby, address(token), subscribeRequired)
@@ -155,6 +156,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
                 address(paidCollectMw),
+                false,
                 false
             ),
             abi.encode(amountRequired, bobby, address(token), subscribeRequired)
@@ -271,6 +273,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
                 address(paidCollectMw),
+                false,
                 false
             ),
             abi.encode(amountRequired, bobby, address(token), subscribeRequired)
@@ -401,6 +404,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
                 address(paidCollectMw),
+                false,
                 false
             ),
             abi.encode(amountRequired, bobby, address(token), subscribeRequired)
@@ -455,6 +459,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
                 address(paidCollectMw),
+                false,
                 false
             ),
             abi.encode(amountRequired, bobby, address(token), subscribeRequired)

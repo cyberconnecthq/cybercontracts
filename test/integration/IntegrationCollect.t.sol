@@ -67,10 +67,13 @@ contract IntegrationEssenceTest is
     string constant CARLY_ESSENCE_1_SYMBOL = "MF";
     string constant CARLY_ESSENCE_1_URL = "mf.com";
     bool constant CARLY_ESSENCE_1_TRANSFERABLE = true;
+    bool constant CARLY_ESSENCE_1_DEPLOYATREGISTER = false;
+
     string constant CARLY_ESSENCE_2_NAME = "Nargacuga Tail";
     string constant CARLY_ESSENCE_2_SYMBOL = "NFT";
     string constant CARLY_ESSENCE_2_URL = "nt.com";
     bool constant CARLY_ESSENCE_2_TRANSFERABLE = false;
+    bool constant CARLY_ESSENCE_2_DEPLOYATREGISTER = false;
     uint256 carlyFirstEssenceId;
     uint256 carlyFirstEssenceTokenId; // bob mint this
     address carlyTransferableEssenceAddr;
@@ -164,7 +167,8 @@ contract IntegrationEssenceTest is
                 BOB_ESSENCE_SYMBOL,
                 "uri",
                 essenceMw,
-                true
+                true,
+                false
             ),
             dataBobEssence
         );
@@ -194,7 +198,8 @@ contract IntegrationEssenceTest is
                 BOB_ESSENCEMW_SYMBOL,
                 "uriMW",
                 address(collectMw),
-                true
+                true,
+                false
             ),
             dataBobEssence
         );
@@ -228,7 +233,8 @@ contract IntegrationEssenceTest is
                 CARLY_ESSENCE_1_SYMBOL,
                 CARLY_ESSENCE_1_URL,
                 address(0),
-                CARLY_ESSENCE_1_TRANSFERABLE
+                CARLY_ESSENCE_1_TRANSFERABLE,
+                CARLY_ESSENCE_1_DEPLOYATREGISTER
             ),
             new bytes(0)
         );
@@ -240,7 +246,8 @@ contract IntegrationEssenceTest is
                 CARLY_ESSENCE_2_SYMBOL,
                 CARLY_ESSENCE_2_URL,
                 address(0),
-                CARLY_ESSENCE_2_TRANSFERABLE
+                CARLY_ESSENCE_2_TRANSFERABLE,
+                CARLY_ESSENCE_2_DEPLOYATREGISTER
             ),
             new bytes(0)
         );
@@ -377,7 +384,7 @@ contract IntegrationEssenceTest is
         // should revert, carly cannot subscribe without subscribing to bob
         vm.expectRevert("NOT_SUBSCRIBED");
         vm.startPrank(carly);
-        uint256 tokenId = link5Profile.collect(
+        link5Profile.collect(
             DataTypes.CollectParams(carly, profileIdBob, bobEssenceMWId),
             new bytes(0),
             new bytes(0)
@@ -456,7 +463,7 @@ contract IntegrationEssenceTest is
         vm.expectRevert("NOT_SUBSCRIBED");
 
         vm.startPrank(dixon);
-        uint256 tokenId = link5Profile.collect(
+        link5Profile.collect(
             DataTypes.CollectParams(dixon, profileIdBob, bobEssenceMWId),
             new bytes(0),
             new bytes(0)

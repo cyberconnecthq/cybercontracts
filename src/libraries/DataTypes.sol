@@ -32,6 +32,7 @@ library DataTypes {
         string essenceTokenURI;
         address essenceMw;
         bool transferable;
+        bool deployAtRegister;
     }
 
     struct SubscribeParams {
@@ -52,6 +53,8 @@ library DataTypes {
         bytes initData;
         address essenceMw;
         bool transferable;
+        bool deployAtRegister;
+        address essBeacon;
     }
 
     struct SubscribeData {

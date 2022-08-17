@@ -145,24 +145,12 @@ library Actions {
 
         // lazy deploy essence NFT
         if (essenceNFT == address(0)) {
-            bytes memory initData = abi.encodeWithSelector(
-                IEssenceNFT.initialize.selector,
+            essenceNFT = _deployEssenceNFT(
                 data.profileId,
                 data.essenceId,
-                _essenceByIdByProfileId[data.profileId][data.essenceId].name,
-                _essenceByIdByProfileId[data.profileId][data.essenceId].symbol,
-                _essenceByIdByProfileId[data.profileId][data.essenceId]
-                    .transferable
+                data.essBeacon,
+                _essenceByIdByProfileId
             );
-            essenceNFT = address(
-                new BeaconProxy{ salt: bytes32(data.profileId) }(
-                    data.essBeacon,
-                    initData
-                )
-            );
-            _essenceByIdByProfileId[data.profileId][data.essenceId]
-                .essenceNFT = essenceNFT;
-            emit DeployEssenceNFT(data.profileId, data.essenceId, essenceNFT);
         }
         // run middleware before collecting essence
         if (essenceMw != address(0)) {
@@ -226,6 +214,16 @@ library Actions {
                 data.profileId,
                 id,
                 data.initData
+            );
+        }
+
+        // if the user chooses to deploy essence NFT at registration
+        if (data.deployAtRegister) {
+            _deployEssenceNFT(
+                data.profileId,
+                id,
+                data.essBeacon,
+                _essenceByIdByProfileId
             );
         }
 
@@ -350,5 +348,29 @@ library Actions {
 
         _subscribeByProfileId[profileId].subscribeNFT = subscribeNFT;
         return subscribeNFT;
+    }
+
+    function _deployEssenceNFT(
+        uint256 profileId,
+        uint256 essenceId,
+        address essBeacon,
+        mapping(uint256 => mapping(uint256 => DataTypes.EssenceStruct))
+            storage _essenceByIdByProfileId
+    ) private returns (address) {
+        bytes memory initData = abi.encodeWithSelector(
+            IEssenceNFT.initialize.selector,
+            profileId,
+            essenceId,
+            _essenceByIdByProfileId[profileId][essenceId].name,
+            _essenceByIdByProfileId[profileId][essenceId].symbol,
+            _essenceByIdByProfileId[profileId][essenceId].transferable
+        );
+        address essenceNFT = address(
+            new BeaconProxy{ salt: bytes32(profileId) }(essBeacon, initData)
+        );
+        _essenceByIdByProfileId[profileId][essenceId].essenceNFT = essenceNFT;
+        emit DeployEssenceNFT(profileId, essenceId, essenceNFT);
+
+        return essenceNFT;
     }
 }

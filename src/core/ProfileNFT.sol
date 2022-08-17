@@ -815,7 +815,9 @@ contract ProfileNFT is
                     params.essenceTokenURI,
                     initData,
                     params.essenceMw,
-                    params.transferable
+                    params.transferable,
+                    params.deployAtRegister,
+                    ESSENCE_BEACON
                 ),
                 ENGINE,
                 _profileById,

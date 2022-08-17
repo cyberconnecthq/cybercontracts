@@ -119,6 +119,7 @@ contract MerkleDropEssenceMwTest is
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
                 address(merkleMw),
+                false,
                 false
             ),
             abi.encodePacked(root)
