@@ -3,6 +3,7 @@
 <a href="https://codecov.io/gh/cyberconnecthq/cybercontracts" > 
    <img src="https://codecov.io/gh/cyberconnecthq/cybercontracts/branch/main/graph/badge.svg?token=QKX1FYTBFM"/>
 </a>
+
 # CyberConnect Contracts
 
 This hosts all contracts for CyberConnect's social graph protocol.
