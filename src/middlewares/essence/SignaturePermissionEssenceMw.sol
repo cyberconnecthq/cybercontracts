@@ -20,8 +20,8 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
     //////////////////////////////////////////////////////////////*/
 
     struct MiddlewareData {
-        uint256 nonce;
         address signer;
+        mapping(address => uint256) nonces;
     }
 
     bytes32 internal constant _ESSENCE_TYPEHASH =
@@ -40,9 +40,9 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
         uint256 essenceId,
         bytes calldata data
     ) external override returns (bytes memory) {
-        _signerStorage[msg.sender][profileId][essenceId] = MiddlewareData(
-            0,
-            abi.decode(data, (address))
+        _signerStorage[msg.sender][profileId][essenceId].signer = abi.decode(
+            data,
+            (address)
         );
 
         return new bytes(0);
@@ -70,8 +70,9 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
                     abi.encode(
                         _ESSENCE_TYPEHASH,
                         collector,
-                        _signerStorage[msg.sender][profileId][essenceId]
-                            .nonce++,
+                        _signerStorage[msg.sender][profileId][essenceId].nonces[
+                            collector
+                        ]++,
                         deadline
                     )
                 )
@@ -106,12 +107,13 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
      * @param essenceId The user address.
      * @return uint256 The nonce.
      */
-    function getNonce(uint256 profileId, uint256 essenceId)
-        external
-        view
-        returns (uint256)
-    {
-        return _signerStorage[msg.sender][profileId][essenceId].nonce;
+    function getNonce(
+        uint256 profileId,
+        address collector,
+        uint256 essenceId
+    ) external view returns (uint256) {
+        return
+            _signerStorage[msg.sender][profileId][essenceId].nonces[collector];
     }
 
     /*//////////////////////////////////////////////////////////////
