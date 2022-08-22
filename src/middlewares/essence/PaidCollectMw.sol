@@ -88,7 +88,7 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         address collector,
         address,
         bytes calldata data
-    ) external override returns(bool) {
+    ) external override returns (bool) {
         address currency = _paidEssenceStorage[msg.sender][profileId][essenceId]
             .currency;
         uint256 amount = _paidEssenceStorage[msg.sender][profileId][essenceId]

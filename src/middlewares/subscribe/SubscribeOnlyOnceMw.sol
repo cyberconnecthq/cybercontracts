@@ -36,7 +36,7 @@ contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
         address subscriber,
         address subscrbeNFT,
         bytes calldata
-    ) external view override returns(bool) {
+    ) external view override returns (bool) {
         require(
             ERC721(subscrbeNFT).balanceOf(subscriber) == 0,
             "Already subscribed"
