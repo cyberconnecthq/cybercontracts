@@ -8,6 +8,8 @@ import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
 
 import { EIP712 } from "../../base/EIP712.sol";
 
+import { DataTypes } from "../../libraries/DataTypes.sol";
+
 /**
  * @title Signiture Permission Essence Middleware
  * @author CyberConnect
@@ -63,9 +65,9 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
             return false;
         }
 
-        (uint8 v, bytes32 r, bytes32 s, uint256 deadline) = abi.decode(
+        DataTypes.EIP712Signature memory dataStruct = abi.decode(
             data,
-            (uint8, bytes32, bytes32, uint256)
+            (DataTypes.EIP712Signature)
         );
 
         _requiresExpectedSigner(
@@ -76,15 +78,15 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
                         collector,
                         _signerStorage[msg.sender][profileId][essenceId]
                             .nonce++,
-                        deadline
+                        dataStruct.deadline
                     )
                 )
             ),
             _signerStorage[msg.sender][profileId][essenceId].signer,
-            v,
-            r,
-            s,
-            deadline
+            dataStruct.v,
+            dataStruct.r,
+            dataStruct.s,
+            dataStruct.deadline
         );
 
         return true;
