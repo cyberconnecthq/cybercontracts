@@ -58,7 +58,11 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
         address collector,
         address,
         bytes calldata data
-    ) external override {
+    ) external override returns (bool) {
+        if (data.length == 0 || msg.sender == address(0)) {
+            return false;
+        }
+
         (uint8 v, bytes32 r, bytes32 s, uint256 deadline) = abi.decode(
             data,
             (uint8, bytes32, bytes32, uint256)
@@ -82,6 +86,8 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
             s,
             deadline
         );
+
+        return true;
     }
 
     /// @inheritdoc IEssenceMiddleware

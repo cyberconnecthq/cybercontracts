@@ -34,7 +34,7 @@ contract CollectDisallowedMw is IEssenceMiddleware {
         address,
         address,
         bytes calldata
-    ) external pure override {
+    ) external pure override returns (bool) {
         revert("COLLECT_DISALLOWED");
     }
 

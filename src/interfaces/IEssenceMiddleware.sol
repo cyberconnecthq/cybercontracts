@@ -31,7 +31,7 @@ interface IEssenceMiddleware {
         address collector,
         address essenceNFT,
         bytes calldata data
-    ) external;
+    ) external returns (bool);
 
     /**
      * @notice Proccess that runs after the essenceeNFT mint happens.

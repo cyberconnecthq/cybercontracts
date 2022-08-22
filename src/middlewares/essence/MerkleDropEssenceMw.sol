@@ -48,7 +48,7 @@ contract MerkleDropEssenceMw is IEssenceMiddleware {
         address collector,
         address,
         bytes calldata proof
-    ) external view override {
+    ) external view override returns(bool) {
         require(
             _verify(
                 _leaf(collector),
