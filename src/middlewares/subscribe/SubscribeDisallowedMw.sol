@@ -34,7 +34,7 @@ contract SubscribeDisallowedMw is ISubscribeMiddleware {
         address,
         address,
         bytes calldata
-    ) external pure override {
+    ) external pure override returns (bool) {
         revert("SUBSCRIBE_DISALLOWED");
     }
 

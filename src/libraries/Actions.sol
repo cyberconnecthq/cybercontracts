@@ -99,8 +99,10 @@ library Actions {
                 );
                 emit DeploySubscribeNFT(data.profileIds[i], subscribeNFT);
             }
+
+            bool preProcessResult = false;
             if (subscribeMw != address(0)) {
-                ISubscribeMiddleware(subscribeMw).preProcess(
+                preProcessResult = ISubscribeMiddleware(subscribeMw).preProcess(
                     data.profileIds[i],
                     data.sender,
                     subscribeNFT,
@@ -108,7 +110,7 @@ library Actions {
                 );
             }
             result[i] = ISubscribeNFT(subscribeNFT).mint(data.sender);
-            if (subscribeMw != address(0)) {
+            if (subscribeMw != address(0) && preProcessResult) {
                 ISubscribeMiddleware(subscribeMw).postProcess(
                     data.profileIds[i],
                     data.sender,
@@ -152,9 +154,11 @@ library Actions {
                 _essenceByIdByProfileId
             );
         }
+
+        bool preProcessResult = false;
         // run middleware before collecting essence
         if (essenceMw != address(0)) {
-            IEssenceMiddleware(essenceMw).preProcess(
+            preProcessResult = IEssenceMiddleware(essenceMw).preProcess(
                 data.profileId,
                 data.essenceId,
                 data.collector,
@@ -163,7 +167,7 @@ library Actions {
             );
         }
         tokenId = IEssenceNFT(essenceNFT).mint(data.collector);
-        if (essenceMw != address(0)) {
+        if (essenceMw != address(0) && preProcessResult) {
             IEssenceMiddleware(essenceMw).postProcess(
                 data.profileId,
                 data.essenceId,

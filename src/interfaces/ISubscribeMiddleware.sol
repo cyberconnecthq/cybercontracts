@@ -26,7 +26,7 @@ interface ISubscribeMiddleware {
         address subscriber,
         address subscrbeNFT,
         bytes calldata data
-    ) external;
+    ) external returns(bool);
 
     /**
      * @notice Proccess that runs after the subscribeNFT mint happens.
