@@ -75,9 +75,11 @@ contract PermissionedFeeCreationMw is
     function preProcess(
         DataTypes.CreateProfileParams calldata params,
         bytes calldata data
-    ) external payable override onlyValidNamespace(msg.sender) {
+    ) external payable override onlyValidNamespace(msg.sender) returns (bool) {
         MiddlewareData storage mwData = _mwDataByNamespace[msg.sender];
-
+        if (data.length == 0 || msg.sender == address(0)) {
+            return false;
+        }
         (uint8 v, bytes32 r, bytes32 s, uint256 deadline) = abi.decode(
             data,
             (uint8, bytes32, bytes32, uint256)
@@ -95,6 +97,7 @@ contract PermissionedFeeCreationMw is
         if (treasuryCollected > 0) {
             payable(_treasuryAddress()).transfer(treasuryCollected);
         }
+        return true;
     }
 
     /// @inheritdoc IProfileMiddleware

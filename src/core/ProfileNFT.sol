@@ -133,15 +133,17 @@ contract ProfileNFT is
             address(this)
         );
 
+        bool preProcessResult = false;
+
         if (profileMw != address(0)) {
-            IProfileMiddleware(profileMw).preProcess{ value: msg.value }(
+            preProcessResult = IProfileMiddleware(profileMw).preProcess{ value: msg.value }(
                 params,
                 preData
             );
         }
 
         tokenID = _createProfile(params);
-        if (profileMw != address(0)) {
+        if (profileMw != address(0) && preProcessResult) {
             IProfileMiddleware(profileMw).postProcess(params, postData);
         }
     }

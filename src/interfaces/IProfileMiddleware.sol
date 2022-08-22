@@ -24,7 +24,10 @@ interface IProfileMiddleware {
     function preProcess(
         DataTypes.CreateProfileParams calldata params,
         bytes calldata data
-    ) external payable;
+    ) 
+    external 
+    payable
+    returns (bool);
 
     /**
      * @notice Proccess that runs after the profileNFT creation happens.
