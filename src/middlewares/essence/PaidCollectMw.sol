@@ -89,10 +89,6 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         address,
         bytes calldata data
     ) external override returns(bool) {
-        if (data.length == 0 || msg.sender == address(0)) {
-            return false;
-        }
-
         address currency = _paidEssenceStorage[msg.sender][profileId][essenceId]
             .currency;
         uint256 amount = _paidEssenceStorage[msg.sender][profileId][essenceId]
@@ -124,7 +120,11 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
                 treasuryCollected
             );
         }
-        return true;
+        if (data.length == 0 || msg.sender == address(0)) {
+            return false;
+        } else {
+            return true;    
+        }
     }
 
     /// @inheritdoc IEssenceMiddleware
