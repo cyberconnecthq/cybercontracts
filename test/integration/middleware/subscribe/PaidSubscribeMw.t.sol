@@ -17,7 +17,7 @@ import { ITreasury } from "../../../../src/interfaces/ITreasury.sol";
 import { ITreasuryEvents } from "../../../../src/interfaces/ITreasuryEvents.sol";
 import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
 import { ICyberEngineEvents } from "../../../../src/interfaces/ICyberEngineEvents.sol";
-import { PaidSubscribeMw } from "../../../../src/middlewares/subscribe/paidSubscribeMw.sol";
+import { PaidSubscribeMw } from "../../../../src/middlewares/subscribe/PaidSubscribeMw.sol";
 import { TestIntegrationBase } from "../../../utils/TestIntegrationBase.sol";
 import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
 import { TestLib712 } from "../../../utils/TestLib712.sol";
