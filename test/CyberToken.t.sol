@@ -20,9 +20,9 @@ contract CyberTokenTest is TestIntegrationBase {
     function setUp() public {
         _setUp();
 
-        vm.label(address(lila), "Cyber Token Contract");
-        vm.label(address(bobby), "Cyber Token Contract");
-        vm.label(address(dave), "Cyber Token Contract");
+        vm.label(address(lila), "lila");
+        vm.label(address(bobby), "bobby");
+        vm.label(address(dave), "dave");
 
         // initialize the cyber contract, bobby is the owner, this contract is where all the initial fund is initially sent to.
         cyberTokenContract = new CYBER(bobby, address(this));
@@ -62,5 +62,17 @@ contract CyberTokenTest is TestIntegrationBase {
         cyberTokenContract.transferFrom(lila, dave, 50);
         assertEq(IERC20(address(cyberTokenContract)).balanceOf(dave), 50);
         assertEq(IERC20(address(cyberTokenContract)).balanceOf(lila), 150);
+    }
+
+    function testTransferOwnership() public {
+        assertEq(cyberTokenContract.owner(), bobby);
+
+        vm.prank(bobby);
+        cyberTokenContract.transferOwnership(lila);
+        assertEq(cyberTokenContract.owner(), lila);
+
+        vm.prank(dave);
+        vm.expectRevert("Ownable: caller is not the owner");
+        cyberTokenContract.transferOwnership(lila);
     }
 }
