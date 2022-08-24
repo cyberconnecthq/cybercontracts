@@ -264,7 +264,10 @@ library Actions {
                 data
             );
         }
-        _subscribeByProfileId[profileId].tokenURI = uri;
+        if (bytes(uri).length != 0) {
+            _subscribeByProfileId[profileId].tokenURI = uri;    
+        }
+
         emit SetSubscribeData(profileId, uri, mw, returnData);
     }
 
