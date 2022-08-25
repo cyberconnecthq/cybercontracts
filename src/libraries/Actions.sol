@@ -10,6 +10,7 @@ import { ISubscribeMiddleware } from "../interfaces/ISubscribeMiddleware.sol";
 import { IEssenceMiddleware } from "../interfaces/IEssenceMiddleware.sol";
 import { ICyberEngine } from "../interfaces/ICyberEngine.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
+import { IProfileMiddleware } from "../interfaces/IProfileMiddleware.sol";
 
 import { DataTypes } from "./DataTypes.sol";
 import { Constants } from "./Constants.sol";
@@ -67,6 +68,23 @@ library Actions {
         string tokenURI,
         address mw,
         bytes prepareReturnData
+    );
+
+    event CreateProfile(
+        address indexed to,
+        uint256 indexed profileId,
+        string handle,
+        string avatar,
+        string metadata
+    );
+
+    event SetPrimaryProfile(address indexed user, uint256 indexed profileId);
+
+    event SetOperatorApproval(
+        uint256 indexed profileId,
+        address indexed operator,
+        bool prevApproved,
+        bool approved
     );
 
     function subscribe(
@@ -372,5 +390,87 @@ library Actions {
         emit DeployEssenceNFT(profileId, essenceId, essenceNFT);
 
         return essenceNFT;
+    }
+
+    
+    function createProfilePreProcess(
+        DataTypes.CreateProfileParams calldata params,
+        bytes calldata preData,
+        address ENGINE
+    ) external returns (address profileMw) {
+        profileMw = ICyberEngine(ENGINE).getProfileMwByNamespace(address(this));
+
+        if (profileMw != address(0)) {
+            IProfileMiddleware(profileMw).preProcess{ value: msg.value }(
+                params,
+                preData
+            );
+        }
+    }
+
+    function createProfilePostProcess(
+        DataTypes.CreateProfileParams calldata params,
+        bytes calldata postData,
+        DataTypes.CreateProfilePostProcessData calldata data,
+        mapping(uint256 => DataTypes.ProfileStruct) storage _profileById,
+        mapping(uint256 => string) storage _metadataById,
+        mapping(bytes32 => uint256) storage _profileIdByHandleHash,
+        mapping(address => uint256) storage _addressToPrimaryProfile,
+        mapping(uint256 => mapping(address => bool)) storage _operatorApproval
+    ) external {
+        _profileById[data.currentIndex].handle = params.handle;
+        _profileById[data.currentIndex].avatar = params.avatar;
+        _metadataById[data.currentIndex] = params.metadata;
+        _profileIdByHandleHash[data.handleHash] = data.currentIndex;
+
+        emit CreateProfile(
+            params.to,
+            data.tokenID,
+            params.handle,
+            params.avatar,
+            params.metadata
+        );
+
+        if (_addressToPrimaryProfile[params.to] == 0) {
+            setPrimaryProfile(
+                params.to,
+                data.tokenID,
+                _addressToPrimaryProfile
+            );
+        }
+
+        if (params.operator != address(0)) {
+            require(params.to != params.operator, "INVALID_OPERATOR");
+            setOperatorApproval(
+                data.currentIndex,
+                params.operator,
+                true,
+                _operatorApproval
+            );
+        }
+        if (data.profileMw != address(0)) {
+            IProfileMiddleware(data.profileMw).postProcess(params, postData);
+        }
+    }
+
+    function setPrimaryProfile(
+        address owner,
+        uint256 profileId,
+        mapping(address => uint256) storage _addressToPrimaryProfile
+    ) public {
+        _addressToPrimaryProfile[owner] = profileId;
+        emit SetPrimaryProfile(owner, profileId);
+    }
+
+    function setOperatorApproval(
+        uint256 profileId,
+        address operator,
+        bool approved,
+        mapping(uint256 => mapping(address => bool)) storage _operatorApproval
+    ) public {
+        require(operator != address(0), "ZERO_ADDRESS");
+        bool prev = _operatorApproval[profileId][operator];
+        _operatorApproval[profileId][operator] = approved;
+        emit SetOperatorApproval(profileId, operator, prev, approved);
     }
 }

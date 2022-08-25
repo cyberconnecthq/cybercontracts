@@ -12,8 +12,7 @@ Some opinionated design decisino:
 
 1. Prefer `require` for semantic clearity.
 2. No custom error until `require` supports custom error.
-3. NFTs don't support burn
-4. Try to be gas efficient :)
+3. Try to be gas efficient :)
 
 # Dependencies
 
@@ -83,47 +82,43 @@ PINATA_JWT=
 3. Run `yarn upload_animation:goerli` to upload animation uri for link3 to ipfs.
 4. Check `DeploySetting.sol` and make sure the deployer contract is correctly set as shown in `docs/deploy/<network>/contract.md`. Run `yarn set_animation_url:goerli` to deploy link3 nft descriptor with animation url. Then set to profile.
 
+# Verify on Etherscan
+
+Because we use `create2` for deployments, so we need to manually submit verification.
+
+1. Verify `CyberEngineImpl`
+
+```
+forge verify-contract --chain-id 5 --num-of-optimizations 200 <address> src/core/CyberEngine.sol:CyberEngine  $ETHERSCAN_KEY
+```
+
+2. Verify `CyberEngineProxy`
+
+a. find the `init_data`
+
+```
+bytes memory data = abi.encodeWithSelector(
+   CyberEngine.initialize.selector,
+   address(0),
+   authority
+);
+console.logBytes(data);
+```
+
+b. verify
+
+```
+forge verify-contract --chain-id 5 --num-of-optimizations 200 <address> lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy --constructor-args $(cast abi-encode "constructor(address,bytes)" <impl_address> <init_data>)  $ETHERSCAN_KEY
+```
+
+3. Verify `Profile`
+
 # Tests
 
 [QRCode](./docs/test/qrcode.md)
-
-# Interaction
-
-To interact with the protocol, directly call functions on CyberEngine.
-
-## Register
-
-Register Fee based on handle length
-| Length | Fee (ETH) |
-|--------|-----------|
-| 1 | 10 |
-| 2 | 2 |
-| 3 | 1 |
-| 4 | 0.5 |
-| 5 | 0.1 |
-| >=6 | 0.01 |
-
-# MAYBE TODO's
-
-- [ ] SVG generation
-- [ ] SBT NFT
-- [ ] SBT Module
-- [ ] Permit with EIP712
-- [ ] Crosschain support (openzeppelin contract) (https://docs.openzeppelin.com/contracts/4.x/api/crosschain)
-- [ ] Reserve slots for EssenceNFT
-- [ ] Put BoxNFT into peripheral
-- [ ] Include chainID in SubscribeNFT, EssenceNFT
-- [ ] Token URI
-- [ ] fix slither
-- [ ] fix solhint
-- [ ] documentation style
 
 # License
 
 GNU General Public License v3.0 or later
 
 See [COPYING](./COPYING) to see the full text.
-
-# TODO
-
-- verify profile contracts deployed from engine

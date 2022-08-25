@@ -80,13 +80,17 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
         ERC1967Proxy profileProxy = new ERC1967Proxy(profileImpl, data);
         assertEq(address(profileProxy), profileProxyAddr);
+
         profile = MockProfile(address(profileProxy));
 
         assertEq(profile.nonces(bob), 0);
         string memory avatar = "bob's avatar";
         string memory metadata = "bob's metadata";
 
-        profileId = profile.createProfile(
+        profileId = _createProfile(
+            vm,
+            engine,
+            address(profileProxy),
             DataTypes.CreateProfileParams(
                 bob,
                 handle,
@@ -95,6 +99,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
                 address(0)
             )
         );
+
         assertEq(profileId, 1);
         assertEq(profile.nonces(bob), 0);
         assertEq(profile.getNamespaceOwner(), gov);

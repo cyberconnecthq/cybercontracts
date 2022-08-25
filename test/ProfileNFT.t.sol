@@ -27,6 +27,7 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
     address constant gov = address(0x8888);
     address alice = vm.addr(alicePk);
     uint256 validDeadline;
+    address engine = address(0xdead1);
 
     DataTypes.CreateProfileParams internal createProfileDataAlice =
         DataTypes.CreateProfileParams(
@@ -64,9 +65,9 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
             address(0)
         );
         address tokenImpl = deployMockProfile(
-            address(0xdead),
-            address(0xdead),
-            address(0xdead)
+            engine,
+            address(0xdead2),
+            address(0xdead3)
         );
         vm.expectEmit(true, false, false, true);
         emit Initialize(gov, "TestProfile", "TP");
@@ -80,8 +81,8 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
         assertEq(token.name(), "TestProfile");
         assertEq(token.symbol(), "TP");
         assertEq(token.paused(), true);
-        assertEq(token.SUBSCRIBE_BEACON(), address(0xdead));
-        assertEq(token.ESSENCE_BEACON(), address(0xdead));
+        assertEq(token.SUBSCRIBE_BEACON(), address(0xdead3));
+        assertEq(token.ESSENCE_BEACON(), address(0xdead2));
     }
 
     function testCannotGetTokenURIOfUnmintted() public {
@@ -90,23 +91,23 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
     }
 
     function testGetHandleByProfileId() public {
-        token.createProfile(createProfileDataAlice);
+        _createProfile(createProfileDataAlice);
         assertEq(token.getHandleByProfileId(1), "alice");
     }
 
     function testGetProfileIdByHandle() public {
-        token.createProfile(createProfileDataAlice);
+        _createProfile(createProfileDataAlice);
         assertEq(token.getProfileIdByHandle("alice"), 1);
     }
 
     function testCannotCreateProfileWithHandleTaken() public {
-        token.createProfile(createProfileDataAlice);
+        _createProfile(createProfileDataAlice);
         vm.expectRevert("HANDLE_TAKEN");
-        token.createProfile(createProfileDataAlice);
+        _createProfile(createProfileDataAlice);
     }
 
     function testGetOperatorApproval() public {
-        uint256 id = token.createProfile(createProfileDataAlice);
+        uint256 id = _createProfile(createProfileDataAlice);
         assertEq(token.getOperatorApproval(id, address(0)), false);
     }
 
@@ -121,7 +122,7 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
                 operator
             );
 
-        uint256 id = token.createProfile(params);
+        uint256 id = _createProfile(params);
         assertEq(token.getOperatorApproval(id, operator), true);
     }
 
@@ -136,7 +137,7 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
             );
 
         vm.expectRevert("INVALID_OPERATOR");
-        token.createProfile(params);
+        _createProfile(params);
     }
 
     function testCannotGetOperatorApprovalForNonexistentProfile() public {
@@ -145,14 +146,14 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
     }
 
     function testCannotSetOperatorToZeroAddress() public {
-        uint256 id = token.createProfile(createProfileDataAlice);
+        uint256 id = _createProfile(createProfileDataAlice);
         vm.prank(alice);
         vm.expectRevert("ZERO_ADDRESS");
         token.setOperatorApproval(id, address(0), true);
     }
 
     function testCannotSetMetadataTooLong() public {
-        uint256 id = token.createProfile(createProfileDataAlice);
+        uint256 id = _createProfile(createProfileDataAlice);
 
         bytes memory longMetadata = new bytes(Constants._MAX_URI_LENGTH + 1);
         vm.prank(alice);
@@ -175,7 +176,7 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
     }
 
     function testSetAvatarAsOwner() public {
-        uint256 id = token.createProfile(createProfileDataAlice);
+        uint256 id = _createProfile(createProfileDataAlice);
         assertEq(token.getAvatar(id), "https://example.com/alice.jpg");
         vm.prank(alice);
         token.setAvatar(id, "avatar");
@@ -188,7 +189,7 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
     }
 
     function testCannotSetAvatarTooLong() public {
-        uint256 id = token.createProfile(createProfileDataAlice);
+        uint256 id = _createProfile(createProfileDataAlice);
 
         bytes memory longAvatar = new bytes(Constants._MAX_URI_LENGTH + 1);
 
@@ -233,8 +234,8 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
     function testReturnProfileId() public {
         vm.startPrank(alice);
 
-        uint256 profileIdAlice = token.createProfile(createProfileDataAlice);
-        uint256 profileIdAlice2 = token.createProfile(createProfileDataBob);
+        uint256 profileIdAlice = _createProfile(createProfileDataAlice);
+        uint256 profileIdAlice2 = _createProfile(createProfileDataBob);
 
         uint256 primaryIdAlice = token.getPrimaryProfile(alice);
         assertEq(primaryIdAlice, profileIdAlice);
@@ -245,7 +246,7 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
     }
 
     function testCannotTransferWhenPaused() public {
-        uint256 id = token.createProfile(createProfileDataAlice);
+        uint256 id = _createProfile(createProfileDataAlice);
         vm.prank(alice);
 
         vm.expectRevert("Pausable: paused");
@@ -257,7 +258,7 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
     }
 
     function testTransferWhenUnpaused() public {
-        uint256 id = token.createProfile(createProfileDataAlice);
+        uint256 id = _createProfile(createProfileDataAlice);
         vm.prank(gov);
         token.pause(false);
         assertEq(token.paused(), false);
@@ -265,5 +266,12 @@ contract ProfileNFTTest is Test, TestDeployer, IProfileNFTEvents {
         vm.prank(alice);
         token.transferFrom(alice, bob, id);
         assertEq(token.ownerOf(id), bob);
+    }
+
+    function _createProfile(DataTypes.CreateProfileParams memory params)
+        private
+        returns (uint256)
+    {
+        return _createProfile(vm, engine, address(token), params);
     }
 }

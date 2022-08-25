@@ -22,12 +22,4 @@ contract MockProfile is ProfileNFT {
     ) external {
         _essenceByIdByProfileId[profileId][essenceId].essenceNFT = essenceAddr;
     }
-
-    // by pass sig check for testing
-    function createProfile(DataTypes.CreateProfileParams calldata params)
-        external
-        returns (uint256)
-    {
-        return _createProfile(params);
-    }
 }

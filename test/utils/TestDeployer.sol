@@ -5,6 +5,7 @@ pragma solidity 0.8.14;
 import { ISubscribeDeployer } from "../../src/interfaces/ISubscribeDeployer.sol";
 import { IEssenceDeployer } from "../../src/interfaces/IEssenceDeployer.sol";
 import { IProfileDeployer } from "../../src/interfaces/IProfileDeployer.sol";
+import { ICyberEngine } from "../../src/interfaces/ICyberEngine.sol";
 
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 
@@ -14,6 +15,8 @@ import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 
 import { MockProfile } from "./MockProfile.sol";
 import { TestProxy } from "./TestProxy.sol";
+
+import "forge-std/Vm.sol";
 
 contract TestDeployer is
     IProfileDeployer,
@@ -72,5 +75,27 @@ contract TestDeployer is
         profileParams.subBeacon = subscribeBeacon;
         addr = address(new ProfileNFT{ salt: salt }());
         delete profileParams;
+    }
+
+    function _createProfile(
+        Vm vm,
+        address engine,
+        address profileProxy,
+        DataTypes.CreateProfileParams memory params
+    ) internal returns (uint256) {
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.getProfileMwByNamespace.selector,
+                profileProxy
+            ),
+            abi.encode(address(0))
+        );
+        return
+            ProfileNFT(profileProxy).createProfile(
+                params,
+                new bytes(0),
+                new bytes(0)
+            );
     }
 }
