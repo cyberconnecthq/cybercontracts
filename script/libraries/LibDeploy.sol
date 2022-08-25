@@ -6,6 +6,7 @@ import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
+import { CyberVault } from "../../src/periphery/CyberVault.sol";
 import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
 import { EssenceNFT } from "../../src/core/EssenceNFT.sol";
 import { Authority } from "../../src/dependencies/solmate/Auth.sol";
@@ -321,6 +322,18 @@ library LibDeploy {
             _write(vm, "CyberBoxNFT (Proxy)", boxProxy);
         }
         require(CyberBoxNFT(boxProxy).paused(), "CYBERBOX_NOT_PAUSED");
+    }
+
+    function deployVault(
+        Vm vm,
+        address vaultOwner,
+        bool writeFile
+    ) internal returns (address vault) {
+        vault = address(new CyberVault(vaultOwner));
+        if (writeFile) {
+            _write(vm, "CyberVault", vault);
+        }
+        require(CyberVault(vault).getSigner() == vaultOwner, "WRONG_SIGNER");
     }
 
     function _deploy(
