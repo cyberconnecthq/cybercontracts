@@ -224,7 +224,7 @@ contract SignaturePermissionEssenceMwTest is
             bytes32
         )
     {
-        uint256 nonce = sigMw.getNonce(profileId, essenceId);
+        uint256 nonce = sigMw.getNonce(profileId, collector, essenceId);
         bytes32 digest = TestLib712.hashTypedDataV4(
             address(sigMw),
             keccak256(
