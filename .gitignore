@@ -9,3 +9,4 @@ artifacts/
 test/qrcode
 misc/qrcode/svg
 misc/qrcode/html
+script/playground

@@ -27,7 +27,7 @@ library Constants {
         );
     bytes32 internal constant _REGISTER_ESSENCE_TYPEHASH =
         keccak256(
-            "registerEssenceWithSig(uint256 profileId,string name,string symbol,string essenceTokenURI,address essenceMw,bytes initData,uint256 nonce,uint256 deadline)"
+            "registerEssenceWithSig(uint256 profileId,string name,string symbol,string essenceTokenURI,address essenceMw,bool transferable,bytes initData,uint256 nonce,uint256 deadline)"
         );
     bytes32 internal constant _SET_METADATA_TYPEHASH =
         keccak256(
