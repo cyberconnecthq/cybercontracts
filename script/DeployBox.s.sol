@@ -13,7 +13,7 @@ contract DeployScript is Script, DeploySetting {
         LibDeploy.deployBox(
             vm,
             deployParams.deployerContract,
-            deployParams.link3Signer,
+            deployParams.link3Owner,
             true
         );
         vm.stopBroadcast();
