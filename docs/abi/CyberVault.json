@@ -3822,7 +3822,7 @@
             "implemented": true,
             "kind": "function",
             "modifiers": [],
-            "name": "_domainSeperatorName",
+            "name": "_domainSeparatorName",
             "nameLocation": "5086:20:89",
             "overrides": {
               "id": 38406,

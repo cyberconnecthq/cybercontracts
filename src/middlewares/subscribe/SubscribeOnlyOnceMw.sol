@@ -29,16 +29,16 @@ contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
 
     /**
      * @inheritdoc ISubscribeMiddleware
-     * @notice Proccess that checks if the subscriber is aready subscribed.
+     * @notice Process that checks if the subscriber is already subscribed.
      */
     function preProcess(
         uint256,
         address subscriber,
-        address subscrbeNFT,
+        address subscribeNFT,
         bytes calldata
     ) external view override {
         require(
-            ERC721(subscrbeNFT).balanceOf(subscriber) == 0,
+            ERC721(subscribeNFT).balanceOf(subscriber) == 0,
             "Already subscribed"
         );
     }
@@ -47,7 +47,7 @@ contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
     function postProcess(
         uint256 profileId,
         address subscriber,
-        address subscrbeNFT,
+        address subscribeNFT,
         bytes calldata data
     ) external override {
         // do nothing

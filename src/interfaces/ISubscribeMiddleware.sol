@@ -14,32 +14,32 @@ interface ISubscribeMiddleware {
         returns (bytes memory);
 
     /**
-     * @notice Proccess that runs before the subscribeNFT mint happens.
+     * @notice Process that runs before the subscribeNFT mint happens.
      *
      * @param profileId The profile Id.
      * @param subscriber The subscriber address.
-     * @param subscrbeNFT The subscribe nft address.
+     * @param subscribeNFT The subscribe nft address.
      * @param data Extra data to process.
      */
     function preProcess(
         uint256 profileId,
         address subscriber,
-        address subscrbeNFT,
+        address subscribeNFT,
         bytes calldata data
     ) external;
 
     /**
-     * @notice Proccess that runs after the subscribeNFT mint happens.
+     * @notice Process that runs after the subscribeNFT mint happens.
      *
      * @param profileId The profile Id.
      * @param subscriber The subscriber address.
-     * @param subscrbeNFT The subscribe nft address.
+     * @param subscribeNFT The subscribe nft address.
      * @param data Extra data to process.
      */
     function postProcess(
         uint256 profileId,
         address subscriber,
-        address subscrbeNFT,
+        address subscribeNFT,
         bytes calldata data
     ) external;
 }

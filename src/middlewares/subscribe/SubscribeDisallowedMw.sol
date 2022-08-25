@@ -27,7 +27,7 @@ contract SubscribeDisallowedMw is ISubscribeMiddleware {
 
     /**
      * @inheritdoc ISubscribeMiddleware
-     * @notice Proccess that disallows a subscription
+     * @notice Process that disallows a subscription
      */
     function preProcess(
         uint256,
@@ -42,7 +42,7 @@ contract SubscribeDisallowedMw is ISubscribeMiddleware {
     function postProcess(
         uint256 profileId,
         address subscriber,
-        address subscrbeNFT,
+        address subscribeNFT,
         bytes calldata data
     ) external override {
         // do nothing

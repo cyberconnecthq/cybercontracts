@@ -31,7 +31,7 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware {
 
     /**
      * @inheritdoc IEssenceMiddleware
-     * @notice Proccess that checks if the user is aready subscribed to the essence owner
+     * @notice Process that checks if the user is already subscribed to the essence owner
      */
     function preProcess(
         uint256 profileId,

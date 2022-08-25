@@ -258,7 +258,7 @@ contract PermissionedFeeCreationMw is
         }
     }
 
-    function _domainSeperatorName()
+    function _domainSeparatorName()
         internal
         pure
         override

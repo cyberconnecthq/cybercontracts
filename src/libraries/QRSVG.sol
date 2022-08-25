@@ -37,7 +37,6 @@ library QRSVG {
 
         // 6. Put format info
         putFormatInfo(qrMatrix);
-        // emit MatrixCreated(qrMatrix.matrix);
 
         // 7. Compose SVG and convert to base64
         string memory qrCodeUri = generateQRURI(qrMatrix);

@@ -50,7 +50,7 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
 
     /**
      * @inheritdoc IEssenceMiddleware
-     * @notice Proccess that checks if the essence collector has the correct signature from the signer
+     * @notice Process that checks if the essence collector has the correct signature from the signer
      */
     function preProcess(
         uint256 profileId,
@@ -120,7 +120,7 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
                               INTERNAL
     //////////////////////////////////////////////////////////////*/
 
-    function _domainSeperatorName()
+    function _domainSeparatorName()
         internal
         pure
         override
