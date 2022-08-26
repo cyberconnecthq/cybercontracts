@@ -32,6 +32,7 @@ contract Treasury is Owned, ITreasury {
     ) {
         require(treasuryAddress != address(0), "ZERO_TREASURY_ADDRESS");
         require(owner != address(0), "ZERO_OWNER_ADDRESS");
+        require(treasuryFee <= Constants._MAX_BPS, "INVALID_TREASURY_FEE");
 
         Owned.__Owned_Init(owner);
         _treasuryAddress = treasuryAddress;

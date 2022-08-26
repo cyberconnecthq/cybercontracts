@@ -530,6 +530,7 @@ contract ProfileNFT is
         override
         returns (address)
     {
+        _requireMinted(profileId);
         return _subscribeByProfileId[profileId].subscribeMw;
     }
 
@@ -550,6 +551,7 @@ contract ProfileNFT is
         override
         returns (address)
     {
+        _requireMinted(profileId);
         return _subscribeByProfileId[profileId].subscribeNFT;
     }
 
@@ -560,6 +562,7 @@ contract ProfileNFT is
         override
         returns (string memory)
     {
+        _requireMinted(profileId);
         return _subscribeByProfileId[profileId].tokenURI;
     }
 
@@ -592,6 +595,7 @@ contract ProfileNFT is
         override
         returns (address)
     {
+        _requireMinted(profileId);
         return _essenceByIdByProfileId[profileId][essenceId].essenceNFT;
     }
 
@@ -602,6 +606,7 @@ contract ProfileNFT is
         override
         returns (string memory)
     {
+        _requireMinted(profileId);
         return _essenceByIdByProfileId[profileId][essenceId].tokenURI;
     }
 
@@ -612,6 +617,7 @@ contract ProfileNFT is
         override
         returns (address)
     {
+        _requireMinted(profileId);
         return _essenceByIdByProfileId[profileId][essenceId].essenceMw;
     }
 
