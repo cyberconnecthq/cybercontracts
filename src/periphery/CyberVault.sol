@@ -165,7 +165,7 @@ contract CyberVault is Owned, ReentrancyGuard, EIP712 {
                               INTERNAL
     //////////////////////////////////////////////////////////////*/
 
-    function _domainSeperatorName()
+    function _domainSeparatorName()
         internal
         view
         virtual

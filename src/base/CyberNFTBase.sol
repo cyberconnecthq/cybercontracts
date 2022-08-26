@@ -125,7 +125,7 @@ abstract contract CyberNFTBase is Initializable, EIP712, ERC721, ICyberNFTBase {
         require(_exists(tokenId), "NOT_MINTED");
     }
 
-    function _domainSeperatorName()
+    function _domainSeparatorName()
         internal
         view
         virtual

@@ -3,7 +3,7 @@
 pragma solidity 0.8.14;
 
 library Constants {
-    // Access Control for CyebreEngine
+    // Access Control for CyberEngine
     uint8 internal constant _ENGINE_GOV_ROLE = 1;
     bytes4 internal constant _AUTHORIZE_UPGRADE =
         bytes4(keccak256(bytes("_authorizeUpgrade(address)")));
@@ -35,7 +35,7 @@ library Constants {
         );
     bytes32 internal constant _SET_OPERATOR_APPROVAL_TYPEHASH =
         keccak256(
-            "setOperatorApprovalWithSign(uint256 profileId,address operator,bool approved,uint256 nonce,uint256 deadline)"
+            "setOperatorApprovalWithSig(uint256 profileId,address operator,bool approved,uint256 nonce,uint256 deadline)"
         );
     bytes32 internal constant _SET_SUBSCRIBE_DATA_TYPEHASH =
         keccak256(

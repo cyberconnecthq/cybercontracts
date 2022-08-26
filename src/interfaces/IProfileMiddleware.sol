@@ -16,7 +16,7 @@ interface IProfileMiddleware {
         returns (bytes memory);
 
     /**
-     * @notice Proccess that runs before the profileNFT creation happens.
+     * @notice Process that runs before the profileNFT creation happens.
      *
      * @param params The params for creating profile.
      * @param data Extra data to process.
@@ -27,7 +27,7 @@ interface IProfileMiddleware {
     ) external payable;
 
     /**
-     * @notice Proccess that runs after the profileNFT creation happens.
+     * @notice Process that runs after the profileNFT creation happens.
      *
      * @param params The params for creating profile.
      * @param data Extra data to process.

@@ -29,7 +29,7 @@ abstract contract EIP712 {
             keccak256(
                 abi.encode(
                     _TYPE_HASH,
-                    keccak256(bytes(_domainSeperatorName())),
+                    keccak256(bytes(_domainSeparatorName())),
                     _HASHED_VERSION,
                     block.chainid,
                     address(this)
@@ -81,7 +81,7 @@ abstract contract EIP712 {
             );
     }
 
-    function _domainSeperatorName()
+    function _domainSeparatorName()
         internal
         view
         virtual

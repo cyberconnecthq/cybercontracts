@@ -40,7 +40,7 @@ contract MerkleDropEssenceMw is IEssenceMiddleware {
 
     /**
      * @inheritdoc IEssenceMiddleware
-     * @notice Proccess that checks if the collect is in the root given the correct proof
+     * @notice Process that checks if the collect is in the root given the correct proof
      */
     function preProcess(
         uint256 profileId,

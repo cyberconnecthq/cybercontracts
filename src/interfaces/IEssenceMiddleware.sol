@@ -17,7 +17,7 @@ interface IEssenceMiddleware {
     ) external returns (bytes memory);
 
     /**
-     * @notice Proccess that runs before the essenceeNFT mint happens.
+     * @notice Process that runs before the essenceNFT mint happens.
      *
      * @param profileId The profile Id.
      * @param essenceId The essence Id.
@@ -34,7 +34,7 @@ interface IEssenceMiddleware {
     ) external;
 
     /**
-     * @notice Proccess that runs after the essenceeNFT mint happens.
+     * @notice Process that runs after the essenceNFT mint happens.
      *
      * @param profileId The profile Id.
      * @param essenceId The essence Id.
