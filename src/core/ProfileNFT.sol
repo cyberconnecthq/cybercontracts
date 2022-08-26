@@ -135,7 +135,7 @@ contract ProfileNFT is
         DataTypes.SubscribeParams calldata params,
         bytes[] calldata preDatas,
         bytes[] calldata postDatas
-    ) external override returns (uint256[] memory) {
+    ) external override nonReentrant returns (uint256[] memory) {
         return _subscribe(msg.sender, params, preDatas, postDatas);
     }
 
@@ -146,7 +146,7 @@ contract ProfileNFT is
         bytes[] calldata postDatas,
         address sender,
         DataTypes.EIP712Signature calldata sig
-    ) external override returns (uint256[] memory) {
+    ) external override nonReentrant returns (uint256[] memory) {
         // let _subscribe handle length check
         uint256 preLength = preDatas.length;
         bytes32[] memory preHashes = new bytes32[](preLength);
@@ -189,7 +189,7 @@ contract ProfileNFT is
         DataTypes.CollectParams calldata params,
         bytes calldata preData,
         bytes calldata postData
-    ) external override returns (uint256 tokenId) {
+    ) external override nonReentrant returns (uint256 tokenId) {
         return _collect(params, preData, postData);
     }
 
@@ -200,7 +200,7 @@ contract ProfileNFT is
         bytes calldata postData,
         address sender,
         DataTypes.EIP712Signature calldata sig
-    ) external override returns (uint256 tokenId) {
+    ) external override nonReentrant returns (uint256 tokenId) {
         _requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
