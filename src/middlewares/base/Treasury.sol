@@ -30,6 +30,9 @@ contract Treasury is Owned, ITreasury {
         address treasuryAddress,
         uint16 treasuryFee
     ) {
+        require(treasuryAddress != address(0), "ZERO_TREASURY_ADDRESS");
+        require(owner != address(0), "ZERO_OWNER_ADDRESS");
+
         Owned.__Owned_Init(owner);
         _treasuryAddress = treasuryAddress;
         _treasuryFee = treasuryFee;
@@ -46,6 +49,7 @@ contract Treasury is Owned, ITreasury {
      * @dev This function is only available to the owner.
      */
     function setTreasuryAddress(address treasuryAddress) external onlyOwner {
+        require(treasuryAddress != address(0), "ZERO_ADDRESS");
         _treasuryAddress = treasuryAddress;
     }
 
