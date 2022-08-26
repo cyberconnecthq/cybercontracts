@@ -41,6 +41,7 @@ abstract contract Owned {
     //////////////////////////////////////////////////////////////*/
 
     function setOwner(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "ZERO_ADDRESS");
         owner = newOwner;
 
         emit OwnerUpdated(msg.sender, newOwner);
