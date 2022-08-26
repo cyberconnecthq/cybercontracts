@@ -51,7 +51,9 @@ contract Treasury is Owned, ITreasury {
      */
     function setTreasuryAddress(address treasuryAddress) external onlyOwner {
         require(treasuryAddress != address(0), "ZERO_ADDRESS");
+        address preTreasuryAddress = _treasuryAddress;
         _treasuryAddress = treasuryAddress;
+        emit SetTreasuryAddress(preTreasuryAddress, treasuryAddress);
     }
 
     /**
@@ -62,7 +64,9 @@ contract Treasury is Owned, ITreasury {
      */
     function setTreasuryFee(uint16 treasuryFee) external onlyOwner {
         require(treasuryFee <= Constants._MAX_BPS, "INVALID_TREASURY_FEE");
+        uint16 preTreasuryFee = _treasuryFee;
         _treasuryFee = treasuryFee;
+        emit SetTreasuryFee(preTreasuryFee, treasuryFee);
     }
 
     /**

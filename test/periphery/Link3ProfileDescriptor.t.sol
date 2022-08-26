@@ -12,7 +12,9 @@ contract Link3ProfileDescriptorTest is Test {
     Link3ProfileDescriptor internal descriptor;
     address constant owner = address(0xA11CE);
     string animationTemplate = "https://animation.example.com";
+
     event Upgraded(address indexed implementation);
+    event SetAnimationTemplate(string preTemplate, string template);
 
     function setUp() public {
         Link3ProfileDescriptor descriptorImpl = new Link3ProfileDescriptor();
@@ -37,11 +39,13 @@ contract Link3ProfileDescriptorTest is Test {
 
     function testSetAnimationTemplateAsProfile() public {
         vm.prank(owner);
-        descriptor.setAnimationTemplate("https://new.animation.example.com");
-        assertEq(
-            descriptor.animationTemplate(),
-            "https://new.animation.example.com"
-        );
+
+        string memory newTemplate = "https://new.animation.example.com";
+        vm.expectEmit(false, false, false, true);
+        emit SetAnimationTemplate(animationTemplate, newTemplate);
+
+        descriptor.setAnimationTemplate(newTemplate);
+        assertEq(descriptor.animationTemplate(), newTemplate);
     }
 
     function testCannotSetAnimationTemplateAsNonOwner() public {

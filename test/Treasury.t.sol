@@ -4,14 +4,17 @@ pragma solidity 0.8.14;
 
 import "forge-std/Test.sol";
 
+import { ITreasuryEvents } from "../src/interfaces/ITreasuryEvents.sol";
+
 import { Constants } from "../src/libraries/Constants.sol";
 
 import { Treasury } from "../src/middlewares/base/Treasury.sol";
 
-contract TreasuryTest is Test {
+contract TreasuryTest is Test, ITreasuryEvents {
     Treasury t;
     address constant owner = address(0xA11CE);
     address constant bob = address(0xB0B);
+    address constant gov = address(0x8888);
     address constant token = address(0x111);
 
     function setUp() public {
@@ -25,6 +28,10 @@ contract TreasuryTest is Test {
 
     function testSetTreasuryFee() public {
         vm.prank(owner);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetTreasuryFee(200, 300);
+
         t.setTreasuryFee(300);
         assertEq(t.getTreasuryFee(), 300);
     }
@@ -42,8 +49,12 @@ contract TreasuryTest is Test {
 
     function testSetTreasuryAddress() public {
         vm.prank(owner);
-        t.setTreasuryAddress(bob);
-        assertEq(t.getTreasuryAddress(), bob);
+
+        vm.expectEmit(true, true, false, true);
+        emit SetTreasuryAddress(bob, gov);
+
+        t.setTreasuryAddress(gov);
+        assertEq(t.getTreasuryAddress(), gov);
     }
 
     function testCannotSetTreasuryAddressNonOwner() public {

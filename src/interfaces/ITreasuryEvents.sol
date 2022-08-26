@@ -17,4 +17,26 @@ interface ITreasuryEvents {
         bool indexed preAllowed,
         bool indexed newAllowed
     );
+
+    /**
+     * @notice Emitted when a new treasuryAddress has been set.
+     *
+     * @param preTreasuryAddress The previous treasuryAddress.
+     * @param treasuryAddress The new treasuryAddress.
+     */
+    event SetTreasuryAddress(
+        address indexed preTreasuryAddress,
+        address indexed treasuryAddress
+    );
+
+    /**
+     * @notice Emitted when a new treasuryFee has been set.
+     *
+     * @param preTreasuryFee The previous treasuryFee.
+     * @param treasuryFee The new treasuryFee.
+     */
+    event SetTreasuryFee(
+        uint16 indexed preTreasuryFee,
+        uint16 indexed treasuryFee
+    );
 }

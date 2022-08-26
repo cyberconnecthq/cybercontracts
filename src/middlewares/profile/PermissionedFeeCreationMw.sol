@@ -22,6 +22,12 @@ contract PermissionedFeeCreationMw is
     PermissionedMw,
     FeeMw
 {
+    event SetFeeByTier(
+        address indexed namespace,
+        Tier tier,
+        uint256 indexed amount
+    );
+
     /*//////////////////////////////////////////////////////////////
                                 STATES
     //////////////////////////////////////////////////////////////*/
@@ -220,6 +226,7 @@ contract PermissionedFeeCreationMw is
         uint256 amount
     ) internal {
         _mwDataByNamespace[namespace].feeMapping[tier] = amount;
+        emit SetFeeByTier(namespace, tier, amount);
     }
 
     function _requiresEnoughFee(
