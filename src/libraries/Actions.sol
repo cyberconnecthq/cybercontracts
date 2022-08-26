@@ -392,7 +392,6 @@ library Actions {
         return essenceNFT;
     }
 
-    
     function createProfilePreProcess(
         DataTypes.CreateProfileParams calldata params,
         bytes calldata preData,
@@ -418,10 +417,10 @@ library Actions {
         mapping(address => uint256) storage _addressToPrimaryProfile,
         mapping(uint256 => mapping(address => bool)) storage _operatorApproval
     ) external {
-        _profileById[data.currentIndex].handle = params.handle;
-        _profileById[data.currentIndex].avatar = params.avatar;
-        _metadataById[data.currentIndex] = params.metadata;
-        _profileIdByHandleHash[data.handleHash] = data.currentIndex;
+        _profileById[data.tokenID].handle = params.handle;
+        _profileById[data.tokenID].avatar = params.avatar;
+        _metadataById[data.tokenID] = params.metadata;
+        _profileIdByHandleHash[data.handleHash] = data.tokenID;
 
         emit CreateProfile(
             params.to,
@@ -442,7 +441,7 @@ library Actions {
         if (params.operator != address(0)) {
             require(params.to != params.operator, "INVALID_OPERATOR");
             setOperatorApproval(
-                data.currentIndex,
+                data.tokenID,
                 params.operator,
                 true,
                 _operatorApproval

@@ -20,7 +20,6 @@ library DataTypes {
 
     struct CreateProfilePostProcessData {
         uint256 tokenID;
-        uint256 currentIndex;
         bytes32 handleHash;
         address profileMw;
     }

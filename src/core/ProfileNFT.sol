@@ -772,7 +772,6 @@ contract ProfileNFT is
             postData,
             DataTypes.CreateProfilePostProcessData(
                 tokenID,
-                _currentIndex,
                 handleHash,
                 profileMw
             ),
