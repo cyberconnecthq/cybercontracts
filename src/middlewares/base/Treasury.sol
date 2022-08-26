@@ -60,7 +60,7 @@ contract Treasury is Owned, ITreasury {
      * @dev This function is only available to the owner.
      */
     function setTreasuryFee(uint16 treasuryFee) external onlyOwner {
-        require(_treasuryFee <= Constants._MAX_BPS, "INVALID_TREASURY_FEE");
+        require(treasuryFee <= Constants._MAX_BPS, "INVALID_TREASURY_FEE");
         _treasuryFee = treasuryFee;
     }
 
@@ -70,7 +70,7 @@ contract Treasury is Owned, ITreasury {
      * @param currency The ERC20 token contract address.
      * @dev This function is only available to the owner.
      */
-    function allowCurrency(address currency, bool allowed) external {
+    function allowCurrency(address currency, bool allowed) external onlyOwner {
         bool preAllowed = _allowedCurrencyList[currency];
         _allowedCurrencyList[currency] = allowed;
         emit AllowCurrency(currency, preAllowed, allowed);
