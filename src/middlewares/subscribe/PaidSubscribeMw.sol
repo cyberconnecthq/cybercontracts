@@ -12,6 +12,7 @@ import { Constants } from "../../libraries/Constants.sol";
 
 import { FeeMw } from "../base/FeeMw.sol";
 import { NFTStatusMw } from "../base/NFTStatusMw.sol";
+import { SubscribeOnceMw } from "../base/SubscribeOnceMw.sol";
 
 /**
  * @title Paid Subscribe Middleware
@@ -93,6 +94,11 @@ contract PaidSubscribeMw is ISubscribeMiddleware, FeeMw {
         uint256 treasuryCollected = (amount * _treasuryFee()) /
             Constants._MAX_BPS;
         uint256 actualPaid = amount - treasuryCollected;
+
+        require(
+            SubscribeOnceMw.checkSubscribeOnce(profileId, subscriber),
+            "CANNOT_DOUBLE_SUBSCRIBE"
+        );
 
         if (_paidSubscribeStorage[msg.sender][profileId].nftRequired == true) {
             require(

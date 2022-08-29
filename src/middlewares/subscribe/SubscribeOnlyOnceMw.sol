@@ -37,6 +37,7 @@ contract SubscribeOnlyOnceMw is ISubscribeMiddleware {
         address subscribeNFT,
         bytes calldata
     ) external view override {
+        // todo: use SubscribeStatusMw here to check, return true only if the user already owns the subscription nft from the profile owner
         require(
             ERC721(subscribeNFT).balanceOf(subscriber) == 0,
             "Already subscribed"
