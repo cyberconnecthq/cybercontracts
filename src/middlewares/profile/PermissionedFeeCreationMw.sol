@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.14;
 
+import { Address } from "openzeppelin-contracts/contracts/utils/Address.sol";
+
 import { IProfileMiddleware } from "../../interfaces/IProfileMiddleware.sol";
 
 import { Constants } from "../../libraries/Constants.sol";
@@ -97,9 +99,9 @@ contract PermissionedFeeCreationMw is
             Constants._MAX_BPS;
         uint256 actualCollected = msg.value - treasuryCollected;
 
-        payable(mwData.recipient).transfer(actualCollected);
+        Address.sendValue(payable(mwData.recipient), actualCollected);
         if (treasuryCollected > 0) {
-            payable(_treasuryAddress()).transfer(treasuryCollected);
+            Address.sendValue(payable(_treasuryAddress()), treasuryCollected);
         }
     }
 
