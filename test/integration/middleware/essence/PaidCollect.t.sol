@@ -33,6 +33,10 @@ contract PaidCollectEssenceMwTest is
     string lilaHandle = "lila";
     uint256 lilaProfileId;
 
+    address dave = address(0xDA00);
+    string daveHandle = "dave";
+    uint256 daveProfileId;
+
     address bobby = address(0xB0B);
     string bobbyHandle = "bobby";
     uint256 bobbyProfileId;
@@ -56,6 +60,10 @@ contract PaidCollectEssenceMwTest is
         // Engine Treasury is the address of the treasury, but we put addrs.cyberTreasury here because its the proxy
         paidCollectMw = new PaidCollectMw(addrs.cyberTreasury);
         vm.label(address(paidCollectMw), "PaidCollectMw");
+        vm.label(address(lila), "lila");
+        vm.label(address(dave), "dave");
+        vm.label(address(bobby), "bobby");
+        vm.label(address(engineTreasury), "engineTreasury");
 
         // note: we first call the MockERC20 contract, in the contract, we mint x amount of shit coins to msg.sender
         // which is this test contract, then we transfer 10000 shit coins from this test contract to lila
@@ -63,7 +71,8 @@ contract PaidCollectEssenceMwTest is
         // lastly, the middlware accesses the shit coin contract and asks to extract x amount
         // it is successful because it is already extracted
 
-        token.transfer(lila, 10000);
+        token.transfer(lila, 100000);
+        token.transfer(dave, 50000);
 
         // bob registeres for their profile
         bobbyProfileId = TestLibFixture.registerProfile(
@@ -538,5 +547,241 @@ contract PaidCollectEssenceMwTest is
         vm.stopPrank();
     }
 
-    // test about limit
+    function testCollectFromDifferentCollectorsUnderLimit() public {
+        // parameters for this test
+        amountRequired = 1000;
+        limit = 3;
+        subscribeRequired = false;
+
+        // checks the initial states of the fund
+        uint256 treasuryFee = ITreasury(addrs.cyberTreasury).getTreasuryFee();
+        uint256 balanceLila = IERC20(address(token)).balanceOf(lila);
+        uint256 balanceBobby = IERC20(address(token)).balanceOf(bobby);
+        uint256 balanceDave = IERC20(address(token)).balanceOf(dave);
+        uint256 balanceEngine = IERC20(address(token)).balanceOf(
+            engineTreasury
+        );
+        uint256 cut = (amountRequired * treasuryFee) / Constants._MAX_BPS;
+
+        // approve the currency that will be used in the transaction
+        vm.expectEmit(true, true, true, false);
+        emit AllowCurrency(address(token), false, true);
+        treasury.allowCurrency(address(token), true);
+
+        // registers for essence, passes in the paid collect middleware address
+        // set the limit
+        vm.expectEmit(false, false, false, true);
+        emit AllowEssenceMw(address(paidCollectMw), false, true);
+        engine.allowEssenceMw(address(paidCollectMw), true);
+
+        vm.expectEmit(true, true, false, false);
+        emit RegisterEssence(
+            bobbyProfileId,
+            1,
+            BOBBY_ESSENCE_NAME,
+            BOBBY_ESSENCE_LABEL,
+            BOBBY_URL,
+            address(paidCollectMw),
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
+        );
+
+        vm.prank(bobby);
+        uint256 bobbyEssenceId = link3Profile.registerEssence(
+            DataTypes.RegisterEssenceParams(
+                bobbyProfileId,
+                BOBBY_ESSENCE_NAME,
+                BOBBY_ESSENCE_LABEL,
+                BOBBY_URL,
+                address(paidCollectMw),
+                false,
+                false
+            ),
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
+        );
+
+        address limitedPaidCollectEssenceProxy = getDeployedEssProxyAddress(
+            link3EssBeacon,
+            bobbyProfileId,
+            bobbyEssenceId,
+            address(link3Profile),
+            BOBBY_ESSENCE_NAME,
+            BOBBY_ESSENCE_LABEL,
+            false
+        );
+
+        // lila collects bobby's addictive essence
+        vm.startPrank(lila);
+        token.approve(address(paidCollectMw), 5000);
+
+        vm.expectEmit(true, true, true, false);
+        emit DeployEssenceNFT(
+            bobbyProfileId,
+            bobbyEssenceId,
+            limitedPaidCollectEssenceProxy
+        );
+
+        vm.expectEmit(true, true, true, false);
+        emit CollectEssence(
+            lila,
+            bobbyProfileId,
+            1,
+            1,
+            new bytes(0),
+            new bytes(0)
+        );
+
+        // lila collects the first essence
+        uint256 limitedPaidCollectTokenIdOne = link3Profile.collect(
+            DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        // verifies the deployed essence address
+        bobbyEssNFT = link3Profile.getEssenceNFT(
+            bobbyProfileId,
+            bobbyEssenceId
+        );
+
+        assertEq(bobbyEssNFT, limitedPaidCollectEssenceProxy);
+
+        // check the ownership of the essence after the first collection
+        assertEq(EssenceNFT(bobbyEssNFT).balanceOf(lila), 1);
+        assertEq(
+            EssenceNFT(bobbyEssNFT).ownerOf(limitedPaidCollectTokenIdOne),
+            lila
+        );
+
+        // check the balance after the first collection
+        assertEq(
+            IERC20(address(token)).balanceOf(lila),
+            balanceLila = balanceLila - amountRequired
+        );
+        assertEq(
+            IERC20(address(token)).balanceOf(bobby),
+            balanceBobby = balanceBobby + amountRequired - cut
+        );
+        assertEq(
+            IERC20(address(token)).balanceOf(engineTreasury),
+            balanceEngine = balanceEngine + cut
+        );
+
+        // lila collects the second essence
+        uint256 limitedPaidCollectTokenIdTwo = link3Profile.collect(
+            DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        // check the ownership of the essence after the second collection
+        assertEq(EssenceNFT(bobbyEssNFT).balanceOf(lila), 2);
+        assertEq(
+            EssenceNFT(bobbyEssNFT).ownerOf(limitedPaidCollectTokenIdTwo),
+            lila
+        );
+
+        // check the balance after the second collection
+        assertEq(
+            IERC20(address(token)).balanceOf(lila),
+            balanceLila = balanceLila - amountRequired
+        );
+        assertEq(
+            IERC20(address(token)).balanceOf(bobby),
+            balanceBobby = balanceBobby + amountRequired - cut
+        );
+        assertEq(
+            IERC20(address(token)).balanceOf(engineTreasury),
+            balanceEngine = balanceEngine + cut
+        );
+
+        // lila collects the third essence, reaches the collect limit
+        uint256 limitedPaidCollectTokenIdThree = link3Profile.collect(
+            DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        // check the ownership of the essence after the third collection
+        assertEq(EssenceNFT(bobbyEssNFT).balanceOf(lila), 3);
+        assertEq(
+            EssenceNFT(bobbyEssNFT).ownerOf(limitedPaidCollectTokenIdThree),
+            lila
+        );
+
+        // check the balance after the third collection
+        assertEq(
+            IERC20(address(token)).balanceOf(lila),
+            balanceLila = balanceLila - amountRequired
+        );
+        assertEq(
+            IERC20(address(token)).balanceOf(bobby),
+            balanceBobby = balanceBobby + amountRequired - cut
+        );
+        assertEq(
+            IERC20(address(token)).balanceOf(engineTreasury),
+            balanceEngine = balanceEngine + cut
+        );
+
+        // lila collects the fourth essence which exceeds the limit, it won't be allowed
+        vm.expectRevert("COLLECT_LIMIT_EXCEEDED");
+
+        link3Profile.collect(
+            DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        // balance should stay the same
+        assertEq(IERC20(address(token)).balanceOf(lila), balanceLila);
+        assertEq(IERC20(address(token)).balanceOf(bobby), balanceBobby);
+        assertEq(
+            IERC20(address(token)).balanceOf(engineTreasury),
+            balanceEngine
+        );
+        vm.stopPrank();
+
+        // Dave collects their first essence(essence id 4), because they have not collected any essence before, it will go through
+        vm.startPrank(dave);
+        token.approve(address(paidCollectMw), 5000);
+
+        // dave collects the fourth essence
+        uint256 limitedPaidCollectTokenIdFour = link3Profile.collect(
+            DataTypes.CollectParams(dave, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        // check the ownership of the essence after the fourth collect(dave's first)
+        assertEq(EssenceNFT(bobbyEssNFT).balanceOf(dave), 1);
+        assertEq(
+            EssenceNFT(bobbyEssNFT).ownerOf(limitedPaidCollectTokenIdFour),
+            dave
+        );
+
+        // check the balance of dave and engine after the fourth collection(dave's first)
+        assertEq(
+            IERC20(address(token)).balanceOf(dave),
+            balanceDave = balanceDave - amountRequired
+        );
+        assertEq(
+            IERC20(address(token)).balanceOf(bobby),
+            balanceBobby = balanceBobby + amountRequired - cut
+        );
+        assertEq(
+            IERC20(address(token)).balanceOf(engineTreasury),
+            balanceEngine = balanceEngine + cut
+        );
+    }
 }
