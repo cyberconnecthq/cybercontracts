@@ -9,14 +9,12 @@ import { IProfileNFTEvents } from "../../src/interfaces/IProfileNFTEvents.sol";
 
 import { LibDeploy } from "../../script/libraries/LibDeploy.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
+import { LibString } from "../../src/libraries/LibString.sol";
 
 import { CyberNFTBase } from "../../src/base/CyberNFTBase.sol";
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
 import { TestLibFixture } from "../utils/TestLibFixture.sol";
-import { LibString } from "../../src/libraries/LibString.sol";
-import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
-import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import { TestIntegrationBase } from "../utils/TestIntegrationBase.sol";
 
 contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {

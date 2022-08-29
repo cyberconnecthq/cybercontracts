@@ -726,7 +726,8 @@ contract ProfileNFT is
                     params.profileIds,
                     preDatas,
                     postDatas,
-                    SUBSCRIBE_BEACON
+                    SUBSCRIBE_BEACON,
+                    ENGINE
                 ),
                 _subscribeByProfileId,
                 _profileById
@@ -748,7 +749,8 @@ contract ProfileNFT is
                     params.essenceId,
                     preData,
                     postData,
-                    ESSENCE_BEACON
+                    ESSENCE_BEACON,
+                    ENGINE
                 ),
                 _essenceByIdByProfileId
             );
