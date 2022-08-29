@@ -43,6 +43,7 @@ contract PaidCollectEssenceMwTest is
 
     uint256 amountRequired;
     bool subscribeRequired;
+    uint256 limit;
 
     ERC20 token;
     PaidCollectMw paidCollectMw;
@@ -87,6 +88,7 @@ contract PaidCollectEssenceMwTest is
 
     function testCannotRegisterEssenceIfCurrencyNotAllowed() public {
         // parameters for this test
+        limit = 1;
         amountRequired = 1000;
         subscribeRequired = false;
 
@@ -109,12 +111,19 @@ contract PaidCollectEssenceMwTest is
                 false,
                 false
             ),
-            abi.encode(amountRequired, bobby, address(token), subscribeRequired)
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
         );
     }
 
     function testCollectWhenNoSubscribeRequired() public {
         // parameters for this test
+        limit = 1;
         amountRequired = 1000;
         subscribeRequired = false;
 
@@ -145,7 +154,13 @@ contract PaidCollectEssenceMwTest is
             BOBBY_ESSENCE_LABEL,
             BOBBY_URL,
             address(paidCollectMw),
-            abi.encode(amountRequired, bobby, address(token), subscribeRequired)
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
         );
 
         vm.prank(bobby);
@@ -159,7 +174,13 @@ contract PaidCollectEssenceMwTest is
                 false,
                 false
             ),
-            abi.encode(amountRequired, bobby, address(token), subscribeRequired)
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
         );
 
         address paidCollectEssenceProxy = getDeployedEssProxyAddress(
@@ -227,6 +248,7 @@ contract PaidCollectEssenceMwTest is
 
     function testCollectWithSubscribeRequired() public {
         // we say that the user has to subscribe prior to collecting
+        limit = 1;
         amountRequired = 1000;
         subscribeRequired = true;
 
@@ -262,7 +284,13 @@ contract PaidCollectEssenceMwTest is
             BOBBY_ESSENCE_LABEL,
             BOBBY_URL,
             address(paidCollectMw),
-            abi.encode(amountRequired, bobby, address(token), subscribeRequired)
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
         );
 
         vm.prank(bobby);
@@ -276,7 +304,13 @@ contract PaidCollectEssenceMwTest is
                 false,
                 false
             ),
-            abi.encode(amountRequired, bobby, address(token), subscribeRequired)
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
         );
 
         address paidCollectEssenceProxy = getDeployedEssProxyAddress(
@@ -372,6 +406,7 @@ contract PaidCollectEssenceMwTest is
 
     function testCannotCollectWithNoSubscribeWhenSubscribeRequired() public {
         // we say that the user has to subscribe before collecting
+        limit = 1;
         amountRequired = 1000;
         subscribeRequired = true;
 
@@ -393,7 +428,13 @@ contract PaidCollectEssenceMwTest is
             BOBBY_ESSENCE_LABEL,
             BOBBY_URL,
             address(paidCollectMw),
-            abi.encode(amountRequired, bobby, address(token), subscribeRequired)
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
         );
 
         vm.prank(bobby);
@@ -407,7 +448,13 @@ contract PaidCollectEssenceMwTest is
                 false,
                 false
             ),
-            abi.encode(amountRequired, bobby, address(token), subscribeRequired)
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
         );
 
         // lila wants to collect bob's essence, without subscribing prior
@@ -427,6 +474,7 @@ contract PaidCollectEssenceMwTest is
 
     function testCannotCollectWithInsufficientFund() public {
         // we say that the user has to subscribe prior to collecting
+        limit = 1;
         amountRequired = 999999;
         subscribeRequired = false;
 
@@ -448,7 +496,13 @@ contract PaidCollectEssenceMwTest is
             BOBBY_ESSENCE_LABEL,
             BOBBY_URL,
             address(paidCollectMw),
-            abi.encode(amountRequired, bobby, address(token), subscribeRequired)
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
         );
 
         vm.prank(bobby);
@@ -462,7 +516,13 @@ contract PaidCollectEssenceMwTest is
                 false,
                 false
             ),
-            abi.encode(amountRequired, bobby, address(token), subscribeRequired)
+            abi.encode(
+                limit,
+                amountRequired,
+                bobby,
+                address(token),
+                subscribeRequired
+            )
         );
 
         vm.startPrank(lila);
@@ -477,4 +537,6 @@ contract PaidCollectEssenceMwTest is
         );
         vm.stopPrank();
     }
+
+    // test about limit
 }

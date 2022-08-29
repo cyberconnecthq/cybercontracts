@@ -17,6 +17,8 @@ import { SubscribeStatusMw } from "../base/SubscribeStatusMw.sol";
  * @title Paid Collect Essence Middleware
  * @author CyberConnect
  * @notice This contract is a middleware to only allow users to collect when they pay a certain fee to the essence owner.
+ * the essence creator can choose to set rules including whether collecting this essence require previous subscription and
+ * has a specific limit.
  */
 contract PaidCollectMw is IEssenceMiddleware, FeeMw {
     using SafeERC20 for IERC20;
@@ -26,10 +28,12 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
     //////////////////////////////////////////////////////////////*/
 
     struct PaidEssenceData {
+        uint256 limit;
         uint256 amount;
         address recipient;
         address currency;
         bool subscribeRequired;
+        mapping(address => uint256) amountCollectedByCollector;
     }
 
     mapping(address => mapping(uint256 => mapping(uint256 => PaidEssenceData)))
@@ -56,16 +60,18 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         bytes calldata data
     ) external override returns (bytes memory) {
         (
+            uint256 limit,
             uint256 amount,
             address recipient,
             address currency,
             bool subscribeRequired
-        ) = abi.decode(data, (uint256, address, address, bool));
+        ) = abi.decode(data, (uint256, uint256, address, address, bool));
 
         require(amount != 0, "INVALID_AMOUNT");
         require(recipient != address(0), "INVALID_ADDRESS");
         require(_currencyAllowed(currency), "CURRENCY_NOT_ALLOWED");
 
+        _paidEssenceStorage[msg.sender][profileId][essenceId].limit = limit;
         _paidEssenceStorage[msg.sender][profileId][essenceId].amount = amount;
         _paidEssenceStorage[msg.sender][profileId][essenceId]
             .recipient = recipient;
@@ -79,8 +85,8 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
 
     /**
      * @inheritdoc IEssenceMiddleware
-     * @notice Determines whether the collection requires prior subscription, and processes the transaction from
-     * the essence collector to the essence owner.
+     * @notice Determines whether the collection requires prior subscription and whether there is a limit, and processes the transaction
+     * from the essence collector to the essence owner.
      */
     function preProcess(
         uint256 profileId,
@@ -89,6 +95,14 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         address,
         bytes calldata
     ) external override {
+        require(
+            _paidEssenceStorage[msg.sender][profileId][essenceId].limit -
+                _paidEssenceStorage[msg.sender][profileId][essenceId]
+                    .amountCollectedByCollector[collector] >
+                0,
+            "COLLECT_LIMIT_EXCEEDED"
+        );
+
         address currency = _paidEssenceStorage[msg.sender][profileId][essenceId]
             .currency;
         uint256 amount = _paidEssenceStorage[msg.sender][profileId][essenceId]
@@ -120,6 +134,9 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
                 treasuryCollected
             );
         }
+
+        _paidEssenceStorage[msg.sender][profileId][essenceId]
+            .amountCollectedByCollector[collector]++;
     }
 
     /// @inheritdoc IEssenceMiddleware
