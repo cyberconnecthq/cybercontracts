@@ -50,6 +50,12 @@ abstract contract EIP712 {
         uint256 deadline
     ) internal view {
         require(deadline >= block.timestamp, "DEADLINE_EXCEEDED");
+        require(
+            uint256(s) <=
+                0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0,
+            "INVALID_SIGNATURE_S_VAULE"
+        );
+
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(recoveredAddress == expectedSigner, "INVALID_SIGNATURE");
     }
