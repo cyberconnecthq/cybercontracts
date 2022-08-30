@@ -201,6 +201,9 @@ contract CyberEngine is
         override
         requiresAuth
     {
+        bytes memory byteName = bytes(_namespaceInfo[namespace].name);
+        require(byteName.length > 0, "INVALID_NAMESPACE");
+
         address subscribeBeacon = ProfileNFT(namespace).SUBSCRIBE_BEACON();
         UpgradeableBeacon(subscribeBeacon).upgradeTo(newImpl);
     }
@@ -211,6 +214,9 @@ contract CyberEngine is
         override
         requiresAuth
     {
+        bytes memory byteName = bytes(_namespaceInfo[namespace].name);
+        require(byteName.length > 0, "INVALID_NAMESPACE");
+
         address essenceBeacon = ProfileNFT(namespace).ESSENCE_BEACON();
         UpgradeableBeacon(essenceBeacon).upgradeTo(newImpl);
     }
