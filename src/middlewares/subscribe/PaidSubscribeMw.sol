@@ -3,6 +3,7 @@
 pragma solidity 0.8.14;
 
 import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import { ERC721 } from "../../dependencies/solmate/ERC721.sol";
 import { SafeERC20 } from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import { ISubscribeMiddleware } from "../../interfaces/ISubscribeMiddleware.sol";
@@ -11,8 +12,6 @@ import { ICyberEngine } from "../../interfaces/ICyberEngine.sol";
 import { Constants } from "../../libraries/Constants.sol";
 
 import { FeeMw } from "../base/FeeMw.sol";
-import { NFTStatusMw } from "../base/NFTStatusMw.sol";
-import { SubscribeOnceMw } from "../base/SubscribeOnceMw.sol";
 
 /**
  * @title Paid Subscribe Middleware
@@ -35,7 +34,7 @@ contract PaidSubscribeMw is ISubscribeMiddleware, FeeMw {
     }
 
     mapping(address => mapping(uint256 => PaidSubscribeData))
-        internal _paidSubscribeStorage;
+        internal _paidSubscribeData;
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
@@ -69,11 +68,11 @@ contract PaidSubscribeMw is ISubscribeMiddleware, FeeMw {
         require(recipient != address(0), "INVALID_ADDRESS");
         require(_currencyAllowed(currency), "CURRENCY_NOT_ALLOWED");
 
-        _paidSubscribeStorage[msg.sender][profileId].amount = amount;
-        _paidSubscribeStorage[msg.sender][profileId].recipient = recipient;
-        _paidSubscribeStorage[msg.sender][profileId].currency = currency;
-        _paidSubscribeStorage[msg.sender][profileId].nftRequired = nftRequired;
-        _paidSubscribeStorage[msg.sender][profileId].nftAddress = nftAddress;
+        _paidSubscribeData[msg.sender][profileId].amount = amount;
+        _paidSubscribeData[msg.sender][profileId].recipient = recipient;
+        _paidSubscribeData[msg.sender][profileId].currency = currency;
+        _paidSubscribeData[msg.sender][profileId].nftRequired = nftRequired;
+        _paidSubscribeData[msg.sender][profileId].nftAddress = nftAddress;
 
         return new bytes(0);
     }
@@ -88,31 +87,23 @@ contract PaidSubscribeMw is ISubscribeMiddleware, FeeMw {
         address,
         bytes calldata
     ) external override {
-        address currency = _paidSubscribeStorage[msg.sender][profileId]
-            .currency;
-        uint256 amount = _paidSubscribeStorage[msg.sender][profileId].amount;
+        address currency = _paidSubscribeData[msg.sender][profileId].currency;
+        uint256 amount = _paidSubscribeData[msg.sender][profileId].amount;
         uint256 treasuryCollected = (amount * _treasuryFee()) /
             Constants._MAX_BPS;
         uint256 actualPaid = amount - treasuryCollected;
 
-        require(
-            SubscribeOnceMw.checkSubscribeOnce(profileId, subscriber),
-            "CANNOT_DOUBLE_SUBSCRIBE"
-        );
-
-        if (_paidSubscribeStorage[msg.sender][profileId].nftRequired == true) {
+        if (_paidSubscribeData[msg.sender][profileId].nftRequired) {
             require(
-                NFTStatusMw.checkNFT(
-                    _paidSubscribeStorage[msg.sender][profileId].nftAddress,
-                    subscriber
-                ),
+                ERC721(_paidSubscribeData[msg.sender][profileId].nftAddress)
+                    .balanceOf(subscriber) > 0,
                 "NO_REQUIRED_NFT"
             );
         }
 
         IERC20(currency).safeTransferFrom(
             subscriber,
-            _paidSubscribeStorage[msg.sender][profileId].recipient,
+            _paidSubscribeData[msg.sender][profileId].recipient,
             actualPaid
         );
 
