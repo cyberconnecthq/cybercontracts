@@ -69,6 +69,7 @@ library DataTypes {
         bytes[] preDatas;
         bytes[] postDatas;
         address subBeacon;
+        address engine;
     }
 
     struct CollectData {
@@ -78,6 +79,7 @@ library DataTypes {
         bytes preData;
         bytes postData;
         address essBeacon;
+        address engine;
     }
 
     struct ProfileStruct {

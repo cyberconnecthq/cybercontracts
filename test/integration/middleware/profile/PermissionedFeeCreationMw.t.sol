@@ -246,6 +246,18 @@ contract PermissionedFeeCreationMwTest is TestIntegrationBase {
         );
     }
 
+    function testCannotCreateProfileIfMwDisallowed() public {
+        engine.allowProfileMw(address(profileMw), false);
+
+        _createProfile(
+            "abcdefg",
+            LibDeploy._INITIAL_FEE_TIER6,
+            link3SignerPk,
+            validDeadline,
+            "PROFILE_MW_NOT_ALLOWED"
+        );
+    }
+
     function testCannotSetMwDataAsNonEngine() public {
         vm.expectRevert("NON_ENGINE_ADDRESS");
         profileMw.setProfileMwData(address(link3Profile), new bytes(0));

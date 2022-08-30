@@ -111,4 +111,26 @@ contract SubscribeDisallowedMwTest is TestIntegrationBase, IProfileNFTEvents {
         vm.expectRevert("SUBSCRIBE_DISALLOWED");
         link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
     }
+
+    function testCannotSubscribeIfMwDisallowed() public {
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = bobbyProfileId;
+        bytes[] memory data = new bytes[](1);
+
+        // bobby sets the subscribe middleware
+        vm.prank(bobby);
+        link3Profile.setSubscribeData(
+            bobbyProfileId,
+            "uri",
+            address(subDisallowedMw),
+            new bytes(0)
+        );
+
+        vm.prank(address(this));
+        engine.allowSubscribeMw(address(subDisallowedMw), false);
+
+        vm.prank(lila);
+        vm.expectRevert("SUBSCRIBE_MW_NOT_ALLOWED");
+        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+    }
 }

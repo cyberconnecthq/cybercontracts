@@ -118,6 +118,11 @@ library Actions {
                 emit DeploySubscribeNFT(data.profileIds[i], subscribeNFT);
             }
             if (subscribeMw != address(0)) {
+                require(
+                    ICyberEngine(data.engine).isSubscribeMwAllowed(subscribeMw),
+                    "SUBSCRIBE_MW_NOT_ALLOWED"
+                );
+
                 ISubscribeMiddleware(subscribeMw).preProcess(
                     data.profileIds[i],
                     data.sender,
@@ -172,6 +177,11 @@ library Actions {
         }
         // run middleware before collecting essence
         if (essenceMw != address(0)) {
+            require(
+                ICyberEngine(data.engine).isEssenceMwAllowed(essenceMw),
+                "ESSENCE_MW_NOT_ALLOWED"
+            );
+
             IEssenceMiddleware(essenceMw).preProcess(
                 data.profileId,
                 data.essenceId,
@@ -400,6 +410,11 @@ library Actions {
         profileMw = ICyberEngine(ENGINE).getProfileMwByNamespace(address(this));
 
         if (profileMw != address(0)) {
+            require(
+                ICyberEngine(ENGINE).isProfileMwAllowed(profileMw),
+                "PROFILE_MW_NOT_ALLOWED"
+            );
+
             IProfileMiddleware(profileMw).preProcess{ value: msg.value }(
                 params,
                 preData

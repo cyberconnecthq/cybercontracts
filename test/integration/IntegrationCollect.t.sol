@@ -732,4 +732,16 @@ contract IntegrationEssenceTest is
         assertEq(essence.balanceOf(alice), 0);
         assertEq(essence.ownerOf(carlySecondEssenceTokenId), bob);
     }
+
+    function testCannotCollectIfMwDisallowed() public {
+        engine.allowEssenceMw(address(collectMw), false);
+
+        vm.expectRevert("ESSENCE_MW_NOT_ALLOWED");
+        vm.startPrank(carly);
+        link5Profile.collect(
+            DataTypes.CollectParams(carly, profileIdBob, bobEssenceMWId),
+            new bytes(0),
+            new bytes(0)
+        );
+    }
 }
