@@ -29,6 +29,8 @@ contract Link3ProfileDescriptor is
     IUpgradeable,
     IProfileNFTDescriptor
 {
+    event SetAnimationTemplate(string preTemplate, string template);
+
     /*//////////////////////////////////////////////////////////////
                                  CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
@@ -60,7 +62,9 @@ contract Link3ProfileDescriptor is
         override
         onlyOwner
     {
+        string memory preTemplate = animationTemplate;
         animationTemplate = template;
+        emit SetAnimationTemplate(preTemplate, template);
     }
 
     /// @inheritdoc IUpgradeable
