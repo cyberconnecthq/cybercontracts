@@ -19,7 +19,7 @@ import { SubscribeStatusMw } from "../base/SubscribeStatusMw.sol";
  * @author CyberConnect
  * @notice This contract is a middleware to only allow users to collect when they pay a certain fee to the essence owner.
  * the essence creator can choose to set rules including whether collecting this essence require previous subscription and
- * has a specific limit.
+ * has a total supply.
  */
 contract PaidCollectMw is IEssenceMiddleware, FeeMw {
     using SafeERC20 for IERC20;
