@@ -596,11 +596,7 @@ contract ProfileNFT is
         returns (address)
     {
         _requireMinted(profileId);
-        require(
-            bytes(_essenceByIdByProfileId[profileId][essenceId].name).length !=
-                0,
-            "ESSENCE_DOES_NOT_EXIST"
-        );
+        _requireEssenceRegistered(profileId, essenceId);
         return _essenceByIdByProfileId[profileId][essenceId].essenceNFT;
     }
 
@@ -612,11 +608,7 @@ contract ProfileNFT is
         returns (string memory)
     {
         _requireMinted(profileId);
-        require(
-            bytes(_essenceByIdByProfileId[profileId][essenceId].name).length !=
-                0,
-            "ESSENCE_DOES_NOT_EXIST"
-        );
+        _requireEssenceRegistered(profileId, essenceId);
         return _essenceByIdByProfileId[profileId][essenceId].tokenURI;
     }
 
@@ -628,11 +620,7 @@ contract ProfileNFT is
         returns (address)
     {
         _requireMinted(profileId);
-        require(
-            bytes(_essenceByIdByProfileId[profileId][essenceId].name).length !=
-                0,
-            "ESSENCE_DOES_NOT_EXIST"
-        );
+        _requireEssenceRegistered(profileId, essenceId);
         return _essenceByIdByProfileId[profileId][essenceId].essenceMw;
     }
 
@@ -899,5 +887,16 @@ contract ProfileNFT is
     function _setPrimaryProfile(address owner, uint256 profileId) internal {
         _requireMinted(profileId);
         Actions.setPrimaryProfile(owner, profileId, _addressToPrimaryProfile);
+    }
+
+    function _requireEssenceRegistered(uint256 profileId, uint256 essenceId)
+        internal
+        view
+    {
+        require(
+            bytes(_essenceByIdByProfileId[profileId][essenceId].name).length !=
+                0,
+            "ESSENCE_DOES_NOT_EXIST"
+        );
     }
 }
