@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.14;
 import { Owned } from "../../dependencies/solmate/Owned.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 import { ITreasury } from "../../interfaces/ITreasury.sol";
 
 import { Constants } from "../../libraries/Constants.sol";
-import { Initializable } from "../../upgradeability/Initializable.sol";
 
 /**
  * @title Treasury

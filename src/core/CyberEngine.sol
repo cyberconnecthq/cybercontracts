@@ -4,6 +4,7 @@ pragma solidity 0.8.14;
 
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import { Auth } from "../dependencies/solmate/Auth.sol";
 import { RolesAuthority } from "../dependencies/solmate/RolesAuthority.sol";
 
@@ -21,7 +22,6 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 import { ProfileNFT } from "./ProfileNFT.sol";
 import { CyberEngineStorage } from "../storages/CyberEngineStorage.sol";
 import { UpgradeableBeacon } from "../upgradeability/UpgradeableBeacon.sol";
-import { Initializable } from "../upgradeability/Initializable.sol";
 
 /**
  * @title CyberEngine
@@ -65,9 +65,9 @@ contract CyberEngine is
         _;
     }
 
-    // /*//////////////////////////////////////////////////////////////
-    //                              CONSTRUCTOR
-    // //////////////////////////////////////////////////////////////*/
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
 
     constructor() {
         _disableInitializers();

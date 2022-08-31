@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0;
 
 import { Auth, Authority } from "./Auth.sol";
-import { Initializable } from "../../upgradeability/Initializable.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 /// @notice Adapted from Solmate's RolesAuthority.sol using Auth's initializer instead of constructor.
 

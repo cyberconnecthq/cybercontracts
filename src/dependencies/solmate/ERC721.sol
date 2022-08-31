@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0;
 
-import { Initializable } from "../../upgradeability/Initializable.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 /// @notice Adapted from Solmate's ERC721.sol with initializer replacing the constructor.
 

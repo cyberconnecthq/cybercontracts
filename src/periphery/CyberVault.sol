@@ -6,12 +6,12 @@ import { Owned } from "../dependencies/solmate/Owned.sol";
 import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 import { EIP712 } from "../base/EIP712.sol";
-import { Initializable } from "../upgradeability/Initializable.sol";
 
 /**
  * @title CyberVault

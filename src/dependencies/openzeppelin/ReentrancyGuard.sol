@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // OpenZeppelin Contracts v4.7.0 (security/ReentrancyGuard.sol)
 
-import { Initializable } from "../../upgradeability/Initializable.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 pragma solidity ^0.8.0;
 
