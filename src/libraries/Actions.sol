@@ -306,6 +306,12 @@ library Actions {
             mw == address(0) || ICyberEngine(engine).isEssenceMwAllowed(mw),
             "ESSENCE_MW_NOT_ALLOWED"
         );
+        require(
+            bytes(_essenceByIdByProfileId[profileId][essenceId].name).length !=
+                0,
+            "ESSENCE_DOES_NOT_EXIST"
+        );
+
         _essenceByIdByProfileId[profileId][essenceId].essenceMw = mw;
         bytes memory returnData;
         if (mw != address(0)) {

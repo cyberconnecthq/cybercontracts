@@ -701,12 +701,15 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             notMw,
             new bytes(0)
         );
-        assertEq(profile.getEssenceMw(profileId, essenceId), address(0));
+
+        vm.expectRevert("ESSENCE_DOES_NOT_EXIST");
+        profile.getEssenceMw(profileId, essenceId);
     }
 
     function testSetEssenceDataMwZeroAddress() public {
+        uint256 essenceId = _registerEssence();
+
         address zeroAddress = address(0);
-        uint256 essenceId = 1;
         bytes memory data = new bytes(0);
         string memory uri = "url";
 
@@ -725,6 +728,9 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testSetEssenceData() public {
+        uint256 essenceId = _registerEssence();
+        bytes memory returnData = new bytes(111);
+
         vm.mockCall(
             engine,
             abi.encodeWithSelector(
@@ -734,9 +740,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
             abi.encode(true)
         );
         bytes memory data = new bytes(0);
-        bytes memory returnData = new bytes(111);
-        string memory uri = "url";
-        uint256 essenceId = 1;
+        string memory uri = "new_url";
 
         vm.mockCall(
             essenceMw,
@@ -750,6 +754,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
         vm.expectEmit(true, true, false, true);
         emit SetEssenceData(profileId, essenceId, uri, essenceMw, returnData);
+
         vm.prank(bob);
         profile.setEssenceData(profileId, essenceId, uri, essenceMw, data);
 
@@ -758,6 +763,8 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
     }
 
     function testSetEssenceDataAsOperator() public {
+        uint256 essenceId = _registerEssence();
+
         vm.mockCall(
             engine,
             abi.encodeWithSelector(
@@ -769,7 +776,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(111);
         string memory uri = "url";
-        uint256 essenceId = 1;
 
         vm.mockCall(
             essenceMw,
@@ -795,6 +801,7 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
 
     function testSetEssenceDataWithSig() public {
         uint256 nonce = profile.nonces(bob);
+        uint256 essenceId = _registerEssence();
 
         vm.warp(50);
         uint256 deadline = 100;
@@ -809,8 +816,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         );
         bytes memory data = new bytes(0);
         bytes memory returnData = new bytes(111);
-
-        uint256 essenceId = 1;
 
         vm.mockCall(
             essenceMw,
@@ -1521,5 +1526,44 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         vm.prank(gov);
         profile.setNFTDescriptor(descriptor);
         assertEq(profile.tokenURI(profileId), "Link5TokenURI");
+    }
+
+    function _registerEssence() internal returns (uint256) {
+        vm.prank(bob);
+        bytes memory returnData = new bytes(111);
+
+        vm.mockCall(
+            engine,
+            abi.encodeWithSelector(
+                ICyberEngine.isEssenceMwAllowed.selector,
+                essenceMw
+            ),
+            abi.encode(true)
+        );
+
+        vm.mockCall(
+            essenceMw,
+            abi.encodeWithSelector(
+                IEssenceMiddleware.setEssenceMwData.selector,
+                profileId,
+                1,
+                new bytes(0)
+            ),
+            abi.encode(returnData)
+        );
+
+        uint256 essenceId = profile.registerEssence(
+            DataTypes.RegisterEssenceParams(
+                profileId,
+                "name",
+                "symbol",
+                "uri",
+                essenceMw,
+                true,
+                false
+            ),
+            new bytes(0)
+        );
+        return essenceId;
     }
 }
