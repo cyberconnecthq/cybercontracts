@@ -3,6 +3,7 @@
 pragma solidity 0.8.14;
 
 import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import { IERC721 } from "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import { SafeERC20 } from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
@@ -28,16 +29,16 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
     //////////////////////////////////////////////////////////////*/
 
     struct PaidEssenceData {
-        uint256 limit;
+        uint256 totalSupply;
+        uint256 currentCollect;
         uint256 amount;
         address recipient;
         address currency;
         bool subscribeRequired;
-        mapping(address => uint256) amountCollectedByCollector;
     }
 
     mapping(address => mapping(uint256 => mapping(uint256 => PaidEssenceData)))
-        internal _paidEssenceStorage;
+        internal _paidEssenceData;
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
@@ -60,7 +61,7 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         bytes calldata data
     ) external override returns (bytes memory) {
         (
-            uint256 limit,
+            uint256 totalSupply,
             uint256 amount,
             address recipient,
             address currency,
@@ -71,13 +72,13 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         require(recipient != address(0), "INVALID_ADDRESS");
         require(_currencyAllowed(currency), "CURRENCY_NOT_ALLOWED");
 
-        _paidEssenceStorage[msg.sender][profileId][essenceId].limit = limit;
-        _paidEssenceStorage[msg.sender][profileId][essenceId].amount = amount;
-        _paidEssenceStorage[msg.sender][profileId][essenceId]
+        _paidEssenceData[msg.sender][profileId][essenceId]
+            .totalSupply = totalSupply;
+        _paidEssenceData[msg.sender][profileId][essenceId].amount = amount;
+        _paidEssenceData[msg.sender][profileId][essenceId]
             .recipient = recipient;
-        _paidEssenceStorage[msg.sender][profileId][essenceId]
-            .currency = currency;
-        _paidEssenceStorage[msg.sender][profileId][essenceId]
+        _paidEssenceData[msg.sender][profileId][essenceId].currency = currency;
+        _paidEssenceData[msg.sender][profileId][essenceId]
             .subscribeRequired = subscribeRequired;
 
         return new bytes(0);
@@ -96,23 +97,23 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         bytes calldata
     ) external override {
         require(
-            _paidEssenceStorage[msg.sender][profileId][essenceId].limit -
-                _paidEssenceStorage[msg.sender][profileId][essenceId]
-                    .amountCollectedByCollector[collector] >
+            _paidEssenceData[msg.sender][profileId][essenceId].totalSupply -
+                _paidEssenceData[msg.sender][profileId][essenceId]
+                    .currentCollect >
                 0,
             "COLLECT_LIMIT_EXCEEDED"
         );
 
-        address currency = _paidEssenceStorage[msg.sender][profileId][essenceId]
+        address currency = _paidEssenceData[msg.sender][profileId][essenceId]
             .currency;
-        uint256 amount = _paidEssenceStorage[msg.sender][profileId][essenceId]
+        uint256 amount = _paidEssenceData[msg.sender][profileId][essenceId]
             .amount;
         uint256 treasuryCollected = (amount * _treasuryFee()) /
             Constants._MAX_BPS;
         uint256 actualPaid = amount - treasuryCollected;
 
         if (
-            _paidEssenceStorage[msg.sender][profileId][essenceId]
+            _paidEssenceData[msg.sender][profileId][essenceId]
                 .subscribeRequired == true
         ) {
             require(
@@ -123,7 +124,7 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
 
         IERC20(currency).safeTransferFrom(
             collector,
-            _paidEssenceStorage[msg.sender][profileId][essenceId].recipient,
+            _paidEssenceData[msg.sender][profileId][essenceId].recipient,
             actualPaid
         );
 
@@ -134,9 +135,7 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
                 treasuryCollected
             );
         }
-
-        _paidEssenceStorage[msg.sender][profileId][essenceId]
-            .amountCollectedByCollector[collector]++;
+        _paidEssenceData[msg.sender][profileId][essenceId].currentCollect++;
     }
 
     /// @inheritdoc IEssenceMiddleware

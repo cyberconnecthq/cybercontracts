@@ -547,7 +547,7 @@ contract PaidCollectEssenceMwTest is
         vm.stopPrank();
     }
 
-    function testCollectFromDifferentCollectorsUnderLimit() public {
+    function testCollectUnderLimit() public {
         // parameters for this test
         amountRequired = 1000;
         limit = 3;
@@ -754,34 +754,13 @@ contract PaidCollectEssenceMwTest is
 
         // Dave collects their first essence(essence id 4), because they have not collected any essence before, it will go through
         vm.startPrank(dave);
-        token.approve(address(paidCollectMw), 5000);
+        vm.expectRevert("COLLECT_LIMIT_EXCEEDED");
 
         // dave collects the fourth essence
-        uint256 limitedPaidCollectTokenIdFour = link3Profile.collect(
+        link3Profile.collect(
             DataTypes.CollectParams(dave, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
             new bytes(0)
-        );
-
-        // check the ownership of the essence after the fourth collect(dave's first)
-        assertEq(EssenceNFT(bobbyEssNFT).balanceOf(dave), 1);
-        assertEq(
-            EssenceNFT(bobbyEssNFT).ownerOf(limitedPaidCollectTokenIdFour),
-            dave
-        );
-
-        // check the balance of dave and engine after the fourth collection(dave's first)
-        assertEq(
-            IERC20(address(token)).balanceOf(dave),
-            balanceDave = balanceDave - amountRequired
-        );
-        assertEq(
-            IERC20(address(token)).balanceOf(bobby),
-            balanceBobby = balanceBobby + amountRequired - cut
-        );
-        assertEq(
-            IERC20(address(token)).balanceOf(engineTreasury),
-            balanceEngine = balanceEngine + cut
         );
     }
 }
