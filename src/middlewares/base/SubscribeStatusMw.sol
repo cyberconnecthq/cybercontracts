@@ -6,6 +6,11 @@ import { IProfileNFT } from "../../interfaces/IProfileNFT.sol";
 
 import { ERC721 } from "../../dependencies/solmate/ERC721.sol";
 
+/**
+ * @title SubscribeStatusMw
+ * @author CyberConnect
+ * @notice This checks that the user has already subscribed to the profile
+ */
 library SubscribeStatusMw {
     /*//////////////////////////////////////////////////////////////
                             PUBLIC VIEW
@@ -18,6 +23,7 @@ library SubscribeStatusMw {
     {
         address essenceOwnerSubscribeNFT = IProfileNFT(msg.sender)
             .getSubscribeNFT(profileId);
+
         return (essenceOwnerSubscribeNFT != address(0) &&
             ERC721(essenceOwnerSubscribeNFT).balanceOf(collector) != 0);
     }
