@@ -6,6 +6,7 @@ import { Owned } from "../dependencies/solmate/Owned.sol";
 import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import { ReentrancyGuard } from "../dependencies/openzeppelin/ReentrancyGuard.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
@@ -17,7 +18,7 @@ import { EIP712 } from "../base/EIP712.sol";
  * @author CyberConnect
  * @notice This contract is used to create CyberVault.
  */
-contract CyberVault is Owned, ReentrancyGuard, EIP712 {
+contract CyberVault is Initializable, Owned, ReentrancyGuard, EIP712 {
     using SafeERC20 for IERC20;
 
     event Initialize(address indexed owner);
@@ -42,7 +43,7 @@ contract CyberVault is Owned, ReentrancyGuard, EIP712 {
                                  CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address owner) {
+    constructor(address owner) initializer {
         _signer = owner;
         Owned.__Owned_Init(owner);
         ReentrancyGuard.__ReentrancyGuard_init();

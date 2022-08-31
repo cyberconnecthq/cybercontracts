@@ -75,7 +75,7 @@ contract SubscribeNFTTest is Test, TestDeployer, ISubscribeNFTEvents {
     }
 
     function testCannotReinitialize() public {
-        vm.expectRevert("Contract already initialized");
+        vm.expectRevert("Initializable: contract is already initialized");
         c.initialize(2, name, symbol);
     }
 

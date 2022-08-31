@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.14;
 import { Owned } from "../../dependencies/solmate/Owned.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 import { ITreasury } from "../../interfaces/ITreasury.sol";
 
@@ -12,7 +13,7 @@ import { Constants } from "../../libraries/Constants.sol";
  * @author CyberConnect
  * @notice This contract is used for treasury.
  */
-contract Treasury is Owned, ITreasury {
+contract Treasury is Initializable, Owned, ITreasury {
     /*//////////////////////////////////////////////////////////////
                                 STATES
     //////////////////////////////////////////////////////////////*/
@@ -29,7 +30,7 @@ contract Treasury is Owned, ITreasury {
         address owner,
         address treasuryAddress,
         uint16 treasuryFee
-    ) {
+    ) initializer {
         require(treasuryAddress != address(0), "ZERO_TREASURY_ADDRESS");
         require(owner != address(0), "ZERO_OWNER_ADDRESS");
         require(treasuryFee <= Constants._MAX_BPS, "INVALID_TREASURY_FEE");

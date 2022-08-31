@@ -2,12 +2,14 @@
 
 pragma solidity >=0.8.0;
 
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
+
 /// @notice Adapted from Solmate's Auth.sol with initializer replacing the constructor.
 
 /// @notice Provides a flexible and updatable auth pattern which is completely separate from application logic.
 /// @author Solmate (https://github.com/Rari-Capital/solmate/blob/main/src/auth/Auth.sol)
 /// @author Modified from Dappsys (https://github.com/dapphub/ds-auth/blob/master/src/auth.sol)
-abstract contract Auth {
+abstract contract Auth is Initializable {
     event OwnerUpdated(address indexed user, address indexed newOwner);
 
     event AuthorityUpdated(address indexed user, Authority indexed newAuthority);
@@ -16,7 +18,7 @@ abstract contract Auth {
 
     Authority public authority;
 
-    function __Auth_Init(address _owner, Authority _authority) internal {
+    function __Auth_Init(address _owner, Authority _authority) internal onlyInitializing {
         owner = _owner;
         authority = _authority;
 

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import { Initializable } from "../../src/upgradeability/Initializable.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 /**
  * @title MockInitializable

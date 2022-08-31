@@ -5,6 +5,7 @@ pragma solidity 0.8.14;
 import { Base64 } from "openzeppelin-contracts/contracts/utils/Base64.sol";
 import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import { Owned } from "../dependencies/solmate/Owned.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
 import { IProfileNFTDescriptor } from "../interfaces/IProfileNFTDescriptor.sol";
@@ -13,7 +14,6 @@ import { QRSVG } from "../libraries/QRSVG.sol";
 import { LibString } from "../libraries/LibString.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
-import { Initializable } from "../upgradeability/Initializable.sol";
 import { Link3ProfileDescriptorStorage } from "../storages/Link3ProfileDescriptorStorage.sol";
 
 /**

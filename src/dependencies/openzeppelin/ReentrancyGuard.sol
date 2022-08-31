@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // OpenZeppelin Contracts v4.7.0 (security/ReentrancyGuard.sol)
 
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
+
 pragma solidity ^0.8.0;
 
 /**
@@ -21,7 +23,7 @@ pragma solidity ^0.8.0;
  * to protect against it, check out our blog post
  * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].
  */
-abstract contract ReentrancyGuard {
+abstract contract ReentrancyGuard is Initializable {
     // Booleans are more expensive than uint256 or any type that takes up a full
     // word because each write operation emits an extra SLOAD to first read the
     // slot's contents, replace the bits taken up by the boolean, and then write
@@ -39,7 +41,7 @@ abstract contract ReentrancyGuard {
     uint256 private _status;
 
 
-    function __ReentrancyGuard_init() internal {
+    function __ReentrancyGuard_init() internal onlyInitializing {
         _status = _NOT_ENTERED;
     }
 

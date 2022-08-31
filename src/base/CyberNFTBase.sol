@@ -3,6 +3,7 @@
 pragma solidity 0.8.14;
 
 import { ERC721 } from "../dependencies/solmate/ERC721.sol";
+import { Initializable } from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 import { ICyberNFTBase } from "../interfaces/ICyberNFTBase.sol";
 
@@ -10,7 +11,6 @@ import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 import { EIP712 } from "./EIP712.sol";
-import { Initializable } from "../upgradeability/Initializable.sol";
 
 /**
  * @title Cyber NFT Base

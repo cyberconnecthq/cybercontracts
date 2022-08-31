@@ -34,7 +34,7 @@ contract CyberNFTBaseTest is Test {
     }
 
     function testCannotInitializeImpl() public {
-        vm.expectRevert("Contract already initialized");
+        vm.expectRevert("Initializable: contract is already initialized");
         impl.initialize("TestNFT", "TNFT");
     }
 
