@@ -6,13 +6,14 @@ import { Owned } from "../../dependencies/solmate/Owned.sol";
 import { ITreasury } from "../../interfaces/ITreasury.sol";
 
 import { Constants } from "../../libraries/Constants.sol";
+import { Initializable } from "../../upgradeability/Initializable.sol";
 
 /**
  * @title Treasury
  * @author CyberConnect
  * @notice This contract is used for treasury.
  */
-contract Treasury is Owned, ITreasury {
+contract Treasury is Initializable, Owned, ITreasury {
     /*//////////////////////////////////////////////////////////////
                                 STATES
     //////////////////////////////////////////////////////////////*/
@@ -29,7 +30,7 @@ contract Treasury is Owned, ITreasury {
         address owner,
         address treasuryAddress,
         uint16 treasuryFee
-    ) {
+    ) initializer {
         require(treasuryAddress != address(0), "ZERO_TREASURY_ADDRESS");
         require(owner != address(0), "ZERO_OWNER_ADDRESS");
         require(treasuryFee <= Constants._MAX_BPS, "INVALID_TREASURY_FEE");

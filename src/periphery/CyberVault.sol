@@ -11,13 +11,14 @@ import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
 import { EIP712 } from "../base/EIP712.sol";
+import { Initializable } from "../upgradeability/Initializable.sol";
 
 /**
  * @title CyberVault
  * @author CyberConnect
  * @notice This contract is used to create CyberVault.
  */
-contract CyberVault is Owned, ReentrancyGuard, EIP712 {
+contract CyberVault is Initializable, Owned, ReentrancyGuard, EIP712 {
     using SafeERC20 for IERC20;
 
     event Initialize(address indexed owner);
@@ -42,7 +43,7 @@ contract CyberVault is Owned, ReentrancyGuard, EIP712 {
                                  CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address owner) {
+    constructor(address owner) initializer {
         _signer = owner;
         Owned.__Owned_Init(owner);
         ReentrancyGuard.__ReentrancyGuard_init();

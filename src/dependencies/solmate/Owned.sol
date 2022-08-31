@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+import { Initializable } from "../../upgradeability/Initializable.sol";
+
 pragma solidity >=0.8.0;
 
 /// @notice Adapted from Solmate's Owned.sol with initializer replacing the constructor.
 
 /// @notice Simple single owner authorization mixin.
 /// @author Solmate (https://github.com/Rari-Capital/solmate/blob/main/src/auth/Owned.sol)
-abstract contract Owned {
+abstract contract Owned is Initializable {
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
     //////////////////////////////////////////////////////////////*/
@@ -29,7 +31,7 @@ abstract contract Owned {
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    function __Owned_Init(address _owner) internal {
+    function __Owned_Init(address _owner) internal onlyInitializing {
         require(_owner != address(0), "ZERO_ADDRESS");
         owner = _owner;
 
