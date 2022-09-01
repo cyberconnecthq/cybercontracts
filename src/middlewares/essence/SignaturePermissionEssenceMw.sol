@@ -16,6 +16,17 @@ import { EIP712 } from "../../base/EIP712.sol";
  */
 contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
     /*//////////////////////////////////////////////////////////////
+                                EVENT
+    //////////////////////////////////////////////////////////////*/
+
+    event SignatureEssenceMwSignerSet(
+        address indexed namespace,
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        address signer
+    );
+
+    /*//////////////////////////////////////////////////////////////
                                 STATES
     //////////////////////////////////////////////////////////////*/
 
@@ -43,6 +54,13 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
         _signerStorage[msg.sender][profileId][essenceId].signer = abi.decode(
             data,
             (address)
+        );
+
+        emit SignatureEssenceMwSignerSet(
+            msg.sender,
+            profileId,
+            essenceId,
+            _signerStorage[msg.sender][profileId][essenceId].signer
         );
 
         return new bytes(0);

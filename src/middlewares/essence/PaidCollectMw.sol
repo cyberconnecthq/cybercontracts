@@ -25,6 +25,21 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
+                                EVENT
+    //////////////////////////////////////////////////////////////*/
+
+    event PaidEssenceMwSet(
+        address indexed namespace,
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        uint256 currentCollect,
+        uint256 amount,
+        address recipient,
+        address currency,
+        bool subscribeRequired
+    );
+
+    /*//////////////////////////////////////////////////////////////
                                STATES
     //////////////////////////////////////////////////////////////*/
 
@@ -81,6 +96,16 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         _paidEssenceData[msg.sender][profileId][essenceId]
             .subscribeRequired = subscribeRequired;
 
+        emit PaidEssenceMwSet(
+            msg.sender,
+            profileId,
+            essenceId,
+            totalSupply,
+            amount,
+            recipient,
+            currency,
+            subscribeRequired
+        );
         return new bytes(0);
     }
 

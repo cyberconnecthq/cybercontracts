@@ -22,6 +22,20 @@ contract PaidSubscribeMw is ISubscribeMiddleware, FeeMw {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
+                                EVENT
+    //////////////////////////////////////////////////////////////*/
+
+    event PaidSubscribeMwSet(
+        address indexed namespace,
+        uint256 indexed profileId,
+        uint256 indexed amount,
+        address recipient,
+        address currency,
+        bool nftRequired,
+        address nftAddress
+    );
+
+    /*//////////////////////////////////////////////////////////////
                                STATES
     //////////////////////////////////////////////////////////////*/
 
@@ -74,6 +88,15 @@ contract PaidSubscribeMw is ISubscribeMiddleware, FeeMw {
         _paidSubscribeData[msg.sender][profileId].nftRequired = nftRequired;
         _paidSubscribeData[msg.sender][profileId].nftAddress = nftAddress;
 
+        emit PaidSubscribeMwSet(
+            msg.sender,
+            profileId,
+            amount,
+            recipient,
+            currency,
+            nftRequired,
+            nftAddress
+        );
         return new bytes(0);
     }
 

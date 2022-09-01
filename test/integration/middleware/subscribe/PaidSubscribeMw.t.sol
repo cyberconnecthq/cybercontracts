@@ -32,6 +32,16 @@ contract PaidSubscribeMwTest is
     IProfileNFTEvents,
     ITreasuryEvents
 {
+    event PaidSubscribeMwSet(
+        address indexed namespace,
+        uint256 indexed profileId,
+        uint256 indexed amount,
+        address recipient,
+        address currency,
+        bool nftRequired,
+        address nftAddress
+    );
+
     address lila = address(0x1114);
     string lilaHandle = "lila";
     uint256 lilaProfileId;
@@ -141,6 +151,18 @@ contract PaidSubscribeMwTest is
 
         // initialize the subscribe middleware data
         vm.prank(bobby);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidSubscribeMwSet(
+            address(link3Profile),
+            bobbyProfileId,
+            amountRequired,
+            bobby,
+            address(token),
+            nftRequired,
+            nftAddress
+        );
+
         vm.expectEmit(true, false, false, true);
         emit SetSubscribeData(
             bobbyProfileId,
@@ -229,6 +251,18 @@ contract PaidSubscribeMwTest is
         engine.allowSubscribeMw(address(paidSubscribeMw), true);
 
         vm.prank(bobby);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidSubscribeMwSet(
+            address(link3Profile),
+            bobbyProfileId,
+            amountRequired,
+            bobby,
+            address(token),
+            nftRequired,
+            address(nft)
+        );
+
         vm.expectEmit(true, false, false, true);
         emit SetSubscribeData(
             bobbyProfileId,
@@ -295,6 +329,18 @@ contract PaidSubscribeMwTest is
 
         // initialize the subscribe middleware data
         vm.prank(bobby);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidSubscribeMwSet(
+            address(link3Profile),
+            bobbyProfileId,
+            amountRequired,
+            bobby,
+            address(token),
+            nftRequired,
+            address(nft)
+        );
+
         vm.expectEmit(true, false, false, true);
         emit SetSubscribeData(
             bobbyProfileId,
@@ -382,6 +428,18 @@ contract PaidSubscribeMwTest is
         engine.allowSubscribeMw(address(paidSubscribeMw), true);
 
         vm.prank(bobby);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidSubscribeMwSet(
+            address(link3Profile),
+            bobbyProfileId,
+            amountRequired,
+            bobby,
+            address(token),
+            nftRequired,
+            address(0)
+        );
+
         vm.expectEmit(true, false, false, true);
         emit SetSubscribeData(
             bobbyProfileId,

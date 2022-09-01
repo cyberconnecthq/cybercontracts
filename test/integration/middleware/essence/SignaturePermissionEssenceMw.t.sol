@@ -21,6 +21,12 @@ contract SignaturePermissionEssenceMwTest is
     ICyberEngineEvents,
     IProfileNFTEvents
 {
+    event SignatureEssenceMwSignerSet(
+        address indexed namespace,
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        address signer
+    );
     // note: logic:
     // Pk means private key
     // Only users approved by the essence owner's private key has the the correct sig
@@ -85,6 +91,15 @@ contract SignaturePermissionEssenceMwTest is
         emit AllowEssenceMw(address(sigMw), false, true);
         engine.allowEssenceMw(address(sigMw), true);
 
+        // check emit for registering the essence
+        vm.expectEmit(true, true, true, true);
+        emit SignatureEssenceMwSignerSet(
+            address(link3Profile),
+            bobbyProfileId,
+            1,
+            bobby
+        );
+        // check emit for setting essence data
         vm.expectEmit(true, true, false, false);
         emit RegisterEssence(
             bobbyProfileId,
@@ -95,7 +110,7 @@ contract SignaturePermissionEssenceMwTest is
             address(sigMw),
             abi.encode(bobby)
         );
-
+        // check emit for registering the essence, which happens after the set essence data
         vm.prank(bobby);
         bobbyEssenceId = link3Profile.registerEssence(
             DataTypes.RegisterEssenceParams(
