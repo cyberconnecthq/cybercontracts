@@ -13,6 +13,17 @@ import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
  */
 contract MerkleDropEssenceMw is IEssenceMiddleware {
     /*//////////////////////////////////////////////////////////////
+                                EVENT
+    //////////////////////////////////////////////////////////////*/
+
+    event MerkleDropEssenceMwSet(
+        address indexed namespace,
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        bytes32 root
+    );
+
+    /*//////////////////////////////////////////////////////////////
                                 STATES
     //////////////////////////////////////////////////////////////*/
 
@@ -35,6 +46,14 @@ contract MerkleDropEssenceMw is IEssenceMiddleware {
             root,
             (bytes32)
         );
+
+        emit MerkleDropEssenceMwSet(
+            msg.sender,
+            profileId,
+            essenceId,
+            rootStorage[msg.sender][profileId][essenceId]
+        );
+
         return new bytes(0);
     }
 

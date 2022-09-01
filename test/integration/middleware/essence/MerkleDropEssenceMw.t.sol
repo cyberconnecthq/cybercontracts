@@ -21,6 +21,13 @@ contract MerkleDropEssenceMwTest is
     ICyberEngineEvents,
     IProfileNFTEvents
 {
+    event MerkleDropEssenceMwSet(
+        address indexed namespace,
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        bytes32 root
+    );
+
     address lila = 0xD68d2bD6f4a013A948881AC067282401b8f62FBb;
     address bobby = 0xE5D263Dd0D466EbF0Fc2647Dd4942a7525b0EAD1;
     address dave = 0xBDed9597195fb3C36b1A213cA45446906d7caeda;
@@ -99,6 +106,14 @@ contract MerkleDropEssenceMwTest is
         vm.expectEmit(false, false, false, true);
         emit AllowEssenceMw(address(merkleMw), false, true);
         engine.allowEssenceMw(address(merkleMw), true);
+
+        vm.expectEmit(true, true, true, true);
+        emit MerkleDropEssenceMwSet(
+            address(link3Profile),
+            bobbyProfileId,
+            1,
+            root
+        );
 
         vm.expectEmit(true, true, false, false);
         emit RegisterEssence(

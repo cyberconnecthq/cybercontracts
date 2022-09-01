@@ -29,6 +29,16 @@ contract PaidCollectEssenceMwTest is
     IProfileNFTEvents,
     ITreasuryEvents
 {
+    event PaidEssenceMwSet(
+        address indexed namespace,
+        uint256 indexed profileId,
+        uint256 indexed essenceId,
+        uint256 currentCollect,
+        uint256 amount,
+        address recipient,
+        address currency,
+        bool subscribeRequired
+    );
     address lila = address(0x1114);
     string lilaHandle = "lila";
     uint256 lilaProfileId;
@@ -154,6 +164,18 @@ contract PaidCollectEssenceMwTest is
         vm.expectEmit(false, false, false, true);
         emit AllowEssenceMw(address(paidCollectMw), false, true);
         engine.allowEssenceMw(address(paidCollectMw), true);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidEssenceMwSet(
+            address(link3Profile),
+            bobbyProfileId,
+            1,
+            limit,
+            amountRequired,
+            bobby,
+            address(token),
+            subscribeRequired
+        );
 
         vm.expectEmit(true, true, false, false);
         emit RegisterEssence(
@@ -284,6 +306,18 @@ contract PaidCollectEssenceMwTest is
         vm.expectEmit(true, true, true, false);
         emit AllowEssenceMw(address(paidCollectMw), false, true);
         engine.allowEssenceMw(address(paidCollectMw), true);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidEssenceMwSet(
+            address(link3Profile),
+            bobbyProfileId,
+            1,
+            limit,
+            amountRequired,
+            bobby,
+            address(token),
+            subscribeRequired
+        );
 
         vm.expectEmit(true, true, false, false);
         emit RegisterEssence(
@@ -429,6 +463,18 @@ contract PaidCollectEssenceMwTest is
         emit AllowEssenceMw(address(paidCollectMw), false, true);
         engine.allowEssenceMw(address(paidCollectMw), true);
 
+        vm.expectEmit(true, true, true, true);
+        emit PaidEssenceMwSet(
+            address(link3Profile),
+            bobbyProfileId,
+            1,
+            limit,
+            amountRequired,
+            bobby,
+            address(token),
+            subscribeRequired
+        );
+
         vm.expectEmit(true, true, false, false);
         emit RegisterEssence(
             bobbyProfileId,
@@ -496,6 +542,18 @@ contract PaidCollectEssenceMwTest is
         vm.expectEmit(true, true, true, false);
         emit AllowEssenceMw(address(paidCollectMw), false, true);
         engine.allowEssenceMw(address(paidCollectMw), true);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidEssenceMwSet(
+            address(link3Profile),
+            bobbyProfileId,
+            1,
+            limit,
+            amountRequired,
+            bobby,
+            address(token),
+            subscribeRequired
+        );
 
         vm.expectEmit(true, true, false, false);
         emit RegisterEssence(
@@ -573,6 +631,18 @@ contract PaidCollectEssenceMwTest is
         vm.expectEmit(false, false, false, true);
         emit AllowEssenceMw(address(paidCollectMw), false, true);
         engine.allowEssenceMw(address(paidCollectMw), true);
+
+        vm.expectEmit(true, true, true, true);
+        emit PaidEssenceMwSet(
+            address(link3Profile),
+            bobbyProfileId,
+            1,
+            limit,
+            amountRequired,
+            bobby,
+            address(token),
+            subscribeRequired
+        );
 
         vm.expectEmit(true, true, false, false);
         emit RegisterEssence(
