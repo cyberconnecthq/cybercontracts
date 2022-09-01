@@ -7,7 +7,7 @@ import { ERC20Permit } from "openzeppelin-contracts/contracts/token/ERC20/extens
 import { Ownable } from "openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract CYBER is ERC20, ERC20Permit, Ownable {
-    //Total supply of cyber token is 100M
+    // Total supply of cyber token is 100M
     uint256 public TOTAL_SUPPLY = 100_000_000 * 10**uint256(decimals());
 
     constructor(address owner, address to)

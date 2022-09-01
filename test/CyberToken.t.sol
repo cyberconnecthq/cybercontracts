@@ -5,7 +5,7 @@ pragma solidity 0.8.14;
 import "forge-std/Test.sol";
 import { ERC20 } from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import { CYBER } from "../src/cybertoken/CYBER.sol";
+import { CYBER } from "../src/token/CYBER.sol";
 import { TestIntegrationBase } from "../test/utils/TestIntegrationBase.sol";
 
 contract CyberTokenTest is TestIntegrationBase {
