@@ -15,3 +15,4 @@
 | Link3 Descriptor (Impl)                      | 0x32fc58637dac8103cb85d27c700ca65f71a7be13 |
 | Link3 Descriptor (Proxy)                     | 0xd737df5724d5cf83dc15d7c82f8df8c0a1bc2c7b |
 | CyberVault                                   | 0x4b79dd7f021faf63fb08a88ed4da4ea4a5bbb06a |
+| CyberToken                                   | 0x01f88e84a5c442081f3e9e3194013b19e9e0d729 |
