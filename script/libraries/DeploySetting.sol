@@ -11,6 +11,7 @@ contract DeploySetting {
         address engineGov; // engine gov to create namespace
         address engineTreasury; // collect protocol fees
         address deployerContract; // used to deploy contracts
+        address cyberTokenOwner; // cyber token owner
     }
 
     DeployParameters internal deployParams;
@@ -45,6 +46,9 @@ contract DeploySetting {
             deployParams.engineTreasury = address(
                 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC // use different wallet to pass balance delta check (gas paying)
             );
+            deployParams.cyberTokenOwner = address(
+                0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
+            );
             deployParams.deployerContract = address(0);
         } else if (block.chainid == 5 || block.chainid == 4) {
             // goerli
@@ -65,6 +69,9 @@ contract DeploySetting {
                 0x927f355117721e0E8A7b5eA20002b65B8a551890
             );
             deployParams.engineTreasury = address(
+                0x78020361856816382501E444600A29519fb3B107
+            );
+            deployParams.cyberTokenOwner = address(
                 0x78020361856816382501E444600A29519fb3B107
             );
             //goerli
@@ -99,6 +106,9 @@ contract DeploySetting {
             );
             deployParams.engineTreasury = address(
                 0xa4E52748fAcCA028D163941f3Bd52F4B204f8019
+            );
+            deployParams.cyberTokenOwner = address(
+                0xa4E52748fAcCA028D163941f3Bd52F4B204f8019 // TODO: change to gnosis wallet
             );
             deployParams.deployerContract = address(
                 0xEFb8369Fb33bA67832B7120C94698e5372eE61C3

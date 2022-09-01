@@ -7,6 +7,7 @@ import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.so
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
 import { CyberVault } from "../../src/periphery/CyberVault.sol";
+import { CYBER } from "../../src/token/CYBER.sol";
 import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
 import { EssenceNFT } from "../../src/core/EssenceNFT.sol";
 import { Authority } from "../../src/dependencies/solmate/Auth.sol";
@@ -230,7 +231,8 @@ library LibDeploy {
                 address(this),
                 address(this),
                 engineTreasury,
-                address(0) // deployer contract address. use 0 address to deploy create2 contract on the fly
+                address(0), // deployer contract address. use 0 address to deploy create2 contract on the fly
+                engineTreasury
             );
         DeployParams memory params = DeployParams(false, false, setting);
         addrs = deploy(
@@ -334,6 +336,19 @@ library LibDeploy {
             _write(vm, "CyberVault", vault);
         }
         require(CyberVault(vault).getSigner() == vaultOwner, "WRONG_SIGNER");
+    }
+
+    function deployCyberToken(
+        Vm vm,
+        address tokenOwner,
+        address to,
+        bool writeFile
+    ) internal returns (address token) {
+        token = address(new CYBER(tokenOwner, to));
+        if (writeFile) {
+            _write(vm, "CyberToken", token);
+        }
+        require(CYBER(token).owner() == tokenOwner, "WRONG_OWNER");
     }
 
     function _deploy(
