@@ -14,7 +14,12 @@ contract CYBER is ERC20, ERC20Permit, Ownable {
         ERC20("CyberConnect", "CYBER")
         ERC20Permit("CyberConnect")
     {
-        transferOwnership(owner);
+        _transferOwnership(owner);
+
         _mint(to, TOTAL_SUPPLY);
+    }
+
+    function mint(address to, uint256 amount) external onlyOwner {
+        _mint(to, amount);
     }
 }

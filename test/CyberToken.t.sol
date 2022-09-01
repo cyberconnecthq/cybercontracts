@@ -75,4 +75,20 @@ contract CyberTokenTest is TestIntegrationBase {
         vm.expectRevert("Ownable: caller is not the owner");
         cyberTokenContract.transferOwnership(lila);
     }
+
+    function testMintOnlyOwner() public {
+        assertEq(cyberTokenContract.owner(), bobby);
+
+        vm.prank(bobby);
+        cyberTokenContract.mint(dave, 10);
+        assertEq(IERC20(address(cyberTokenContract)).balanceOf(dave), 10);
+
+        vm.prank(dave);
+        vm.expectRevert("Ownable: caller is not the owner");
+        cyberTokenContract.mint(dave, 10);
+
+        vm.prank(lila);
+        vm.expectRevert("Ownable: caller is not the owner");
+        cyberTokenContract.mint(dave, 10);
+    }
 }
