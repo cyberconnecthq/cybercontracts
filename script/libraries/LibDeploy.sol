@@ -82,6 +82,7 @@ library LibDeploy {
         else if (chainId == 4) chainName = "rinkeby";
         else if (chainId == 5) chainName = "goerli";
         else if (chainId == 42) chainName = "kovan";
+        else if (chainId == 97) chainName = "bnbt";
         else if (chainId == 31337) chainName = "anvil";
         else chainName = "unknown";
         return

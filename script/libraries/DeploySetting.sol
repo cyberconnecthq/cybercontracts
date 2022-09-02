@@ -50,7 +50,9 @@ contract DeploySetting {
                 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
             );
             deployParams.deployerContract = address(0);
-        } else if (block.chainid == 5 || block.chainid == 4) {
+        } else if (
+            block.chainid == 5 || block.chainid == 4 || block.chainid == 97
+        ) {
             // goerli
             deployParams.link3Owner = address(
                 // 0x1890a1625d837A809b0e77EdE1a999a161df085d
@@ -82,6 +84,10 @@ contract DeploySetting {
             } else if (block.chainid == 4) {
                 deployParams.deployerContract = address(
                     0xe19061D4Dd38ac3B67eeC28E90bdFB68065DbF7c
+                );
+            } else if (block.chainid == 97) {
+                deployParams.deployerContract = address(
+                    0x4077B8554A5F9A3C2D10c6Bb467B7E26Caf65ad9
                 );
             }
         } else if (
