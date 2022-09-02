@@ -49,16 +49,13 @@ contract SubscribeNFTUpgradeTest is Test, TestDeployer {
     function testUpgrade() public {
         MockSubscribeNFTV2 implB = _deployV2(profile);
 
-        assertEq(SubscribeNFT(address(proxy)).version(), 1);
-        assertEq(SubscribeNFT(address(proxyB)).version(), 1);
-
         vm.prank(address(profile));
         beacon.upgradeTo(address(implB));
 
         MockSubscribeNFTV2 p = MockSubscribeNFTV2(address(proxy));
         MockSubscribeNFTV2 pB = MockSubscribeNFTV2(address(proxyB));
 
-        assertEq(p.version(), 2);
-        assertEq(pB.version(), 2);
+        assertEq(p.version(), 100);
+        assertEq(pB.version(), 100);
     }
 }

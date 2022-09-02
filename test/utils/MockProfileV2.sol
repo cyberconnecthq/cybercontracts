@@ -6,6 +6,6 @@ import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 
 contract MockProfileV2 is ProfileNFT {
     function version() external pure override returns (uint256) {
-        return 2;
+        return 100;
     }
 }

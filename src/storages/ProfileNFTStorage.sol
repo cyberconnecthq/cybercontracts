@@ -6,7 +6,7 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 
 abstract contract ProfileNFTStorage {
     // constant
-    uint256 internal constant _VERSION = 1;
+    uint256 internal constant _VERSION = 2;
 
     // storage
     address internal _nftDescriptor;

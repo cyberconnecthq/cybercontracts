@@ -7,7 +7,7 @@ import { DataTypes } from "../libraries/DataTypes.sol";
 abstract contract CyberEngineStorage {
     // constant
     string internal constant _VERSION_STRING = "1"; // for 712, should never  change
-    uint256 internal constant _VERSION = 1;
+    uint256 internal constant _VERSION = 2;
 
     // storage
     mapping(address => bool) internal _profileMwAllowlist;

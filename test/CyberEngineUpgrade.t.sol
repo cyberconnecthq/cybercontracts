@@ -50,7 +50,7 @@ contract CyberEngineUpgradeTest is Test {
     }
 
     function testCannotUpgradeToAndCallAsNonGov() public {
-        assertEq(CyberEngine(address(engine)).version(), 1);
+        uint256 oldVersion = CyberEngine(address(engine)).version();
         MockEngineV2 implV2 = new MockEngineV2();
 
         vm.prank(alice);
@@ -59,32 +59,30 @@ contract CyberEngineUpgradeTest is Test {
             address(implV2),
             abi.encodeWithSelector(MockEngineV2.version.selector)
         );
-        assertEq(CyberEngine(address(engine)).version(), 1);
+        assertEq(CyberEngine(address(engine)).version(), oldVersion);
     }
 
     function testCannotUpgradeAsNonGov() public {
-        assertEq(CyberEngine(address(engine)).version(), 1);
+        uint256 oldVersion = CyberEngine(address(engine)).version();
         MockEngineV2 implV2 = new MockEngineV2();
 
         vm.prank(alice);
         vm.expectRevert("UNAUTHORIZED");
         CyberEngine(address(engine)).upgradeTo(address(implV2));
-        assertEq(CyberEngine(address(engine)).version(), 1);
+        assertEq(CyberEngine(address(engine)).version(), oldVersion);
     }
 
     function testUpgrade() public {
-        assertEq(CyberEngine(address(engine)).version(), 1);
         MockEngineV2 implV2 = new MockEngineV2();
 
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
         vm.prank(alice);
 
         CyberEngine(address(engine)).upgradeTo(address(implV2));
-        assertEq(CyberEngine(address(engine)).version(), 2);
+        assertEq(CyberEngine(address(engine)).version(), 100);
     }
 
     function testUpgradeToAndCall() public {
-        assertEq(CyberEngine(address(engine)).version(), 1);
         MockEngineV2 implV2 = new MockEngineV2();
 
         rolesAuthority.setUserRole(alice, Constants._ENGINE_GOV_ROLE, true);
@@ -94,7 +92,7 @@ contract CyberEngineUpgradeTest is Test {
             address(implV2),
             abi.encodeWithSelector(MockEngineV2.version.selector)
         );
-        assertEq(CyberEngine(address(engine)).version(), 2);
+        assertEq(CyberEngine(address(engine)).version(), 100);
     }
 
     function testCannotUpgradeSubNFTAsNonGov() public {
