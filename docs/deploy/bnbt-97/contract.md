@@ -10,3 +10,4 @@
 | Link3 Profile                                | 0xdeb2c11e20e9759db94431c81cfadd3dc392c086 |
 | CyberConnect Treasury                        | 0x4eba0a1140256506a6e04533839dd565529ee579 |
 | Link3 Profile MW (PermissionedFeeCreationMw) | 0x478a79f6f84eadb613acd325b404776a4c570ea1 |
+| Essence MW (SignaturePermissionEssenceMw)    | 0xb2805efb881f2774460eb4b2bdcde360fcc8ddfd |
