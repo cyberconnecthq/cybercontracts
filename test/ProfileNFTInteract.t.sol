@@ -286,44 +286,44 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         assertEq(profile.getSubscribeNFT(profileId), subscribeProxy);
     }
 
-    function testSetOperatorApprovalWithSig() public {
-        vm.startPrank(alice);
+    // function testSetOperatorApprovalWithSig() public {
+    //     vm.startPrank(alice);
 
-        bytes[] memory subDatas = new bytes[](1);
-        subDatas[0] = bytes("simple subdata");
-        bool approved = true;
+    //     bytes[] memory subDatas = new bytes[](1);
+    //     subDatas[0] = bytes("simple subdata");
+    //     bool approved = true;
 
-        vm.warp(50);
-        uint256 deadline = 100;
+    //     vm.warp(50);
+    //     uint256 deadline = 100;
 
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
-                    profileId,
-                    gov,
-                    approved,
-                    profile.nonces(bob),
-                    deadline
-                )
-            ),
-            profile.name(),
-            "1"
-        );
+    //     bytes32 digest = TestLib712.hashTypedDataV4(
+    //         address(profile),
+    //         keccak256(
+    //             abi.encode(
+    //                 Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
+    //                 profileId,
+    //                 gov,
+    //                 approved,
+    //                 profile.nonces(bob),
+    //                 deadline
+    //             )
+    //         ),
+    //         profile.name(),
+    //         "1"
+    //     );
 
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+    //     (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
 
-        vm.expectEmit(true, false, false, true);
-        emit SetOperatorApproval(profileId, gov, false, approved);
+    //     vm.expectEmit(true, false, false, true);
+    //     emit SetOperatorApproval(profileId, gov, false, approved);
 
-        profile.setOperatorApprovalWithSig(
-            profileId,
-            gov,
-            approved,
-            DataTypes.EIP712Signature(v, r, s, deadline)
-        );
-    }
+    //     profile.setOperatorApprovalWithSig(
+    //         profileId,
+    //         gov,
+    //         approved,
+    //         DataTypes.EIP712Signature(v, r, s, deadline)
+    //     );
+    // }
 
     function testCannotSetMetadataWithSigInvalidSig() public {
         vm.startPrank(bob);
@@ -387,67 +387,67 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         profile.setAvatar(profileId, avatar);
     }
 
-    function testSetAvatarWithSig() public {
-        string memory avatar = "avatar";
-        uint256 nonce = profile.nonces(bob);
+    // function testSetAvatarWithSig() public {
+    //     string memory avatar = "avatar";
+    //     uint256 nonce = profile.nonces(bob);
 
-        vm.warp(50);
-        uint256 deadline = 100;
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._SET_AVATAR_TYPEHASH,
-                    profileId,
-                    keccak256(bytes(avatar)),
-                    nonce,
-                    deadline
-                )
-            ),
-            "Name",
-            "1"
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
-        vm.prank(bob);
-        profile.setAvatarWithSig(
-            profileId,
-            avatar,
-            DataTypes.EIP712Signature(v, r, s, deadline)
-        );
-        assertEq(profile.getAvatar(profileId), avatar);
-        assertEq(profile.nonces(bob), nonce + 1);
-    }
+    //     vm.warp(50);
+    //     uint256 deadline = 100;
+    //     bytes32 digest = TestLib712.hashTypedDataV4(
+    //         address(profile),
+    //         keccak256(
+    //             abi.encode(
+    //                 Constants._SET_AVATAR_TYPEHASH,
+    //                 profileId,
+    //                 keccak256(bytes(avatar)),
+    //                 nonce,
+    //                 deadline
+    //             )
+    //         ),
+    //         "Name",
+    //         "1"
+    //     );
+    //     (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+    //     vm.prank(bob);
+    //     profile.setAvatarWithSig(
+    //         profileId,
+    //         avatar,
+    //         DataTypes.EIP712Signature(v, r, s, deadline)
+    //     );
+    //     assertEq(profile.getAvatar(profileId), avatar);
+    //     assertEq(profile.nonces(bob), nonce + 1);
+    // }
 
-    function testCannotSetAvatarInvalidSig() public {
-        string memory avatar = "avatar";
-        uint256 nonce = profile.nonces(bob);
+    // function testCannotSetAvatarInvalidSig() public {
+    //     string memory avatar = "avatar";
+    //     uint256 nonce = profile.nonces(bob);
 
-        vm.warp(50);
-        uint256 deadline = 100;
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._SET_AVATAR_TYPEHASH,
-                    profileId,
-                    keccak256(bytes(avatar)),
-                    nonce + 1,
-                    deadline
-                )
-            ),
-            "Name",
-            "1"
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
-        vm.prank(bob);
-        vm.expectRevert("INVALID_SIGNATURE");
-        profile.setAvatarWithSig(
-            profileId,
-            avatar,
-            DataTypes.EIP712Signature(v, r, s, deadline)
-        );
-        assertEq(profile.nonces(bob), nonce);
-    }
+    //     vm.warp(50);
+    //     uint256 deadline = 100;
+    //     bytes32 digest = TestLib712.hashTypedDataV4(
+    //         address(profile),
+    //         keccak256(
+    //             abi.encode(
+    //                 Constants._SET_AVATAR_TYPEHASH,
+    //                 profileId,
+    //                 keccak256(bytes(avatar)),
+    //                 nonce + 1,
+    //                 deadline
+    //             )
+    //         ),
+    //         "Name",
+    //         "1"
+    //     );
+    //     (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+    //     vm.prank(bob);
+    //     vm.expectRevert("INVALID_SIGNATURE");
+    //     profile.setAvatarWithSig(
+    //         profileId,
+    //         avatar,
+    //         DataTypes.EIP712Signature(v, r, s, deadline)
+    //     );
+    //     assertEq(profile.nonces(bob), nonce);
+    // }
 
     function testCannotSetSubscribeDataIfNotOwnerOrOperator() public {
         address maliciousUser = address(0xD);
@@ -889,58 +889,58 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         profile.setPrimaryProfile(profileId);
     }
 
-    function testSetPrimaryWithSig() public {
-        vm.warp(50);
-        uint256 nonce = profile.nonces(bob);
-        uint256 deadline = 100;
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._SET_PRIMARY_PROFILE_TYPEHASH,
-                    profileId,
-                    nonce,
-                    deadline
-                )
-            ),
-            "Name",
-            "1"
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
-        vm.prank(bob);
-        profile.setPrimaryProfileWithSig(
-            profileId,
-            DataTypes.EIP712Signature(v, r, s, deadline)
-        );
-        assertEq(profile.nonces(bob), nonce + 1);
-    }
+    // function testSetPrimaryWithSig() public {
+    //     vm.warp(50);
+    //     uint256 nonce = profile.nonces(bob);
+    //     uint256 deadline = 100;
+    //     bytes32 digest = TestLib712.hashTypedDataV4(
+    //         address(profile),
+    //         keccak256(
+    //             abi.encode(
+    //                 Constants._SET_PRIMARY_PROFILE_TYPEHASH,
+    //                 profileId,
+    //                 nonce,
+    //                 deadline
+    //             )
+    //         ),
+    //         "Name",
+    //         "1"
+    //     );
+    //     (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+    //     vm.prank(bob);
+    //     profile.setPrimaryProfileWithSig(
+    //         profileId,
+    //         DataTypes.EIP712Signature(v, r, s, deadline)
+    //     );
+    //     assertEq(profile.nonces(bob), nonce + 1);
+    // }
 
-    function testCannotSetPrimaryInvalidSig() public {
-        vm.warp(50);
-        uint256 nonce = profile.nonces(bob);
-        uint256 deadline = 100;
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._SET_PRIMARY_PROFILE_TYPEHASH,
-                    profileId,
-                    nonce,
-                    deadline
-                )
-            ),
-            "Name",
-            "2"
-        );
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
-        vm.prank(bob);
-        vm.expectRevert("INVALID_SIGNATURE");
-        profile.setPrimaryProfileWithSig(
-            profileId,
-            DataTypes.EIP712Signature(v, r, s, deadline)
-        );
-        assertEq(profile.nonces(bob), nonce);
-    }
+    // function testCannotSetPrimaryInvalidSig() public {
+    //     vm.warp(50);
+    //     uint256 nonce = profile.nonces(bob);
+    //     uint256 deadline = 100;
+    //     bytes32 digest = TestLib712.hashTypedDataV4(
+    //         address(profile),
+    //         keccak256(
+    //             abi.encode(
+    //                 Constants._SET_PRIMARY_PROFILE_TYPEHASH,
+    //                 profileId,
+    //                 nonce,
+    //                 deadline
+    //             )
+    //         ),
+    //         "Name",
+    //         "2"
+    //     );
+    //     (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+    //     vm.prank(bob);
+    //     vm.expectRevert("INVALID_SIGNATURE");
+    //     profile.setPrimaryProfileWithSig(
+    //         profileId,
+    //         DataTypes.EIP712Signature(v, r, s, deadline)
+    //     );
+    //     assertEq(profile.nonces(bob), nonce);
+    // }
 
     function testCannotRegisterEssenceIfProfileNotMinted() public {
         vm.expectRevert("NOT_MINTED");

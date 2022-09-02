@@ -11,7 +11,7 @@ contract DeployerCreate2Deployer is Script {
         require(nonce == 0, "nonce must be 0");
         console.log("deployer", msg.sender);
         require(
-            msg.sender == 0xA7b6bEf855c1c57Df5b7C9c7a4e1eB757e544e7f,
+            msg.sender == 0x927f355117721e0E8A7b5eA20002b65B8a551890,
             "address must be deployer"
         );
         vm.startBroadcast();
