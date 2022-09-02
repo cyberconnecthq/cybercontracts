@@ -222,6 +222,18 @@ contract CyberEngine is
     }
 
     /// @inheritdoc ICyberEngine
+    function upgradeProfileNFT(address newImpl, address namespace)
+        external
+        override
+        requiresAuth
+    {
+        bytes memory byteName = bytes(_namespaceInfo[namespace].name);
+        require(byteName.length > 0, "INVALID_NAMESPACE");
+
+        ProfileNFT(namespace).upgradeTo(address(newImpl));
+    }
+
+    /// @inheritdoc ICyberEngine
     function setProfileMw(
         address namespace,
         address mw,

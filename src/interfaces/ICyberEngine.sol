@@ -78,6 +78,14 @@ interface ICyberEngine is ICyberEngineEvents {
     function upgradeEssenceNFT(address newImpl, address namespace) external;
 
     /**
+     * @notice Upgrade ProfileNFT to new version.
+     *
+     * @param newImpl The new ProfileNFT implementation address.
+     * @param namespace The namespace to upgrade.
+     */
+    function upgradeProfileNFT(address newImpl, address namespace) external;
+
+    /**
      * @notice Sets the profile middleware.
      *
      * @param namespace The namespace address.

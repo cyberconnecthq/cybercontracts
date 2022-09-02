@@ -469,6 +469,12 @@ library LibDeploy {
             CyberEngine.upgradeEssenceNFT.selector,
             true
         );
+        RolesAuthority(addrs.engineAuthority).setRoleCapability(
+            Constants._ENGINE_GOV_ROLE,
+            addrs.engineProxyAddress,
+            CyberEngine.upgradeProfileNFT.selector,
+            true
+        );
         RolesAuthority(addrs.engineAuthority).setUserRole(
             params.setting.engineGov,
             Constants._ENGINE_GOV_ROLE,

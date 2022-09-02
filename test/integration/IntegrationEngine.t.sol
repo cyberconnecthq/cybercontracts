@@ -14,6 +14,7 @@ import { EssenceNFT } from "../../src/core/EssenceNFT.sol";
 import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
 import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
 import { MockLink5NFTDescriptor } from "../utils/MockLink5NFTDescriptor.sol";
+import { MockProfileV2 } from "../utils/MockProfileV2.sol";
 import { TestDeployer } from "../utils/TestDeployer.sol";
 
 contract IntegrationEngineTest is
@@ -79,6 +80,36 @@ contract IntegrationEngineTest is
             UpgradeableBeacon(essBeacon).implementation(),
             address(essenceNFTV2)
         );
+    }
+
+    function testUpgradeProfileNFT() public {
+        (
+            address link5Namespace,
+            address subBeacon,
+            address essBeacon
+        ) = LibDeploy.createNamespace(
+                addrs.engineProxyAddress,
+                namespaceOwner,
+                LINK5_NAME,
+                LINK5_SYMBOL,
+                LINK5_SALT,
+                addrs.profileFac,
+                addrs.subFac,
+                addrs.essFac
+            );
+
+        ProfileNFT profileNFTV2 = _deployProfileV2(
+            addrs.engineProxyAddress,
+            essBeacon,
+            subBeacon
+        );
+        assertEq(ProfileNFT(address(link5Namespace)).version(), 1);
+        ICyberEngine(addrs.engineProxyAddress).upgradeProfileNFT(
+            address(profileNFTV2),
+            link5Namespace
+        );
+
+        assertEq(ProfileNFT(address(link5Namespace)).version(), 2);
     }
 
     function testCreatNamespaceAndCreateMultipleProfiles() public {
@@ -200,5 +231,17 @@ contract IntegrationEngineTest is
         essParams.profileProxy = profile;
         addr = new EssenceNFT{ salt: LINK5_SALT }();
         delete essParams;
+    }
+
+    function _deployProfileV2(
+        address engine,
+        address essenceBeacon,
+        address subscribeBeacon
+    ) internal returns (ProfileNFT addr) {
+        profileParams.engine = engine;
+        profileParams.essenceBeacon = essenceBeacon;
+        profileParams.subBeacon = subscribeBeacon;
+        addr = new MockProfileV2{ salt: LINK5_SALT }();
+        delete profileParams;
     }
 }
