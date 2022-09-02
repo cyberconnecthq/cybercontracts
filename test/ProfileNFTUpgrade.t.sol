@@ -49,7 +49,7 @@ contract ProfileNFTUpgradeTest is Test, TestDeployer {
     }
 
     function testCannotUpgradeToAndCallAsNonEngine() public {
-        assertEq(ProfileNFT(address(profile)).version(), 1);
+        uint256 oldVersion = ProfileNFT(address(profile)).version();
         MockProfileV2 implV2 = _deployV2(
             engine,
             address(0xdead),
@@ -61,11 +61,11 @@ contract ProfileNFTUpgradeTest is Test, TestDeployer {
             address(implV2),
             abi.encodeWithSelector(MockProfileV2.version.selector)
         );
-        assertEq(ProfileNFT(address(profile)).version(), 1);
+        assertEq(ProfileNFT(address(profile)).version(), oldVersion);
     }
 
     function testCannotUpgradeAsNonEngine() public {
-        assertEq(ProfileNFT(address(profile)).version(), 1);
+        uint256 oldVersion = ProfileNFT(address(profile)).version();
         MockProfileV2 implV2 = _deployV2(
             engine,
             address(0xdead),
@@ -74,11 +74,10 @@ contract ProfileNFTUpgradeTest is Test, TestDeployer {
 
         vm.expectRevert("ONLY_ENGINE");
         ProfileNFT(address(profile)).upgradeTo(address(implV2));
-        assertEq(ProfileNFT(address(profile)).version(), 1);
+        assertEq(ProfileNFT(address(profile)).version(), oldVersion);
     }
 
     function testUpgrade() public {
-        assertEq(ProfileNFT(address(profile)).version(), 1);
         MockProfileV2 implV2 = _deployV2(
             engine,
             address(0xdead),
@@ -88,11 +87,10 @@ contract ProfileNFTUpgradeTest is Test, TestDeployer {
         vm.prank(engine);
 
         ProfileNFT(address(profile)).upgradeTo(address(implV2));
-        assertEq(ProfileNFT(address(profile)).version(), 2);
+        assertEq(ProfileNFT(address(profile)).version(), 100);
     }
 
     function testUpgradeToAndCall() public {
-        assertEq(ProfileNFT(address(profile)).version(), 1);
         MockProfileV2 implV2 = _deployV2(
             engine,
             address(0xdead),
@@ -105,6 +103,6 @@ contract ProfileNFTUpgradeTest is Test, TestDeployer {
             address(implV2),
             abi.encodeWithSelector(MockProfileV2.version.selector)
         );
-        assertEq(ProfileNFT(address(profile)).version(), 2);
+        assertEq(ProfileNFT(address(profile)).version(), 100);
     }
 }

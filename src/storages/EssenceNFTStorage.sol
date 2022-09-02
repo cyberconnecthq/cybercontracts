@@ -4,7 +4,7 @@ pragma solidity 0.8.14;
 
 contract EssenceNFTStorage {
     // constant
-    uint256 internal constant _VERSION = 1;
+    uint256 internal constant _VERSION = 2;
 
     // storage
     uint256 internal _profileId;

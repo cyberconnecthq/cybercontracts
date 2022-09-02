@@ -68,7 +68,7 @@ contract SubscribeNFT is
 
     /// @inheritdoc IUpgradeable
     function version() external pure virtual override returns (uint256) {
-        return 1;
+        return _VERSION;
     }
 
     /*//////////////////////////////////////////////////////////////

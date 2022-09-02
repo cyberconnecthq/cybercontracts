@@ -103,13 +103,12 @@ contract IntegrationEngineTest is
             essBeacon,
             subBeacon
         );
-        assertEq(ProfileNFT(address(link5Namespace)).version(), 1);
         ICyberEngine(addrs.engineProxyAddress).upgradeProfileNFT(
             address(profileNFTV2),
             link5Namespace
         );
 
-        assertEq(ProfileNFT(address(link5Namespace)).version(), 2);
+        assertEq(ProfileNFT(address(link5Namespace)).version(), 100);
     }
 
     function testCreatNamespaceAndCreateMultipleProfiles() public {

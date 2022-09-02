@@ -177,8 +177,8 @@ contract EssenceNFTTest is Test, TestDeployer, IEssenceNFTEvents {
     }
 
     function testVersion() public {
-        assertEq(essence.version(), 1);
-        assertEq(nonTransferableEssence.version(), 1);
+        assertEq(essence.version(), 2);
+        assertEq(nonTransferableEssence.version(), 2);
     }
 
     function testTokenURI() public {
