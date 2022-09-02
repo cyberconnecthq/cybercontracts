@@ -21,7 +21,7 @@ contract UpgradeableBeaconTest is Test {
 
     function testCannotCreatedWithNonContractImplementation() public {
         vm.expectRevert("UpgradeableBeacon: implementation is not a contract");
-        new UpgradeableBeacon(owner, address(0));
+        new UpgradeableBeacon(owner, address(this));
     }
 
     function testReturnsImplementation() public {

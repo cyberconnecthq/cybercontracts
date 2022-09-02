@@ -61,11 +61,11 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         address profileProxyAddr = 0x5693a610120eEf35686DB1DC312a9ddc2dcBB893;
         address fakeImpl = deploySubscribe(_salt, profileProxyAddr);
         subscribeBeacon = address(
-            new UpgradeableBeacon(fakeImpl, address(profile))
+            new UpgradeableBeacon(fakeImpl, address(this))
         );
         address fakeEssenceImpl = deployEssence(_salt, profileProxyAddr);
         essenceBeacon = address(
-            new UpgradeableBeacon(fakeEssenceImpl, address(profile))
+            new UpgradeableBeacon(fakeEssenceImpl, address(this))
         );
         address profileImpl = deployMockProfile(
             engine,
