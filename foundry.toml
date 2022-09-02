@@ -3,5 +3,8 @@ src = 'src'
 out = 'out'
 libs = ['lib']
 gas_reports = ["*"]
+libraries = [
+    './src/libraries/Actions.sol:Actions:0x26d74f09dc17b6239310aa27c213394acb2ae0ca'
+]
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

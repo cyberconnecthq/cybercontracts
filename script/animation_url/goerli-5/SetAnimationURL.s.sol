@@ -5,7 +5,7 @@ pragma solidity 0.8.14;
 import "forge-std/Script.sol";
 import { ProfileNFT } from "../../../src/core/ProfileNFT.sol";
 import { Link3ProfileDescriptor } from "../../../src/periphery/Link3ProfileDescriptor.sol";
-import { Create2Deployer } from "../../libraries/Create2Deployer.sol";
+import { Create2Deployer } from "../../../src/deployer/Create2Deployer.sol";
 import { LibDeploy } from "../../libraries/LibDeploy.sol";
 import { DeploySetting } from "../../libraries/DeploySetting.sol";
 

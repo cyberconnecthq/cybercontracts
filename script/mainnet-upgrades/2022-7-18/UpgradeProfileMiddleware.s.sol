@@ -8,7 +8,7 @@ import { ProfileNFT } from "../../../src/core/ProfileNFT.sol";
 import { CyberEngine } from "../../../src/core/CyberEngine.sol";
 import { PermissionedFeeCreationMw } from "../../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import { DeploySetting } from "../.././libraries/DeploySetting.sol";
-import { Create2Deployer } from "../../libraries/Create2Deployer.sol";
+import { Create2Deployer } from "../../../src/deployer/Create2Deployer.sol";
 
 contract UpgradeScript is Script, DeploySetting {
     function run() external {

@@ -19,7 +19,7 @@ import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescript
 import { TestLib712 } from "../../test/utils/TestLib712.sol";
 import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
-import { Create2Deployer } from "./Create2Deployer.sol";
+import { Create2Deployer } from "../../src/deployer/Create2Deployer.sol";
 import { EssenceDeployer } from "../../src/deployer/EssenceDeployer.sol";
 import { SubscribeDeployer } from "../../src/deployer/SubscribeDeployer.sol";
 import { ProfileDeployer } from "../../src/deployer/ProfileDeployer.sol";
