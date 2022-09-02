@@ -303,21 +303,6 @@ interface IProfileNFT is IProfileNFTEvents {
     ) external;
 
     /**
-     * @notice Sets the operator approval with a signature.
-     *
-     * @param profileId The profile ID.
-     * @param operator The operator address.
-     * @param approved The new state of the approval.
-     * @param sig The EIP712 signature.
-     */
-    function setOperatorApprovalWithSig(
-        uint256 profileId,
-        address operator,
-        bool approved,
-        DataTypes.EIP712Signature calldata sig
-    ) external;
-
-    /**
      * @notice Gets the profile metadata.
      *
      * @param profileId The profile ID.
