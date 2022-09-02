@@ -6,14 +6,14 @@ async function main() {
   // goerli
   const create2Deployer = await ethers.getContractAt(
     "Create2Deployer",
-    // "0xeE048722AE9F11EFE0E233c9a53f2CaD141acF51" // goerli
-    "0x4077B8554A5F9A3C2D10c6Bb467B7E26Caf65ad9" // bnbt
+    "0xeE048722AE9F11EFE0E233c9a53f2CaD141acF51" // goerli
+    // "0x4077B8554A5F9A3C2D10c6Bb467B7E26Caf65ad9" // bnbt
   );
   const creationCode = (
     await ethers.getContractFactory("ProfileDeployer", {
       libraries: {
-        // Actions: "0x26d74f09dc17b6239310aa27c213394acb2ae0ca", // goerli
-        Actions: "0x06944d76ba21c4b77d3b5261058617c9d949a888", // bnbt
+        Actions: "0x26d74f09dc17b6239310aa27c213394acb2ae0ca", // goerli
+        // Actions: "0x06944d76ba21c4b77d3b5261058617c9d949a888", // bnbt
       },
     })
   ).bytecode;

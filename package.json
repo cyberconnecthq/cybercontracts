@@ -40,7 +40,7 @@
     "deploy_deployer:bsc": "source .env.bsc && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $BSC_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_deployer:anvil": "source .env.anvil && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
     "deploy_actions:goerli": "source .env.goerli && forge script script/DeployActions.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
-    "deploy_deployers:goerli": "source .env.goerli && forge script script/DeployDeployers.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "deploy_profile_deployer:goerli": "source .env.goerli && forge script script/DeployDeployers.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "size": "hardhat size-contracts",
     "deploy_full:anvil": "yarn deploy:anvil && yarn upload_animation:anvil && yarn set_animation_url:anvil"
   },

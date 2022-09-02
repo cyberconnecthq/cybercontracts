@@ -105,7 +105,7 @@ library LibDeploy {
     }
 
     function _prepareToWrite(Vm vm) internal {
-        vm.removeFile(_fileNameMd());
+        // vm.removeFile(_fileNameMd());
     }
 
     function _writeText(
@@ -113,7 +113,8 @@ library LibDeploy {
         string memory fileName,
         string memory text
     ) internal {
-        vm.writeLine(fileName, text);
+        // vm.writeLine(fileName, text);
+        console.log(fileName, text);
     }
 
     function _writeHelper(
