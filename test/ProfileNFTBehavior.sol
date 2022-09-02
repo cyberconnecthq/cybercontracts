@@ -39,9 +39,7 @@ contract ProfileNFTBehaviorTest is Test, IProfileNFTEvents, TestDeployer {
         address impl = address(
             deploySubscribe(keccak256(bytes("salt")), address(0xdead))
         );
-        subscribeBeacon = address(
-            new UpgradeableBeacon(impl, address(profile))
-        );
+        subscribeBeacon = address(new UpgradeableBeacon(impl, address(this)));
 
         address profileImpl = deployMockProfile(
             engine,

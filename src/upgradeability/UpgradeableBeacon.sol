@@ -28,6 +28,7 @@ contract UpgradeableBeacon is IBeacon {
      * beacon.
      */
     constructor(address implementation_, address owner) {
+        require(owner != address(0), "ZERO_OWNER_ADDRESS");
         _setImplementation(implementation_);
         OWNER = owner;
     }
