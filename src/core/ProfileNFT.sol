@@ -341,33 +341,6 @@ contract ProfileNFT is
     }
 
     /// @inheritdoc IProfileNFT
-    function setOperatorApprovalWithSig(
-        uint256 profileId,
-        address operator,
-        bool approved,
-        DataTypes.EIP712Signature calldata sig
-    ) external override {
-        address owner = ownerOf(profileId);
-        _requiresExpectedSigner(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
-                        profileId,
-                        operator,
-                        approved,
-                        nonces[owner]++,
-                        sig.deadline
-                    )
-                )
-            ),
-            owner,
-            sig
-        );
-        _setOperatorApproval(profileId, operator, approved);
-    }
-
-    /// @inheritdoc IProfileNFT
     function setMetadata(uint256 profileId, string calldata metadata)
         external
         override

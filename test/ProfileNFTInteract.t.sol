@@ -286,45 +286,6 @@ contract ProfileNFTInteractTest is Test, IProfileNFTEvents, TestDeployer {
         assertEq(profile.getSubscribeNFT(profileId), subscribeProxy);
     }
 
-    function testSetOperatorApprovalWithSig() public {
-        vm.startPrank(alice);
-
-        bytes[] memory subDatas = new bytes[](1);
-        subDatas[0] = bytes("simple subdata");
-        bool approved = true;
-
-        vm.warp(50);
-        uint256 deadline = 100;
-
-        bytes32 digest = TestLib712.hashTypedDataV4(
-            address(profile),
-            keccak256(
-                abi.encode(
-                    Constants._SET_OPERATOR_APPROVAL_TYPEHASH,
-                    profileId,
-                    gov,
-                    approved,
-                    profile.nonces(bob),
-                    deadline
-                )
-            ),
-            profile.name(),
-            "1"
-        );
-
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
-
-        vm.expectEmit(true, false, false, true);
-        emit SetOperatorApproval(profileId, gov, false, approved);
-
-        profile.setOperatorApprovalWithSig(
-            profileId,
-            gov,
-            approved,
-            DataTypes.EIP712Signature(v, r, s, deadline)
-        );
-    }
-
     function testCannotSetMetadataWithSigInvalidSig() public {
         vm.startPrank(bob);
 
