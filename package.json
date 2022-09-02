@@ -14,6 +14,7 @@
     "deploy:anvil": "source .env.anvil && forge script script/Deploy.s.sol:DeployScript --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
     "deploy:rinkeby": "source .env.rinkeby && forge script script/Deploy.s.sol:DeployScript --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy:goerli": "source .env.goerli && forge script script/Deploy.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "deploy:bnbt": "source .env.bnbt && forge script script/Deploy.s.sol:DeployScript --rpc-url $BNBT_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_cyberbox:goerli": "source .env.goerli && forge script script/DeployBox.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_cyberbox:mainnet": "source .env.mainnet && forge script script/DeployBox.s.sol:DeployScript --rpc-url $MAINNET_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv",
     "deploy_cyberbox:rinkeby": "source .env.rinkeby && forge script script/DeployBox.s.sol:DeployScript --rpc-url $RINKEBY_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
@@ -37,7 +38,7 @@
     "deploy_deployer:goerli": "source .env.goerli && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_deployer:mainnet": "source .env.mainnet && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $MAINNET_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_deployer:polygon": "source .env.polygon && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $POLYGON_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv --etherscan-api-key $ETHERSCAN_KEY -vvv",
-    "deploy_deployer:bsc": "source .env.bsc && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $BSC_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "deploy_deployer:bnbt": "source .env.bnbt && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --rpc-url $BNBT_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_deployer:anvil": "source .env.anvil && forge script script/DeployCreate2Deployer.s.sol:DeployerCreate2Deployer --fork-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast -vvv",
     "size": "hardhat size-contracts",
     "deploy_full:anvil": "yarn deploy:anvil && yarn upload_animation:anvil && yarn set_animation_url:anvil"

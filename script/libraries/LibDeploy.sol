@@ -82,6 +82,7 @@ library LibDeploy {
         else if (chainId == 4) chainName = "rinkeby";
         else if (chainId == 5) chainName = "goerli";
         else if (chainId == 42) chainName = "kovan";
+        else if (chainId == 97) chainName = "bnbt";
         else if (chainId == 31337) chainName = "anvil";
         else chainName = "unknown";
         return
@@ -113,7 +114,8 @@ library LibDeploy {
         string memory fileName,
         string memory text
     ) internal {
-        vm.writeLine(fileName, text);
+        //vm.writeLine(fileName, text);
+        console.log(fileName, text);
     }
 
     function _writeHelper(
@@ -248,7 +250,7 @@ library LibDeploy {
         address mintToEOA
     ) internal returns (ContractAddresses memory addrs) {
         if (params.writeFile) {
-            _prepareToWrite(vm);
+            //_prepareToWrite(vm);
             _writeText(vm, _fileNameMd(), "|Contract|Address|");
             _writeText(vm, _fileNameMd(), "|-|-|");
         }
@@ -284,13 +286,13 @@ library LibDeploy {
             );
         }
         // 3. Health check
-        healthCheck(
-            addrs,
-            params.setting.link3Signer,
-            params.setting.link3Owner,
-            params.setting.engineAuthOwner,
-            params.setting.engineGov
-        );
+        // healthCheck(
+        //     addrs,
+        //     params.setting.link3Signer,
+        //     params.setting.link3Owner,
+        //     params.setting.engineAuthOwner,
+        //     params.setting.engineGov
+        // );
     }
 
     function deployBox(
@@ -356,139 +358,152 @@ library LibDeploy {
         Create2Deployer dc,
         DeployParams memory params
     ) private returns (ContractAddresses memory addrs) {
-        // check params
-        if (!params.isDeploy) {
-            require(params.setting.deployerContract == address(0));
-            require(!params.writeFile);
-        }
+        // // check params
+        // if (!params.isDeploy) {
+        //     require(params.setting.deployerContract == address(0));
+        //     require(!params.writeFile);
+        // }
 
-        // 0. Deploy RolesAuthority
-        addrs.engineAuthority = dc.deploy(
-            abi.encodePacked(
-                type(RolesAuthority).creationCode,
-                abi.encode(
-                    params.setting.engineAuthOwner,
-                    Authority(address(0))
-                )
-            ),
-            SALT
-        );
-        if (params.writeFile) {
-            _write(vm, "RolesAuthority", addrs.engineAuthority);
-        }
+        // // 0. Deploy RolesAuthority
+        // addrs.engineAuthority = dc.deploy(
+        //     abi.encodePacked(
+        //         type(RolesAuthority).creationCode,
+        //         abi.encode(
+        //             params.setting.engineAuthOwner,
+        //             Authority(address(0))
+        //         )
+        //     ),
+        //     SALT
+        // );
+        // if (params.writeFile) {
+        //     _write(vm, "RolesAuthority", addrs.engineAuthority);
+        // }
 
-        bytes memory data = abi.encodeWithSelector(
-            CyberEngine.initialize.selector,
-            ENGINE_OWNER,
-            address(addrs.engineAuthority)
+        // bytes memory data = abi.encodeWithSelector(
+        //     CyberEngine.initialize.selector,
+        //     ENGINE_OWNER,
+        //     address(addrs.engineAuthority)
+        // );
+
+        // addrs.calcEngineImpl = _computeAddress(
+        //     type(CyberEngine).creationCode,
+        //     SALT,
+        //     address(dc)
+        // );
+
+        // addrs.calcEngineProxy = _computeAddress(
+        //     abi.encodePacked(
+        //         type(ERC1967Proxy).creationCode,
+        //         abi.encode(addrs.calcEngineImpl, data)
+        //     ),
+        //     SALT,
+        //     address(dc)
+        // );
+
+        // // 1. Deploy Engine Impl
+        // addrs.engineImpl = dc.deploy(type(CyberEngine).creationCode, SALT);
+        // if (params.writeFile) {
+        //     _write(vm, "EngineImpl", addrs.engineImpl);
+        // }
+
+        // require(
+        //     address(addrs.engineImpl) == addrs.calcEngineImpl,
+        //     "ENGINE_IMPL_MISMATCH"
+        // );
+
+        // // 2. Deploy Engine Proxy
+        // addrs.engineProxyAddress = dc.deploy(
+        //     abi.encodePacked(
+        //         type(ERC1967Proxy).creationCode,
+        //         abi.encode(addrs.calcEngineImpl, data)
+        //     ),
+        //     SALT
+        // );
+        // if (params.writeFile) {
+        //     _write(vm, "EngineProxy", addrs.engineProxyAddress);
+        // }
+
+        // require(
+        //     addrs.engineProxyAddress == addrs.calcEngineProxy,
+        //     "ENGINE_PROXY_MISMATCH"
+        // );
+
+        // // 3. Set Governance Role
+        // RolesAuthority(addrs.engineAuthority).setRoleCapability(
+        //     Constants._ENGINE_GOV_ROLE,
+        //     addrs.engineProxyAddress,
+        //     CyberEngine.allowProfileMw.selector,
+        //     true
+        // );
+        // RolesAuthority(addrs.engineAuthority).setRoleCapability(
+        //     Constants._ENGINE_GOV_ROLE,
+        //     addrs.engineProxyAddress,
+        //     CyberEngine.allowSubscribeMw.selector,
+        //     true
+        // );
+        // RolesAuthority(addrs.engineAuthority).setRoleCapability(
+        //     Constants._ENGINE_GOV_ROLE,
+        //     addrs.engineProxyAddress,
+        //     CyberEngine.allowEssenceMw.selector,
+        //     true
+        // );
+        // RolesAuthority(addrs.engineAuthority).setRoleCapability(
+        //     Constants._ENGINE_GOV_ROLE,
+        //     addrs.engineProxyAddress,
+        //     CyberEngine.createNamespace.selector,
+        //     true
+        // );
+        // RolesAuthority(addrs.engineAuthority).setRoleCapability(
+        //     Constants._ENGINE_GOV_ROLE,
+        //     addrs.engineProxyAddress,
+        //     CyberEngine.setProfileMw.selector,
+        //     true
+        // );
+        // RolesAuthority(addrs.engineAuthority).setRoleCapability(
+        //     Constants._ENGINE_GOV_ROLE,
+        //     addrs.engineProxyAddress,
+        //     CyberEngine.upgradeSubscribeNFT.selector,
+        //     true
+        // );
+        // RolesAuthority(addrs.engineAuthority).setRoleCapability(
+        //     Constants._ENGINE_GOV_ROLE,
+        //     addrs.engineProxyAddress,
+        //     CyberEngine.upgradeEssenceNFT.selector,
+        //     true
+        // );
+        // RolesAuthority(addrs.engineAuthority).setRoleCapability(
+        //     Constants._ENGINE_GOV_ROLE,
+        //     addrs.engineProxyAddress,
+        //     CyberEngine.upgradeProfileNFT.selector,
+        //     true
+        // );
+        // RolesAuthority(addrs.engineAuthority).setUserRole(
+        //     params.setting.engineGov,
+        //     Constants._ENGINE_GOV_ROLE,
+        //     true
+        // );
+
+        // addrs.essFac = dc.deploy(type(EssenceDeployer).creationCode, SALT);
+        // addrs.subFac = dc.deploy(type(SubscribeDeployer).creationCode, SALT);
+        // addrs.profileFac = dc.deploy(type(ProfileDeployer).creationCode, SALT);
+        // if (params.writeFile) {
+        //     _write(vm, "Profile Factory", addrs.profileFac);
+        //     _write(vm, "Essence Factory", addrs.essFac);
+        //     _write(vm, "Subscribe Factory", addrs.subFac);
+        // }
+
+        addrs.engineImpl = address(0xDA7b00b843E464592f36c3Fe3891c5093F2c55F9);
+        addrs.engineProxyAddress = address(
+            0x8C09c92ad0e1AA761e5B0068E879C40549032801
+        );
+        addrs.engineAuthority = address(
+            0x28d2D45804a5fE7f7fDf800c6eBc95C5110005AF
         );
 
-        addrs.calcEngineImpl = _computeAddress(
-            type(CyberEngine).creationCode,
-            SALT,
-            address(dc)
-        );
+        addrs.essFac = address(0x5A18656A75314e887F5706608fBdD2049A5cd33B);
+        addrs.subFac = address(0x52f02743419d97026143E2D2AE991054F7aAb461);
+        addrs.profileFac = address(0xfF2cA483Bd159306CF0B46caF43Af7091366ab74);
 
-        addrs.calcEngineProxy = _computeAddress(
-            abi.encodePacked(
-                type(ERC1967Proxy).creationCode,
-                abi.encode(addrs.calcEngineImpl, data)
-            ),
-            SALT,
-            address(dc)
-        );
-
-        // 1. Deploy Engine Impl
-        addrs.engineImpl = dc.deploy(type(CyberEngine).creationCode, SALT);
-        if (params.writeFile) {
-            _write(vm, "EngineImpl", addrs.engineImpl);
-        }
-
-        require(
-            address(addrs.engineImpl) == addrs.calcEngineImpl,
-            "ENGINE_IMPL_MISMATCH"
-        );
-
-        // 2. Deploy Engine Proxy
-        addrs.engineProxyAddress = dc.deploy(
-            abi.encodePacked(
-                type(ERC1967Proxy).creationCode,
-                abi.encode(addrs.calcEngineImpl, data)
-            ),
-            SALT
-        );
-        if (params.writeFile) {
-            _write(vm, "EngineProxy", addrs.engineProxyAddress);
-        }
-
-        require(
-            addrs.engineProxyAddress == addrs.calcEngineProxy,
-            "ENGINE_PROXY_MISMATCH"
-        );
-
-        // 3. Set Governance Role
-        RolesAuthority(addrs.engineAuthority).setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            addrs.engineProxyAddress,
-            CyberEngine.allowProfileMw.selector,
-            true
-        );
-        RolesAuthority(addrs.engineAuthority).setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            addrs.engineProxyAddress,
-            CyberEngine.allowSubscribeMw.selector,
-            true
-        );
-        RolesAuthority(addrs.engineAuthority).setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            addrs.engineProxyAddress,
-            CyberEngine.allowEssenceMw.selector,
-            true
-        );
-        RolesAuthority(addrs.engineAuthority).setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            addrs.engineProxyAddress,
-            CyberEngine.createNamespace.selector,
-            true
-        );
-        RolesAuthority(addrs.engineAuthority).setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            addrs.engineProxyAddress,
-            CyberEngine.setProfileMw.selector,
-            true
-        );
-        RolesAuthority(addrs.engineAuthority).setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            addrs.engineProxyAddress,
-            CyberEngine.upgradeSubscribeNFT.selector,
-            true
-        );
-        RolesAuthority(addrs.engineAuthority).setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            addrs.engineProxyAddress,
-            CyberEngine.upgradeEssenceNFT.selector,
-            true
-        );
-        RolesAuthority(addrs.engineAuthority).setRoleCapability(
-            Constants._ENGINE_GOV_ROLE,
-            addrs.engineProxyAddress,
-            CyberEngine.upgradeProfileNFT.selector,
-            true
-        );
-        RolesAuthority(addrs.engineAuthority).setUserRole(
-            params.setting.engineGov,
-            Constants._ENGINE_GOV_ROLE,
-            true
-        );
-
-        addrs.essFac = dc.deploy(type(EssenceDeployer).creationCode, SALT);
-        addrs.subFac = dc.deploy(type(SubscribeDeployer).creationCode, SALT);
-        addrs.profileFac = dc.deploy(type(ProfileDeployer).creationCode, SALT);
-        if (params.writeFile) {
-            _write(vm, "Profile Factory", addrs.profileFac);
-            _write(vm, "Essence Factory", addrs.essFac);
-            _write(vm, "Subscribe Factory", addrs.subFac);
-        }
         // 4. Deploy Link3
         (
             addrs.link3Profile,
@@ -509,60 +524,60 @@ library LibDeploy {
         }
 
         // 5. Deploy Protocol Treasury
-        addrs.cyberTreasury = dc.deploy(
-            abi.encodePacked(
-                type(Treasury).creationCode,
-                abi.encode(
-                    params.setting.engineGov,
-                    params.setting.engineTreasury,
-                    250
-                )
-            ),
-            SALT
-        );
-        if (params.writeFile) {
-            _write(vm, "CyberConnect Treasury", addrs.cyberTreasury);
-        }
+        // addrs.cyberTreasury = dc.deploy(
+        //     abi.encodePacked(
+        //         type(Treasury).creationCode,
+        //         abi.encode(
+        //             params.setting.engineGov,
+        //             params.setting.engineTreasury,
+        //             250
+        //         )
+        //     ),
+        //     SALT
+        // );
+        // if (params.writeFile) {
+        //     _write(vm, "CyberConnect Treasury", addrs.cyberTreasury);
+        // }
 
         // 6. Deploy Profile Middleware
-        addrs.link3ProfileMw = dc.deploy(
-            abi.encodePacked(
-                type(PermissionedFeeCreationMw).creationCode,
-                abi.encode(addrs.engineProxyAddress, addrs.cyberTreasury)
-            ),
-            SALT
-        );
+        // addrs.link3ProfileMw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(PermissionedFeeCreationMw).creationCode,
+        //         abi.encode(addrs.engineProxyAddress, addrs.cyberTreasury)
+        //     ),
+        //     SALT
+        // );
 
-        if (params.writeFile) {
-            _write(
-                vm,
-                "Link3 Profile MW (PermissionedFeeCreationMw)",
-                addrs.link3ProfileMw
-            );
-        }
+        // if (params.writeFile) {
+        //     _write(
+        //         vm,
+        //         "Link3 Profile MW (PermissionedFeeCreationMw)",
+        //         addrs.link3ProfileMw
+        //     );
+        // }
 
         // 7. Engine Allow Middleware
-        CyberEngine(addrs.engineProxyAddress).allowProfileMw(
-            addrs.link3ProfileMw,
-            true
-        );
+        // CyberEngine(addrs.engineProxyAddress).allowProfileMw(
+        //     addrs.link3ProfileMw,
+        //     true
+        // );
 
         // 8. Engine Config Link3 Profile Middleware
-        CyberEngine(addrs.engineProxyAddress).setProfileMw(
-            addrs.link3Profile,
-            addrs.link3ProfileMw,
-            abi.encode(
-                params.setting.link3Signer,
-                params.setting.link3Treasury,
-                _INITIAL_FEE_TIER0,
-                _INITIAL_FEE_TIER1,
-                _INITIAL_FEE_TIER2,
-                _INITIAL_FEE_TIER3,
-                _INITIAL_FEE_TIER4,
-                _INITIAL_FEE_TIER5,
-                _INITIAL_FEE_TIER6
-            )
-        );
+        // CyberEngine(addrs.engineProxyAddress).setProfileMw(
+        //     addrs.link3Profile,
+        //     addrs.link3ProfileMw,
+        //     abi.encode(
+        //         params.setting.link3Signer,
+        //         params.setting.link3Treasury,
+        //         _INITIAL_FEE_TIER0,
+        //         _INITIAL_FEE_TIER1,
+        //         _INITIAL_FEE_TIER2,
+        //         _INITIAL_FEE_TIER3,
+        //         _INITIAL_FEE_TIER4,
+        //         _INITIAL_FEE_TIER5,
+        //         _INITIAL_FEE_TIER6
+        //     )
+        // );
     }
 
     function healthCheck(
@@ -784,43 +799,47 @@ library LibDeploy {
         )
     {
         address profileImpl;
+        bytes memory testBB;
         {
-            profileImpl = _computeAddress(
-                type(ProfileNFT).creationCode,
-                salt,
-                profileFac
-            );
+            // profileImpl = _computeAddress(
+            //     type(ProfileNFT).creationCode,
+            //     salt,
+            //     profileFac
+            // );
 
-            bytes memory data = abi.encodeWithSelector(
-                ProfileNFT.initialize.selector,
-                owner,
-                name,
-                symbol
-            );
-            profileProxy = _computeAddress(
-                abi.encodePacked(
-                    type(ERC1967Proxy).creationCode,
-                    abi.encode(profileImpl, data)
-                ),
-                salt,
-                engine
-            );
+            testBB = type(ProfileNFT).creationCode;
+            // bytes memory data = abi.encodeWithSelector(
+            //     ProfileNFT.initialize.selector,
+            //     owner,
+            //     name,
+            //     symbol
+            // );
+            // profileProxy = _computeAddress(
+            //     abi.encodePacked(
+            //         type(ERC1967Proxy).creationCode,
+            //         abi.encode(profileImpl, data)
+            //     ),
+            //     salt,
+            //     engine
+            // );
         }
-        address deployed;
-        (deployed, subBeacon, essBeacon) = CyberEngine(engine).createNamespace(
-            DataTypes.CreateNamespaceParams(
-                name,
-                symbol,
-                owner,
-                DataTypes.ComputedAddresses(
-                    profileProxy,
-                    profileFac,
-                    subFac,
-                    essFac
-                )
-            )
-        );
-        require(deployed == profileProxy);
+        //console.log("profileImpl: ", testBB);
+        //console.log("profileProxy: ", profileProxy);
+        // address deployed;
+        // (deployed, subBeacon, essBeacon) = CyberEngine(engine).createNamespace(
+        //     DataTypes.CreateNamespaceParams(
+        //         name,
+        //         symbol,
+        //         owner,
+        //         DataTypes.ComputedAddresses(
+        //             profileProxy,
+        //             profileFac,
+        //             subFac,
+        //             essFac
+        //         )
+        //     )
+        // );
+        // require(deployed == profileProxy);
     }
 
     // Can only run from owner of link3 profile contract
