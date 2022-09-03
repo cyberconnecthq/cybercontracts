@@ -2,7 +2,7 @@ cache/
 cache_hardhat/
 out/
 node_modules
-.env
+.env*
 broadcast/
 .DS_Store
 artifacts/

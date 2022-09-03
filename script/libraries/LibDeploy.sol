@@ -19,7 +19,8 @@ import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescript
 import { TestLib712 } from "../../test/utils/TestLib712.sol";
 import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
-import { Create2Deployer } from "./Create2Deployer.sol";
+import { SignaturePermissionEssenceMw } from "../../src/middlewares/essence/SignaturePermissionEssenceMw.sol";
+import { Create2Deployer } from "../../src/deployer/Create2Deployer.sol";
 import { EssenceDeployer } from "../../src/deployer/EssenceDeployer.sol";
 import { SubscribeDeployer } from "../../src/deployer/SubscribeDeployer.sol";
 import { ProfileDeployer } from "../../src/deployer/ProfileDeployer.sol";
@@ -82,6 +83,7 @@ library LibDeploy {
         else if (chainId == 4) chainName = "rinkeby";
         else if (chainId == 5) chainName = "goerli";
         else if (chainId == 42) chainName = "kovan";
+        else if (chainId == 97) chainName = "bnbt";
         else if (chainId == 31337) chainName = "anvil";
         else chainName = "unknown";
         return
@@ -349,6 +351,28 @@ library LibDeploy {
             _write(vm, "CyberToken", token);
         }
         require(CYBER(token).owner() == tokenOwner, "WRONG_OWNER");
+    }
+
+    function deployAllMiddleware(
+        Vm vm,
+        DeployParams memory params,
+        address engine,
+        bool writeFile
+    ) internal returns (address token) {
+        Create2Deployer dc = Create2Deployer(params.setting.deployerContract); // for deployment
+
+        // SignaturePermissionEssenceMw
+        address mw;
+        mw = dc.deploy(
+            abi.encodePacked(type(SignaturePermissionEssenceMw).creationCode),
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "Essence MW (SignaturePermissionEssenceMw)", mw);
+        }
+
+        CyberEngine(engine).allowEssenceMw(mw, true);
     }
 
     function _deploy(
