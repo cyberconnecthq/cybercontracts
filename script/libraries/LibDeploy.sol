@@ -20,6 +20,8 @@ import { TestLib712 } from "../../test/utils/TestLib712.sol";
 import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import { SignaturePermissionEssenceMw } from "../../src/middlewares/essence/SignaturePermissionEssenceMw.sol";
+import { PaidSubscribeMw } from "../../src/middlewares/subscribe/PaidSubscribeMw.sol";
+import { PaidCollectMw } from "../../src/middlewares/essence/PaidCollectMw.sol";
 import { Create2Deployer } from "../../src/deployer/Create2Deployer.sol";
 import { EssenceDeployer } from "../../src/deployer/EssenceDeployer.sol";
 import { SubscribeDeployer } from "../../src/deployer/SubscribeDeployer.sol";
@@ -357,19 +359,50 @@ library LibDeploy {
         Vm vm,
         DeployParams memory params,
         address engine,
+        address cyberTreasury,
         bool writeFile
     ) internal returns (address token) {
         Create2Deployer dc = Create2Deployer(params.setting.deployerContract); // for deployment
+        address mw;
 
         // SignaturePermissionEssenceMw
-        address mw;
+        // mw = dc.deploy(
+        //     abi.encodePacked(type(SignaturePermissionEssenceMw).creationCode),
+        //     SALT
+        // );
+
+        // if (writeFile) {
+        //     _write(vm, "Essence MW (SignaturePermissionEssenceMw)", mw);
+        // }
+
+        // CyberEngine(engine).allowEssenceMw(mw, true);
+
+        // PaidSubscribeMw
         mw = dc.deploy(
-            abi.encodePacked(type(SignaturePermissionEssenceMw).creationCode),
+            abi.encodePacked(
+                type(PaidSubscribeMw).creationCode,
+                abi.encode(cyberTreasury)
+            ),
             SALT
         );
 
         if (writeFile) {
-            _write(vm, "Essence MW (SignaturePermissionEssenceMw)", mw);
+            _write(vm, "Subscribe MW (PaidSubscribeMw)", mw);
+        }
+
+        CyberEngine(engine).allowSubscribeMw(mw, true);
+
+        // PaidCollectMw
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(PaidCollectMw).creationCode,
+                abi.encode(cyberTreasury)
+            ),
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "Essence MW (PaidCollectMw)", mw);
         }
 
         CyberEngine(engine).allowEssenceMw(mw, true);
