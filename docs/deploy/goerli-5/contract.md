@@ -11,3 +11,6 @@
 | CyberConnect Treasury                        | 0xb9d6d688e1e051cb74e5b5d1627421de56f2b4ad |
 | Link3 Profile MW (PermissionedFeeCreationMw) | 0x8a07c56c28fc62cac8f42fdd1f16f0ce3141c291 |
 | Essence MW (SignaturePermissionEssenceMw)    | 0x08fc72352bf2963bb094d6a4dc40406dd426d1c6 |
+| Subscribe MW (PaidSubscribeMw)               | 0xdc55fe3c2f50752c608479bfac000be5ed12f006 |
+| Essence MW (PaidCollectMw)                   | 0x3a174902214fbb9ac9d441a04bc18b28456d5d7e |
+| CyberConnect Profile                         | 0xCB053E4429dfB042E6ECE9A8f535C88035610567 |
