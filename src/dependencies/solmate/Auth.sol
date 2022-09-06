@@ -43,7 +43,7 @@ abstract contract Auth is Initializable {
     function setAuthority(Authority newAuthority) public virtual {
         // We check if the caller is the owner first because we want to ensure they can
         // always swap out the authority even if it's reverting or using up a lot of gas.
-        require(msg.sender == owner || authority.canCall(msg.sender, address(this), msg.sig));
+        require(msg.sender == owner || authority.canCall(msg.sender, address(this), msg.sig), "UNAUTHORIZED");
 
         authority = newAuthority;
 
