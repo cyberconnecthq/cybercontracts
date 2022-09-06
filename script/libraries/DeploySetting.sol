@@ -112,7 +112,7 @@ contract DeploySetting {
                 0xa4E52748fAcCA028D163941f3Bd52F4B204f8019
             );
             deployParams.cyberTokenOwner = address(
-                0xa4E52748fAcCA028D163941f3Bd52F4B204f8019 // TODO: change to gnosis wallet
+                0x9aEd1dA7127bF39838f6a1F407563437b362C64f
             );
             deployParams.deployerContract = address(
                 0xEFb8369Fb33bA67832B7120C94698e5372eE61C3
