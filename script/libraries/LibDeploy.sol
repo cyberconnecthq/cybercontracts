@@ -278,9 +278,9 @@ library LibDeploy {
             LibDeploy.registerLink3TestProfile(
                 vm,
                 RegisterLink3TestProfileParams(
-                    ProfileNFT(addrs.link3Profile),
-                    CyberEngine(addrs.engineProxyAddress),
-                    PermissionedFeeCreationMw(addrs.link3ProfileMw),
+                    addrs.link3Profile,
+                    addrs.engineProxyAddress,
+                    addrs.link3ProfileMw,
                     mintToEOA,
                     params.setting.link3Treasury,
                     params.setting.engineTreasury
@@ -366,16 +366,16 @@ library LibDeploy {
         address mw;
 
         // SignaturePermissionEssenceMw
-        // mw = dc.deploy(
-        //     abi.encodePacked(type(SignaturePermissionEssenceMw).creationCode),
-        //     SALT
-        // );
+        mw = dc.deploy(
+            abi.encodePacked(type(SignaturePermissionEssenceMw).creationCode),
+            SALT
+        );
 
-        // if (writeFile) {
-        //     _write(vm, "Essence MW (SignaturePermissionEssenceMw)", mw);
-        // }
+        if (writeFile) {
+            _write(vm, "Essence MW (SignaturePermissionEssenceMw)", mw);
+        }
 
-        // CyberEngine(engine).allowEssenceMw(mw, true);
+        CyberEngine(engine).allowEssenceMw(mw, true);
 
         // PaidSubscribeMw
         mw = dc.deploy(
@@ -679,9 +679,9 @@ library LibDeploy {
     string constant TEST_HANDLE = "cyberconnect";
     uint256 constant TEST_SIGNER_PK = 1;
     struct RegisterLink3TestProfileParams {
-        ProfileNFT profile;
-        CyberEngine engine;
-        PermissionedFeeCreationMw mw;
+        address profile;
+        address engine;
+        address mw;
         address mintToEOA;
         address link3Treasury;
         address engineTreasury;
@@ -692,15 +692,17 @@ library LibDeploy {
         Vm vm,
         RegisterLink3TestProfileParams memory params
     ) internal {
-        address originSigner = params.mw.getSigner(address(params.profile));
+        address originSigner = PermissionedFeeCreationMw(params.mw).getSigner(
+            params.profile
+        );
         uint256 startingLink3 = params.link3Treasury.balance;
         uint256 startingEngine = params.engineTreasury.balance;
         address signer = vm.addr(TEST_SIGNER_PK);
 
         // change signer to tempory signer
-        params.engine.setProfileMw(
-            address(params.profile),
-            address(params.mw),
+        CyberEngine(params.engine).setProfileMw(
+            params.profile,
+            params.mw,
             abi.encode(
                 signer,
                 params.link3Treasury,
@@ -714,7 +716,8 @@ library LibDeploy {
             )
         );
         require(
-            params.mw.getSigner(address(params.profile)) == signer,
+            PermissionedFeeCreationMw(params.mw).getSigner(params.profile) ==
+                signer,
             "Signer is not set"
         );
 
@@ -739,7 +742,7 @@ library LibDeploy {
                 )
             );
             digest = TestLib712.hashTypedDataV4(
-                address(params.mw),
+                params.mw,
                 data,
                 "PermissionedFeeCreationMw",
                 "1"
@@ -748,9 +751,12 @@ library LibDeploy {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(TEST_SIGNER_PK, digest);
 
         require(
-            params.mw.getNonce(address(params.profile), params.mintToEOA) == 0
+            PermissionedFeeCreationMw(params.mw).getNonce(
+                params.profile,
+                params.mintToEOA
+            ) == 0
         );
-        params.profile.createProfile{ value: _INITIAL_FEE_TIER6 }(
+        ProfileNFT(params.profile).createProfile{ value: _INITIAL_FEE_TIER6 }(
             DataTypes.CreateProfileParams(
                 params.mintToEOA,
                 TEST_HANDLE,
@@ -762,9 +768,12 @@ library LibDeploy {
             new bytes(0)
         );
         require(
-            params.mw.getNonce(address(params.profile), params.mintToEOA) == 1
+            PermissionedFeeCreationMw(params.mw).getNonce(
+                params.profile,
+                params.mintToEOA
+            ) == 1
         );
-        require(params.profile.balanceOf(params.mintToEOA) == 1);
+        require(ProfileNFT(params.profile).balanceOf(params.mintToEOA) == 1);
         require(
             params.link3Treasury.balance == startingLink3 + 0.00975 ether,
             "LINK3_TREASURY_BALANCE_INCORRECT"
@@ -775,9 +784,9 @@ library LibDeploy {
         );
 
         // revert signer
-        params.engine.setProfileMw(
-            address(params.profile),
-            address(params.mw),
+        CyberEngine(params.engine).setProfileMw(
+            params.profile,
+            params.mw,
             abi.encode(
                 originSigner,
                 params.link3Treasury,
@@ -790,6 +799,7 @@ library LibDeploy {
                 _INITIAL_FEE_TIER6
             )
         );
+        console.log("origin signer:", originSigner);
     }
 
     function computeProfileProxyAddr(

@@ -14,7 +14,7 @@ out = 'out'
 libs = ['lib']
 gas_reports = ["*"]
 libraries = [
-    './src/libraries/Actions.sol:Actions:0x4077B8554A5F9A3C2D10c6Bb467B7E26Caf65ad9'
+    './src/libraries/Actions.sol:Actions:0x5551336Ee5aa3b3ccF6BA11bdBfDcF8F0758b5d6'
 ]
 fs_permissions = [{ access = "read-write", path = "./"}]
 
