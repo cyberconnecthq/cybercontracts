@@ -151,7 +151,7 @@
       const nodeURL =
         "https://bnbt.infura.io/v3/a606847a1dd5461c9081be56bd0ffe71";
       const provider = new ethers.providers.JsonRpcProvider(nodeURL);
-      const contractAddress = "0xDeB2C11E20e9759Db94431c81cfaDd3DC392c086";
+      const contractAddress = "0xc633795bE5E61F0363e239fC21cF32dbB073Fd21";
       const abi = [
         {
           inputs: [

@@ -23,6 +23,8 @@
     "deploy_mw:bnbt": "source .env.bnbt && FOUNDRY_PROFILE=bnbt forge script script/DeployMiddleware.s.sol:DeployScript --rpc-url $BNBT_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_mw:goerli": "source .env.goerli && FOUNDRY_PROFILE=goerli forge script script/DeployMiddleware.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy_namespace:goerli": "source .env.goerli && FOUNDRY_PROFILE=goerli forge script script/DeployNamespace.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "register_profile:bnbt": "source .env.bnbt && FOUNDRY_PROFILE=bnbt forge script script/RegisterProfile.s.sol:DeployScript --rpc-url $BNBT_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "register_profile:goerli": "source .env.goerli && FOUNDRY_PROFILE=goerli forge script script/RegisterProfile.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "deploy:mainnet": "source .env.mainnet && forge script script/Deploy.s.sol:DeployScript --rpc-url $MAINNET_RPC_URL --private-key $PRIVATE_KEY --broadcast -vvv",
     "deploy_dryrun:mainnet": "source .env.mainnet && forge script script/Deploy.s.sol:DeployScript --rpc-url $MAINNET_RPC_URL --private-key $PRIVATE_KEY -vvv",
     "pre_deploy": "node misc/pre_deploy.js",
