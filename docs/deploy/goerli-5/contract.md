@@ -18,9 +18,3 @@
 | CyberBoxNFT (Impl)                           | 0xade767591a2dc92335fd35e398d8057b3ff42dd2 |
 | CyberBoxNFT (Proxy)                          | 0x1dfc23a9a81202980711a334b07038a9a1789d73 |
 | Timelock                                     | 0xd983e38407c336fb4a3e37f30474f1c47eda7fa2 |
-| Timelock                                     | 0x9e9ca5da60bf09ee6a7b1c6c5dceec43588b0a0d |
-| Timelock                                     | 0x9e9ca5da60bf09ee6a7b1c6c5dceec43588b0a0d |
-| Timelock                                     | 0x9e9ca5da60bf09ee6a7b1c6c5dceec43588b0a0d |
-| Timelock                                     | 0x9e9ca5da60bf09ee6a7b1c6c5dceec43588b0a0d |
-| Timelock                                     | 0x9e9ca5da60bf09ee6a7b1c6c5dceec43588b0a0d |
-| Timelock                                     | 0x9e9ca5da60bf09ee6a7b1c6c5dceec43588b0a0d |
