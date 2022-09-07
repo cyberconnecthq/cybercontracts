@@ -16,6 +16,13 @@ contract DeploySetting {
 
     DeployParameters internal deployParams;
 
+    uint256 internal constant ANVIL = 31337;
+    uint256 internal constant GOERLI = 5;
+    uint256 internal constant BNBT = 97;
+    uint256 internal constant RINKEBY = 4;
+    uint256 internal constant MAINNET = 1;
+    uint256 internal constant NOVA = 42170;
+
     function _setDeployParams() internal {
         // Anvil accounts
         // (0) 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (10000 ETH)
@@ -26,7 +33,7 @@ contract DeploySetting {
         // deployer: 0x927f355117721e0E8A7b5eA20002b65B8a551890
         // engine treasury: 0x1890a1625d837A809b0e77EdE1a999a161df085d
         // link3 treasury + signer: 0xaB24749c622AF8FC567CA2b4d3EC53019F83dB8F
-        if (block.chainid == 31337) {
+        if (block.chainid == ANVIL) {
             // use the same address that runs the deployment script
             deployParams.link3Owner = address(
                 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
@@ -51,7 +58,9 @@ contract DeploySetting {
             );
             deployParams.deployerContract = address(0);
         } else if (
-            block.chainid == 5 || block.chainid == 4 || block.chainid == 97
+            block.chainid == GOERLI ||
+            block.chainid == RINKEBY ||
+            block.chainid == BNBT
         ) {
             // goerli
             deployParams.link3Owner = address(
@@ -77,22 +86,20 @@ contract DeploySetting {
                 0x78020361856816382501E444600A29519fb3B107
             );
             //goerli
-            if (block.chainid == 5) {
+            if (block.chainid == GOERLI) {
                 deployParams.deployerContract = address(
                     0x1bD54483A329861eB1b6d0F312Ab07F6Fd8a4000
                 );
-            } else if (block.chainid == 4) {
+            } else if (block.chainid == RINKEBY) {
                 deployParams.deployerContract = address(
                     0xe19061D4Dd38ac3B67eeC28E90bdFB68065DbF7c
                 );
-            } else if (block.chainid == 97) {
+            } else if (block.chainid == BNBT) {
                 deployParams.deployerContract = address(
                     0x4077B8554A5F9A3C2D10c6Bb467B7E26Caf65ad9
                 );
             }
-        } else if (
-            block.chainid == 1 || block.chainid == 137 || block.chainid == 56
-        ) {
+        } else if (block.chainid == MAINNET || block.chainid == NOVA) {
             deployParams.link3Owner = address(
                 0x39e0c6E610A8D7F408dD688011591583cbc1c3ce
             );

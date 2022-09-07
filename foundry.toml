@@ -32,4 +32,14 @@ libs = ['lib']
 gas_reports = ["*"]
 fs_permissions = [{ access = "read-write", path = "./"}]
 
+[profile.nova]
+src = 'src'
+out = 'out'
+libs = ['lib']
+gas_reports = ["*"]
+libraries = [
+    './src/libraries/Actions.sol:Actions:0x16c9471c076cd38e282ee7adc158b510d17c0951'
+]
+fs_permissions = [{ access = "read-write", path = "./"}]
+
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
