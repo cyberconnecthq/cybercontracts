@@ -13,6 +13,7 @@ import { EssenceNFT } from "../../src/core/EssenceNFT.sol";
 import { Authority } from "../../src/dependencies/solmate/Auth.sol";
 import { UpgradeableBeacon } from "../../src/upgradeability/UpgradeableBeacon.sol";
 import { ERC1967Proxy } from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import { TimelockController } from "openzeppelin-contracts/contracts/governance/TimelockController.sol";
 import { Constants } from "../../src/libraries/Constants.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
@@ -353,6 +354,55 @@ library LibDeploy {
             _write(vm, "CyberToken", token);
         }
         require(CYBER(token).owner() == tokenOwner, "WRONG_OWNER");
+    }
+
+    function deployTimeLock(
+        Vm vm,
+        address owner,
+        uint256 minDeplay,
+        bool writeFile
+    ) internal returns (address lock) {
+        address[] memory proposers = new address[](1);
+        proposers[0] = owner;
+        address[] memory executors = new address[](1);
+        executors[0] = owner;
+
+        lock = address(new TimelockController(minDeplay, proposers, executors));
+        if (writeFile) {
+            _write(vm, "Timelock", lock);
+        }
+    }
+
+    function changeOwnership(
+        Vm vm,
+        address timelock,
+        address engineGov,
+        address engineAuthority,
+        address boxProxy,
+        address link3DescriptorProxy
+    ) internal {
+        // CyberEngine gov role change to timelock
+        RolesAuthority(engineAuthority).setUserRole(
+            engineGov,
+            Constants._ENGINE_GOV_ROLE,
+            false
+        );
+        RolesAuthority(engineAuthority).setUserRole(
+            timelock,
+            Constants._ENGINE_GOV_ROLE,
+            true
+        );
+
+        // CyberBox owner role change to timelock
+        CyberBoxNFT(boxProxy).setOwner(timelock);
+        require(CyberBoxNFT(boxProxy).owner() == timelock, "WRONG_BOX_OWNER");
+
+        // Link3Descriptor owner role change to timelock
+        Link3ProfileDescriptor(link3DescriptorProxy).setOwner(timelock);
+        require(
+            Link3ProfileDescriptor(link3DescriptorProxy).owner() == timelock,
+            "WRONG_DESC_OWNER"
+        );
     }
 
     function deployAllMiddleware(
