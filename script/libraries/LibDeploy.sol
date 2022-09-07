@@ -379,9 +379,10 @@ library LibDeploy {
         address engineGov,
         address engineAuthority,
         address boxProxy,
-        address link3DescriptorProxy
+        address link3DescriptorProxy,
+        address cyberConnectTreasury
     ) internal {
-        // CyberEngine gov role change to timelock
+        // CyberEngine set gov role to timelock
         RolesAuthority(engineAuthority).setUserRole(
             engineGov,
             Constants._ENGINE_GOV_ROLE,
@@ -393,6 +394,13 @@ library LibDeploy {
             true
         );
 
+        // EngineAuthority owner role change to timelock
+        RolesAuthority(engineAuthority).setOwner(timelock);
+        require(
+            RolesAuthority(engineAuthority).owner() == timelock,
+            "WRONG_ENGINE_AUTH_OWNER"
+        );
+
         // CyberBox owner role change to timelock
         CyberBoxNFT(boxProxy).setOwner(timelock);
         require(CyberBoxNFT(boxProxy).owner() == timelock, "WRONG_BOX_OWNER");
@@ -402,6 +410,13 @@ library LibDeploy {
         require(
             Link3ProfileDescriptor(link3DescriptorProxy).owner() == timelock,
             "WRONG_DESC_OWNER"
+        );
+
+        // CyberConnect treasury owner role change to timelock
+        Treasury(cyberConnectTreasury).setOwner(timelock);
+        require(
+            Treasury(cyberConnectTreasury).owner() == timelock,
+            "WRONG_TREASURY_OWNER"
         );
     }
 
