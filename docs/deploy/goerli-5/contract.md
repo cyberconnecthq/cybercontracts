@@ -14,3 +14,7 @@
 | Subscribe MW (PaidSubscribeMw)               | 0xdc55fe3c2f50752c608479bfac000be5ed12f006 |
 | Essence MW (PaidCollectMw)                   | 0x3a174902214fbb9ac9d441a04bc18b28456d5d7e |
 | CyberConnect Profile                         | 0xCB053E4429dfB042E6ECE9A8f535C88035610567 |
+| Link3 Descriptor (Proxy)                     | 0x994d90C72aD3eeB327b6f6288D544384eF53a020 |
+| CyberBoxNFT (Impl)                           | 0xade767591a2dc92335fd35e398d8057b3ff42dd2 |
+| CyberBoxNFT (Proxy)                          | 0x1dfc23a9a81202980711a334b07038a9a1789d73 |
+| Timelock                                     | 0xd983e38407c336fb4a3e37f30474f1c47eda7fa2 |
