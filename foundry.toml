@@ -1,3 +1,10 @@
+[profile.default]
+src = 'src'
+out = 'out'
+libs = ['lib']
+gas_reports = ["*"]
+fs_permissions = [{ access = "read-write", path = "./"}]
+
 [profile.goerli]
 src = 'src'
 out = 'out'
