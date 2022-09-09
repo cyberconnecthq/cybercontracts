@@ -8,7 +8,7 @@ import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol"
 import { CYBER } from "../src/token/CYBER.sol";
 import { TestIntegrationBase } from "../test/utils/TestIntegrationBase.sol";
 
-contract CyberTokenTest is TestIntegrationBase {
+contract CyberTokenTest is Test {
     uint256 amountRequired;
     bool subscribeRequired;
     address lila = address(0x1114);
@@ -18,8 +18,6 @@ contract CyberTokenTest is TestIntegrationBase {
     CYBER cyberTokenContract;
 
     function setUp() public {
-        _setUp();
-
         vm.label(address(lila), "lila");
         vm.label(address(bobby), "bobby");
         vm.label(address(dave), "dave");
