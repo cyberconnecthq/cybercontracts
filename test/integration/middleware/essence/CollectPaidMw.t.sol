@@ -15,7 +15,7 @@ import { ITreasury } from "../../../../src/interfaces/ITreasury.sol";
 import { ITreasuryEvents } from "../../../../src/interfaces/ITreasuryEvents.sol";
 import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
 import { ICyberEngineEvents } from "../../../../src/interfaces/ICyberEngineEvents.sol";
-import { PaidCollectMw } from "../../../../src/middlewares/essence/PaidCollectMw.sol";
+import { CollectPaidMw } from "../../../../src/middlewares/essence/CollectPaidMw.sol";
 import { TestIntegrationBase } from "../../../utils/TestIntegrationBase.sol";
 import { EssenceNFT } from "../../../../src/core/EssenceNFT.sol";
 import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
@@ -23,13 +23,13 @@ import { TestLib712 } from "../../../utils/TestLib712.sol";
 import { MockERC20 } from "../../../utils/MockERC20.sol";
 import { CyberNFTBase } from "../../../../src/base/CyberNFTBase.sol";
 
-contract PaidCollectEssenceMwTest is
+contract CollectPaidMwTest is
     TestIntegrationBase,
     ICyberEngineEvents,
     IProfileNFTEvents,
     ITreasuryEvents
 {
-    event PaidEssenceMwSet(
+    event CollectPaidMwSet(
         address indexed namespace,
         uint256 indexed profileId,
         uint256 indexed essenceId,
@@ -60,7 +60,7 @@ contract PaidCollectEssenceMwTest is
     uint256 limit;
 
     ERC20 token;
-    PaidCollectMw paidCollectMw;
+    CollectPaidMw collectPaidMw;
 
     function setUp() public {
         _setUp();
@@ -68,8 +68,8 @@ contract PaidCollectEssenceMwTest is
         token = new MockERC20("Shit Coin", "SHIT");
 
         // Engine Treasury is the address of the treasury, but we put addrs.cyberTreasury here because its the proxy
-        paidCollectMw = new PaidCollectMw(addrs.cyberTreasury);
-        vm.label(address(paidCollectMw), "PaidCollectMw");
+        collectPaidMw = new CollectPaidMw(addrs.cyberTreasury);
+        vm.label(address(collectPaidMw), "CollectPaidMw");
         vm.label(address(lila), "lila");
         vm.label(address(dave), "dave");
         vm.label(address(bobby), "bobby");
@@ -113,8 +113,8 @@ contract PaidCollectEssenceMwTest is
 
         // registers for essence, passes in the paid collect middleware address
         vm.expectEmit(false, false, false, true);
-        emit AllowEssenceMw(address(paidCollectMw), false, true);
-        engine.allowEssenceMw(address(paidCollectMw), true);
+        emit AllowEssenceMw(address(collectPaidMw), false, true);
+        engine.allowEssenceMw(address(collectPaidMw), true);
 
         vm.expectRevert("CURRENCY_NOT_ALLOWED");
 
@@ -126,7 +126,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_NAME,
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
-                address(paidCollectMw),
+                address(collectPaidMw),
                 false,
                 false
             ),
@@ -162,11 +162,11 @@ contract PaidCollectEssenceMwTest is
 
         // registers for essence, passes in the paid collect middleware address
         vm.expectEmit(false, false, false, true);
-        emit AllowEssenceMw(address(paidCollectMw), false, true);
-        engine.allowEssenceMw(address(paidCollectMw), true);
+        emit AllowEssenceMw(address(collectPaidMw), false, true);
+        engine.allowEssenceMw(address(collectPaidMw), true);
 
         vm.expectEmit(true, true, true, true);
-        emit PaidEssenceMwSet(
+        emit CollectPaidMwSet(
             address(link3Profile),
             bobbyProfileId,
             1,
@@ -184,7 +184,7 @@ contract PaidCollectEssenceMwTest is
             BOBBY_ESSENCE_NAME,
             BOBBY_ESSENCE_LABEL,
             BOBBY_URL,
-            address(paidCollectMw),
+            address(collectPaidMw),
             abi.encode(
                 limit,
                 amountRequired,
@@ -201,7 +201,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_NAME,
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
-                address(paidCollectMw),
+                address(collectPaidMw),
                 false,
                 false
             ),
@@ -214,7 +214,7 @@ contract PaidCollectEssenceMwTest is
             )
         );
 
-        address paidCollectEssenceProxy = getDeployedEssProxyAddress(
+        address collectPaidEssenceProxy = getDeployedEssProxyAddress(
             link3EssBeacon,
             bobbyProfileId,
             bobbyEssenceId,
@@ -226,13 +226,13 @@ contract PaidCollectEssenceMwTest is
 
         // lila wants to collect bob's essence
         vm.startPrank(lila);
-        token.approve(address(paidCollectMw), 5000);
+        token.approve(address(collectPaidMw), 5000);
 
         vm.expectEmit(true, true, true, false);
         emit DeployEssenceNFT(
             bobbyProfileId,
             bobbyEssenceId,
-            paidCollectEssenceProxy
+            collectPaidEssenceProxy
         );
 
         vm.expectEmit(true, true, true, false);
@@ -245,7 +245,7 @@ contract PaidCollectEssenceMwTest is
             new bytes(0)
         );
 
-        uint256 paidCollectTokenId = link3Profile.collect(
+        uint256 collectPaidTokenId = link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
             new bytes(0)
@@ -258,9 +258,9 @@ contract PaidCollectEssenceMwTest is
         vm.stopPrank();
 
         // check the ownership of the essence
-        assertEq(bobbyEssNFT, paidCollectEssenceProxy);
+        assertEq(bobbyEssNFT, collectPaidEssenceProxy);
         assertEq(EssenceNFT(bobbyEssNFT).balanceOf(lila), 1);
-        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(paidCollectTokenId), lila);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectPaidTokenId), lila);
 
         // check the balance
         assertEq(
@@ -304,11 +304,11 @@ contract PaidCollectEssenceMwTest is
 
         // registers for essence, passes in the paid collect middleware address
         vm.expectEmit(true, true, true, false);
-        emit AllowEssenceMw(address(paidCollectMw), false, true);
-        engine.allowEssenceMw(address(paidCollectMw), true);
+        emit AllowEssenceMw(address(collectPaidMw), false, true);
+        engine.allowEssenceMw(address(collectPaidMw), true);
 
         vm.expectEmit(true, true, true, true);
-        emit PaidEssenceMwSet(
+        emit CollectPaidMwSet(
             address(link3Profile),
             bobbyProfileId,
             1,
@@ -326,7 +326,7 @@ contract PaidCollectEssenceMwTest is
             BOBBY_ESSENCE_NAME,
             BOBBY_ESSENCE_LABEL,
             BOBBY_URL,
-            address(paidCollectMw),
+            address(collectPaidMw),
             abi.encode(
                 limit,
                 amountRequired,
@@ -343,7 +343,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_NAME,
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
-                address(paidCollectMw),
+                address(collectPaidMw),
                 false,
                 false
             ),
@@ -356,7 +356,7 @@ contract PaidCollectEssenceMwTest is
             )
         );
 
-        address paidCollectEssenceProxy = getDeployedEssProxyAddress(
+        address collectPaidEssenceProxy = getDeployedEssProxyAddress(
             link3EssBeacon,
             bobbyProfileId,
             bobbyEssenceId,
@@ -396,13 +396,13 @@ contract PaidCollectEssenceMwTest is
         assertEq(ERC721(bobSubNFT).ownerOf(bobbySubscribeNFTId), address(lila));
 
         // lila wants to collect bobby's essence
-        token.approve(address(paidCollectMw), 5000);
+        token.approve(address(collectPaidMw), 5000);
 
         vm.expectEmit(true, true, true, false);
         emit DeployEssenceNFT(
             bobbyProfileId,
             bobbyEssenceId,
-            paidCollectEssenceProxy
+            collectPaidEssenceProxy
         );
 
         vm.expectEmit(true, true, true, false);
@@ -415,7 +415,7 @@ contract PaidCollectEssenceMwTest is
             new bytes(0)
         );
 
-        uint256 paidCollectTokenId = link3Profile.collect(
+        uint256 collectPaidTokenId = link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
             new bytes(0)
@@ -428,9 +428,9 @@ contract PaidCollectEssenceMwTest is
         vm.stopPrank();
 
         // check the ownership of the essence
-        assertEq(bobbyEssNFT, paidCollectEssenceProxy);
+        assertEq(bobbyEssNFT, collectPaidEssenceProxy);
         assertEq(EssenceNFT(bobbyEssNFT).balanceOf(lila), 1);
-        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(paidCollectTokenId), lila);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectPaidTokenId), lila);
 
         // check the balance
         assertEq(
@@ -460,11 +460,11 @@ contract PaidCollectEssenceMwTest is
 
         // registers for essence, passes in the paid collect middleware address
         vm.expectEmit(true, true, true, false);
-        emit AllowEssenceMw(address(paidCollectMw), false, true);
-        engine.allowEssenceMw(address(paidCollectMw), true);
+        emit AllowEssenceMw(address(collectPaidMw), false, true);
+        engine.allowEssenceMw(address(collectPaidMw), true);
 
         vm.expectEmit(true, true, true, true);
-        emit PaidEssenceMwSet(
+        emit CollectPaidMwSet(
             address(link3Profile),
             bobbyProfileId,
             1,
@@ -482,7 +482,7 @@ contract PaidCollectEssenceMwTest is
             BOBBY_ESSENCE_NAME,
             BOBBY_ESSENCE_LABEL,
             BOBBY_URL,
-            address(paidCollectMw),
+            address(collectPaidMw),
             abi.encode(
                 limit,
                 amountRequired,
@@ -499,7 +499,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_NAME,
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
-                address(paidCollectMw),
+                address(collectPaidMw),
                 false,
                 false
             ),
@@ -514,7 +514,7 @@ contract PaidCollectEssenceMwTest is
 
         // lila wants to collect bob's essence, without subscribing prior
         vm.startPrank(lila);
-        token.approve(address(paidCollectMw), 5000);
+        token.approve(address(collectPaidMw), 5000);
 
         vm.expectRevert("NOT_SUBSCRIBED");
 
@@ -540,11 +540,11 @@ contract PaidCollectEssenceMwTest is
 
         // registers for essence, passes in the paid collect middleware address
         vm.expectEmit(true, true, true, false);
-        emit AllowEssenceMw(address(paidCollectMw), false, true);
-        engine.allowEssenceMw(address(paidCollectMw), true);
+        emit AllowEssenceMw(address(collectPaidMw), false, true);
+        engine.allowEssenceMw(address(collectPaidMw), true);
 
         vm.expectEmit(true, true, true, true);
-        emit PaidEssenceMwSet(
+        emit CollectPaidMwSet(
             address(link3Profile),
             bobbyProfileId,
             1,
@@ -562,7 +562,7 @@ contract PaidCollectEssenceMwTest is
             BOBBY_ESSENCE_NAME,
             BOBBY_ESSENCE_LABEL,
             BOBBY_URL,
-            address(paidCollectMw),
+            address(collectPaidMw),
             abi.encode(
                 limit,
                 amountRequired,
@@ -579,7 +579,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_NAME,
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
-                address(paidCollectMw),
+                address(collectPaidMw),
                 false,
                 false
             ),
@@ -594,7 +594,7 @@ contract PaidCollectEssenceMwTest is
 
         vm.startPrank(lila);
         // lila wants to collect bobby's essence
-        token.approve(address(paidCollectMw), 999999);
+        token.approve(address(collectPaidMw), 999999);
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
         link3Profile.collect(
@@ -629,11 +629,11 @@ contract PaidCollectEssenceMwTest is
         // registers for essence, passes in the paid collect middleware address
         // set the limit
         vm.expectEmit(false, false, false, true);
-        emit AllowEssenceMw(address(paidCollectMw), false, true);
-        engine.allowEssenceMw(address(paidCollectMw), true);
+        emit AllowEssenceMw(address(collectPaidMw), false, true);
+        engine.allowEssenceMw(address(collectPaidMw), true);
 
         vm.expectEmit(true, true, true, true);
-        emit PaidEssenceMwSet(
+        emit CollectPaidMwSet(
             address(link3Profile),
             bobbyProfileId,
             1,
@@ -651,7 +651,7 @@ contract PaidCollectEssenceMwTest is
             BOBBY_ESSENCE_NAME,
             BOBBY_ESSENCE_LABEL,
             BOBBY_URL,
-            address(paidCollectMw),
+            address(collectPaidMw),
             abi.encode(
                 limit,
                 amountRequired,
@@ -668,7 +668,7 @@ contract PaidCollectEssenceMwTest is
                 BOBBY_ESSENCE_NAME,
                 BOBBY_ESSENCE_LABEL,
                 BOBBY_URL,
-                address(paidCollectMw),
+                address(collectPaidMw),
                 false,
                 false
             ),
@@ -681,7 +681,7 @@ contract PaidCollectEssenceMwTest is
             )
         );
 
-        address limitedPaidCollectEssenceProxy = getDeployedEssProxyAddress(
+        address limitedCollectPaidEssenceProxy = getDeployedEssProxyAddress(
             link3EssBeacon,
             bobbyProfileId,
             bobbyEssenceId,
@@ -693,13 +693,13 @@ contract PaidCollectEssenceMwTest is
 
         // lila collects bobby's addictive essence
         vm.startPrank(lila);
-        token.approve(address(paidCollectMw), 5000);
+        token.approve(address(collectPaidMw), 5000);
 
         vm.expectEmit(true, true, true, false);
         emit DeployEssenceNFT(
             bobbyProfileId,
             bobbyEssenceId,
-            limitedPaidCollectEssenceProxy
+            limitedCollectPaidEssenceProxy
         );
 
         vm.expectEmit(true, true, true, false);
@@ -713,7 +713,7 @@ contract PaidCollectEssenceMwTest is
         );
 
         // lila collects the first essence
-        uint256 limitedPaidCollectTokenIdOne = link3Profile.collect(
+        uint256 limitedCollectPaidTokenIdOne = link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
             new bytes(0)
@@ -725,12 +725,12 @@ contract PaidCollectEssenceMwTest is
             bobbyEssenceId
         );
 
-        assertEq(bobbyEssNFT, limitedPaidCollectEssenceProxy);
+        assertEq(bobbyEssNFT, limitedCollectPaidEssenceProxy);
 
         // check the ownership of the essence after the first collection
         assertEq(EssenceNFT(bobbyEssNFT).balanceOf(lila), 1);
         assertEq(
-            EssenceNFT(bobbyEssNFT).ownerOf(limitedPaidCollectTokenIdOne),
+            EssenceNFT(bobbyEssNFT).ownerOf(limitedCollectPaidTokenIdOne),
             lila
         );
 
@@ -749,7 +749,7 @@ contract PaidCollectEssenceMwTest is
         );
 
         // lila collects the second essence
-        uint256 limitedPaidCollectTokenIdTwo = link3Profile.collect(
+        uint256 limitedCollectPaidTokenIdTwo = link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
             new bytes(0)
@@ -758,7 +758,7 @@ contract PaidCollectEssenceMwTest is
         // check the ownership of the essence after the second collection
         assertEq(EssenceNFT(bobbyEssNFT).balanceOf(lila), 2);
         assertEq(
-            EssenceNFT(bobbyEssNFT).ownerOf(limitedPaidCollectTokenIdTwo),
+            EssenceNFT(bobbyEssNFT).ownerOf(limitedCollectPaidTokenIdTwo),
             lila
         );
 
@@ -777,7 +777,7 @@ contract PaidCollectEssenceMwTest is
         );
 
         // lila collects the third essence, reaches the collect limit
-        uint256 limitedPaidCollectTokenIdThree = link3Profile.collect(
+        uint256 limitedCollectPaidTokenIdThree = link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
             new bytes(0)
@@ -786,7 +786,7 @@ contract PaidCollectEssenceMwTest is
         // check the ownership of the essence after the third collection
         assertEq(EssenceNFT(bobbyEssNFT).balanceOf(lila), 3);
         assertEq(
-            EssenceNFT(bobbyEssNFT).ownerOf(limitedPaidCollectTokenIdThree),
+            EssenceNFT(bobbyEssNFT).ownerOf(limitedCollectPaidTokenIdThree),
             lila
         );
 

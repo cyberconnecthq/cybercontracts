@@ -17,7 +17,7 @@ import { ITreasury } from "../../../../src/interfaces/ITreasury.sol";
 import { ITreasuryEvents } from "../../../../src/interfaces/ITreasuryEvents.sol";
 import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
 import { ICyberEngineEvents } from "../../../../src/interfaces/ICyberEngineEvents.sol";
-import { PaidSubscribeMw } from "../../../../src/middlewares/subscribe/PaidSubscribeMw.sol";
+import { SubscribePaidMw } from "../../../../src/middlewares/subscribe/SubscribePaidMw.sol";
 import { TestIntegrationBase } from "../../../utils/TestIntegrationBase.sol";
 import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
 import { TestLib712 } from "../../../utils/TestLib712.sol";
@@ -26,13 +26,13 @@ import { MockERC721 } from "../../../utils/MockERC721.sol";
 
 import { CyberNFTBase } from "../../../../src/base/CyberNFTBase.sol";
 
-contract PaidSubscribeMwTest is
+contract SubscribePaidMwTest is
     TestIntegrationBase,
     ICyberEngineEvents,
     IProfileNFTEvents,
     ITreasuryEvents
 {
-    event PaidSubscribeMwSet(
+    event SubscribePaidMwSet(
         address indexed namespace,
         uint256 indexed profileId,
         uint256 indexed amount,
@@ -55,7 +55,7 @@ contract PaidSubscribeMwTest is
 
     ERC20 token;
     ERC721 nft;
-    PaidSubscribeMw paidSubscribeMw;
+    SubscribePaidMw subscribePaidMw;
 
     function setUp() public {
         _setUp();
@@ -64,8 +64,8 @@ contract PaidSubscribeMwTest is
         token = new MockERC20("Shit Coin", "SHIT");
 
         // Engine Treasury is the address of the treasury, but we put addrs.cyberTreasury here because its the proxy
-        paidSubscribeMw = new PaidSubscribeMw(addrs.cyberTreasury);
-        vm.label(address(paidSubscribeMw), "paidSubscribeMw");
+        subscribePaidMw = new SubscribePaidMw(addrs.cyberTreasury);
+        vm.label(address(subscribePaidMw), "subscribePaidMw");
 
         // msg.sender is this contract, then the token contract transfers 10000 to lila
         token.transfer(lila, 10000);
@@ -104,8 +104,8 @@ contract PaidSubscribeMwTest is
 
         // allows the subscribe middleware, passes in the paid subscribe middleware address
         vm.expectEmit(false, false, false, true);
-        emit AllowSubscribeMw(address(paidSubscribeMw), false, true);
-        engine.allowSubscribeMw(address(paidSubscribeMw), true);
+        emit AllowSubscribeMw(address(subscribePaidMw), false, true);
+        engine.allowSubscribeMw(address(subscribePaidMw), true);
 
         vm.expectRevert("CURRENCY_NOT_ALLOWED");
 
@@ -113,7 +113,7 @@ contract PaidSubscribeMwTest is
         link3Profile.setSubscribeData(
             bobbyProfileId,
             "uri",
-            address(paidSubscribeMw),
+            address(subscribePaidMw),
             abi.encode(
                 amountRequired,
                 bobby,
@@ -146,14 +146,14 @@ contract PaidSubscribeMwTest is
 
         // allows the subscribe middleware, passes in the paid subscribe middleware address
         vm.expectEmit(false, false, false, true);
-        emit AllowSubscribeMw(address(paidSubscribeMw), false, true);
-        engine.allowSubscribeMw(address(paidSubscribeMw), true);
+        emit AllowSubscribeMw(address(subscribePaidMw), false, true);
+        engine.allowSubscribeMw(address(subscribePaidMw), true);
 
         // initialize the subscribe middleware data
         vm.prank(bobby);
 
         vm.expectEmit(true, true, true, true);
-        emit PaidSubscribeMwSet(
+        emit SubscribePaidMwSet(
             address(link3Profile),
             bobbyProfileId,
             amountRequired,
@@ -167,14 +167,14 @@ contract PaidSubscribeMwTest is
         emit SetSubscribeData(
             bobbyProfileId,
             "uri",
-            address(paidSubscribeMw),
+            address(subscribePaidMw),
             new bytes(0)
         );
 
         link3Profile.setSubscribeData(
             bobbyProfileId,
             "uri",
-            address(paidSubscribeMw),
+            address(subscribePaidMw),
             abi.encode(
                 amountRequired,
                 bobby,
@@ -194,7 +194,7 @@ contract PaidSubscribeMwTest is
         // lila wants to follows bobby
         vm.startPrank(lila);
 
-        token.approve(address(paidSubscribeMw), 5000);
+        token.approve(address(subscribePaidMw), 5000);
 
         // put bobby in the id list
         uint256[] memory ids = new uint256[](1);
@@ -247,13 +247,13 @@ contract PaidSubscribeMwTest is
 
         // allows the subscribe middleware, passes in the paid subscribe middleware address
         vm.expectEmit(false, false, false, true);
-        emit AllowSubscribeMw(address(paidSubscribeMw), false, true);
-        engine.allowSubscribeMw(address(paidSubscribeMw), true);
+        emit AllowSubscribeMw(address(subscribePaidMw), false, true);
+        engine.allowSubscribeMw(address(subscribePaidMw), true);
 
         vm.prank(bobby);
 
         vm.expectEmit(true, true, true, true);
-        emit PaidSubscribeMwSet(
+        emit SubscribePaidMwSet(
             address(link3Profile),
             bobbyProfileId,
             amountRequired,
@@ -267,14 +267,14 @@ contract PaidSubscribeMwTest is
         emit SetSubscribeData(
             bobbyProfileId,
             "uri",
-            address(paidSubscribeMw),
+            address(subscribePaidMw),
             new bytes(0)
         );
 
         link3Profile.setSubscribeData(
             bobbyProfileId,
             "uri",
-            address(paidSubscribeMw),
+            address(subscribePaidMw),
             abi.encode(
                 amountRequired,
                 bobby,
@@ -286,7 +286,7 @@ contract PaidSubscribeMwTest is
 
         // lila wants to subscribe to bobby, without the required nft
         vm.startPrank(lila);
-        token.approve(address(paidSubscribeMw), 5000);
+        token.approve(address(subscribePaidMw), 5000);
 
         vm.expectRevert("NO_REQUIRED_NFT");
         link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
@@ -324,14 +324,14 @@ contract PaidSubscribeMwTest is
 
         // allows the subscribe middleware, passes in the paid subscribe middleware address
         vm.expectEmit(false, false, false, true);
-        emit AllowSubscribeMw(address(paidSubscribeMw), false, true);
-        engine.allowSubscribeMw(address(paidSubscribeMw), true);
+        emit AllowSubscribeMw(address(subscribePaidMw), false, true);
+        engine.allowSubscribeMw(address(subscribePaidMw), true);
 
         // initialize the subscribe middleware data
         vm.prank(bobby);
 
         vm.expectEmit(true, true, true, true);
-        emit PaidSubscribeMwSet(
+        emit SubscribePaidMwSet(
             address(link3Profile),
             bobbyProfileId,
             amountRequired,
@@ -345,14 +345,14 @@ contract PaidSubscribeMwTest is
         emit SetSubscribeData(
             bobbyProfileId,
             "uri",
-            address(paidSubscribeMw),
+            address(subscribePaidMw),
             new bytes(0)
         );
 
         link3Profile.setSubscribeData(
             bobbyProfileId,
             "uri",
-            address(paidSubscribeMw),
+            address(subscribePaidMw),
             abi.encode(
                 amountRequired,
                 bobby,
@@ -364,7 +364,7 @@ contract PaidSubscribeMwTest is
 
         vm.startPrank(lila);
 
-        token.approve(address(paidSubscribeMw), amountRequired);
+        token.approve(address(subscribePaidMw), amountRequired);
 
         address subscribeProxy = getDeployedSubProxyAddress(
             link3SubBeacon,
@@ -424,13 +424,13 @@ contract PaidSubscribeMwTest is
 
         // allows the subscribe middleware, passes in the paid subscribe middleware address
         vm.expectEmit(false, false, false, true);
-        emit AllowSubscribeMw(address(paidSubscribeMw), false, true);
-        engine.allowSubscribeMw(address(paidSubscribeMw), true);
+        emit AllowSubscribeMw(address(subscribePaidMw), false, true);
+        engine.allowSubscribeMw(address(subscribePaidMw), true);
 
         vm.prank(bobby);
 
         vm.expectEmit(true, true, true, true);
-        emit PaidSubscribeMwSet(
+        emit SubscribePaidMwSet(
             address(link3Profile),
             bobbyProfileId,
             amountRequired,
@@ -444,14 +444,14 @@ contract PaidSubscribeMwTest is
         emit SetSubscribeData(
             bobbyProfileId,
             "uri",
-            address(paidSubscribeMw),
+            address(subscribePaidMw),
             new bytes(0)
         );
 
         link3Profile.setSubscribeData(
             bobbyProfileId,
             "uri",
-            address(paidSubscribeMw),
+            address(subscribePaidMw),
             abi.encode(
                 amountRequired,
                 bobby,
@@ -463,7 +463,7 @@ contract PaidSubscribeMwTest is
 
         vm.startPrank(lila);
 
-        token.approve(address(paidSubscribeMw), 999999);
+        token.approve(address(subscribePaidMw), 999999);
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
         link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);

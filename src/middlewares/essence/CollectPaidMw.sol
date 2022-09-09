@@ -15,24 +15,24 @@ import { FeeMw } from "../base/FeeMw.sol";
 import { SubscribeStatusMw } from "../base/SubscribeStatusMw.sol";
 
 /**
- * @title Paid Collect Essence Middleware
+ * @title  Collect Paid Middleware
  * @author CyberConnect
  * @notice This contract is a middleware to only allow users to collect when they pay a certain fee to the essence owner.
  * the essence creator can choose to set rules including whether collecting this essence require previous subscription and
  * has a total supply.
  */
-contract PaidCollectMw is IEssenceMiddleware, FeeMw {
+contract CollectPaidMw is IEssenceMiddleware, FeeMw {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENT
     //////////////////////////////////////////////////////////////*/
 
-    event PaidEssenceMwSet(
+    event CollectPaidMwSet(
         address indexed namespace,
         uint256 indexed profileId,
         uint256 indexed essenceId,
-        uint256 currentCollect,
+        uint256 totalSupply,
         uint256 amount,
         address recipient,
         address currency,
@@ -43,7 +43,7 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
                                STATES
     //////////////////////////////////////////////////////////////*/
 
-    struct PaidEssenceData {
+    struct CollectPaidData {
         uint256 totalSupply;
         uint256 currentCollect;
         uint256 amount;
@@ -52,7 +52,7 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         bool subscribeRequired;
     }
 
-    mapping(address => mapping(uint256 => mapping(uint256 => PaidEssenceData)))
+    mapping(address => mapping(uint256 => mapping(uint256 => CollectPaidData)))
         internal _paidEssenceData;
 
     /*//////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ contract PaidCollectMw is IEssenceMiddleware, FeeMw {
         _paidEssenceData[msg.sender][profileId][essenceId]
             .subscribeRequired = subscribeRequired;
 
-        emit PaidEssenceMwSet(
+        emit CollectPaidMwSet(
             msg.sender,
             profileId,
             essenceId,
