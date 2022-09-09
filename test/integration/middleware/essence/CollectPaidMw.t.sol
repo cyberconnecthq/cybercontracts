@@ -23,7 +23,7 @@ import { TestLib712 } from "../../../utils/TestLib712.sol";
 import { MockERC20 } from "../../../utils/MockERC20.sol";
 import { CyberNFTBase } from "../../../../src/base/CyberNFTBase.sol";
 
-contract CollectPaidEssenceMwTest is
+contract CollectPaidMwTest is
     TestIntegrationBase,
     ICyberEngineEvents,
     IProfileNFTEvents,
