@@ -10,18 +10,18 @@ import { Constants } from "../../../../src/libraries/Constants.sol";
 
 import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
 import { ICyberEngineEvents } from "../../../../src/interfaces/ICyberEngineEvents.sol";
-import { SignaturePermissionEssenceMw } from "../../../../src/middlewares/essence/SignaturePermissionEssenceMw.sol";
+import { CollectPermissionMw } from "../../../../src/middlewares/essence/CollectPermissionMw.sol";
 import { TestIntegrationBase } from "../../../utils/TestIntegrationBase.sol";
 import { EssenceNFT } from "../../../../src/core/EssenceNFT.sol";
 import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
 import { TestLib712 } from "../../../utils/TestLib712.sol";
 
-contract SignaturePermissionEssenceMwTest is
+contract CollectPermissionMwTest is
     TestIntegrationBase,
     ICyberEngineEvents,
     IProfileNFTEvents
 {
-    event SignatureEssenceMwSignerSet(
+    event CollectPermissionMwSet(
         address indexed namespace,
         uint256 indexed profileId,
         uint256 indexed essenceId,
@@ -57,14 +57,14 @@ contract SignaturePermissionEssenceMwTest is
     uint256 bobbyProfileId;
     uint256 lilaProfileId;
 
-    SignaturePermissionEssenceMw sigMw;
+    CollectPermissionMw sigMw;
 
     function setUp() public {
         validDeadline = block.timestamp + 100;
         exceededTime = 300;
 
         _setUp();
-        sigMw = new SignaturePermissionEssenceMw();
+        sigMw = new CollectPermissionMw();
         vm.label(address(sigMw), "SignaturePermissionMiddleware");
 
         // bob registeres for their profile
@@ -93,7 +93,7 @@ contract SignaturePermissionEssenceMwTest is
 
         // check emit for registering the essence
         vm.expectEmit(true, true, true, true);
-        emit SignatureEssenceMwSignerSet(
+        emit CollectPermissionMwSet(
             address(link3Profile),
             bobbyProfileId,
             1,
@@ -245,7 +245,7 @@ contract SignaturePermissionEssenceMwTest is
             keccak256(
                 abi.encode(_ESSENCE_TYPEHASH, collector, nonce, deadline)
             ),
-            "SignaturePermissionEssenceMw",
+            "CollectPermissionMw",
             "1"
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);

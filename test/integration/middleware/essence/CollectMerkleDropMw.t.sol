@@ -10,18 +10,18 @@ import { Constants } from "../../../../src/libraries/Constants.sol";
 
 import { IProfileNFTEvents } from "../../../../src/interfaces/IProfileNFTEvents.sol";
 import { ICyberEngineEvents } from "../../../../src/interfaces/ICyberEngineEvents.sol";
-import { MerkleDropEssenceMw } from "../../../../src/middlewares/essence/MerkleDropEssenceMw.sol";
+import { CollectMerkleDropMw } from "../../../../src/middlewares/essence/CollectMerkleDropMw.sol";
 import { TestIntegrationBase } from "../../../utils/TestIntegrationBase.sol";
 import { EssenceNFT } from "../../../../src/core/EssenceNFT.sol";
 import { TestLibFixture } from "../../../utils/TestLibFixture.sol";
 import { TestLib712 } from "../../../utils/TestLib712.sol";
 
-contract MerkleDropEssenceMwTest is
+contract CollectMerkleDropMwTest is
     TestIntegrationBase,
     ICyberEngineEvents,
     IProfileNFTEvents
 {
-    event MerkleDropEssenceMwSet(
+    event CollectMerkleDropMwSet(
         address indexed namespace,
         uint256 indexed profileId,
         uint256 indexed essenceId,
@@ -73,11 +73,11 @@ contract MerkleDropEssenceMwTest is
     bytes32 root = rootHash;
     bytes32[] proofForLila = [bobbyLeaf, firstLayerNodeTwo, secondLayerNodeTwo];
 
-    MerkleDropEssenceMw merkleMw;
+    CollectMerkleDropMw merkleMw;
 
     function setUp() public {
         _setUp();
-        merkleMw = new MerkleDropEssenceMw();
+        merkleMw = new CollectMerkleDropMw();
         vm.label(address(merkleMw), "MerkleMiddleware");
 
         // bob registeres for their profile
@@ -108,7 +108,7 @@ contract MerkleDropEssenceMwTest is
         engine.allowEssenceMw(address(merkleMw), true);
 
         vm.expectEmit(true, true, true, true);
-        emit MerkleDropEssenceMwSet(
+        emit CollectMerkleDropMwSet(
             address(link3Profile),
             bobbyProfileId,
             1,

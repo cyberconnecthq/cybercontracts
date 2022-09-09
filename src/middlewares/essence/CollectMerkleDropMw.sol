@@ -7,16 +7,16 @@ import { MerkleProof } from "openzeppelin-contracts/contracts/utils/cryptography
 import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
 
 /**
- * @title Merkle Drop Essence Middleware
+ * @title Collect Merkle Drop Middleware
  * @author CyberConnect
  * @notice This contract is a middleware to only allow users to collect an essence given the correct merkle proof
  */
-contract MerkleDropEssenceMw is IEssenceMiddleware {
+contract CollectMerkleDropMw is IEssenceMiddleware {
     /*//////////////////////////////////////////////////////////////
                                 EVENT
     //////////////////////////////////////////////////////////////*/
 
-    event MerkleDropEssenceMwSet(
+    event CollectMerkleDropMwSet(
         address indexed namespace,
         uint256 indexed profileId,
         uint256 indexed essenceId,
@@ -47,7 +47,7 @@ contract MerkleDropEssenceMw is IEssenceMiddleware {
             (bytes32)
         );
 
-        emit MerkleDropEssenceMwSet(
+        emit CollectMerkleDropMwSet(
             msg.sender,
             profileId,
             essenceId,

@@ -9,17 +9,17 @@ import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
 import { EIP712 } from "../../base/EIP712.sol";
 
 /**
- * @title Signiture Permission Essence Middleware
+ * @title Collect Permission Middleware
  * @author CyberConnect
  * @notice This contract is a middleware to allow an address to collect an essence only if they have a valid signiture from the
  * essence owner
  */
-contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
+contract CollectPermissionMw is IEssenceMiddleware, EIP712 {
     /*//////////////////////////////////////////////////////////////
                                 EVENT
     //////////////////////////////////////////////////////////////*/
 
-    event SignatureEssenceMwSignerSet(
+    event CollectPermissionMwSet(
         address indexed namespace,
         uint256 indexed profileId,
         uint256 indexed essenceId,
@@ -56,7 +56,7 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
             (address)
         );
 
-        emit SignatureEssenceMwSignerSet(
+        emit CollectPermissionMwSet(
             msg.sender,
             profileId,
             essenceId,
@@ -144,6 +144,6 @@ contract SignaturePermissionEssenceMw is IEssenceMiddleware, EIP712 {
         override
         returns (string memory)
     {
-        return "SignaturePermissionEssenceMw";
+        return "CollectPermissionMw";
     }
 }

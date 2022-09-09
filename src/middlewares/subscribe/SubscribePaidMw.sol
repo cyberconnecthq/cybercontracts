@@ -14,18 +14,18 @@ import { Constants } from "../../libraries/Constants.sol";
 import { FeeMw } from "../base/FeeMw.sol";
 
 /**
- * @title Paid Subscribe Middleware
+ * @title  Subscribe Paid Middleware
  * @author CyberConnect
  * @notice This contract is a middleware to only allow users to subscribe when they pay a certain fee to the profile owner.
  */
-contract PaidSubscribeMw is ISubscribeMiddleware, FeeMw {
+contract SubscribePaidMw is ISubscribeMiddleware, FeeMw {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENT
     //////////////////////////////////////////////////////////////*/
 
-    event PaidSubscribeMwSet(
+    event SubscribePaidMwSet(
         address indexed namespace,
         uint256 indexed profileId,
         uint256 indexed amount,
@@ -88,7 +88,7 @@ contract PaidSubscribeMw is ISubscribeMiddleware, FeeMw {
         _paidSubscribeData[msg.sender][profileId].nftRequired = nftRequired;
         _paidSubscribeData[msg.sender][profileId].nftAddress = nftAddress;
 
-        emit PaidSubscribeMwSet(
+        emit SubscribePaidMwSet(
             msg.sender,
             profileId,
             amount,
