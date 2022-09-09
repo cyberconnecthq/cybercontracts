@@ -8,7 +8,7 @@ import "../src/deployer/Create2Deployer.sol";
 contract DeployerCreate2Deployer is Script {
     function run() external {
         uint256 nonce = vm.getNonce(msg.sender);
-        if (block.chainid == 1 || block.chainid == 56) {
+        if (block.chainid == 1 || block.chainid == 42170) {
             require(nonce == 0, "nonce must be 0");
             console.log("deployer", msg.sender);
             require(

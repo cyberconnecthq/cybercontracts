@@ -4,7 +4,8 @@ import "hardhat-contract-sizer";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-ethers";
 //require("dotenv").config({ path: __dirname + "/.env.goerli" });
-require("dotenv").config({ path: __dirname + "/.env.bnbt" });
+//require("dotenv").config({ path: __dirname + "/.env.bnbt" });
+require("dotenv").config({ path: __dirname + "/.env.nova" });
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
@@ -14,8 +15,12 @@ const config: HardhatUserConfig = {
     //   url: process.env.GOERLI_RPC_URL,
     //   accounts: [process.env.PRIVATE_KEY as string],
     // },
-    bnbt: {
-      url: process.env.BNBT_RPC_URL,
+    // bnbt: {
+    //   url: process.env.BNBT_RPC_URL,
+    //   accounts: [process.env.PRIVATE_KEY as string],
+    // },
+    nova: {
+      url: process.env.NOVA_RPC_URL,
       accounts: [process.env.PRIVATE_KEY as string],
     },
   },

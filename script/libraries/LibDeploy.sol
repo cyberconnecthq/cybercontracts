@@ -69,6 +69,7 @@ library LibDeploy {
     bytes32 constant SALT = keccak256(bytes("CyberConnect"));
 
     // Initial States
+    uint256 internal constant _INITIAL_FEE_FREE = 0 ether;
     uint256 internal constant _INITIAL_FEE_TIER0 = 10 ether;
     uint256 internal constant _INITIAL_FEE_TIER1 = 2 ether;
     uint256 internal constant _INITIAL_FEE_TIER2 = 1 ether;
@@ -89,6 +90,7 @@ library LibDeploy {
         else if (chainId == 42) chainName = "kovan";
         else if (chainId == 97) chainName = "bnbt";
         else if (chainId == 31337) chainName = "anvil";
+        else if (chainId == 42170) chainName = "nova";
         else chainName = "unknown";
         return
             string(
@@ -702,6 +704,59 @@ library LibDeploy {
         );
     }
 
+    function setProfileMw(
+        Vm vm,
+        DeployParams memory params,
+        address engineProxyAddress,
+        address link3Profile,
+        address link3ProfileMw
+    ) internal returns (address token) {
+        // CyberEngine(engineProxyAddress).setProfileMw(
+        //     link3Profile,
+        //     link3ProfileMw,
+        //     abi.encode(
+        //         params.setting.link3Signer,
+        //         params.setting.link3Treasury,
+        //         _INITIAL_FEE_TIER0,
+        //         _INITIAL_FEE_TIER1,
+        //         _INITIAL_FEE_TIER2,
+        //         _INITIAL_FEE_TIER3,
+        //         _INITIAL_FEE_TIER4,
+        //         _INITIAL_FEE_TIER5,
+        //         _INITIAL_FEE_TIER6
+        //     )
+        // );
+
+        CyberEngine(engineProxyAddress).setProfileMw(
+            link3Profile,
+            link3ProfileMw,
+            abi.encode(
+                params.setting.link3Signer,
+                params.setting.link3Treasury,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE
+            )
+        );
+        string memory name = CyberEngine(engineProxyAddress).getNameByNamespace(
+            link3Profile
+        );
+        address mw = CyberEngine(engineProxyAddress).getProfileMwByNamespace(
+            link3Profile
+        );
+
+        require(mw == link3ProfileMw, "WRONG_PROFILE_MW");
+        require(
+            PermissionedFeeCreationMw(link3ProfileMw).getSigner(link3Profile) ==
+                params.setting.link3Signer,
+            "LINK3_SIGNER_WRONG"
+        );
+    }
+
     function healthCheck(
         ContractAddresses memory addrs,
         address link3Signer,
@@ -713,7 +768,7 @@ library LibDeploy {
             .getNameByNamespace(addrs.link3Profile);
         address mw = CyberEngine(addrs.engineProxyAddress)
             .getProfileMwByNamespace(addrs.link3Profile);
-        require(mw == addrs.link3ProfileMw, "WRONG_PROFILE_MW");
+
         require(
             keccak256(abi.encodePacked(name)) ==
                 keccak256(abi.encodePacked(LINK3_NAME)),
@@ -722,12 +777,6 @@ library LibDeploy {
         require(
             ProfileNFT(addrs.link3Profile).getNamespaceOwner() == link3Owner,
             "ProfileNFT owner is not deployer"
-        );
-        require(
-            PermissionedFeeCreationMw(addrs.link3ProfileMw).getSigner(
-                addrs.link3Profile
-            ) == link3Signer,
-            "LINK3_SIGNER_WRONG"
         );
         require(
             keccak256(
