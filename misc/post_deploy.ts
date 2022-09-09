@@ -12,6 +12,10 @@ const writeAbi = async () => {
     "CyberBoxNFT.sol/CyberBoxNFT.json",
     "SubscribeNFT.sol/SubscribeNFT.json",
     "EssenceNFT.sol/EssenceNFT.json",
+    "CyberVault.sol/CyberVault.json",
+    "SignaturePermissionEssenceMw.sol/SignaturePermissionEssenceMw.json",
+    "PaidCollectMw.sol/PaidCollectMw.json",
+    "PaidSubscribeMw.sol/PaidSubscribeMw.json",
   ];
   const ps = folders.map(async (file) => {
     const f = await fs.readFile(path.join("./out", file), "utf8");
