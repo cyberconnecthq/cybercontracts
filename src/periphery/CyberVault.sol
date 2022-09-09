@@ -23,13 +23,13 @@ contract CyberVault is Initializable, Owned, ReentrancyGuard, EIP712 {
 
     event Initialize(address indexed owner);
     event Claim(
-        uint256 indexed profileId,
+        string profileId,
         address indexed to,
         address indexed currency,
         uint256 amount
     );
     event Deposit(
-        uint256 indexed profileId,
+        string profileId,
         address indexed currency,
         uint256 indexed amount
     );
@@ -37,7 +37,7 @@ contract CyberVault is Initializable, Owned, ReentrancyGuard, EIP712 {
 
     address internal _signer;
     mapping(address => int256) public nonces;
-    mapping(uint256 => mapping(address => uint256)) _balanceByProfileByCurrency;
+    mapping(string => mapping(address => uint256)) _balanceByProfileByCurrency;
 
     /*//////////////////////////////////////////////////////////////
                                  CONSTRUCTOR
@@ -64,7 +64,7 @@ contract CyberVault is Initializable, Owned, ReentrancyGuard, EIP712 {
      * @param sig The EIP712 signature.
      */
     function claim(
-        uint256 profileId,
+        string calldata profileId,
         address to,
         address currency,
         uint256 amount,
@@ -75,7 +75,7 @@ contract CyberVault is Initializable, Owned, ReentrancyGuard, EIP712 {
                 keccak256(
                     abi.encode(
                         Constants._CLAIM_TYPEHASH,
-                        profileId,
+                        keccak256(bytes(profileId)),
                         to,
                         currency,
                         amount,
@@ -107,7 +107,7 @@ contract CyberVault is Initializable, Owned, ReentrancyGuard, EIP712 {
      * @param amount The amount to deposit.
      */
     function deposit(
-        uint256 profileId,
+        string calldata profileId,
         address currency,
         uint256 amount
     ) external nonReentrant {
@@ -154,7 +154,7 @@ contract CyberVault is Initializable, Owned, ReentrancyGuard, EIP712 {
      * @param profileId The profile id.
      * @param currency The ERC20 currency address.
      */
-    function balanceOf(uint256 profileId, address currency)
+    function balanceOf(string calldata profileId, address currency)
         external
         view
         returns (uint256)

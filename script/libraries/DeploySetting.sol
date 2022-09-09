@@ -19,6 +19,7 @@ contract DeploySetting {
     uint256 internal constant ANVIL = 31337;
     uint256 internal constant GOERLI = 5;
     uint256 internal constant BNBT = 97;
+    uint256 internal constant BNB = 56;
     uint256 internal constant RINKEBY = 4;
     uint256 internal constant MAINNET = 1;
     uint256 internal constant NOVA = 42170;
@@ -99,7 +100,11 @@ contract DeploySetting {
                     0x4077B8554A5F9A3C2D10c6Bb467B7E26Caf65ad9
                 );
             }
-        } else if (block.chainid == MAINNET || block.chainid == NOVA) {
+        } else if (
+            block.chainid == MAINNET ||
+            block.chainid == NOVA ||
+            block.chainid == BNB
+        ) {
             deployParams.link3Owner = address(
                 0x39e0c6E610A8D7F408dD688011591583cbc1c3ce
             );

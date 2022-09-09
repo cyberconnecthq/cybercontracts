@@ -57,7 +57,7 @@ library Constants {
         keccak256("claimBox(address to,uint256 nonce,uint256 deadline)");
     bytes32 internal constant _CLAIM_TYPEHASH =
         keccak256(
-            "claim(uint256 profileId,address to,address currency,uint256 amount,uint256 nonce,uint256 deadline)"
+            "claim(string profileId,address to,address currency,uint256 amount,uint256 nonce,uint256 deadline)"
         );
 
     // Parameters
