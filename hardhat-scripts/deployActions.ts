@@ -54,8 +54,10 @@ export const factoryAbi = [
 
 
 async function main() {
-  const factory = await ethers.getContractFactory("CyberEngine");
-  const actionBytecode = factory.bytecode;
+  const [signer, , ] = await ethers.getSigners();
+  const actionBytecode = (await ethers.getContractFactory("CyberVault", signer)).bytecode;
+  console.log('Actions bytecode:', actionBytecode);
+  // const actionBytecode = factory.bytecode;
   const salt = 'CyberConnect';
   const computedAddr = getCreate2Address({
     salt,
@@ -63,11 +65,12 @@ async function main() {
     constructorTypes: [''],
     constructorArgs: [''],
   })
+  console.log('computedAddr:', computedAddr);
 
-  console.log('Create2Address', computedAddr)
-  console.log('Actions bytecode:', actionBytecode);
+  // console.log('Create2Address', computedAddr)
+  // console.log('Actions bytecode:', actionBytecode);
 
-  const [signer, , ] = await ethers.getSigners();
+  // const [signer, , ] = await ethers.getSigners();
   // const result = await deployCreate2Contract({
   //   salt,
   //   contractBytecode: actionBytecode,

@@ -28,6 +28,14 @@ contract DeployScript is Script, DeploySetting {
                 address(0xc633795bE5E61F0363e239fC21cF32dbB073Fd21), //address link3Profile,
                 address(0x342456d340D705f6B58137b57bEbEAd0069ba646) //address link3ProfileMw
             );
+        } else if (block.chainid == DeploySetting.BNB) {
+            LibDeploy.setProfileMw(
+                vm,
+                LibDeploy.DeployParams(true, true, deployParams),
+                address(0x1cA51941a616D14C42D3e3B9E6E687d7F5054c3A), //engineProxyAddress,
+                address(0x2723522702093601e6360CAe665518C4f63e9dA6), //address link3Profile,
+                address(0xd37bbF27e39B2f8c4386BebcCdA0850EEfFD2a82) //address link3ProfileMw
+            );
         }
 
         vm.stopBroadcast();

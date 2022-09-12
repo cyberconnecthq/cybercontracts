@@ -14,3 +14,4 @@
 | CyberBoxNFT (Impl)                           | 0x8aec8907e7f4ca94aae9d2d6f09bb085d0c50d3e |
 | CyberBoxNFT (Proxy)                          | 0xce4f341622340d56e397740d325fd357e62b91cb |
 | CyberToken                                   | 0x82272dc64e9f9cd915229e61ffbf79f15e973dea |
+| Action Lib                                   | 0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a |

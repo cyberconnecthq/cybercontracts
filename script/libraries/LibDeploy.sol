@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.14;
 import "forge-std/console.sol";
+import { Actions } from "../../src/libraries/Actions.sol";
 import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
@@ -268,12 +269,6 @@ library LibDeploy {
         DeployParams memory params,
         address mintToEOA
     ) internal returns (ContractAddresses memory addrs) {
-        if (params.writeFile) {
-            _prepareToWrite(vm);
-            _writeText(vm, _fileNameMd(), "|Contract|Address|");
-            _writeText(vm, _fileNameMd(), "|-|-|");
-        }
-
         Create2Deployer dc;
         if (params.setting.deployerContract == address(0)) {
             console.log(
@@ -293,7 +288,7 @@ library LibDeploy {
         // 1. Deploy engine + link3 profile
         addrs = _deploy(vm, dc, params);
         // 2. Register a test profile
-        if (block.chainid == 31337) {
+        if (block.chainid == 31337 || block.chainid == 97) {
             LibDeploy.registerLink3TestProfile(
                 vm,
                 RegisterLink3TestProfileParams(
@@ -388,6 +383,20 @@ library LibDeploy {
         lock = address(new TimelockController(minDeplay, proposers, executors));
         if (writeFile) {
             _write(vm, "Timelock", lock);
+        }
+    }
+
+    function deployActionLib(
+        Vm vm,
+        address dc,
+        bool writeFile
+    ) internal {
+        address actionLib = Create2Deployer(dc).deploy(
+            type(Actions).creationCode,
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "Action Lib", actionLib);
         }
     }
 
