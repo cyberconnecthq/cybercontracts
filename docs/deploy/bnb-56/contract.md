@@ -10,3 +10,5 @@
 | Link3 Profile                                | 0x2723522702093601e6360cae665518c4f63e9da6 |
 | CyberConnect Treasury                        | 0x90137f1234c137c4284dd317303f2717c871f70a |
 | Link3 Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
+| Link3 Descriptor (Impl)                      | 0x24f869169422f86ebf0c90b6785f9f3534ff08e5 |
+| Link3 Descriptor (Proxy)                     | 0x3b131d2d6694a60eb71dff607cc64e6296daa71e |
