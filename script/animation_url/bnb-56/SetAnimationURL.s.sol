@@ -10,14 +10,14 @@ import { LibDeploy } from "../../libraries/LibDeploy.sol";
 import { DeploySetting } from "../../libraries/DeploySetting.sol";
 
 contract SetAnimationURL is Script, DeploySetting {
-    address internal link3Profile = 0x57e12b7a5F38A7F9c23eBD0400e6E53F2a45F271;
+    address internal link3Profile = 0x2723522702093601e6360CAe665518C4f63e9dA6;
     string internal animationUrl =
-        "https://cyberconnect.mypinata.cloud/ipfs/bafkreigqqa3tkzqkl7bjylkya5nf5qsyyjcunsp4ix525icn5nycf7nw2m";
+        "https://cyberconnect.mypinata.cloud/ipfs/bafkreiblu7mqgd43bmenvsyfcp33pkrtjyc52ofwectc2257uicatn6vzm";
 
     function run() external {
         _setDeployParams();
         // make sure only on anvil
-        require(block.chainid == 97, "ONLY_BNBT");
+        require(block.chainid == 56, "ONLY_BNB");
         vm.startBroadcast();
 
         LibDeploy.deployLink3Descriptor(

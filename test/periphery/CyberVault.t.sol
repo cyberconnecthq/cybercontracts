@@ -71,7 +71,7 @@ contract CyberVaultTest is Test {
         vm.startPrank(bob);
         assertEq(token.balanceOf(bob), 200);
 
-        uint256 profileId = 1;
+        string memory profileId = "1";
         uint256 amount = 50;
 
         token.approve(address(vault), amount);
@@ -85,7 +85,7 @@ contract CyberVaultTest is Test {
         vm.startPrank(bob);
         assertEq(token.balanceOf(bob), 200);
 
-        uint256 profileId = 1;
+        string memory profileId = "1";
         token.approve(address(vault), 1000);
 
         vm.expectRevert("INSUFFICIENT_BALANCE");
@@ -100,7 +100,7 @@ contract CyberVaultTest is Test {
         vm.prank(owner);
         vault.setSigner(charlie);
 
-        uint256 profileId = 1;
+        string memory profileId = "1";
         uint256 deposit = 1000;
         uint256 claim = 300;
         uint256 bobInitBal = 200;
@@ -119,7 +119,7 @@ contract CyberVaultTest is Test {
             keccak256(
                 abi.encode(
                     Constants._CLAIM_TYPEHASH,
-                    profileId,
+                    keccak256(bytes(profileId)),
                     bob,
                     address(token),
                     claim,
@@ -149,7 +149,7 @@ contract CyberVaultTest is Test {
         vm.prank(owner);
         vault.setSigner(charlie);
 
-        uint256 profileId = 1;
+        string memory profileId = "1";
         uint256 deposit = 0;
         uint256 claim = 300;
         uint256 bobInitBal = 200;
@@ -164,7 +164,7 @@ contract CyberVaultTest is Test {
             keccak256(
                 abi.encode(
                     Constants._CLAIM_TYPEHASH,
-                    profileId,
+                    keccak256(bytes(profileId)),
                     bob,
                     address(token),
                     claim,
@@ -195,7 +195,7 @@ contract CyberVaultTest is Test {
         vm.prank(owner);
         vault.setSigner(charlie);
 
-        uint256 profileId = 1;
+        string memory profileId = "1";
         uint256 deposit = 1000;
         uint256 claim = 300;
         uint256 bobInitBal = 200;
@@ -210,7 +210,7 @@ contract CyberVaultTest is Test {
             keccak256(
                 abi.encode(
                     Constants._CLAIM_TYPEHASH,
-                    profileId,
+                    keccak256(bytes(profileId)),
                     bob,
                     address(token),
                     claim + 200,

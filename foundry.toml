@@ -21,7 +21,7 @@ out = 'out'
 libs = ['lib']
 gas_reports = ["*"]
 libraries = [
-    './src/libraries/Actions.sol:Actions:0x5551336Ee5aa3b3ccF6BA11bdBfDcF8F0758b5d6'
+    './src/libraries/Actions.sol:Actions:0x781d0a455020024da046f823d9ea076b76a873f3'
 ]
 fs_permissions = [{ access = "read-write", path = "./"}]
 
@@ -30,6 +30,9 @@ src = 'src'
 out = 'out'
 libs = ['lib']
 gas_reports = ["*"]
+libraries = [
+    './src/libraries/Actions.sol:Actions:0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a'
+]
 fs_permissions = [{ access = "read-write", path = "./"}]
 
 [profile.nova]
@@ -38,7 +41,17 @@ out = 'out'
 libs = ['lib']
 gas_reports = ["*"]
 libraries = [
-    './src/libraries/Actions.sol:Actions:0x16c9471c076cd38e282ee7adc158b510d17c0951'
+    './src/libraries/Actions.sol:Actions:0xf1944eca9a85a0ba3db0721343289de758c70ae4'
+]
+fs_permissions = [{ access = "read-write", path = "./"}]
+
+[profile.bnb]
+src = 'src'
+out = 'out'
+libs = ['lib']
+gas_reports = ["*"]
+libraries = [
+    './src/libraries/Actions.sol:Actions:0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a'
 ]
 fs_permissions = [{ access = "read-write", path = "./"}]
 
