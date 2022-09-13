@@ -1,13 +1,14 @@
 | Contract                                     | Address                                    |
 | -------------------------------------------- | ------------------------------------------ |
-| RolesAuthority                               | 0x607685ee4564c5a060f31b268514c464e0639573 |
-| EngineImpl                                   | 0xa1fc1c5e159b7fc26e58b388ec44d4f7fe5d18c3 |
-| EngineProxy                                  | 0x9cf19d129ca563397ca1fca8da884ffb5fe20102 |
-| Profile Factory                              | 0xb20b030f17667458a0159f8e71e057230db39eb1 |
-| Essence Factory                              | 0x0277be3b9984e027253a18e92b19dd66f4f3a512 |
-| Subscribe Factory                            | 0x6df2f3879dd13d32d215e3c995decfc6032b92ee |
-| Link3 Profile                                | 0xeb73538f84285dd972d3a1cb6b2bb1d2b90c4fdb |
-| CyberConnect Treasury                        | 0x0eceaff5df0fbbebe306ccaae826ae463edbee39 |
-| Link3 Profile MW (PermissionedFeeCreationMw) | 0x9560c74afbd2b4c77f3dad34dfe6cfdb32da62c3 |
-| Action Lib                                   | 0xf1944eca9a85a0ba3db0721343289de758c70ae4 |
 | Action Lib                                   | 0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a |
+| RolesAuthority                               | 0x9937fb8ebe4ebc7710ffaed246584603f390be3e |
+| EngineImpl                                   | 0x1c2c8e6634fc29f38d110233b5370a1b7ebbb6e5 |
+| EngineProxy                                  | 0x1ca51941a616d14c42d3e3b9e6e687d7f5054c3a |
+| Profile Factory                              | 0x730d6e17589f606dff2e6e36c7abd8a8c2b40f91 |
+| Essence Factory                              | 0xf7a31740969dce331615d189d355e5edf2b80b70 |
+| Subscribe Factory                            | 0xeac6012efe2f7451e8b28139e8d23bb3b540fecb |
+| Link3 Profile                                | 0x2723522702093601e6360cae665518c4f63e9da6 |
+| CyberConnect Treasury                        | 0x90137f1234c137c4284dd317303f2717c871f70a |
+| Link3 Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
+| Link3 Descriptor (Impl)                      | 0x24f869169422f86ebf0c90b6785f9f3534ff08e5 |
+| Link3 Descriptor (Proxy)                     | 0x13303f991643d886a480bb9c0b928abe131b98e8 |

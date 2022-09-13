@@ -15,7 +15,10 @@ contract DeployScript is Script, DeploySetting {
         _setDeployParams();
         vm.startBroadcast();
         address profileAddr;
-        if (block.chainid == 97 || block.chainid == 5) {
+        if (
+            block.chainid == DeploySetting.BNBT ||
+            block.chainid == DeploySetting.GOERLI
+        ) {
             (profileAddr, , ) = LibDeploy.createNamespace(
                 address(0xAF9104Eb9c6B21Efdc43BaaaeE70662d6CcE8798), // engine proxy address
                 address(0x927f355117721e0E8A7b5eA20002b65B8a551890), // link3Owner
