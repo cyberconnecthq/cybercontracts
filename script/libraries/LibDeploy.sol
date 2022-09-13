@@ -288,7 +288,9 @@ library LibDeploy {
         // 1. Deploy engine + link3 profile
         addrs = _deploy(vm, dc, params);
         // 2. Register a test profile
-        if (block.chainid == 31337 || block.chainid == 97) {
+        if (
+            block.chainid == 31337 || block.chainid == 97 || block.chainid == 5
+        ) {
             LibDeploy.registerLink3TestProfile(
                 vm,
                 RegisterLink3TestProfileParams(

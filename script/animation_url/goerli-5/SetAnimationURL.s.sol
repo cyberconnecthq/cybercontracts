@@ -10,9 +10,9 @@ import { LibDeploy } from "../../libraries/LibDeploy.sol";
 import { DeploySetting } from "../../libraries/DeploySetting.sol";
 
 contract SetAnimationURL is Script, DeploySetting {
-    address internal link3Profile = 0x7B2bc3ae8f816a431Ff438d939C44E1A502EaD25;
+    address internal link3Profile = 0x57e12b7a5F38A7F9c23eBD0400e6E53F2a45F271;
     string internal animationUrl =
-        "https://cyberconnect.mypinata.cloud/ipfs/bafkreibnbvrhu2kfylb5ch3t4jptbooke3ludl5wk2fo7awfuvjt2hczve";
+        "https://cyberconnect.mypinata.cloud/ipfs/bafkreic7ur7evrpy45md2xpth3zvy4mjcczzodjg7xciupty6dvmliye6i";
 
     function run() external {
         _setDeployParams();
