@@ -11,7 +11,7 @@ out = 'out'
 libs = ['lib']
 gas_reports = ["*"]
 libraries = [
-    './src/libraries/Actions.sol:Actions:0x26d74f09dc17b6239310aa27c213394acb2ae0ca'
+    './src/libraries/Actions.sol:Actions:0x781d0a455020024da046f823d9ea076b76a873f3'
 ]
 fs_permissions = [{ access = "read-write", path = "./"}]
 
@@ -41,7 +41,7 @@ out = 'out'
 libs = ['lib']
 gas_reports = ["*"]
 libraries = [
-    './src/libraries/Actions.sol:Actions:0xf1944eca9a85a0ba3db0721343289de758c70ae4'
+    './src/libraries/Actions.sol:Actions:0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a'
 ]
 fs_permissions = [{ access = "read-write", path = "./"}]
 

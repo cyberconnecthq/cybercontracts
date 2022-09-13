@@ -10,3 +10,4 @@
 | CyberConnect Treasury                        | 0x0eceaff5df0fbbebe306ccaae826ae463edbee39 |
 | Link3 Profile MW (PermissionedFeeCreationMw) | 0x9560c74afbd2b4c77f3dad34dfe6cfdb32da62c3 |
 | Action Lib                                   | 0xf1944eca9a85a0ba3db0721343289de758c70ae4 |
+| Action Lib                                   | 0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a |
