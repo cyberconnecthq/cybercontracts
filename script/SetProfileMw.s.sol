@@ -12,15 +12,7 @@ contract DeployScript is Script, DeploySetting {
 
         vm.startBroadcast();
 
-        if (block.chainid == DeploySetting.NOVA) {
-            LibDeploy.setProfileMw(
-                vm,
-                LibDeploy.DeployParams(true, true, deployParams),
-                address(0), //engineProxyAddress,
-                address(0), //address link3Profile,
-                address(0) //address link3ProfileMw
-            );
-        } else if (block.chainid == DeploySetting.BNBT) {
+        if (block.chainid == DeploySetting.BNBT) {
             LibDeploy.setProfileMw(
                 vm,
                 LibDeploy.DeployParams(true, true, deployParams),
@@ -28,7 +20,10 @@ contract DeployScript is Script, DeploySetting {
                 address(0x57e12b7a5F38A7F9c23eBD0400e6E53F2a45F271), //address link3Profile,
                 address(0xd1587F68e9D9f9eE93C9AA6FC60c7Da414E90818) //address link3ProfileMw
             );
-        } else if (block.chainid == DeploySetting.BNB) {
+        } else if (
+            block.chainid == DeploySetting.BNB ||
+            block.chainid == DeploySetting.NOVA
+        ) {
             LibDeploy.setProfileMw(
                 vm,
                 LibDeploy.DeployParams(true, true, deployParams),
