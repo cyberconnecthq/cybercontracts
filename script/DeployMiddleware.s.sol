@@ -10,7 +10,10 @@ contract DeployScript is Script, DeploySetting {
     function run() external {
         _setDeployParams();
         vm.startBroadcast();
-        if (block.chainid == 97 || block.chainid == 5) {
+        if (
+            block.chainid == DeploySetting.BNBT ||
+            block.chainid == DeploySetting.GOERLI
+        ) {
             LibDeploy.deployAllMiddleware(
                 vm,
                 LibDeploy.DeployParams(true, true, deployParams),
@@ -18,7 +21,10 @@ contract DeployScript is Script, DeploySetting {
                 address(0x3963744012daDf90A9034Ea1068f53108B1A3834), // cyber treasury address
                 true
             );
-        } else if (block.chainid == 56) {
+        } else if (
+            block.chainid == DeploySetting.BNB ||
+            block.chainid == DeploySetting.NOVA
+        ) {
             LibDeploy.deployAllMiddleware(
                 vm,
                 LibDeploy.DeployParams(true, true, deployParams),

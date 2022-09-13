@@ -86,15 +86,9 @@ contract DeploySetting {
             deployParams.cyberTokenOwner = address(
                 0x78020361856816382501E444600A29519fb3B107
             );
-            if (block.chainid == RINKEBY) {
-                deployParams.deployerContract = address(
-                    0xe19061D4Dd38ac3B67eeC28E90bdFB68065DbF7c
-                );
-            } else if (block.chainid == BNBT || block.chainid == GOERLI) {
-                deployParams.deployerContract = address(
-                    0x4077B8554A5F9A3C2D10c6Bb467B7E26Caf65ad9
-                );
-            }
+            deployParams.deployerContract = address(
+                0x4077B8554A5F9A3C2D10c6Bb467B7E26Caf65ad9
+            );
         } else if (
             block.chainid == MAINNET ||
             block.chainid == NOVA ||
