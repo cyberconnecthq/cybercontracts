@@ -26,6 +26,14 @@ contract DeployScript is Script, DeploySetting {
                 address(0x3963744012daDf90A9034Ea1068f53108B1A3834), // cyber treasury address
                 true
             );
+        } else if (block.chainid == 56) {
+            LibDeploy.deployAllMiddleware(
+                vm,
+                LibDeploy.DeployParams(true, true, deployParams),
+                address(0x1cA51941a616D14C42D3e3B9E6E687d7F5054c3A), // engine proxy address
+                address(0x90137F1234C137C4284dd317303F2717c871f70A), // cyber treasury address
+                true
+            );
         }
         vm.stopBroadcast();
     }
