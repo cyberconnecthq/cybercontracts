@@ -6,6 +6,8 @@ import { ERC721 } from "../../dependencies/solmate/ERC721.sol";
 
 import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
 
+import { DataTypes } from "../../libraries/DataTypes.sol";
+
 import { EIP712 } from "../../base/EIP712.sol";
 
 /**
@@ -36,7 +38,9 @@ contract CollectPermissionMw is IEssenceMiddleware, EIP712 {
     }
 
     bytes32 internal constant _ESSENCE_TYPEHASH =
-        keccak256("mint(address to,uint256 nonce,uint256 deadline)");
+        keccak256(
+            "mint(address to,uint256 profileId,uint256 essenceId,uint256 nonce,uint256 deadline)"
+        );
 
     mapping(address => mapping(uint256 => mapping(uint256 => MiddlewareData)))
         internal _signerStorage;
@@ -77,7 +81,9 @@ contract CollectPermissionMw is IEssenceMiddleware, EIP712 {
         address,
         bytes calldata data
     ) external override {
-        (uint8 v, bytes32 r, bytes32 s, uint256 deadline) = abi.decode(
+        DataTypes.EIP712Signature memory sig;
+
+        (sig.v, sig.r, sig.s, sig.deadline) = abi.decode(
             data,
             (uint8, bytes32, bytes32, uint256)
         );
@@ -88,18 +94,20 @@ contract CollectPermissionMw is IEssenceMiddleware, EIP712 {
                     abi.encode(
                         _ESSENCE_TYPEHASH,
                         collector,
+                        profileId,
+                        essenceId,
                         _signerStorage[msg.sender][profileId][essenceId].nonces[
-                            collector
-                        ]++,
-                        deadline
+                                collector
+                            ]++,
+                        sig.deadline
                     )
                 )
             ),
             _signerStorage[msg.sender][profileId][essenceId].signer,
-            v,
-            r,
-            s,
-            deadline
+            sig.v,
+            sig.r,
+            sig.s,
+            sig.deadline
         );
     }
 

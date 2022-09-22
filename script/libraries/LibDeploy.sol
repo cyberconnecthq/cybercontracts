@@ -459,14 +459,14 @@ library LibDeploy {
         Create2Deployer dc = Create2Deployer(params.setting.deployerContract); // for deployment
         address mw;
 
-        // SignaturePermissionEssenceMw
+        // CollectPermissionMw
         mw = dc.deploy(
             abi.encodePacked(type(CollectPermissionMw).creationCode),
             SALT
         );
 
         if (writeFile) {
-            _write(vm, "Essence MW (SignaturePermissionEssenceMw)", mw);
+            _write(vm, "Essence MW (CollectPermissionMw)", mw);
         }
 
         CyberEngine(engine).allowEssenceMw(mw, true);
