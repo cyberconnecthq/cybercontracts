@@ -59,6 +59,14 @@ library Constants {
         keccak256(
             "claim(string profileId,address to,address currency,uint256 amount,uint256 nonce,uint256 deadline)"
         );
+    bytes32 internal constant _CLAIM721_TYPEHASH =
+        keccak256(
+            "claim(string profileId,address to,address currency,uint256 tokenId,uint256 nonce,uint256 deadline)"
+        );
+    bytes32 internal constant _CLAIM1155_TYPEHASH =
+        keccak256(
+            "claim(string profileId,address to,address currency,uint256 tokenId,uint256 amount,uint256 nonce,uint256 deadline)"
+        );
 
     // Parameters
     uint8 internal constant _MAX_HANDLE_LENGTH = 20;

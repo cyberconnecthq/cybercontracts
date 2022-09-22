@@ -9,6 +9,8 @@ import { DataTypes } from "../../src/libraries/DataTypes.sol";
 
 import { TestLib712 } from "../utils/TestLib712.sol";
 import { MockERC20 } from "../utils/MockERC20.sol";
+import { MockERC721 } from "../utils/MockERC721.sol";
+import { MockERC1155 } from "../utils/MockERC1155.sol";
 import { CyberVault } from "../../src/periphery/CyberVault.sol";
 
 contract CyberVaultTest is Test {
@@ -28,14 +30,23 @@ contract CyberVaultTest is Test {
 
     CyberVault internal vault;
     MockERC20 internal token;
+    MockERC721 internal nft721;
+    MockERC1155 internal nft1155;
+
     address constant signer = address(0xA11CE);
     address constant owner = address(0xe);
     address constant bob = address(0xB0B);
+    uint256 constant tokenId = 888;
 
     function setUp() public {
         vault = new CyberVault(owner);
         token = new MockERC20("Test Coin", "TC");
+        nft721 = new MockERC721("CyberPunk", "CP");
+        nft1155 = new MockERC1155("url");
+
         token.mint(bob, 200);
+        nft721.mint(bob, tokenId);
+        nft1155.mint(bob, tokenId, 200);
     }
 
     function testBasic() public {
@@ -79,6 +90,31 @@ contract CyberVaultTest is Test {
 
         assertEq(token.balanceOf(bob), 200 - amount);
         assertEq(vault.balanceOf(profileId, address(token)), amount);
+    }
+
+    function testDeposit721() public {
+        vm.startPrank(bob);
+        assertEq(nft721.ownerOf(tokenId), bob);
+
+        string memory profileId = "1";
+
+        nft721.approve(address(vault), tokenId);
+        vault.deposit721(profileId, address(nft721), tokenId);
+
+        assertEq(nft721.ownerOf(tokenId), address(vault));
+    }
+
+    function testDeposit1155() public {
+        vm.startPrank(bob);
+        assertEq(nft1155.balanceOf(bob, tokenId), 200);
+
+        string memory profileId = "1";
+
+        nft1155.setApprovalForAll(address(vault), true);
+        vault.deposit1155(profileId, address(nft1155), tokenId, 50);
+
+        assertEq(nft1155.balanceOf(bob, tokenId), 150);
+        assertEq(nft1155.balanceOf(address(vault), tokenId), 50);
     }
 
     function testDepositInsufficientBal() public {
@@ -144,6 +180,115 @@ contract CyberVaultTest is Test {
         assertEq(vault.nonces(bob), 1);
     }
 
+    function testClaim721() public {
+        address charlie = vm.addr(1);
+        vm.prank(owner);
+        vault.setSigner(charlie);
+
+        string memory profileId = "1";
+
+        vm.startPrank(bob);
+
+        nft721.approve(address(vault), tokenId);
+        vault.deposit721(profileId, address(nft721), tokenId);
+
+        assertEq(vault.nftBalanceOf(profileId, address(nft721), tokenId), 1);
+        assertEq(nft721.ownerOf(tokenId), address(vault));
+        assertEq(vault.nonces(bob), 0);
+
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(vault),
+            keccak256(
+                abi.encode(
+                    Constants._CLAIM721_TYPEHASH,
+                    keccak256(bytes(profileId)),
+                    bob,
+                    address(nft721),
+                    tokenId,
+                    0,
+                    deadline
+                )
+            ),
+            "CyberVault",
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+        vault.claim721(
+            profileId,
+            bob,
+            address(nft721),
+            tokenId,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+
+        assertEq(vault.nftBalanceOf(profileId, address(token), tokenId), 0);
+        assertEq(nft721.ownerOf(tokenId), bob);
+        assertEq(vault.nonces(bob), 1);
+    }
+
+    function testClaim1155() public {
+        address charlie = vm.addr(1);
+        vm.prank(owner);
+        vault.setSigner(charlie);
+
+        string memory profileId = "1";
+        uint256 deposit = 50;
+        uint256 initAmount = 200;
+        uint256 claim = 30;
+
+        vm.startPrank(bob);
+
+        nft1155.setApprovalForAll(address(vault), true);
+        vault.deposit1155(profileId, address(nft1155), tokenId, deposit);
+
+        assertEq(
+            vault.nftBalanceOf(profileId, address(nft1155), tokenId),
+            deposit
+        );
+        assertEq(nft1155.balanceOf(bob, tokenId), initAmount - deposit);
+        assertEq(nft1155.balanceOf(address(vault), tokenId), deposit);
+        assertEq(vault.nonces(bob), 0);
+
+        vm.warp(50);
+        uint256 deadline = 100;
+        bytes32 digest = TestLib712.hashTypedDataV4(
+            address(vault),
+            keccak256(
+                abi.encode(
+                    Constants._CLAIM1155_TYPEHASH,
+                    keccak256(bytes(profileId)),
+                    bob,
+                    address(nft1155),
+                    tokenId,
+                    claim,
+                    0,
+                    deadline
+                )
+            ),
+            "CyberVault",
+            "1"
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
+        vault.claim1155(
+            profileId,
+            bob,
+            address(nft1155),
+            tokenId,
+            claim,
+            DataTypes.EIP712Signature(v, r, s, deadline)
+        );
+
+        assertEq(
+            vault.nftBalanceOf(profileId, address(nft1155), tokenId),
+            deposit - claim
+        );
+        assertEq(nft1155.balanceOf(bob, tokenId), initAmount - deposit + claim);
+        assertEq(nft1155.balanceOf(address(vault), tokenId), deposit - claim);
+        assertEq(vault.nonces(bob), 1);
+    }
+
     function testClaimInsufficientBal() public {
         address charlie = vm.addr(1);
         vm.prank(owner);
@@ -198,7 +343,6 @@ contract CyberVaultTest is Test {
         string memory profileId = "1";
         uint256 deposit = 1000;
         uint256 claim = 300;
-        uint256 bobInitBal = 200;
 
         token.approve(address(vault), deposit);
         vault.deposit(profileId, address(token), deposit);
