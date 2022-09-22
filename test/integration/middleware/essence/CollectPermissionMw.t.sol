@@ -36,7 +36,9 @@ contract CollectPermissionMwTest is
     // 2. message(digest) + Signature = public key => address
 
     bytes32 internal constant _ESSENCE_TYPEHASH =
-        keccak256("mint(address to,uint256 nonce,uint256 deadline)");
+        keccak256(
+            "mint(address to,uint256 profileId,uint256 essenceId,uint256 nonce,uint256 deadline)"
+        );
     uint256 lilaPk = 1024;
     address lila = vm.addr(lilaPk);
     uint256 bobbyPk = 2048;
@@ -243,7 +245,14 @@ contract CollectPermissionMwTest is
         bytes32 digest = TestLib712.hashTypedDataV4(
             address(sigMw),
             keccak256(
-                abi.encode(_ESSENCE_TYPEHASH, collector, nonce, deadline)
+                abi.encode(
+                    _ESSENCE_TYPEHASH,
+                    collector,
+                    profileId,
+                    essenceId,
+                    nonce,
+                    deadline
+                )
             ),
             "CollectPermissionMw",
             "1"
