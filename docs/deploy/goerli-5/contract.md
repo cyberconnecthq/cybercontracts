@@ -17,3 +17,4 @@
 | Essence MW (SignaturePermissionEssenceMw)    | 0x733142f467904f9a2e8efa0119523d3cc7a99b0b |
 | Subscribe MW (SubscribePaidMw)               | 0xd5d66dc7180fa4f3ae05b66ee34793146db6e3e9 |
 | Essence MW (CollectPaidMw)                   | 0x415648c28adb31629418498264f55d54e4c324db |
+| CyberVault                                   | 0x5e2a433774a51207d69bb432898b3626e20cda66 |
