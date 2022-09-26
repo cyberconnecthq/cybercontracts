@@ -5,17 +5,24 @@ const writeAbi = async () => {
   const folders = [
     "RolesAuthority.sol/RolesAuthority.json",
     "CyberEngine.sol/CyberEngine.json",
-    "Link3ProfileDescriptor.sol/Link3ProfileDescriptor.json",
-    "ProfileNFT.sol/ProfileNFT.json",
-    "Treasury.sol/Treasury.json",
-    "PermissionedFeeCreationMw.sol/PermissionedFeeCreationMw.json",
-    "CyberBoxNFT.sol/CyberBoxNFT.json",
-    "SubscribeNFT.sol/SubscribeNFT.json",
     "EssenceNFT.sol/EssenceNFT.json",
+    "ProfileNFT.sol/ProfileNFT.json",
+    "SubscribeNFT.sol/SubscribeNFT.json",
+
+    "Link3ProfileDescriptor.sol/Link3ProfileDescriptor.json",
+    "CyberBoxNFT.sol/CyberBoxNFT.json",
     "CyberVault.sol/CyberVault.json",
-    "SignaturePermissionEssenceMw.sol/SignaturePermissionEssenceMw.json",
-    "PaidCollectMw.sol/PaidCollectMw.json",
-    "PaidSubscribeMw.sol/PaidSubscribeMw.json",
+
+    "Treasury.sol/Treasury.json",
+
+    "CollectDisallowedMw.sol/CollectDisallowedMw.json",
+    "CollectMerkleDropMw.sol/CollectMerkleDropMw.json",
+    "CollectOnlySubscribedMw.sol/CollectOnlySubscribedMw.json",
+    "CollectPaidMw.sol/CollectPaidMw.json",
+    "PermissionedFeeCreationMw.sol/PermissionedFeeCreationMw.json",
+    "SubscribeDisallowedMw.sol/SubscribeDisallowedMw.json",
+    "SubscribeOnlyOnceMw.sol/SubscribeOnlyOnceMw.json",
+    "SubscribePaidMw.sol/SubscribePaidMw.json",
   ];
   const ps = folders.map(async (file) => {
     const f = await fs.readFile(path.join("./out", file), "utf8");
