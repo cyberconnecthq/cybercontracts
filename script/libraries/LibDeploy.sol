@@ -93,6 +93,7 @@ library LibDeploy {
         else if (chainId == 56) chainName = "bnb";
         else if (chainId == 31337) chainName = "anvil";
         else if (chainId == 42170) chainName = "nova";
+        else if (chainId == 137) chainName = "polygon";
         else chainName = "unknown";
         return
             string(
@@ -405,6 +406,7 @@ library LibDeploy {
             type(Actions).creationCode,
             SALT
         );
+        console.logBytes(type(Actions).creationCode);
         if (writeFile) {
             _write(vm, "Action Lib", actionLib);
         }

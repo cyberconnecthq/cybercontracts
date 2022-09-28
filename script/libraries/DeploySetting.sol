@@ -23,6 +23,7 @@ contract DeploySetting {
     uint256 internal constant RINKEBY = 4;
     uint256 internal constant MAINNET = 1;
     uint256 internal constant NOVA = 42170;
+    uint256 internal constant POLYGON = 137;
 
     function _setDeployParams() internal {
         // Anvil accounts
@@ -92,7 +93,8 @@ contract DeploySetting {
         } else if (
             block.chainid == MAINNET ||
             block.chainid == NOVA ||
-            block.chainid == BNB
+            block.chainid == BNB ||
+            block.chainid == POLYGON
         ) {
             deployParams.link3Owner = address(
                 0x39e0c6E610A8D7F408dD688011591583cbc1c3ce
