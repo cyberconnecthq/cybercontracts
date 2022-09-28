@@ -10,7 +10,12 @@ contract DeployScript is Script, DeploySetting {
     function run() external {
         _setDeployParams();
         vm.startBroadcast();
-        LibDeploy.deployVault(vm, deployParams.link3Signer, true);
+        LibDeploy.deployVault(
+            vm,
+            LibDeploy.DeployParams(true, true, deployParams),
+            deployParams.link3Signer,
+            true
+        );
         vm.stopBroadcast();
     }
 }
