@@ -19,7 +19,9 @@ const writeAbi = async () => {
     "CollectMerkleDropMw.sol/CollectMerkleDropMw.json",
     "CollectOnlySubscribedMw.sol/CollectOnlySubscribedMw.json",
     "CollectPaidMw.sol/CollectPaidMw.json",
+
     "CollectPermissionMw.sol/CollectPermissionMw.json",
+
     "PermissionedFeeCreationMw.sol/PermissionedFeeCreationMw.json",
     "SubscribeDisallowedMw.sol/SubscribeDisallowedMw.json",
     "SubscribeOnlyOnceMw.sol/SubscribeOnlyOnceMw.json",
