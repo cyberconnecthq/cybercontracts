@@ -348,10 +348,18 @@ library LibDeploy {
 
     function deployVault(
         Vm vm,
+        DeployParams memory params,
         address vaultOwner,
         bool writeFile
     ) internal returns (address vault) {
-        vault = address(new CyberVault(vaultOwner));
+        Create2Deployer dc = Create2Deployer(params.setting.deployerContract);
+        vault = dc.deploy(
+            abi.encodePacked(
+                type(CyberVault).creationCode,
+                abi.encode(vaultOwner)
+            ),
+            SALT
+        );
         if (writeFile) {
             _write(vm, "CyberVault", vault);
         }
