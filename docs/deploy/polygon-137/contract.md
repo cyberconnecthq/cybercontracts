@@ -12,7 +12,6 @@
 | Link3 Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
 | Link3 Descriptor (Impl)                      | 0x24f869169422f86ebf0c90b6785f9f3534ff08e5 |
 | Link3 Descriptor (Proxy)                     | 0x6aac6e75b5f136541e6bd0a86b2d596fc10465fc |
-| Essence MW (SignaturePermissionEssenceMw)    | 0x4ce2d3d72f3b3ce626cb88c8f26a988e89269a97 |
 | Subscribe MW (SubscribePaidMw)               | 0x9b5678862e143c970f4a63f57dd8a677f5942c40 |
 | Essence MW (CollectPaidMw)                   | 0x9e5e171fadcc01f204bdff12a87f1573e40b0cd2 |
-| CyberVault                                   | 0x816c2800aabc224b61aeeaf640b3422b9adc88d5 |
+| CyberVault                                   | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
