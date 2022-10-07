@@ -12,13 +12,16 @@ contract DeployScript is Script, DeploySetting {
 
         vm.startBroadcast();
 
-        if (block.chainid == DeploySetting.BNBT) {
+        if (
+            block.chainid == DeploySetting.BNBT ||
+            block.chainid == DeploySetting.GOERLI
+        ) {
             LibDeploy.setProfileMw(
                 vm,
                 LibDeploy.DeployParams(true, true, deployParams),
                 address(0xAF9104Eb9c6B21Efdc43BaaaeE70662d6CcE8798), //engineProxyAddress,
                 address(0x57e12b7a5F38A7F9c23eBD0400e6E53F2a45F271), //address link3Profile,
-                address(0xd1587F68e9D9f9eE93C9AA6FC60c7Da414E90818) //address link3ProfileMw
+                address(0) //address link3ProfileMw
             );
         } else if (
             block.chainid == DeploySetting.BNB ||

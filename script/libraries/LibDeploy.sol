@@ -749,20 +749,26 @@ library LibDeploy {
         //     )
         // );
 
+        // CyberEngine(engineProxyAddress).setProfileMw(
+        //     link3Profile,
+        //     link3ProfileMw,
+        //     abi.encode(
+        //         params.setting.link3Signer,
+        //         params.setting.link3Treasury,
+        //         _INITIAL_FEE_FREE,
+        //         _INITIAL_FEE_FREE,
+        //         _INITIAL_FEE_FREE,
+        //         _INITIAL_FEE_FREE,
+        //         _INITIAL_FEE_FREE,
+        //         _INITIAL_FEE_FREE,
+        //         _INITIAL_FEE_FREE
+        //     )
+        // );
+        bytes memory data = new bytes(0);
         CyberEngine(engineProxyAddress).setProfileMw(
             link3Profile,
             link3ProfileMw,
-            abi.encode(
-                params.setting.link3Signer,
-                params.setting.link3Treasury,
-                _INITIAL_FEE_FREE,
-                _INITIAL_FEE_FREE,
-                _INITIAL_FEE_FREE,
-                _INITIAL_FEE_FREE,
-                _INITIAL_FEE_FREE,
-                _INITIAL_FEE_FREE,
-                _INITIAL_FEE_FREE
-            )
+            data
         );
         string memory name = CyberEngine(engineProxyAddress).getNameByNamespace(
             link3Profile
@@ -772,11 +778,11 @@ library LibDeploy {
         );
 
         require(mw == link3ProfileMw, "WRONG_PROFILE_MW");
-        require(
-            PermissionedFeeCreationMw(link3ProfileMw).getSigner(link3Profile) ==
-                params.setting.link3Signer,
-            "LINK3_SIGNER_WRONG"
-        );
+        // require(
+        //     PermissionedFeeCreationMw(link3ProfileMw).getSigner(link3Profile) ==
+        //         params.setting.link3Signer,
+        //     "LINK3_SIGNER_WRONG"
+        // );
     }
 
     function healthCheck(
