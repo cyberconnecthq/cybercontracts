@@ -512,6 +512,18 @@ library LibDeploy {
         CyberEngine(engine).allowEssenceMw(mw, true);
     }
 
+    function allowCurrency(
+        Vm vm,
+        address treasury,
+        address currencyAddr
+    ) internal {
+        Treasury(treasury).allowCurrency(currencyAddr, true);
+        require(
+            Treasury(treasury).isCurrencyAllowed(currencyAddr) == true,
+            "CURRENCY_NOT_ALLOWED"
+        );
+    }
+
     function _deploy(
         Vm vm,
         Create2Deployer dc,
