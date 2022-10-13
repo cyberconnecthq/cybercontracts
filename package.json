@@ -75,6 +75,7 @@
     "set_profile_mw:goerli": "source .env.goerli.link3 && forge script script/SetProfileMw.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "set_profile_mw:bnb": "source .env.bnb.link3 && forge script script/SetProfileMw.s.sol:DeployScript --rpc-url $BNB_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
     "allow_currency:goerli": "source .env.goerli.link3 && forge script script/AllowCurrency.s.sol:DeployScript --rpc-url $GOERLI_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_KEY -vvv",
+    "verify_contract:example": "forge verify-contract --chain-id 5 --num-of-optimizations 200 --compiler-version v0.8.14+commit.80d49f37 --libraries src/libraries/Actions.sol:Actions:0x781d0a455020024da046f823d9ea076b76a873f3 0xeD2788C005C8715cFC7C2A29fF81B40b479Cc6fb src/core/ProfileNFT.sol:ProfileNFT $ETHERSCAN_KEY --watch",
     "deploy_full:anvil": "yarn deploy:anvil && yarn upload_animation:anvil && yarn set_animation_url:anvil"
     
   },
