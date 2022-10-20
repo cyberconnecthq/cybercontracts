@@ -1316,7 +1316,7 @@
               );
               let displayName = name;
               let displayEns = "";
-              if (nameType === "ENS") {
+              if (nameType === "ENS" || nameType === "SID") {
                 const idx = name.indexOf(".");
                 displayName = name.slice(0, idx);
                 displayEns = name.slice(idx);
