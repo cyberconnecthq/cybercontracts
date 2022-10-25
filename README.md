@@ -19,15 +19,9 @@ Some opinionated design decisino:
 [Foundry](https://github.com/foundry-rs/foundry) ([book](https://book.getfoundry.sh/))
 [slither](https://github.com/crytic/slither)
 
-# Live Deployment
-
-## Rinkeby
-
-[Deployment](./docs/deploy/rinkeby.md)
-
 # ABI
 
-[ABI](./docs/abi/README.md)
+[ABI](./docs/abi/)
 
 # Set Up
 
