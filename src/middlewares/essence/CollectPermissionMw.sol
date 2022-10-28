@@ -134,12 +134,13 @@ contract CollectPermissionMw is IEssenceMiddleware, EIP712 {
      * @return uint256 The nonce.
      */
     function getNonce(
+        address namespace,
         uint256 profileId,
         address collector,
         uint256 essenceId
     ) external view returns (uint256) {
         return
-            _signerStorage[msg.sender][profileId][essenceId].nonces[collector];
+            _signerStorage[namespace][profileId][essenceId].nonces[collector];
     }
 
     /*//////////////////////////////////////////////////////////////
