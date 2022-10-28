@@ -23,7 +23,8 @@ contract DeployScript is Script, DeploySetting {
             );
         } else if (
             block.chainid == DeploySetting.BNB ||
-            block.chainid == DeploySetting.NOVA
+            block.chainid == DeploySetting.NOVA ||
+            block.chainid == DeploySetting.POLYGON
         ) {
             LibDeploy.deployAllMiddleware(
                 vm,

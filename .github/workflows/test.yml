@@ -22,9 +22,6 @@ jobs:
         with:
           version: nightly
 
-      - name: Check contract sizes
-        run: forge build --contracts src --sizes
-
       - name: Check gas snapshots
         run: forge snapshot --check
 

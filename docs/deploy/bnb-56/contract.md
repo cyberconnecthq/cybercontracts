@@ -16,3 +16,4 @@
 | Essence MW (CollectPaidMw)                   | 0x9e5e171fadcc01f204bdff12a87f1573e40b0cd2 |
 | Essence MW (CollectPermissionMw)             | 0xaf53c3101c4b57a3d48100832ab8d1732b58c64c |
 | CyberVault                                   | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
+| Essence MW (CollectPermissionMw V2)          | 0x01fafdbfbb1a56d4a58bb1f7472fb866922ff6c4 |
