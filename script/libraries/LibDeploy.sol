@@ -797,6 +797,38 @@ library LibDeploy {
         // );
     }
 
+    function setAniURL(
+        Vm vm,
+        DeployParams memory params,
+        address link3Desc
+    ) internal {
+        string
+            memory preURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreidztiie5tmfvadt52nnb4q2g2whglrnsyhyk7d43hwczh65xjtwni";
+        string
+            memory newURL = "https://cyberconnect.mypinata.cloud/ipfs/bafkreigjfjobgbh6voodb4z4u3nfpuchwb5usolon6i67kecelki2uzb6y";
+        string memory pre = Link3ProfileDescriptor(link3Desc)
+            .animationTemplate();
+        console.log(pre);
+        require(
+            keccak256(
+                abi.encodePacked(
+                    Link3ProfileDescriptor(link3Desc).animationTemplate()
+                )
+            ) == keccak256(abi.encodePacked(preURL)),
+            "WRONG_ANI_URL"
+        );
+
+        Link3ProfileDescriptor(link3Desc).setAnimationTemplate(newURL);
+        require(
+            keccak256(
+                abi.encodePacked(
+                    Link3ProfileDescriptor(link3Desc).animationTemplate()
+                )
+            ) == keccak256(abi.encodePacked(newURL)),
+            "WRONG_CUR_ANI_URL"
+        );
+    }
+
     function healthCheck(
         ContractAddresses memory addrs,
         address link3Signer,
