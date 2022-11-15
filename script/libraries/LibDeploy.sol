@@ -8,6 +8,7 @@ import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.so
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
 import { CyberVault } from "../../src/periphery/CyberVault.sol";
+import { RelationshipChecker } from "../../src/periphery/RelationshipChecker.sol";
 import { CYBER } from "../../src/token/CYBER.sol";
 import { SubscribeNFT } from "../../src/core/SubscribeNFT.sol";
 import { EssenceNFT } from "../../src/core/EssenceNFT.sol";
@@ -365,6 +366,26 @@ library LibDeploy {
             _write(vm, "CyberVault", vault);
         }
         require(CyberVault(vault).getSigner() == vaultOwner, "WRONG_SIGNER");
+    }
+
+    function deployRelationshipChecker(
+        Vm vm,
+        DeployParams memory params,
+        address namespace,
+        bool writeFile
+    ) internal returns (address checker) {
+        Create2Deployer dc = Create2Deployer(params.setting.deployerContract);
+        checker = dc.deploy(
+            abi.encodePacked(
+                type(RelationshipChecker).creationCode,
+                abi.encode(namespace)
+            ),
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "RelationshipChecker", checker);
+        }
     }
 
     function deployCyberToken(

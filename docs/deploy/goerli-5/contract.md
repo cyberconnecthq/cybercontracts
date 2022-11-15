@@ -20,3 +20,4 @@
 | CyberVault                                   | 0x5e2a433774a51207d69bb432898b3626e20cda66 |
 | Essence MW (CollectPermissionMw)             | 0x77ebd0aa021b39086e84b9d3afeb738cbbfe16fd |
 | Essence MW (CollectPermissionMw V2)          | 0xbbbab0257edba5823ddb5aa62c08f07bd0d302d9 |
+| RelationshipChecker                          | 0xa52cc9b8219dce25bc791a8b253dec61f16d5ff0 |
