@@ -21,3 +21,5 @@
 | Essence MW (CollectPermissionMw)             | 0x77ebd0aa021b39086e84b9d3afeb738cbbfe16fd |
 | Essence MW (CollectPermissionMw V2)          | 0xbbbab0257edba5823ddb5aa62c08f07bd0d302d9 |
 | RelationshipChecker                          | 0xa52cc9b8219dce25bc791a8b253dec61f16d5ff0 |
+| CyberGrandNFT (Impl)                         | 0x4ae6d419b943c6a26b08f8969d5feb987b4e6deb |
+| CyberGrandNFT (Proxy)                        | 0x812f26e1ebacb28d129a02bce016098154335ebd |

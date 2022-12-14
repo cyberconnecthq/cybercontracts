@@ -16,3 +16,5 @@
 | CyberToken                                   | 0x82272dc64e9f9cd915229e61ffbf79f15e973dea |
 | Action Lib                                   | 0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a |
 | CyberVault                                   | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
+| CyberGrandNFT (Impl)                         | 0xcdee88dacbedf83d79d8d2c0f7923e2e62ae80f7 |
+| CyberGrandNFT (Proxy)                        | 0x09e1d96d9b4ba7d2dfb7ac543e53f27f85317274 |

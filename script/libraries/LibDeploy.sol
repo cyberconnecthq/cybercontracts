@@ -7,6 +7,7 @@ import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.sol";
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
+import { CyberGrandNFT } from "../../src/periphery/CyberGrandNFT.sol";
 import { CyberVault } from "../../src/periphery/CyberVault.sol";
 import { RelationshipChecker } from "../../src/periphery/RelationshipChecker.sol";
 import { CYBER } from "../../src/token/CYBER.sol";
@@ -346,6 +347,46 @@ library LibDeploy {
             _write(vm, "CyberBoxNFT (Proxy)", boxProxy);
         }
         require(CyberBoxNFT(boxProxy).paused(), "CYBERBOX_NOT_PAUSED");
+    }
+
+    function deployGrand(
+        Vm vm,
+        address dc,
+        address link3Owner,
+        address link3Signer,
+        bool writeFile
+    ) internal returns (address grandImpl, address grandProxy) {
+        grandImpl = Create2Deployer(dc).deploy(
+            type(CyberGrandNFT).creationCode,
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "CyberGrandNFT (Impl)", grandImpl);
+        }
+
+        bytes memory _data = abi.encodeWithSelector(
+            CyberGrandNFT.initialize.selector,
+            link3Owner,
+            "Link3 Grand NFT",
+            "LINK3_GRAND_NFT"
+        );
+        grandProxy = Create2Deployer(dc).deploy(
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(grandImpl, _data)
+            ),
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "CyberGrandNFT (Proxy)", grandProxy);
+        }
+        require(
+            CyberGrandNFT(grandProxy).paused() == false,
+            "GRAND_NFT_PAUSED"
+        );
+
+        // CyberGrandNFT(grandProxy).setSigner(link3Signer);
+        // require(CyberGrandNFT(grandProxy).getSigner() == link3Signer, "WRONG_SIGNER");
     }
 
     function deployVault(
