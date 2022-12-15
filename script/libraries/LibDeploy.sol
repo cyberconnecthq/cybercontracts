@@ -367,8 +367,10 @@ library LibDeploy {
         bytes memory _data = abi.encodeWithSelector(
             CyberGrandNFT.initialize.selector,
             link3Owner,
-            "Link3 Grand NFT",
-            "LINK3_GRAND_NFT"
+            link3Signer,
+            "Connect2022 Grand NFT",
+            "GRAND_NFT",
+            "https://metadata.cyberconnect.dev/grandnft.json"
         );
         grandProxy = Create2Deployer(dc).deploy(
             abi.encodePacked(
@@ -381,12 +383,14 @@ library LibDeploy {
             _write(vm, "CyberGrandNFT (Proxy)", grandProxy);
         }
         require(
-            CyberGrandNFT(grandProxy).paused() == false,
-            "GRAND_NFT_PAUSED"
+            CyberGrandNFT(grandProxy).paused() == true,
+            "GRAND_NFT_NOT_PAUSED"
         );
 
-        // CyberGrandNFT(grandProxy).setSigner(link3Signer);
-        // require(CyberGrandNFT(grandProxy).getSigner() == link3Signer, "WRONG_SIGNER");
+        require(
+            CyberGrandNFT(grandProxy).getSigner() == link3Signer,
+            "WRONG_SIGNER"
+        );
     }
 
     function deployVault(

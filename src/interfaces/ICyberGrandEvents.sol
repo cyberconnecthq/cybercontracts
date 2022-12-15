@@ -7,10 +7,18 @@ interface ICyberGrandEvents {
      * @notice Emiited when the CyberGrand is initialized.
      *
      * @param owner The address of the CyberGrand owner.
+     * @param signer The address of the CyberGrand signer.
      * @param name The name for the CyberGrand.
      * @param symbol The symbol for the CyberGrand.
+     * @param uri The uri for the CyberGrand.
      */
-    event Initialize(address indexed owner, string name, string symbol);
+    event Initialize(
+        address indexed owner,
+        address indexed signer,
+        string name,
+        string symbol,
+        string uri
+    );
 
     /**
      * @notice Emitted when a new signer has been set.
