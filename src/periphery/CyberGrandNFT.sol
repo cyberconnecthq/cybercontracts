@@ -137,7 +137,7 @@ contract CyberGrandNFT is
      *
      * @param uri The tokenURI.
      */
-    function setSigner(string calldata uri) external onlyOwner {
+    function setTokenURI(string calldata uri) external onlyOwner {
         _tokenURI = uri;
     }
 
