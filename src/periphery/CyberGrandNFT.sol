@@ -49,13 +49,17 @@ contract CyberGrandNFT is
      */
     function initialize(
         address owner,
+        address signer,
         string calldata name,
-        string calldata symbol
+        string calldata symbol,
+        string calldata uri
     ) external initializer {
-        _signer = owner;
+        _signer = signer;
+        _tokenURI = uri;
+        _pause();
         CyberNFTBase._initialize(name, symbol);
         Owned.__Owned_Init(owner);
-        emit Initialize(owner, name, symbol);
+        emit Initialize(owner, signer, name, symbol, uri);
     }
 
     /**
@@ -128,6 +132,15 @@ contract CyberGrandNFT is
         emit SetSigner(preSigner, signer);
     }
 
+    /**
+     * @notice Sets the new tokenURI.
+     *
+     * @param uri The tokenURI.
+     */
+    function setTokenURI(string calldata uri) external onlyOwner {
+        _tokenURI = uri;
+    }
+
     /*//////////////////////////////////////////////////////////////
                          EXTERNAL VIEW
     //////////////////////////////////////////////////////////////*/
@@ -179,8 +192,7 @@ contract CyberGrandNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
-        return
-            "ipfs://bafybeifvdkw6f43432hkybwl3mphwogsipq4aiyogxwshx4b2a2caaayla";
+        return _tokenURI;
     }
 
     /*//////////////////////////////////////////////////////////////

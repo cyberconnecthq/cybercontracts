@@ -17,3 +17,5 @@
 | Essence MW (CollectPermissionMw)             | 0xaf53c3101c4b57a3d48100832ab8d1732b58c64c |
 | CyberVault                                   | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
 | Essence MW (CollectPermissionMw V2)          | 0x01fafdbfbb1a56d4a58bb1f7472fb866922ff6c4 |
+| CyberGrandNFT (Impl)                         | 0x0160876ad7302cfb5d2bcfbe664a436a69383a12 |
+| CyberGrandNFT (Proxy)                        | 0x110fe2bc9cf45d29e9764da4f6274abf13111efc |

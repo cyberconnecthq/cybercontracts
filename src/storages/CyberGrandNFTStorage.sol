@@ -8,4 +8,5 @@ abstract contract CyberGrandNFTStorage {
 
     // storage
     address internal _signer;
+    string internal _tokenURI;
 }
