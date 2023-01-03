@@ -23,3 +23,8 @@
 | RelationshipChecker                          | 0xa52cc9b8219dce25bc791a8b253dec61f16d5ff0 |
 | CyberGrandNFT (Impl)                         | 0x4ae6d419b943c6a26b08f8969d5feb987b4e6deb |
 | CyberGrandNFT (Proxy)                        | 0x812f26e1ebacb28d129a02bce016098154335ebd |
+| CyberBoxNFT (Proxy)                          | 0x1cc24a44c4b51d3f9b0d0f5bdcf95b0f385b154f |
+| FrameNFT (Impl)                              | 0x654a3129ea7d07826718d6b78c98461abfe23154 |
+| FrameNFT (Proxy)                             | 0x1fef9185f12cd3ff965a43f9a3b1ff9db513304f |
+| MBNFT (Impl)                                 | 0x05054bab1b4cdabf092b2f29d0854b56c9e17a27 |
+| MBNFT (Proxy)                                | 0x0073cb82b66da30eaff95f4b37eadb1f169a87aa |

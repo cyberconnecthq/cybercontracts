@@ -12,6 +12,8 @@ const writeAbi = async () => {
     "Link3ProfileDescriptor.sol/Link3ProfileDescriptor.json",
     "CyberBoxNFT.sol/CyberBoxNFT.json",
     "CyberGrandNFT.sol/CyberGrandNFT.json",
+    "MBNFT.sol/MBNFT.json",
+    "FrameNFT.sol/FrameNFT.json",
     "CyberVault.sol/CyberVault.json",
     "RelationshipChecker.sol/RelationshipChecker.json",
 

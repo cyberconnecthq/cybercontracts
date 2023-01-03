@@ -8,6 +8,8 @@ import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.so
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
 import { CyberGrandNFT } from "../../src/periphery/CyberGrandNFT.sol";
+import { FrameNFT } from "../../src/periphery/FrameNFT.sol";
+import { MBNFT } from "../../src/periphery/MBNFT.sol";
 import { CyberVault } from "../../src/periphery/CyberVault.sol";
 import { RelationshipChecker } from "../../src/periphery/RelationshipChecker.sol";
 import { CYBER } from "../../src/token/CYBER.sol";
@@ -391,6 +393,83 @@ library LibDeploy {
             CyberGrandNFT(grandProxy).getSigner() == link3Signer,
             "WRONG_SIGNER"
         );
+    }
+
+    function deployMB(
+        Vm vm,
+        address dc,
+        address link3Owner,
+        address boxAddr,
+        bool writeFile
+    ) internal {
+        address frameImpl = Create2Deployer(dc).deploy(
+            type(FrameNFT).creationCode,
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "FrameNFT (Impl)", frameImpl);
+        }
+
+        bytes memory _data = abi.encodeWithSelector(
+            FrameNFT.initialize.selector,
+            link3Owner,
+            "Frame NFT",
+            "FRAME_NFT",
+            "https://metadata.cyberconnect.dev/grandnft.json"
+        );
+
+        address frameProxy = Create2Deployer(dc).deploy(
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(frameImpl, _data)
+            ),
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "FrameNFT (Proxy)", frameProxy);
+        }
+
+        require(FrameNFT(frameProxy).paused() == true, "FRAME_NFT_NOT_PAUSED");
+
+        address MBImpl = Create2Deployer(dc).deploy(
+            type(MBNFT).creationCode,
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "MBNFT (Impl)", MBImpl);
+        }
+
+        bytes memory _dataMB = abi.encodeWithSelector(
+            MBNFT.initialize.selector,
+            link3Owner,
+            boxAddr,
+            frameProxy,
+            "MB NFT",
+            "MB_NFT",
+            "https://metadata.cyberconnect.dev/grandnft.json"
+        );
+
+        address MBProxy = Create2Deployer(dc).deploy(
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(MBImpl, _dataMB)
+            ),
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "MBNFT (Proxy)", MBProxy);
+        }
+
+        require(MBNFT(MBProxy).paused() == true, "MB_NFT_NOT_PAUSED");
+        require(MBNFT(MBProxy).getBoxAddr() == boxAddr, "WRONG_BOX_ADDR");
+        require(
+            MBNFT(MBProxy).getFrameAddr() == frameProxy,
+            "WRONG_FRAME_ADDR"
+        );
+
+        FrameNFT(frameProxy).setMBAddress(MBProxy);
     }
 
     function deployVault(
