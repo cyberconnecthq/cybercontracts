@@ -20,6 +20,7 @@ import { TimelockController } from "openzeppelin-contracts/contracts/governance/
 import { Constants } from "../../src/libraries/Constants.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
+import { Link3ProfileDescriptorV2 } from "../../src/periphery/Link3ProfileDescriptorV2.sol";
 import { TestLib712 } from "../../test/utils/TestLib712.sol";
 import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
@@ -1190,6 +1191,48 @@ library LibDeploy {
         );
         if (writeFile) {
             _write(vm, "Link3 Descriptor (Proxy)", proxy);
+        }
+
+        // Need to have access to LINK3 OWNER
+        ProfileNFT(link3Profile).setNFTDescriptor(proxy);
+
+        require(
+            ProfileNFT(link3Profile).getNFTDescriptor() == proxy,
+            "NFT_DESCRIPTOR_NOT_SET"
+        );
+    }
+
+    function deployLink3DescriptorV2(
+        Vm vm,
+        address _dc,
+        bool writeFile,
+        address link3Profile,
+        address link3Owner
+    ) internal returns (address impl, address proxy) {
+        Create2Deployer dc = Create2Deployer(_dc);
+        impl = dc.deploy(
+            abi.encodePacked(type(Link3ProfileDescriptorV2).creationCode),
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "Link3 DescriptorV2 (Impl)", impl);
+        }
+
+        proxy = dc.deploy(
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(
+                    impl,
+                    abi.encodeWithSelector(
+                        Link3ProfileDescriptorV2.initialize.selector,
+                        link3Owner
+                    )
+                )
+            ),
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "Link3 DescriptorV2 (Proxy)", proxy);
         }
 
         // Need to have access to LINK3 OWNER
