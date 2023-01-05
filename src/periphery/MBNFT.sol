@@ -95,11 +95,11 @@ contract MBNFT is
      */
     function openBox(uint256 boxId) external {
         address to = CyberNFTBase(_boxAddr).ownerOf(boxId);
-        require(to == msg.sender);
+        require(to == msg.sender, "INCORRECT_SENDER");
 
         CyberNFTBase(_boxAddr).burn(boxId);
 
-        super._mint(to, boxId);
+        super._mintTo(to, boxId);
 
         emit OpenBox(to, boxId);
     }

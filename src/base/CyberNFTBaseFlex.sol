@@ -112,7 +112,7 @@ abstract contract CyberNFTBaseFlex is Initializable, EIP712, ERC721, ICyberNFTBa
         ERC721.__ERC721_Init(_name, _symbol);
     }
 
-    function _mint(address _to, uint256 _id) internal override virtual {
+    function _mintTo(address _to, uint256 _id) internal virtual {
         super._safeMint(_to, _id);
         ++_mintCount;
     }

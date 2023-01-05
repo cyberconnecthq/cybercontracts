@@ -25,5 +25,5 @@
 | CyberGrandNFT (Proxy)                        | 0x812f26e1ebacb28d129a02bce016098154335ebd |
 | CyberBoxNFT (Proxy)                          | 0x1cc24a44c4b51d3f9b0d0f5bdcf95b0f385b154f |
 |FrameNFT|0xf869d7836b9b52b761bdd331e58f9be308425cfc|
-|MBNFT (Impl)|0xc6e4d489e6fec83d6d855a0ef4f38abecef06f2e|
-|MBNFT (Proxy)|0x9e6c800f633fd92cb35ffe72c7411f7b6ef0b42b|
+|MBNFT (Impl)|0x335f95030e1fe45ff3be16c203905de612125278|
+|MBNFT (Proxy)|0xb476a5800b189420ffd5feee41db1c3e257f89a9|
