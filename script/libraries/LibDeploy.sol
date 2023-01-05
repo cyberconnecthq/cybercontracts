@@ -402,35 +402,6 @@ library LibDeploy {
         address boxAddr,
         bool writeFile
     ) internal {
-        address frameImpl = Create2Deployer(dc).deploy(
-            type(FrameNFT).creationCode,
-            SALT
-        );
-
-        if (writeFile) {
-            _write(vm, "FrameNFT (Impl)", frameImpl);
-        }
-
-        bytes memory _data = abi.encodeWithSelector(
-            FrameNFT.initialize.selector,
-            link3Owner,
-            "Frame NFT",
-            "FRAME_NFT",
-            "https://metadata.cyberconnect.dev/grandnft.json"
-        );
-
-        address frameProxy = Create2Deployer(dc).deploy(
-            abi.encodePacked(
-                type(ERC1967Proxy).creationCode,
-                abi.encode(frameImpl, _data)
-            ),
-            SALT
-        );
-        if (writeFile) {
-            _write(vm, "FrameNFT (Proxy)", frameProxy);
-        }
-
-        require(FrameNFT(frameProxy).paused() == true, "FRAME_NFT_NOT_PAUSED");
 
         address MBImpl = Create2Deployer(dc).deploy(
             type(MBNFT).creationCode,
@@ -445,10 +416,9 @@ library LibDeploy {
             MBNFT.initialize.selector,
             link3Owner,
             boxAddr,
-            frameProxy,
             "MB NFT",
             "MB_NFT",
-            "https://metadata.cyberconnect.dev/grandnft.json"
+            "https://metadata.cyberconnect.dev/mbnft.json"
         );
 
         address MBProxy = Create2Deployer(dc).deploy(
@@ -462,14 +432,28 @@ library LibDeploy {
             _write(vm, "MBNFT (Proxy)", MBProxy);
         }
 
-        require(MBNFT(MBProxy).paused() == true, "MB_NFT_NOT_PAUSED");
+        require(MBNFT(MBProxy).paused() == false, "MB_NFT_PAUSED");
         require(MBNFT(MBProxy).getBoxAddr() == boxAddr, "WRONG_BOX_ADDR");
-        require(
-            MBNFT(MBProxy).getFrameAddr() == frameProxy,
-            "WRONG_FRAME_ADDR"
-        );
+    }
 
-        FrameNFT(frameProxy).setMBAddress(MBProxy);
+
+    function deployFrame(
+        Vm vm,
+        address dc,
+        address link3Signer,
+        bool writeFile
+    ) internal returns (address frame) {
+        Create2Deployer dc = Create2Deployer(dc);
+        frame = dc.deploy(
+            abi.encodePacked(
+                type(FrameNFT).creationCode,
+                abi.encode("https://metadata.cyberconnect.dev/framenft.json", link3Signer)
+            ),
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "FrameNFT", frame);
+        }
     }
 
     function deployVault(

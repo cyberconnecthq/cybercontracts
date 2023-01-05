@@ -1,168 +1,117 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Contracts (last updated v4.5.0) (token/ERC1155/presets/ERC1155PresetMinterPauser.sol)
 
-pragma solidity 0.8.14;
+pragma solidity ^0.8.0;
 
-import { UUPSUpgradeable } from "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
-import { Pausable } from "../dependencies/openzeppelin/Pausable.sol";
-import { Owned } from "../dependencies/solmate/Owned.sol";
-
-import { IUpgradeable } from "../interfaces/IUpgradeable.sol";
-import { IFrameEvents } from "../interfaces/IFrameEvents.sol";
-
-import { Constants } from "../libraries/Constants.sol";
-import { DataTypes } from "../libraries/DataTypes.sol";
-
-import { CyberNFTBase } from "../base/CyberNFTBase.sol";
-import { FrameNFTStorage } from "../storages/FrameNFTStorage.sol";
+import { ERC1155 } from "openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
+import { ERC1155Burnable } from "openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
+import { ERC1155Pausable } from "openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
+import { AccessControlEnumerable } from "openzeppelin-contracts/contracts/access/AccessControlEnumerable.sol";
+import { Context } from "openzeppelin-contracts/contracts/utils/Context.sol";
 
 /**
- * @title Frame NFT
- * @author CyberConnect
- * @notice This contract is used to create Frame NFT.
+ * @dev {ERC1155} token, including:
+ *
+ *  - ability for holders to burn (destroy) their tokens
+ *  - a minter role that allows for token minting (creation)
+ *  - a pauser role that allows to stop all token transfers
+ *
+ * This contract uses {AccessControl} to lock permissioned functions using the
+ * different roles - head to its documentation for details.
+ *
+ * The account that deploys the contract will be granted the minter and pauser
+ * roles, as well as the default admin role, which will let it grant both minter
+ * and pauser roles to other accounts.
+ *
  */
-contract FrameNFT is
-    Pausable,
-    CyberNFTBase,
-    UUPSUpgradeable,
-    Owned,
-    FrameNFTStorage,
-    IUpgradeable,
-    IFrameEvents
-{
-    /*//////////////////////////////////////////////////////////////
-                                 CONSTRUCTOR
-    //////////////////////////////////////////////////////////////*/
-
-    constructor() {
-        _disableInitializers();
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                                 EXTERNAL
-    //////////////////////////////////////////////////////////////*/
+contract FrameNFT is Context, AccessControlEnumerable, ERC1155Burnable, ERC1155Pausable {
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /**
-     * @notice Initializes the Frame NFT.
-     * @param owner The owner to set for the Frame NFT.
-     * @param name The name to set for the Frame NFT.
-     * @param symbol The symbol to set for the Frame NFT.
+     * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE`, and `PAUSER_ROLE` to the account that
+     * deploys the contract.
      */
-    function initialize(
-        address owner,
-        string calldata name,
-        string calldata symbol,
-        string calldata uri
-    ) external initializer {
-        _tokenURI = uri;
+    constructor(string memory uri, address owner) ERC1155(uri) {
+        _setupRole(DEFAULT_ADMIN_ROLE, owner);
 
+        _setupRole(MINTER_ROLE, owner);
+        _setupRole(PAUSER_ROLE, owner);
+    }
+
+    /**
+     * @dev Creates `amount` new tokens for `to`, of token type `id`.
+     *
+     * See {ERC1155-_mint}.
+     *
+     * Requirements:
+     *
+     * - the caller must have the `MINTER_ROLE`.
+     */
+    function mint(address to, uint256 id, uint256 amount, bytes memory data) public virtual {
+        require(hasRole(MINTER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have minter role to mint");
+
+        _mint(to, id, amount, data);
+    }
+
+    /**
+     * @dev xref:ROOT:erc1155.adoc#batch-operations[Batched] variant of {mint}.
+     */
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) public virtual {
+        require(hasRole(MINTER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have minter role to mint");
+
+        _mintBatch(to, ids, amounts, data);
+    }
+
+    /**
+     * @dev Pauses all token transfers.
+     *
+     * See {ERC1155Pausable} and {Pausable-_pause}.
+     *
+     * Requirements:
+     *
+     * - the caller must have the `PAUSER_ROLE`.
+     */
+    function pause() public virtual {
+        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have pauser role to pause");
         _pause();
-
-        CyberNFTBase._initialize(name, symbol);
-        Owned.__Owned_Init(owner);
-        emit Initialize(owner, name, symbol, uri);
     }
 
     /**
-     * @notice Changes the pause state of the Frame nft.
+     * @dev Unpauses all token transfers.
      *
-     * @param toPause The pause state.
+     * See {ERC1155Pausable} and {Pausable-_unpause}.
+     *
+     * Requirements:
+     *
+     * - the caller must have the `PAUSER_ROLE`.
      */
-    function pause(bool toPause) external onlyOwner {
-        if (toPause) {
-            super._pause();
-        } else {
-            super._unpause();
-        }
+    function unpause() public virtual {
+        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC1155PresetMinterPauser: must have pauser role to unpause");
+        _unpause();
     }
 
     /**
-     * @notice Contract version number.
-     *
-     * @return uint256 The version number.
-     * @dev This contract can be upgraded with UUPS upgradeability
+     * @dev See {IERC165-supportsInterface}.
      */
-    function version() external pure virtual override returns (uint256) {
-        return _VERSION;
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(AccessControlEnumerable, ERC1155) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 
-    /**
-     * @notice Claims a Frame nft for an address.
-     *
-     * @param to The claimer address.
-     * @return uint256 The token id.
-     */
-    function claim(address to) external returns (uint256) {
-        require(msg.sender == _MBAddr);
-
-        uint256 tokenId = super._mint(to);
-        emit Claim(to, tokenId);
-
-        return tokenId;
-    }
-
-    /**
-     * @notice Sets the new tokenURI.
-     *
-     * @param uri The tokenURI.
-     */
-    function setTokenURI(string calldata uri) external onlyOwner {
-        _tokenURI = uri;
-    }
-
-    /**
-     * @notice Sets the new MB contract address.
-     *
-     * @param MBAddr The MB NFT address.
-     */
-    function setMBAddress(address MBAddr) external onlyOwner {
-        _MBAddr = MBAddr;
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                                 PUBLIC
-    //////////////////////////////////////////////////////////////*/
-
-    /**
-     * @notice Transfers the Frame nft.
-     *
-     * @param from The initial owner address.
-     * @param to The receipient address.
-     * @param id The nft id.
-     * @dev It requires the state to be unpaused
-     */
-    function transferFrom(
+    function _beforeTokenTransfer(
+        address operator,
         address from,
         address to,
-        uint256 id
-    ) public override whenNotPaused {
-        super.transferFrom(from, to, id);
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal virtual override(ERC1155, ERC1155Pausable) {
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-    /*//////////////////////////////////////////////////////////////
-                            PUBLIC VIEW
-    //////////////////////////////////////////////////////////////*/
-
-    /**
-     * @notice Generates the metadata json object.
-     *
-     * @param tokenId The profile NFT token ID.
-     * @return string The metadata json object.
-     * @dev It requires the tokenId to be already minted.
-     */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        _requireMinted(tokenId);
-        return _tokenURI;
+    function uri(uint256 id) public view virtual override returns (string memory) {
+        return string(abi.encodePacked(super.uri(id), "/", id));
     }
-
-    /*//////////////////////////////////////////////////////////////
-                              INTERNAL
-    //////////////////////////////////////////////////////////////*/
-
-    // UUPS upgradeability
-    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

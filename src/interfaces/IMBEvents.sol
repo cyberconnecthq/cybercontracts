@@ -8,7 +8,6 @@ interface IMBEvents {
      *
      * @param owner The address of the MB owner.
      * @param boxAddr The address of the box NFT.
-     * @param frameAddr The address of the frame NFT.
      * @param name The name for the MB.
      * @param symbol The symbol for the MB.
      * @param uri The uri for the MB.
@@ -16,7 +15,6 @@ interface IMBEvents {
     event Initialize(
         address indexed owner,
         address indexed boxAddr,
-        address indexed frameAddr,
         string name,
         string symbol,
         string uri
@@ -26,12 +24,10 @@ interface IMBEvents {
      * @notice Emitted when a box NFT has been opened.
      *
      * @param to The claimer address.
-     * @param MBTokenId The token id for MB NFT.
-     * @param frameTokenId The token id for frame NFT.
+     * @param boxId The token id for MB NFT.
      */
     event OpenBox(
         address indexed to,
-        uint256 indexed MBTokenId,
-        uint256 indexed frameTokenId
+        uint256 indexed boxId
     );
 }

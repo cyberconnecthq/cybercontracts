@@ -9,5 +9,4 @@ abstract contract MBNFTStorage {
     // storage
     string internal _tokenURI;
     address internal _boxAddr;
-    address internal _frameAddr;
 }

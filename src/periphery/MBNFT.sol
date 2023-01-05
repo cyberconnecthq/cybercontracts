@@ -12,8 +12,8 @@ import { IMB } from "../interfaces/IMB.sol";
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
 
+import { CyberNFTBaseFlex } from "../base/CyberNFTBaseFlex.sol";
 import { CyberNFTBase } from "../base/CyberNFTBase.sol";
-import { FrameNFT } from "../periphery/FrameNFT.sol";
 import { MBNFTStorage } from "../storages/MBNFTStorage.sol";
 
 /**
@@ -23,7 +23,7 @@ import { MBNFTStorage } from "../storages/MBNFTStorage.sol";
  */
 contract MBNFT is
     Pausable,
-    CyberNFTBase,
+    CyberNFTBaseFlex,
     UUPSUpgradeable,
     Owned,
     MBNFTStorage,
@@ -46,28 +46,23 @@ contract MBNFT is
      * @notice Initializes the MB NFT.
      * @param owner The owner to set for the MB NFT.
      * @param boxAddr The box NFT contract address.
-     * @param frameAddr the frame NFT contract address.
      * @param name The name to set for the MB NFT.
      * @param symbol The symbol to set for the MB NFT.
      */
     function initialize(
         address owner,
         address boxAddr,
-        address frameAddr,
         string calldata name,
         string calldata symbol,
         string calldata uri
     ) external initializer {
         _boxAddr = boxAddr;
-        _frameAddr = frameAddr;
         _tokenURI = uri;
 
-        _pause();
-
-        CyberNFTBase._initialize(name, symbol);
+        CyberNFTBaseFlex._initialize(name, symbol);
         Owned.__Owned_Init(owner);
 
-        emit Initialize(owner, boxAddr, frameAddr, name, symbol, uri);
+        emit Initialize(owner, boxAddr, name, symbol, uri);
     }
 
     /**
@@ -104,11 +99,9 @@ contract MBNFT is
 
         CyberNFTBase(_boxAddr).burn(boxId);
 
-        uint256 MBTokenId = super._mint(to);
+        super._mint(to, boxId);
 
-        uint256 frameTokenId = FrameNFT(_frameAddr).claim(to);
-
-        emit OpenBox(to, MBTokenId, frameTokenId);
+        emit OpenBox(to, boxId);
     }
 
     /**
@@ -124,14 +117,12 @@ contract MBNFT is
      * @notice Sets the new box and frame contract address.
      *
      * @param boxAddr The box NFT address.
-     * @param frameAddr The frame NFT address.
      */
-    function setBoxAndFrameAddr(address boxAddr, address frameAddr)
+    function setBoxAddr(address boxAddr)
         external
         onlyOwner
     {
         _boxAddr = boxAddr;
-        _frameAddr = frameAddr;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -145,15 +136,6 @@ contract MBNFT is
      */
     function getBoxAddr() external view override returns (address) {
         return _boxAddr;
-    }
-
-    /**
-     * @notice Gets the Frame address.
-     *
-     * @return address The Frame address.
-     */
-    function getFrameAddr() external view override returns (address) {
-        return _frameAddr;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -194,7 +176,7 @@ contract MBNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
-        return _tokenURI;
+        return string(abi.encodePacked(_tokenURI, "/", tokenId));
     }
 
     /*//////////////////////////////////////////////////////////////
