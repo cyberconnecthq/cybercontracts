@@ -8,6 +8,8 @@ import { RolesAuthority } from "../../src/dependencies/solmate/RolesAuthority.so
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
 import { CyberGrandNFT } from "../../src/periphery/CyberGrandNFT.sol";
+import { FrameNFT } from "../../src/periphery/FrameNFT.sol";
+import { MBNFT } from "../../src/periphery/MBNFT.sol";
 import { CyberVault } from "../../src/periphery/CyberVault.sol";
 import { RelationshipChecker } from "../../src/periphery/RelationshipChecker.sol";
 import { CYBER } from "../../src/token/CYBER.sol";
@@ -392,6 +394,67 @@ library LibDeploy {
             CyberGrandNFT(grandProxy).getSigner() == link3Signer,
             "WRONG_SIGNER"
         );
+    }
+
+    function deployMB(
+        Vm vm,
+        address dc,
+        address link3Owner,
+        address boxAddr,
+        bool writeFile
+    ) internal {
+
+        address MBImpl = Create2Deployer(dc).deploy(
+            type(MBNFT).creationCode,
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "MBNFT (Impl)", MBImpl);
+        }
+
+        bytes memory _dataMB = abi.encodeWithSelector(
+            MBNFT.initialize.selector,
+            link3Owner,
+            boxAddr,
+            "MB NFT",
+            "MB_NFT",
+            "https://metadata.cyberconnect.dev/mbnft.json"
+        );
+
+        address MBProxy = Create2Deployer(dc).deploy(
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(MBImpl, _dataMB)
+            ),
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "MBNFT (Proxy)", MBProxy);
+        }
+
+        require(MBNFT(MBProxy).paused() == false, "MB_NFT_PAUSED");
+        require(MBNFT(MBProxy).getBoxAddr() == boxAddr, "WRONG_BOX_ADDR");
+    }
+
+
+    function deployFrame(
+        Vm vm,
+        address dc,
+        address link3Signer,
+        bool writeFile
+    ) internal returns (address frame) {
+        Create2Deployer dc = Create2Deployer(dc);
+        frame = dc.deploy(
+            abi.encodePacked(
+                type(FrameNFT).creationCode,
+                abi.encode("https://metadata.cyberconnect.dev/framenft.json", link3Signer)
+            ),
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "FrameNFT", frame);
+        }
     }
 
     function deployVault(
