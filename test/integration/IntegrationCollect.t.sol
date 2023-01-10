@@ -42,6 +42,12 @@ contract IntegrationEssenceTest is
         uint256 indexed id
     );
 
+    event ApprovalForAll(
+        address indexed owner,
+        address indexed operator,
+        bool approved
+    );
+
     address namespaceOwner = alice;
     string constant LINK5_NAME = "Link5";
     string constant LINK5_SYMBOL = "L5";
@@ -411,7 +417,7 @@ contract IntegrationEssenceTest is
         emit Subscribe(carly, ids, data, data);
 
         uint256 nftid = link5Profile.subscribe(
-            DataTypes.SubscribeParams(ids),
+            DataTypes.SubscribeParams(carly, ids),
             data,
             data
         )[0];

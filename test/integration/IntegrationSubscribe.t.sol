@@ -52,7 +52,7 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
 
         vm.prank(alice);
         uint256 nftid = link3Profile.subscribe(
-            DataTypes.SubscribeParams(ids),
+            DataTypes.SubscribeParams(alice, ids),
             data,
             data
         )[0];
@@ -70,7 +70,7 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         emit Subscribe(alice, ids, data, data);
         vm.prank(alice);
         nftid = link3Profile.subscribe(
-            DataTypes.SubscribeParams(ids),
+            DataTypes.SubscribeParams(alice, ids),
             data,
             data
         )[0];
@@ -135,7 +135,11 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         vm.expectEmit(true, false, false, true, address(link3Profile));
         emit Subscribe(alice, ids, data, data);
 
-        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        link3Profile.subscribe(
+            DataTypes.SubscribeParams(carly, ids),
+            data,
+            data
+        );
         assertEq(link3Profile.getSubscribeNFT(aliceProfileId), aliceSubProxy);
         assertEq(link3Profile.getSubscribeNFT(bobProfileId), bobSubProxy);
 
@@ -147,7 +151,11 @@ contract IntegrationSubscribeTest is TestIntegrationBase, IProfileNFTEvents {
         vm.expectEmit(true, false, false, true, address(link3Profile));
         emit Subscribe(bob, ids, data, data);
 
-        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        link3Profile.subscribe(
+            DataTypes.SubscribeParams(dixon, ids),
+            data,
+            data
+        );
 
         vm.stopPrank();
     }

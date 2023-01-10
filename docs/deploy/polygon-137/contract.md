@@ -1,18 +1,18 @@
 | Contract                                     | Address                                    |
 | -------------------------------------------- | ------------------------------------------ |
 | Action Lib                                   | 0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a |
-| RolesAuthority                               | 0x9937fb8ebe4ebc7710ffaed246584603f390be3e |
-| EngineImpl                                   | 0x1c2c8e6634fc29f38d110233b5370a1b7ebbb6e5 |
-| EngineProxy                                  | 0x1ca51941a616d14c42d3e3b9e6e687d7f5054c3a |
-| Profile Factory                              | 0x730d6e17589f606dff2e6e36c7abd8a8c2b40f91 |
-| Essence Factory                              | 0xf7a31740969dce331615d189d355e5edf2b80b70 |
-| Subscribe Factory                            | 0xeac6012efe2f7451e8b28139e8d23bb3b540fecb |
-| Link3 Profile                                | 0x2723522702093601e6360cae665518c4f63e9da6 |
-| CyberConnect Treasury                        | 0x90137f1234c137c4284dd317303f2717c871f70a |
-| Link3 Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
-| Link3 Descriptor (Impl)                      | 0x24f869169422f86ebf0c90b6785f9f3534ff08e5 |
-| Link3 Descriptor (Proxy)                     | 0x6aac6e75b5f136541e6bd0a86b2d596fc10465fc |
-| Subscribe MW (SubscribePaidMw)               | 0x9b5678862e143c970f4a63f57dd8a677f5942c40 |
-| Essence MW (CollectPaidMw)                   | 0x9e5e171fadcc01f204bdff12a87f1573e40b0cd2 |
 | CyberVault                                   | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
-| Essence MW (CollectPermissionMw V2)          | 0x01fafdbfbb1a56d4a58bb1f7472fb866922ff6c4 |
+| RolesAuthority                               | 0x2fe62101a6fe6e9b234426cad374ac651f458a16 |
+| EngineImpl                                   | 0x4d67074a9200035517245f9bea360789b42c12e3 |
+| EngineProxy                                  | 0x346bf45a74e1b9d31e0e5d747964f99c81ffffd8 |
+| Profile Factory                              | 0xc60c151c1f2621031a7025c32a7a01f17c05ecd4 |
+| Essence Factory                              | 0x634222fd31ba8e6f233b93155f68b1a701c71b17 |
+| Subscribe Factory                            | 0x9c2441ade00681486eb25de98ff4e1eeb4557541 |
+| Link3 Profile                                | 0xe2f8a9885e81429f1b464b01a1ea234293474945 |
+| CyberConnect Treasury                        | 0x2e51d648b862a8a8733567ac6e1c765343809248 |
+| Link3 Profile MW (PermissionedFeeCreationMw) | 0x338b17418da4887046ffbdaa52a6817e016911f5 |
+| Essence MW (CollectPermissionMw V2)          | 0x3b44500a5e1f12f24fec69eec8c828cbbcfd18c4 |
+| Subscribe MW (SubscribePaidMw)               | 0xf9093aed7380fd53cac070af90048189bf8ed7c8 |
+| Essence MW (CollectPaidMw)                   | 0xad8223058fd7dfa552fd0912f662dad5144d6a8d |
+| Link3 Descriptor (Impl)                      | 0x695afe7b9902a370186dca18ea7c0c1cb08af83c |
+| Link3 Descriptor (Proxy)                     | 0x15cbd68a82dc0d998964385d7414335cebe347f5 |

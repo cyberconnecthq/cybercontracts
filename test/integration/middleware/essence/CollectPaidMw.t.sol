@@ -382,7 +382,7 @@ contract CollectPaidMwTest is
         emit Subscribe(lila, ids, data, data);
 
         uint256 bobbySubscribeNFTId = link3Profile.subscribe(
-            DataTypes.SubscribeParams(ids),
+            DataTypes.SubscribeParams(lila, ids),
             data,
             data
         )[0];

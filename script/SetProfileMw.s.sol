@@ -25,7 +25,8 @@ contract DeployScript is Script, DeploySetting {
             );
         } else if (
             block.chainid == DeploySetting.BNB ||
-            block.chainid == DeploySetting.NOVA
+            block.chainid == DeploySetting.NOVA ||
+            block.chainid == DeploySetting.POLYGON
         ) {
             LibDeploy.setProfileMw(
                 vm,
@@ -33,6 +34,14 @@ contract DeployScript is Script, DeploySetting {
                 address(0x1cA51941a616D14C42D3e3B9E6E687d7F5054c3A), //engineProxyAddress,
                 address(0x2723522702093601e6360CAe665518C4f63e9dA6), //address link3Profile,
                 address(0xd37bbF27e39B2f8c4386BebcCdA0850EEfFD2a82) //address link3ProfileMw
+            );
+        } else {
+            LibDeploy.setProfileMw(
+                vm,
+                LibDeploy.DeployParams(true, true, deployParams),
+                address(0x346Bf45A74e1B9d31E0E5d747964f99c81FFFfD8), //engineProxyAddress,
+                address(0xE2f8a9885E81429f1B464b01a1EA234293474945), //address link3Profile,
+                address(0x338b17418da4887046FFBDaA52A6817E016911F5) //address link3ProfileMw
             );
         }
 
