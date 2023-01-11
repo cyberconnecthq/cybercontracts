@@ -88,7 +88,11 @@ contract SubscribeDisallowedMwTest is TestIntegrationBase, IProfileNFTEvents {
         emit Subscribe(lila, ids, data, data);
 
         vm.prank(lila);
-        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        link3Profile.subscribe(
+            DataTypes.SubscribeParams(lila, ids),
+            data,
+            data
+        );
 
         assertEq(link3Profile.getSubscribeNFT(bobbyProfileId), subscribeProxy);
     }
@@ -109,7 +113,11 @@ contract SubscribeDisallowedMwTest is TestIntegrationBase, IProfileNFTEvents {
 
         vm.prank(lila);
         vm.expectRevert("SUBSCRIBE_DISALLOWED");
-        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        link3Profile.subscribe(
+            DataTypes.SubscribeParams(lila, ids),
+            data,
+            data
+        );
     }
 
     function testCannotSubscribeIfMwDisallowed() public {
@@ -131,6 +139,10 @@ contract SubscribeDisallowedMwTest is TestIntegrationBase, IProfileNFTEvents {
 
         vm.prank(lila);
         vm.expectRevert("SUBSCRIBE_MW_NOT_ALLOWED");
-        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
+        link3Profile.subscribe(
+            DataTypes.SubscribeParams(lila, ids),
+            data,
+            data
+        );
     }
 }

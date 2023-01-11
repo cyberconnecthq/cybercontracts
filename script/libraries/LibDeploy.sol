@@ -66,13 +66,13 @@ library LibDeploy {
     // link3 specific setting
     string internal constant LINK3_NAME = "Link3";
     string internal constant LINK3_SYMBOL = "LINK3";
-    bytes32 constant LINK3_SALT = keccak256(bytes(LINK3_NAME));
+    bytes32 constant LINK3_SALT = keccak256(bytes("Link3"));
 
     // set engine owner to zero and let engine role authority handle access control
     address internal constant ENGINE_OWNER = address(0);
 
     // create2 deploy all contract with this protocol salt
-    bytes32 constant SALT = keccak256(bytes("CyberConnect"));
+    bytes32 constant SALT = keccak256(bytes("CCV2"));
 
     // Initial States
     uint256 internal constant _INITIAL_FEE_FREE = 0 ether;
@@ -403,7 +403,6 @@ library LibDeploy {
         address boxAddr,
         bool writeFile
     ) internal {
-
         address MBImpl = Create2Deployer(dc).deploy(
             type(MBNFT).creationCode,
             SALT
@@ -437,7 +436,6 @@ library LibDeploy {
         require(MBNFT(MBProxy).getBoxAddr() == boxAddr, "WRONG_BOX_ADDR");
     }
 
-
     function deployFrame(
         Vm vm,
         address dc,
@@ -448,7 +446,10 @@ library LibDeploy {
         frame = dc.deploy(
             abi.encodePacked(
                 type(FrameNFT).creationCode,
-                abi.encode("https://metadata.cyberconnect.dev/framenft.json", link3Signer)
+                abi.encode(
+                    "https://metadata.cyberconnect.dev/framenft.json",
+                    link3Signer
+                )
             ),
             SALT
         );
@@ -611,35 +612,35 @@ library LibDeploy {
 
         CyberEngine(engine).allowEssenceMw(mw, true);
 
-        // // SubscribePaidMw
-        // mw = dc.deploy(
-        //     abi.encodePacked(
-        //         type(SubscribePaidMw).creationCode,
-        //         abi.encode(cyberTreasury)
-        //     ),
-        //     SALT
-        // );
+        // SubscribePaidMw
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(SubscribePaidMw).creationCode,
+                abi.encode(cyberTreasury)
+            ),
+            SALT
+        );
 
-        // if (writeFile) {
-        //     _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
-        // }
+        if (writeFile) {
+            _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
+        }
 
-        // CyberEngine(engine).allowSubscribeMw(mw, true);
+        CyberEngine(engine).allowSubscribeMw(mw, true);
 
-        // // CollectPaidMw
-        // mw = dc.deploy(
-        //     abi.encodePacked(
-        //         type(CollectPaidMw).creationCode,
-        //         abi.encode(cyberTreasury)
-        //     ),
-        //     SALT
-        // );
+        // CollectPaidMw
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(CollectPaidMw).creationCode,
+                abi.encode(cyberTreasury)
+            ),
+            SALT
+        );
 
-        // if (writeFile) {
-        //     _write(vm, "Essence MW (CollectPaidMw)", mw);
-        // }
+        if (writeFile) {
+            _write(vm, "Essence MW (CollectPaidMw)", mw);
+        }
 
-        // CyberEngine(engine).allowEssenceMw(mw, true);
+        CyberEngine(engine).allowEssenceMw(mw, true);
     }
 
     function allowCurrency(
@@ -857,13 +858,13 @@ library LibDeploy {
             abi.encode(
                 params.setting.link3Signer,
                 params.setting.link3Treasury,
-                _INITIAL_FEE_TIER0,
-                _INITIAL_FEE_TIER1,
-                _INITIAL_FEE_TIER2,
-                _INITIAL_FEE_TIER3,
-                _INITIAL_FEE_TIER4,
-                _INITIAL_FEE_TIER5,
-                _INITIAL_FEE_TIER6
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE
             )
         );
     }
@@ -891,40 +892,26 @@ library LibDeploy {
         //     )
         // );
 
-        // CyberEngine(engineProxyAddress).setProfileMw(
-        //     link3Profile,
-        //     link3ProfileMw,
-        //     abi.encode(
-        //         params.setting.link3Signer,
-        //         params.setting.link3Treasury,
-        //         _INITIAL_FEE_FREE,
-        //         _INITIAL_FEE_FREE,
-        //         _INITIAL_FEE_FREE,
-        //         _INITIAL_FEE_FREE,
-        //         _INITIAL_FEE_FREE,
-        //         _INITIAL_FEE_FREE,
-        //         _INITIAL_FEE_FREE
-        //     )
-        // );
-        bytes memory data = new bytes(0);
         CyberEngine(engineProxyAddress).setProfileMw(
             link3Profile,
             link3ProfileMw,
-            data
+            abi.encode(
+                params.setting.link3Signer,
+                params.setting.link3Treasury,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE
+            )
         );
-        string memory name = CyberEngine(engineProxyAddress).getNameByNamespace(
-            link3Profile
+        require(
+            PermissionedFeeCreationMw(link3ProfileMw).getSigner(link3Profile) ==
+                params.setting.link3Signer,
+            "LINK3_SIGNER_WRONG"
         );
-        address mw = CyberEngine(engineProxyAddress).getProfileMwByNamespace(
-            link3Profile
-        );
-
-        require(mw == link3ProfileMw, "WRONG_PROFILE_MW");
-        // require(
-        //     PermissionedFeeCreationMw(link3ProfileMw).getSigner(link3Profile) ==
-        //         params.setting.link3Signer,
-        //     "LINK3_SIGNER_WRONG"
-        // );
     }
 
     function setAniURL(
