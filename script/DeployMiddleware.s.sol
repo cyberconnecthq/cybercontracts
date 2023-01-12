@@ -36,8 +36,8 @@ contract DeployScript is Script, DeploySetting {
             LibDeploy.deployAllMiddleware(
                 vm,
                 LibDeploy.DeployParams(true, true, deployParams),
-                address(0x346Bf45A74e1B9d31E0E5d747964f99c81FFFfD8), // engine proxy address
-                address(0x2E51d648B862A8A8733567Ac6e1C765343809248), // cyber treasury address
+                address(0x64E1503a2419966c51332d7f6018dE9544AD78a1), // engine proxy address
+                address(0x4ADe3Dd65aD8BAfcD2c79F12cE62080c8c6749eF), // cyber treasury address
                 true
             );
         }
