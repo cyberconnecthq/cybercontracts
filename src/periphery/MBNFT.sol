@@ -11,6 +11,7 @@ import { IMB } from "../interfaces/IMB.sol";
 
 import { Constants } from "../libraries/Constants.sol";
 import { DataTypes } from "../libraries/DataTypes.sol";
+import { LibString } from "../libraries/LibString.sol";
 
 import { CyberNFTBaseFlex } from "../base/CyberNFTBaseFlex.sol";
 import { CyberNFTBase } from "../base/CyberNFTBase.sol";
@@ -118,10 +119,7 @@ contract MBNFT is
      *
      * @param boxAddr The box NFT address.
      */
-    function setBoxAddr(address boxAddr)
-        external
-        onlyOwner
-    {
+    function setBoxAddr(address boxAddr) external onlyOwner {
         _boxAddr = boxAddr;
     }
 
@@ -176,7 +174,10 @@ contract MBNFT is
         returns (string memory)
     {
         _requireMinted(tokenId);
-        return string(abi.encodePacked(_tokenURI, "/", tokenId));
+        return
+            string(
+                abi.encodePacked(_tokenURI, "/", LibString.toString(tokenId))
+            );
     }
 
     /*//////////////////////////////////////////////////////////////

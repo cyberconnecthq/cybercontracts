@@ -27,3 +27,6 @@
 | FrameNFT                                     | 0xef8bed41a2c38efa8863aa07950965add0fae9f2 |
 | MBNFT (Impl)                                 | 0x8d1990aff37b87cf11a6f97969dc51190cd8809a |
 | MBNFT (Proxy)                                | 0x29db011588a96a49e464920f6da7c44118207ff5 |
+| MBNFT (Impl)                                 | 0x4f321fb85f09630d4a6c2295c89da39b4a6f791c |
+| MBNFT (Proxy)                                | 0xff0ab461778232a1480f7886ea1e2abd3324f338 |
+| FrameNFT                                     | 0x58d8c07575339bf47392ad2bd0aeb9955f8495cf |
