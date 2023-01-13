@@ -601,31 +601,31 @@ library LibDeploy {
         address mw;
 
         // CollectPermissionMw
-        // mw = dc.deploy(
-        //     abi.encodePacked(type(CollectPermissionMw).creationCode),
-        //     SALT
-        // );
+        mw = dc.deploy(
+            abi.encodePacked(type(CollectPermissionMw).creationCode),
+            SALT
+        );
 
-        // if (writeFile) {
-        //     _write(vm, "Essence MW (CollectPermissionMw V2)", mw);
-        // }
+        if (writeFile) {
+            _write(vm, "Essence MW (CollectPermissionMw V2)", mw);
+        }
 
-        // CyberEngine(engine).allowEssenceMw(mw, true);
+        CyberEngine(engine).allowEssenceMw(mw, true);
 
-        // // SubscribePaidMw
-        // mw = dc.deploy(
-        //     abi.encodePacked(
-        //         type(SubscribePaidMw).creationCode,
-        //         abi.encode(cyberTreasury)
-        //     ),
-        //     SALT
-        // );
+        // SubscribePaidMw
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(SubscribePaidMw).creationCode,
+                abi.encode(cyberTreasury)
+            ),
+            SALT
+        );
 
-        // if (writeFile) {
-        //     _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
-        // }
+        if (writeFile) {
+            _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
+        }
 
-        // CyberEngine(engine).allowSubscribeMw(mw, true);
+        CyberEngine(engine).allowSubscribeMw(mw, true);
 
         // CollectPaidMw
         mw = dc.deploy(
