@@ -72,7 +72,7 @@ library LibDeploy {
     address internal constant ENGINE_OWNER = address(0);
 
     // create2 deploy all contract with this protocol salt
-    bytes32 constant SALT = keccak256(bytes("CCV2"));
+    bytes32 constant SALT = keccak256(bytes("ConnectV2"));
 
     // Initial States
     uint256 internal constant _INITIAL_FEE_FREE = 0 ether;
@@ -418,7 +418,7 @@ library LibDeploy {
             boxAddr,
             "MB NFT",
             "MB_NFT",
-            "https://metadata.cyberconnect.dev/mbnft.json"
+            "https://mb-metadata.cyberconnect.dev"
         );
 
         address MBProxy = Create2Deployer(dc).deploy(
@@ -447,7 +447,7 @@ library LibDeploy {
             abi.encodePacked(
                 type(FrameNFT).creationCode,
                 abi.encode(
-                    "https://metadata.cyberconnect.dev/framenft.json",
+                    "https://mb-metadata.cyberconnect.dev/frames",
                     link3Signer
                 )
             ),
