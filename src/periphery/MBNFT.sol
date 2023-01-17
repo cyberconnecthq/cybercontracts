@@ -95,6 +95,8 @@ contract MBNFT is
      * @param boxId The box NFT tokenID.
      */
     function openBox(uint256 boxId) external {
+        require(block.timestamp > 16430586, "NOT_STARTED");
+
         address to = CyberNFTBase(_boxAddr).ownerOf(boxId);
         require(to == msg.sender, "INCORRECT_SENDER");
 

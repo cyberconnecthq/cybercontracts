@@ -28,6 +28,7 @@ import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import { CollectPermissionMw } from "../../src/middlewares/essence/CollectPermissionMw.sol";
 import { SubscribePaidMw } from "../../src/middlewares/subscribe/SubscribePaidMw.sol";
+import { SubscribeOnlyOnceMw } from "../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
 import { CollectPaidMw } from "../../src/middlewares/essence/CollectPaidMw.sol";
 import { Create2Deployer } from "../../src/deployer/Create2Deployer.sol";
 import { EssenceDeployer } from "../../src/deployer/EssenceDeployer.sol";
@@ -72,7 +73,7 @@ library LibDeploy {
     address internal constant ENGINE_OWNER = address(0);
 
     // create2 deploy all contract with this protocol salt
-    bytes32 constant SALT = keccak256(bytes("ConnectV2"));
+    bytes32 constant SALT = keccak256(bytes("CCV2"));
 
     // Initial States
     uint256 internal constant _INITIAL_FEE_FREE = 0 ether;
@@ -416,9 +417,9 @@ library LibDeploy {
             MBNFT.initialize.selector,
             link3Owner,
             boxAddr,
-            "MB NFT",
-            "MB_NFT",
-            "https://mb-metadata.cyberconnect.dev"
+            "The Shards",
+            "SHARDS",
+            "https://mbmetadata.cyberconnect.dev"
         );
 
         address MBProxy = Create2Deployer(dc).deploy(
@@ -447,7 +448,7 @@ library LibDeploy {
             abi.encodePacked(
                 type(FrameNFT).creationCode,
                 abi.encode(
-                    "https://mb-metadata.cyberconnect.dev/frames",
+                    "https://mbmetadata.cyberconnect.dev/frames",
                     link3Signer
                 )
             ),
@@ -623,6 +624,21 @@ library LibDeploy {
 
         if (writeFile) {
             _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
+        }
+
+        CyberEngine(engine).allowSubscribeMw(mw, true);
+
+        // SubscribeOnlyOnceMw
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(SubscribeOnlyOnceMw).creationCode,
+                abi.encode(cyberTreasury)
+            ),
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "Subscribe MW (SubscribeOnlyOnceMw)", mw);
         }
 
         CyberEngine(engine).allowSubscribeMw(mw, true);

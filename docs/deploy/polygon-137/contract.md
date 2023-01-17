@@ -16,3 +16,5 @@
 | Essence MW (CollectPaidMw)                   | 0x65245ccf83b2820cfbfaada41361b8599701ce51 |
 | Link3 Descriptor (Impl)                      | 0xc202c743b8f7ba7f598557e93ebe0441dc9c630d |
 | Link3 Descriptor (Proxy)                     | 0x8173b44251b3107b4a9c771dee9e7beae8da10fa |
+| FrameNFT                                     | 0x3fdf5cd1f2fbd007b833ea06c5500d67b3d6cdec |
+| Subscribe MW (SubscribeOnlyOnceMw)           | 0x1c9dd108bcea22ccd4e268401e2e3fda65ab6ea3 |

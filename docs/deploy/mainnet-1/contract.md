@@ -18,5 +18,7 @@
 | CyberVault                                   | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
 | CyberGrandNFT (Impl)                         | 0xcdee88dacbedf83d79d8d2c0f7923e2e62ae80f7 |
 | CyberGrandNFT (Proxy)                        | 0x09e1d96d9b4ba7d2dfb7ac543e53f27f85317274 |
-|Link3 DescriptorV2 (Impl)|0x0dd63a883881df38faf0b466f808662dbde5f212|
-|Link3 DescriptorV2 (Proxy)|0x5a07945ba123b3f0ba743c0b887e42e3fefce0e8|
+| Link3 DescriptorV2 (Impl)                    | 0x0dd63a883881df38faf0b466f808662dbde5f212 |
+| Link3 DescriptorV2 (Proxy)                   | 0x5a07945ba123b3f0ba743c0b887e42e3fefce0e8 |
+| MBNFT (Impl)                                 | 0xe58e05497703fc05ada9f0d01498f63d4638f1db |
+| MBNFT (Proxy)                                | 0x162d43abb8cc246254569d2e63945a9a48cbfd7c |
