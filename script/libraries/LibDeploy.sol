@@ -73,7 +73,7 @@ library LibDeploy {
     address internal constant ENGINE_OWNER = address(0);
 
     // create2 deploy all contract with this protocol salt
-    bytes32 constant SALT = keccak256(bytes("CCV2"));
+    bytes32 constant SALT = keccak256(bytes("CCV2SALT"));
 
     // Initial States
     uint256 internal constant _INITIAL_FEE_FREE = 0 ether;
