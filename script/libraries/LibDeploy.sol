@@ -29,7 +29,11 @@ import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/Permiss
 import { CollectPermissionMw } from "../../src/middlewares/essence/CollectPermissionMw.sol";
 import { SubscribePaidMw } from "../../src/middlewares/subscribe/SubscribePaidMw.sol";
 import { SubscribeOnlyOnceMw } from "../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
+import { SubscribeDisallowedMw } from "../../src/middlewares/subscribe/SubscribeDisallowedMw.sol";
 import { CollectPaidMw } from "../../src/middlewares/essence/CollectPaidMw.sol";
+import { CollectDisallowedMw } from "../../src/middlewares/essence/CollectDisallowedMw.sol";
+import { CollectOnlySubscribedMw } from "../../src/middlewares/essence/CollectOnlySubscribedMw.sol";
+import { CollectMerkleDropMw } from "../../src/middlewares/essence/CollectMerkleDropMw.sol";
 import { Create2Deployer } from "../../src/deployer/Create2Deployer.sol";
 import { EssenceDeployer } from "../../src/deployer/EssenceDeployer.sol";
 import { SubscribeDeployer } from "../../src/deployer/SubscribeDeployer.sol";
@@ -601,44 +605,51 @@ library LibDeploy {
         Create2Deployer dc = Create2Deployer(params.setting.deployerContract); // for deployment
         address mw;
 
-        // CollectPermissionMw
-        mw = dc.deploy(
-            abi.encodePacked(type(CollectPermissionMw).creationCode),
-            SALT
-        );
+        // // CollectPermissionMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(type(CollectPermissionMw).creationCode),
+        //     SALT
+        // );
 
-        if (writeFile) {
-            _write(vm, "Essence MW (CollectPermissionMw V2)", mw);
-        }
+        // if (writeFile) {
+        //     _write(vm, "Essence MW (CollectPermissionMw V2)", mw);
+        // }
 
-        CyberEngine(engine).allowEssenceMw(mw, true);
+        // CyberEngine(engine).allowEssenceMw(mw, true);
 
-        // SubscribePaidMw
-        mw = dc.deploy(
-            abi.encodePacked(
-                type(SubscribePaidMw).creationCode,
-                abi.encode(cyberTreasury)
-            ),
-            SALT
-        );
+        // // SubscribePaidMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(SubscribePaidMw).creationCode,
+        //         abi.encode(cyberTreasury)
+        //     ),
+        //     SALT
+        // );
 
-        if (writeFile) {
-            _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
-        }
+        // if (writeFile) {
+        //     _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
+        // }
 
-        CyberEngine(engine).allowSubscribeMw(mw, true);
+        // CyberEngine(engine).allowSubscribeMw(mw, true);
 
         // SubscribeOnlyOnceMw
         mw = dc.deploy(
-            abi.encodePacked(
-                type(SubscribeOnlyOnceMw).creationCode,
-                abi.encode(cyberTreasury)
-            ),
+            abi.encodePacked(type(SubscribeOnlyOnceMw).creationCode),
             SALT
         );
 
         if (writeFile) {
             _write(vm, "Subscribe MW (SubscribeOnlyOnceMw)", mw);
+        }
+
+        // SubscribeDisallowedMw
+        mw = dc.deploy(
+            abi.encodePacked(type(SubscribeDisallowedMw).creationCode),
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "Subscribe MW (SubscribeDisallowedMw)", mw);
         }
 
         CyberEngine(engine).allowSubscribeMw(mw, true);
@@ -654,6 +665,42 @@ library LibDeploy {
 
         if (writeFile) {
             _write(vm, "Essence MW (CollectPaidMw)", mw);
+        }
+
+        CyberEngine(engine).allowEssenceMw(mw, true);
+
+        // CollectDisallowedMw
+        mw = dc.deploy(
+            abi.encodePacked(type(CollectDisallowedMw).creationCode),
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "Essence MW (CollectDisallowedMw)", mw);
+        }
+
+        CyberEngine(engine).allowEssenceMw(mw, true);
+
+        // CollectOnlySubscribedMw
+        mw = dc.deploy(
+            abi.encodePacked(type(CollectOnlySubscribedMw).creationCode),
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "Essence MW (CollectOnlySubscribedMw)", mw);
+        }
+
+        CyberEngine(engine).allowEssenceMw(mw, true);
+
+        // CollectMerkleDropMw
+        mw = dc.deploy(
+            abi.encodePacked(type(CollectMerkleDropMw).creationCode),
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "Essence MW (CollectMerkleDropMw)", mw);
         }
 
         CyberEngine(engine).allowEssenceMw(mw, true);

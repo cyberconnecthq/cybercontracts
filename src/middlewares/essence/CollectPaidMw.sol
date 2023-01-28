@@ -3,16 +3,16 @@
 pragma solidity 0.8.14;
 
 import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import { IERC721 } from "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
+import { ERC721 } from "../../dependencies/solmate/ERC721.sol";
 import { SafeERC20 } from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
 import { ICyberEngine } from "../../interfaces/ICyberEngine.sol";
+import { IProfileNFT } from "../../interfaces/IProfileNFT.sol";
 
 import { Constants } from "../../libraries/Constants.sol";
 
 import { FeeMw } from "../base/FeeMw.sol";
-import { SubscribeStatusMw } from "../base/SubscribeStatusMw.sol";
 
 /**
  * @title  Collect Paid Middleware
@@ -142,7 +142,7 @@ contract CollectPaidMw is IEssenceMiddleware, FeeMw {
                 .subscribeRequired == true
         ) {
             require(
-                SubscribeStatusMw.checkSubscribe(profileId, collector),
+                _checkSubscribe(msg.sender, profileId, collector),
                 "NOT_SUBSCRIBED"
             );
         }
@@ -172,5 +172,21 @@ contract CollectPaidMw is IEssenceMiddleware, FeeMw {
         bytes calldata
     ) external {
         // do nothing
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                              INTERNAL
+    //////////////////////////////////////////////////////////////*/
+
+    function _checkSubscribe(
+        address namespace,
+        uint256 profileId,
+        address collector
+    ) internal view returns (bool) {
+        address essenceOwnerSubscribeNFT = IProfileNFT(namespace)
+            .getSubscribeNFT(profileId);
+
+        return (essenceOwnerSubscribeNFT != address(0) &&
+            ERC721(essenceOwnerSubscribeNFT).balanceOf(collector) != 0);
     }
 }

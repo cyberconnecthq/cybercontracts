@@ -7,8 +7,6 @@ import { ERC721 } from "../../dependencies/solmate/ERC721.sol";
 import { IEssenceMiddleware } from "../../interfaces/IEssenceMiddleware.sol";
 import { IProfileNFT } from "../../interfaces/IProfileNFT.sol";
 
-import { SubscribeStatusMw } from "../base/SubscribeStatusMw.sol";
-
 /**
  * @title Collect only when subscribed Middleware
  * @author CyberConnect
@@ -41,7 +39,7 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware {
         bytes calldata
     ) external view override {
         require(
-            SubscribeStatusMw.checkSubscribe(profileId, collector),
+            _checkSubscribe(msg.sender, profileId, collector),
             "NOT_SUBSCRIBED"
         );
     }
@@ -55,5 +53,21 @@ contract CollectOnlySubscribedMw is IEssenceMiddleware {
         bytes calldata
     ) external {
         // do nothing
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                              INTERNAL
+    //////////////////////////////////////////////////////////////*/
+
+    function _checkSubscribe(
+        address namespace,
+        uint256 profileId,
+        address collector
+    ) internal view returns (bool) {
+        address essenceOwnerSubscribeNFT = IProfileNFT(namespace)
+            .getSubscribeNFT(profileId);
+
+        return (essenceOwnerSubscribeNFT != address(0) &&
+            ERC721(essenceOwnerSubscribeNFT).balanceOf(collector) != 0);
     }
 }

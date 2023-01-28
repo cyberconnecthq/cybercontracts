@@ -28,8 +28,8 @@ contract DeployScript is Script, DeploySetting {
             LibDeploy.deployAllMiddleware(
                 vm,
                 LibDeploy.DeployParams(true, true, deployParams),
-                address(0x24Ee18a7135020E02C18DaD07e201C44e7d68334), // engine proxy address
-                address(0x4a4712D9AC10bAfEe113A070019c2b342eAac2fA), // cyber treasury address
+                address(0x1cA51941a616D14C42D3e3B9E6E687d7F5054c3A), // engine proxy address
+                address(0x90137F1234C137C4284dd317303F2717c871f70A), // cyber treasury address
                 true
             );
         } else if (block.chainid == DeploySetting.POLYGON) {
