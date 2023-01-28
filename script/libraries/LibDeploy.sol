@@ -26,6 +26,7 @@ import { Link3ProfileDescriptorV2 } from "../../src/periphery/Link3ProfileDescri
 import { TestLib712 } from "../../test/utils/TestLib712.sol";
 import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
+import { StableFeeCreationMw } from "../../src/middlewares/profile/StableFeeCreationMw.sol";
 import { CollectPermissionMw } from "../../src/middlewares/essence/CollectPermissionMw.sol";
 import { SubscribePaidMw } from "../../src/middlewares/subscribe/SubscribePaidMw.sol";
 import { SubscribeOnlyOnceMw } from "../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
@@ -42,6 +43,10 @@ import { LibString } from "../../src/libraries/LibString.sol";
 import { DeploySetting } from "./DeploySetting.sol";
 
 import "forge-std/Vm.sol";
+
+interface AggregatorInterface {
+    function latestAnswer() external view returns (int256);
+}
 
 library LibDeploy {
     struct ContractAddresses {
@@ -88,6 +93,15 @@ library LibDeploy {
     uint256 internal constant _INITIAL_FEE_TIER4 = 0.1 ether;
     uint256 internal constant _INITIAL_FEE_TIER5 = 0.05 ether;
     uint256 internal constant _INITIAL_FEE_TIER6 = 0.01 ether;
+
+    uint256 internal constant _INITIAL_USD_FEE_FREE = 0;
+    uint256 internal constant _INITIAL_USD_FEE_TIER0 = 10000;
+    uint256 internal constant _INITIAL_USD_FEE_TIER1 = 2000;
+    uint256 internal constant _INITIAL_USD_FEE_TIER2 = 1000;
+    uint256 internal constant _INITIAL_USD_FEE_TIER3 = 500;
+    uint256 internal constant _INITIAL_USD_FEE_TIER4 = 100;
+    uint256 internal constant _INITIAL_USD_FEE_TIER5 = 50;
+    uint256 internal constant _INITIAL_USD_FEE_TIER6 = 10;
 
     string internal constant OUTPUT_FILE = "docs/deploy/";
 
@@ -600,6 +614,7 @@ library LibDeploy {
         DeployParams memory params,
         address engine,
         address cyberTreasury,
+        address usdOracle,
         bool writeFile
     ) internal returns (address token) {
         Create2Deployer dc = Create2Deployer(params.setting.deployerContract); // for deployment
@@ -632,78 +647,94 @@ library LibDeploy {
 
         // CyberEngine(engine).allowSubscribeMw(mw, true);
 
-        // SubscribeOnlyOnceMw
-        mw = dc.deploy(
-            abi.encodePacked(type(SubscribeOnlyOnceMw).creationCode),
-            SALT
-        );
+        // // SubscribeOnlyOnceMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(type(SubscribeOnlyOnceMw).creationCode),
+        //     SALT
+        // );
 
-        if (writeFile) {
-            _write(vm, "Subscribe MW (SubscribeOnlyOnceMw)", mw);
-        }
+        // if (writeFile) {
+        //     _write(vm, "Subscribe MW (SubscribeOnlyOnceMw)", mw);
+        // }
 
-        // SubscribeDisallowedMw
-        mw = dc.deploy(
-            abi.encodePacked(type(SubscribeDisallowedMw).creationCode),
-            SALT
-        );
+        // // SubscribeDisallowedMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(type(SubscribeDisallowedMw).creationCode),
+        //     SALT
+        // );
 
-        if (writeFile) {
-            _write(vm, "Subscribe MW (SubscribeDisallowedMw)", mw);
-        }
+        // if (writeFile) {
+        //     _write(vm, "Subscribe MW (SubscribeDisallowedMw)", mw);
+        // }
 
-        CyberEngine(engine).allowSubscribeMw(mw, true);
+        // CyberEngine(engine).allowSubscribeMw(mw, true);
 
-        // CollectPaidMw
+        // // CollectPaidMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(CollectPaidMw).creationCode,
+        //         abi.encode(cyberTreasury)
+        //     ),
+        //     SALT
+        // );
+
+        // if (writeFile) {
+        //     _write(vm, "Essence MW (CollectPaidMw)", mw);
+        // }
+
+        // CyberEngine(engine).allowEssenceMw(mw, true);
+
+        // // CollectDisallowedMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(type(CollectDisallowedMw).creationCode),
+        //     SALT
+        // );
+
+        // if (writeFile) {
+        //     _write(vm, "Essence MW (CollectDisallowedMw)", mw);
+        // }
+
+        // CyberEngine(engine).allowEssenceMw(mw, true);
+
+        // // CollectOnlySubscribedMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(type(CollectOnlySubscribedMw).creationCode),
+        //     SALT
+        // );
+
+        // if (writeFile) {
+        //     _write(vm, "Essence MW (CollectOnlySubscribedMw)", mw);
+        // }
+
+        // CyberEngine(engine).allowEssenceMw(mw, true);
+
+        // // CollectMerkleDropMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(type(CollectMerkleDropMw).creationCode),
+        //     SALT
+        // );
+
+        // if (writeFile) {
+        //     _write(vm, "Essence MW (CollectMerkleDropMw)", mw);
+        // }
+
+        // CyberEngine(engine).allowEssenceMw(mw, true);
+
+        // StableFeeCreationMw
+        AggregatorInterface ai = AggregatorInterface(usdOracle);
         mw = dc.deploy(
             abi.encodePacked(
-                type(CollectPaidMw).creationCode,
-                abi.encode(cyberTreasury)
+                type(StableFeeCreationMw).creationCode,
+                abi.encode(engine, ai)
             ),
             SALT
         );
 
         if (writeFile) {
-            _write(vm, "Essence MW (CollectPaidMw)", mw);
+            _write(vm, "Profile MW (StableFeeCreationMw)", mw);
         }
 
-        CyberEngine(engine).allowEssenceMw(mw, true);
-
-        // CollectDisallowedMw
-        mw = dc.deploy(
-            abi.encodePacked(type(CollectDisallowedMw).creationCode),
-            SALT
-        );
-
-        if (writeFile) {
-            _write(vm, "Essence MW (CollectDisallowedMw)", mw);
-        }
-
-        CyberEngine(engine).allowEssenceMw(mw, true);
-
-        // CollectOnlySubscribedMw
-        mw = dc.deploy(
-            abi.encodePacked(type(CollectOnlySubscribedMw).creationCode),
-            SALT
-        );
-
-        if (writeFile) {
-            _write(vm, "Essence MW (CollectOnlySubscribedMw)", mw);
-        }
-
-        CyberEngine(engine).allowEssenceMw(mw, true);
-
-        // CollectMerkleDropMw
-        mw = dc.deploy(
-            abi.encodePacked(type(CollectMerkleDropMw).creationCode),
-            SALT
-        );
-
-        if (writeFile) {
-            _write(vm, "Essence MW (CollectMerkleDropMw)", mw);
-        }
-
-        CyberEngine(engine).allowEssenceMw(mw, true);
+        CyberEngine(engine).allowProfileMw(mw, true);
     }
 
     function allowCurrency(
@@ -974,6 +1005,40 @@ library LibDeploy {
             PermissionedFeeCreationMw(link3ProfileMw).getSigner(link3Profile) ==
                 params.setting.link3Signer,
             "LINK3_SIGNER_WRONG"
+        );
+    }
+
+    function setStableFeeMw(
+        Vm vm,
+        DeployParams memory params,
+        address engineProxyAddress,
+        address link3Profile,
+        address stableFeeMw
+    ) internal returns (address token) {
+        // CyberEngine(engineProxyAddress).setProfileMw(
+        //     link3Profile,
+        //     stableFeeMw,
+        //     abi.encode(
+        //         params.setting.link3Signer,
+        //         params.setting.link3Treasury,
+        //         _INITIAL_USD_FEE_TIER0,
+        //         _INITIAL_USD_FEE_TIER1,
+        //         _INITIAL_USD_FEE_TIER2,
+        //         _INITIAL_USD_FEE_TIER3,
+        //         _INITIAL_USD_FEE_TIER4,
+        //         _INITIAL_USD_FEE_TIER5,
+        //         _INITIAL_USD_FEE_TIER6
+        //     )
+        // );
+        // require(
+        //     StableFeeCreationMw(stableFeeMw).getSigner(link3Profile) ==
+        //         params.setting.link3Signer,
+        //     "LINK3_SIGNER_WRONG"
+        // );
+
+        require(
+            StableFeeCreationMw(stableFeeMw).getPriceWei(link3Profile, "A") ==
+                100
         );
     }
 

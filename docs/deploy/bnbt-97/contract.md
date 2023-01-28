@@ -25,3 +25,4 @@
 | Essence MW (SignaturePermissionEssenceMw)    | 0x733142f467904f9a2e8efa0119523d3cc7a99b0b |
 | Essence MW (CollectPermissionMw)             | 0x77ebd0aa021b39086e84b9d3afeb738cbbfe16fd |
 | Essence MW (CollectPermissionMw V2)          | 0xbbbab0257edba5823ddb5aa62c08f07bd0d302d9 |
+| Profile MW (StableFeeCreationMw)             | 0x4db6b3f3236adb0fb85a3957e740f07481c1dc99 |
