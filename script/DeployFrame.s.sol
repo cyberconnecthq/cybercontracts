@@ -18,6 +18,13 @@ contract DeployScript is Script, DeploySetting {
                 deployParams.link3Signer,
                 true
             );
+        } else if (block.chainid == POLYGON) {
+            LibDeploy.deployFrame(
+                vm,
+                deployParams.deployerContract,
+                deployParams.link3Signer,
+                true
+            );
         }
         vm.stopBroadcast();
     }

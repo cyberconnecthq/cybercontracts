@@ -5,24 +5,32 @@ pragma solidity 0.8.14;
 import "forge-std/Script.sol";
 import { ProfileNFT } from "../src/core/ProfileNFT.sol";
 import { CyberEngine } from "../src/core/CyberEngine.sol";
-import { CyberBoxNFT } from "../src/periphery/CyberBoxNFT.sol";
+import { Link3ProfileDescriptor } from "../src/periphery/Link3ProfileDescriptor.sol";
+import { RolesAuthority } from "../src/dependencies/solmate/RolesAuthority.sol";
 import { LibDeploy } from "./libraries/LibDeploy.sol";
 import { PermissionedFeeCreationMw } from "../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 
 contract DeployScript is Script {
     function run() external {
         vm.startBroadcast();
-        // address deployer = 0x39e0c6E610A8D7F408dD688011591583cbc1c3ce;
-        // require(msg.sender == deployer);
+        // address link3Desc = 0x3B131D2d6694a60eb71dfF607cc64E6296daa71E;
+        // address preOwner = 0x39e0c6E610A8D7F408dD688011591583cbc1c3ce;
+        // address newOwner = 0xf9E12df9428F1a15BC6CfD4092ADdD683738cE96;
 
-        // address signer = 0x2A2EA826102c067ECE82Bc6E2B7cf38D7EbB1B82;
-        address boxProxy = 0xcE4F341622340d56E397740d325Fd357E62b91CB;
+        // require(Link3ProfileDescriptor(link3Desc).owner() == preOwner, "WRONG_OWNER");
+        // Link3ProfileDescriptor(link3Desc).setOwner(newOwner);
+        // require(Link3ProfileDescriptor(link3Desc).owner() == newOwner, "WRONG_NEW_OWNER");
 
-        require(CyberBoxNFT(boxProxy).paused() == true, "GRAND_NFT_NOT_PAUSED");
+        address roleAuth = 0x9937fb8ebe4Ebc7710fFAEd246584603F390BE3E;
+        address preOwner = 0xA7b6bEf855c1c57Df5b7C9c7a4e1eB757e544e7f;
+        address newOwner = 0xf9E12df9428F1a15BC6CfD4092ADdD683738cE96;
 
-        CyberBoxNFT(boxProxy).pause(false);
-
-        require(CyberBoxNFT(boxProxy).paused() == false, "GRAND_NFT_PAUSED");
+        require(RolesAuthority(roleAuth).owner() == preOwner, "WRONG_OWNER");
+        RolesAuthority(roleAuth).setOwner(newOwner);
+        require(
+            RolesAuthority(roleAuth).owner() == newOwner,
+            "WRONG_NEW_OWNER"
+        );
 
         vm.stopBroadcast();
     }
