@@ -3,6 +3,7 @@
 pragma solidity 0.8.14;
 
 import { Address } from "openzeppelin-contracts/contracts/utils/Address.sol";
+import { AggregatorV3Interface } from "chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import { IProfileMiddleware } from "../../interfaces/IProfileMiddleware.sol";
 
@@ -11,10 +12,6 @@ import { DataTypes } from "../../libraries/DataTypes.sol";
 
 import { EIP712 } from "../../base/EIP712.sol";
 import { PermissionedMw } from "../base/PermissionedMw.sol";
-
-interface AggregatorInterface {
-    function latestAnswer() external view returns (int256);
-}
 
 /**
  * @title Stable Fee Creation Middleware
@@ -52,7 +49,7 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
     mapping(address => MiddlewareData) internal _mwDataByNamespace;
 
     // Oracle address
-    AggregatorInterface public immutable usdOracle;
+    AggregatorV3Interface public immutable usdOracle;
 
     /*//////////////////////////////////////////////////////////////
                               MODIFIERS
@@ -71,10 +68,8 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
                                  CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address engine, AggregatorInterface _usdOracle)
-        PermissionedMw(engine)
-    {
-        usdOracle = _usdOracle;
+    constructor(address engine, address _usdOracle) PermissionedMw(engine) {
+        usdOracle = AggregatorV3Interface(_usdOracle);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -292,9 +287,9 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
         );
     }
 
-    function _attoUSDToWei(uint256 amount) internal view returns (uint256) {
-        uint256 ethPrice = uint256(usdOracle.latestAnswer());
-        return (amount * 1e8) / ethPrice;
+    function _attoUSDToGWei(uint256 amount) internal view returns (uint256) {
+        uint256 ethPrice = uint256(getLatestPrice());
+        return (amount * 1e8 * 1e9) / ethPrice;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -313,6 +308,18 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
         if (byteHandle.length < 7) {
             feeUSD = mwData.feeMapping[Tier(byteHandle.length - 1)];
         }
-        return _attoUSDToWei(feeUSD);
+        return _attoUSDToGWei(feeUSD);
+    }
+
+    function getLatestPrice() public view returns (int256) {
+        // prettier-ignore
+        (
+            /* uint80 roundID */,
+            int price,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = usdOracle.latestRoundData();
+        return price;
     }
 }

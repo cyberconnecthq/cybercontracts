@@ -44,10 +44,6 @@ import { DeploySetting } from "./DeploySetting.sol";
 
 import "forge-std/Vm.sol";
 
-interface AggregatorInterface {
-    function latestAnswer() external view returns (int256);
-}
-
 library LibDeploy {
     struct ContractAddresses {
         address engineAuthority;
@@ -721,11 +717,10 @@ library LibDeploy {
         // CyberEngine(engine).allowEssenceMw(mw, true);
 
         // StableFeeCreationMw
-        AggregatorInterface ai = AggregatorInterface(usdOracle);
         mw = dc.deploy(
             abi.encodePacked(
                 type(StableFeeCreationMw).creationCode,
-                abi.encode(engine, ai)
+                abi.encode(engine, usdOracle)
             ),
             SALT
         );
@@ -1015,31 +1010,32 @@ library LibDeploy {
         address link3Profile,
         address stableFeeMw
     ) internal returns (address token) {
-        // CyberEngine(engineProxyAddress).setProfileMw(
-        //     link3Profile,
-        //     stableFeeMw,
-        //     abi.encode(
-        //         params.setting.link3Signer,
-        //         params.setting.link3Treasury,
-        //         _INITIAL_USD_FEE_TIER0,
-        //         _INITIAL_USD_FEE_TIER1,
-        //         _INITIAL_USD_FEE_TIER2,
-        //         _INITIAL_USD_FEE_TIER3,
-        //         _INITIAL_USD_FEE_TIER4,
-        //         _INITIAL_USD_FEE_TIER5,
-        //         _INITIAL_USD_FEE_TIER6
-        //     )
-        // );
-        // require(
-        //     StableFeeCreationMw(stableFeeMw).getSigner(link3Profile) ==
-        //         params.setting.link3Signer,
-        //     "LINK3_SIGNER_WRONG"
-        // );
-
-        require(
-            StableFeeCreationMw(stableFeeMw).getPriceWei(link3Profile, "A") ==
-                100
+        CyberEngine(engineProxyAddress).setProfileMw(
+            link3Profile,
+            stableFeeMw,
+            abi.encode(
+                params.setting.link3Signer,
+                params.setting.link3Treasury,
+                _INITIAL_USD_FEE_TIER0,
+                _INITIAL_USD_FEE_TIER1,
+                _INITIAL_USD_FEE_TIER2,
+                _INITIAL_USD_FEE_TIER3,
+                _INITIAL_USD_FEE_TIER4,
+                _INITIAL_USD_FEE_TIER5,
+                _INITIAL_USD_FEE_TIER6
+            )
         );
+        require(
+            StableFeeCreationMw(stableFeeMw).getSigner(link3Profile) ==
+                params.setting.link3Signer,
+            "LINK3_SIGNER_WRONG"
+        );
+
+        uint256 fee = StableFeeCreationMw(stableFeeMw).getPriceWei(
+            link3Profile,
+            "A"
+        );
+        console.log(fee);
     }
 
     function setAniURL(

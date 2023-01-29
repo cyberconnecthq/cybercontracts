@@ -19,7 +19,7 @@ contract DeployScript is Script, DeploySetting {
                 LibDeploy.DeployParams(true, true, deployParams),
                 address(0xAF9104Eb9c6B21Efdc43BaaaeE70662d6CcE8798), // engine proxy address
                 address(0x3963744012daDf90A9034Ea1068f53108B1A3834), // cyber treasury address
-                address(0x14e613AC84a31f709eadbdF89C6CC390fDc9540A), // bnb-usd oracle address
+                address(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e), // bnb-usd oracle address
                 true
             );
         } else if (
