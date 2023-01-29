@@ -287,9 +287,9 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
         );
     }
 
-    function _attoUSDToGWei(uint256 amount) internal view returns (uint256) {
+    function _attoUSDToWei(uint256 amount) internal view returns (uint256) {
         uint256 ethPrice = uint256(getLatestPrice());
-        return (amount * 1e8 * 1e9) / ethPrice;
+        return (amount * 1e8 * 1e18) / ethPrice;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -308,7 +308,7 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
         if (byteHandle.length < 7) {
             feeUSD = mwData.feeMapping[Tier(byteHandle.length - 1)];
         }
-        return _attoUSDToGWei(feeUSD);
+        return _attoUSDToWei(feeUSD);
     }
 
     function getLatestPrice() public view returns (int256) {
