@@ -36,6 +36,19 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
         mapping(Tier => uint256) feeMapping;
     }
 
+    struct FeeData {
+        address signer;
+        address recipient;
+        uint256 tier0Fee;
+        uint256 tier1Fee;
+        uint256 tier2Fee;
+        uint256 tier3Fee;
+        uint256 tier4Fee;
+        uint256 tier5Fee;
+        uint256 tier6Fee;
+        uint256 tier7Fee;
+    }
+
     enum Tier {
         Tier0,
         Tier1,
@@ -43,7 +56,8 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
         Tier3,
         Tier4,
         Tier5,
-        Tier6
+        Tier6,
+        Tier7
     }
 
     mapping(address => MiddlewareData) internal _mwDataByNamespace;
@@ -88,8 +102,19 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
             (uint8, bytes32, bytes32, uint256)
         );
 
+        DataTypes.EIP712Signature memory sig;
+        sig.v = v;
+        sig.r = r;
+        sig.s = s;
+        sig.deadline = deadline;
+
         _requiresValidHandle(params.handle);
-        _requiresValidSig(params, v, r, s, deadline, mwData);
+
+        if (_isValidClaimSig(params, sig, mwData)) {
+            return;
+        }
+
+        _requiresValidSig(params, sig, mwData);
 
         uint256 feeWei = getPriceWei(msg.sender, params.handle);
         require(msg.value >= feeWei, "INSUFFICIENT_FEE");
@@ -115,46 +140,24 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
         onlyEngine
         returns (bytes memory)
     {
-        (
-            address signer,
-            address recipient,
-            uint256 tier0Fee,
-            uint256 tier1Fee,
-            uint256 tier2Fee,
-            uint256 tier3Fee,
-            uint256 tier4Fee,
-            uint256 tier5Fee,
-            uint256 tier6Fee
-        ) = abi.decode(
-                data,
-                (
-                    address,
-                    address,
-                    uint256,
-                    uint256,
-                    uint256,
-                    uint256,
-                    uint256,
-                    uint256,
-                    uint256
-                )
-            );
+        FeeData memory d = abi.decode(data, (FeeData));
 
         require(
-            signer != address(0) && recipient != address(0),
+            d.signer != address(0) && d.recipient != address(0),
             "INVALID_SIGNER_OR_RECIPIENT"
         );
 
-        _setFeeByTier(namespace, Tier.Tier0, tier0Fee);
-        _setFeeByTier(namespace, Tier.Tier1, tier1Fee);
-        _setFeeByTier(namespace, Tier.Tier2, tier2Fee);
-        _setFeeByTier(namespace, Tier.Tier3, tier3Fee);
-        _setFeeByTier(namespace, Tier.Tier4, tier4Fee);
-        _setFeeByTier(namespace, Tier.Tier5, tier5Fee);
-        _setFeeByTier(namespace, Tier.Tier6, tier6Fee);
+        _setFeeByTier(namespace, Tier.Tier0, d.tier0Fee);
+        _setFeeByTier(namespace, Tier.Tier1, d.tier1Fee);
+        _setFeeByTier(namespace, Tier.Tier2, d.tier2Fee);
+        _setFeeByTier(namespace, Tier.Tier3, d.tier3Fee);
+        _setFeeByTier(namespace, Tier.Tier4, d.tier4Fee);
+        _setFeeByTier(namespace, Tier.Tier5, d.tier5Fee);
+        _setFeeByTier(namespace, Tier.Tier6, d.tier6Fee);
+        _setFeeByTier(namespace, Tier.Tier7, d.tier7Fee);
 
-        _mwDataByNamespace[namespace].signer = signer;
-        _mwDataByNamespace[namespace].recipient = recipient;
+        _mwDataByNamespace[namespace].signer = d.signer;
+        _mwDataByNamespace[namespace].recipient = d.recipient;
 
         return data;
     }
@@ -258,10 +261,7 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
 
     function _requiresValidSig(
         DataTypes.CreateProfileParams calldata params,
-        uint8 v,
-        bytes32 r,
-        bytes32 s,
-        uint256 deadline,
+        DataTypes.EIP712Signature memory sig,
         MiddlewareData storage mwData
     ) internal {
         _requiresExpectedSigner(
@@ -275,16 +275,66 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
                         keccak256(bytes(params.metadata)),
                         params.operator,
                         mwData.nonces[params.to]++,
-                        deadline
+                        sig.deadline
                     )
                 )
             ),
             mwData.signer,
-            v,
-            r,
-            s,
-            deadline
+            sig.v,
+            sig.r,
+            sig.s,
+            sig.deadline
         );
+    }
+
+    function _isValidClaimSig(
+        DataTypes.CreateProfileParams calldata params,
+        DataTypes.EIP712Signature memory sig,
+        MiddlewareData storage mwData
+    ) internal returns (bool valid) {
+        valid = _checkExpectedSigner(
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        Constants._CLAIM_PROFILE_TYPEHASH,
+                        params.to,
+                        keccak256(bytes(params.handle)),
+                        keccak256(bytes(params.avatar)),
+                        keccak256(bytes(params.metadata)),
+                        params.operator,
+                        mwData.nonces[params.to]++,
+                        sig.deadline
+                    )
+                )
+            ),
+            mwData.signer,
+            sig.v,
+            sig.r,
+            sig.s,
+            sig.deadline
+        );
+    }
+
+    function _checkExpectedSigner(
+        bytes32 digest,
+        address expectedSigner,
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        uint256 deadline
+    ) internal returns (bool) {
+        if (deadline < block.timestamp) {
+            return false;
+        }
+
+        if (
+            uint256(s) >
+            0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
+        ) {
+            return false;
+        }
+        address recoveredAddress = ecrecover(digest, v, r, s);
+        return recoveredAddress == expectedSigner;
     }
 
     function _attoUSDToWei(uint256 amount) internal view returns (uint256) {
@@ -303,10 +353,12 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
     {
         bytes memory byteHandle = bytes(handle);
         MiddlewareData storage mwData = _mwDataByNamespace[namespace];
-        uint256 feeUSD = mwData.feeMapping[Tier.Tier6];
+        uint256 feeUSD = mwData.feeMapping[Tier.Tier7];
 
         if (byteHandle.length < 7) {
             feeUSD = mwData.feeMapping[Tier(byteHandle.length - 1)];
+        } else if (byteHandle.length < 12) {
+            feeUSD = mwData.feeMapping[Tier.Tier6];
         }
         return _attoUSDToWei(feeUSD);
     }

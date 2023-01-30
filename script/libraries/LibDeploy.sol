@@ -98,6 +98,7 @@ library LibDeploy {
     uint256 internal constant _INITIAL_USD_FEE_TIER4 = 100;
     uint256 internal constant _INITIAL_USD_FEE_TIER5 = 50;
     uint256 internal constant _INITIAL_USD_FEE_TIER6 = 10;
+    uint256 internal constant _INITIAL_USD_FEE_TIER7 = 1;
 
     string internal constant OUTPUT_FILE = "docs/deploy/";
 
@@ -1022,7 +1023,8 @@ library LibDeploy {
                 _INITIAL_USD_FEE_TIER3,
                 _INITIAL_USD_FEE_TIER4,
                 _INITIAL_USD_FEE_TIER5,
-                _INITIAL_USD_FEE_TIER6
+                _INITIAL_USD_FEE_TIER6,
+                _INITIAL_USD_FEE_TIER7
             )
         );
         require(
@@ -1033,7 +1035,7 @@ library LibDeploy {
 
         uint256 fee = StableFeeCreationMw(stableFeeMw).getPriceWei(
             link3Profile,
-            "A"
+            "ABCDDDSASDSSSDD"
         );
         console.log(fee);
     }
