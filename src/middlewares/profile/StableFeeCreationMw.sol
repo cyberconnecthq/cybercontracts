@@ -111,6 +111,7 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
         _requiresValidHandle(params.handle);
 
         if (_isValidClaimSig(params, sig, mwData)) {
+            mwData.nonces[params.to]++;
             return;
         }
 
@@ -302,7 +303,7 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
                         keccak256(bytes(params.avatar)),
                         keccak256(bytes(params.metadata)),
                         params.operator,
-                        mwData.nonces[params.to]++,
+                        mwData.nonces[params.to],
                         sig.deadline
                     )
                 )
