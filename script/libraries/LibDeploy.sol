@@ -1033,11 +1033,11 @@ library LibDeploy {
             "LINK3_SIGNER_WRONG"
         );
 
-        uint256 fee = StableFeeCreationMw(stableFeeMw).getPriceWei(
-            link3Profile,
-            "ABCDDDSASDSSSDD"
-        );
-        console.log(fee);
+        // uint256 fee = StableFeeCreationMw(stableFeeMw).getPriceWei(
+        //     link3Profile,
+        //     "ABCDDDSASDSSSDD"
+        // );
+        // console.log(fee);
     }
 
     function setAniURL(

@@ -65,6 +65,8 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
     // Oracle address
     AggregatorV3Interface public immutable usdOracle;
 
+    uint80 internal constant ACCEPTABLE_ROUND_TIME_DIFF_SEC = 60 * 60 * 2;
+
     /*//////////////////////////////////////////////////////////////
                               MODIFIERS
     //////////////////////////////////////////////////////////////*/
@@ -97,10 +99,8 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
     ) external payable override onlyValidNamespace(msg.sender) {
         MiddlewareData storage mwData = _mwDataByNamespace[msg.sender];
 
-        (uint8 v, bytes32 r, bytes32 s, uint256 deadline) = abi.decode(
-            data,
-            (uint8, bytes32, bytes32, uint256)
-        );
+        (uint8 v, bytes32 r, bytes32 s, uint256 deadline, uint80 roundId) = abi
+            .decode(data, (uint8, bytes32, bytes32, uint256, uint80));
 
         DataTypes.EIP712Signature memory sig;
         sig.v = v;
@@ -115,14 +115,15 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
             return;
         }
 
-        _requiresValidSig(params, sig, mwData);
+        _requiresValidSig(params, sig, mwData, roundId);
+        require(
+            _getLatestRoundTimeStamp() - _getTimeStampAt(roundId) <=
+                ACCEPTABLE_ROUND_TIME_DIFF_SEC,
+            "NOT_RECENT_ROUND"
+        );
 
-        uint256 feeWei = getPriceWei(msg.sender, params.handle);
+        uint256 feeWei = getPriceWeiAt(msg.sender, params.handle, roundId);
         require(msg.value >= feeWei, "INSUFFICIENT_FEE");
-
-        if (msg.value > feeWei) {
-            Address.sendValue(payable(msg.sender), msg.value - feeWei);
-        }
         Address.sendValue(payable(mwData.recipient), feeWei);
     }
 
@@ -263,20 +264,22 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
     function _requiresValidSig(
         DataTypes.CreateProfileParams calldata params,
         DataTypes.EIP712Signature memory sig,
-        MiddlewareData storage mwData
+        MiddlewareData storage mwData,
+        uint80 roundId
     ) internal {
         _requiresExpectedSigner(
             _hashTypedDataV4(
                 keccak256(
                     abi.encode(
-                        Constants._CREATE_PROFILE_TYPEHASH,
+                        Constants._CREATE_PROFILE_ORACLE_TYPEHASH,
                         params.to,
                         keccak256(bytes(params.handle)),
                         keccak256(bytes(params.avatar)),
                         keccak256(bytes(params.metadata)),
                         params.operator,
                         mwData.nonces[params.to]++,
-                        sig.deadline
+                        sig.deadline,
+                        roundId
                     )
                 )
             ),
@@ -338,20 +341,60 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
         return recoveredAddress == expectedSigner;
     }
 
-    function _attoUSDToWei(uint256 amount) internal view returns (uint256) {
-        uint256 ethPrice = uint256(getLatestPrice());
+    function _attoUSDToWei(uint256 amount, uint80 roundId)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 ethPrice = uint256(_getPriceAt(roundId));
         return (amount * 1e8 * 1e18) / ethPrice;
+    }
+
+    function _getPriceAt(uint80 roundId) internal view returns (int256) {
+        // prettier-ignore
+        (
+            /* uint80 roundID */,
+            int price,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = usdOracle.getRoundData(roundId);
+        return price;
+    }
+
+    function _getTimeStampAt(uint80 roundId) internal view returns (uint256) {
+        // prettier-ignore
+        (
+            /*uint80 roundID*/,
+            /*int price*/,
+            /*uint startedAt*/,
+            uint timeStamp,
+            /*uint80 answeredInRound*/
+        ) = usdOracle.getRoundData(roundId);
+        return timeStamp;
+    }
+
+    function _getLatestRoundTimeStamp() internal view returns (uint256) {
+        // prettier-ignore
+        (
+            /*uint80 roundID*/,
+            /*int price*/,
+            /*uint startedAt*/,
+            uint timeStamp,
+            /*uint80 answeredInRound*/
+        ) = usdOracle.latestRoundData();
+        return timeStamp;
     }
 
     /*//////////////////////////////////////////////////////////////
                             PUBLIC VIEW
     //////////////////////////////////////////////////////////////*/
 
-    function getPriceWei(address namespace, string calldata handle)
-        public
-        view
-        returns (uint256)
-    {
+    function getPriceWeiAt(
+        address namespace,
+        string calldata handle,
+        uint80 roundId
+    ) public view returns (uint256) {
         bytes memory byteHandle = bytes(handle);
         MiddlewareData storage mwData = _mwDataByNamespace[namespace];
         uint256 feeUSD = mwData.feeMapping[Tier.Tier7];
@@ -361,18 +404,6 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
         } else if (byteHandle.length < 12) {
             feeUSD = mwData.feeMapping[Tier.Tier6];
         }
-        return _attoUSDToWei(feeUSD);
-    }
-
-    function getLatestPrice() public view returns (int256) {
-        // prettier-ignore
-        (
-            /* uint80 roundID */,
-            int price,
-            /*uint startedAt*/,
-            /*uint timeStamp*/,
-            /*uint80 answeredInRound*/
-        ) = usdOracle.latestRoundData();
-        return price;
+        return _attoUSDToWei(feeUSD, roundId);
     }
 }
