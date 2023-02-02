@@ -22,3 +22,4 @@
 | Link3 DescriptorV2 (Proxy)                   | 0x5a07945ba123b3f0ba743c0b887e42e3fefce0e8 |
 | MBNFT (Impl)                                 | 0x87aced3c18ae7e0d5b00913d3384ec80c816cf89 |
 | MBNFT (Proxy)                                | 0xd9c225efcc4162173a7369a14fd559de4e4aadae |
+| Profile MW (StableFeeCreationMw)             | 0xd10fb4701be5050692da69a9b5baa823e9864044 |

@@ -26,7 +26,7 @@ contract DeployScript is Script, DeploySetting {
                 LibDeploy.DeployParams(true, true, deployParams),
                 address(0x1cA51941a616D14C42D3e3B9E6E687d7F5054c3A), //engineProxyAddress,
                 address(0x2723522702093601e6360CAe665518C4f63e9dA6), //address link3Profile,
-                address(0) //address stableFeeMw
+                address(0xE5B8C70427c25365A62648f8804C5eAeE57Fb006) //address stableFeeMw
             );
         } else if (block.chainid == DeploySetting.BNBT) {
             LibDeploy.setStableFeeMw(
@@ -35,6 +35,14 @@ contract DeployScript is Script, DeploySetting {
                 address(0xAF9104Eb9c6B21Efdc43BaaaeE70662d6CcE8798), //engineProxyAddress,
                 address(0x57e12b7a5F38A7F9c23eBD0400e6E53F2a45F271), //address link3Profile,
                 address(0) //address stableFeeMw
+            );
+        } else if (block.chainid == DeploySetting.MAINNET) {
+            LibDeploy.setStableFeeMw(
+                vm,
+                LibDeploy.DeployParams(true, true, deployParams),
+                address(0xE8805326f9DA84e70c680429eD46B924b3F158F2), //engineProxyAddress,
+                address(0x8CC6517e45dB7a0803feF220D9b577326A12033f), //address link3Profile,
+                address(0xD10FB4701Be5050692da69a9B5BaA823e9864044) //address stableFeeMw
             );
         }
 
