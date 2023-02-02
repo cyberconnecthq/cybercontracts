@@ -26,3 +26,5 @@
 | Essence MW (CollectPermissionMw)             | 0x77ebd0aa021b39086e84b9d3afeb738cbbfe16fd |
 | Essence MW (CollectPermissionMw V2)          | 0xbbbab0257edba5823ddb5aa62c08f07bd0d302d9 |
 | Profile MW (StableFeeCreationMw)             | 0x4db6b3f3236adb0fb85a3957e740f07481c1dc99 |
+| Link3 DescriptorV2 (Impl)                    | 0x9d56524b59ff68ab57e22b8384cb5dcf9ce2068d |
+| Link3 DescriptorV2 (Proxy)                   | 0x854149bd7a87b4de67e642d792b4ae7954835844 |
