@@ -27,3 +27,4 @@
 | MBNFT (Impl)                                 | 0x4f321fb85f09630d4a6c2295c89da39b4a6f791c |
 | MBNFT (Proxy)                                | 0xff0ab461778232a1480f7886ea1e2abd3324f338 |
 | FrameNFT                                     | 0x58d8c07575339bf47392ad2bd0aeb9955f8495cf |
+| Profile MW (StableFeeCreationMw)             | 0x940d11e9105d7c0ffee91e5e6b2375e3a58ec18a |

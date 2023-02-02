@@ -21,14 +21,28 @@ contract DeployScript is Script {
         // Link3ProfileDescriptor(link3Desc).setOwner(newOwner);
         // require(Link3ProfileDescriptor(link3Desc).owner() == newOwner, "WRONG_NEW_OWNER");
 
-        address roleAuth = 0x9937fb8ebe4Ebc7710fFAEd246584603F390BE3E;
-        address preOwner = 0xA7b6bEf855c1c57Df5b7C9c7a4e1eB757e544e7f;
+        // address roleAuth = 0x9937fb8ebe4Ebc7710fFAEd246584603F390BE3E;
+        // address preOwner = 0xA7b6bEf855c1c57Df5b7C9c7a4e1eB757e544e7f;
+        // address newOwner = 0xf9E12df9428F1a15BC6CfD4092ADdD683738cE96;
+
+        // require(RolesAuthority(roleAuth).owner() == preOwner, "WRONG_OWNER");
+        // RolesAuthority(roleAuth).setOwner(newOwner);
+        // require(
+        //     RolesAuthority(roleAuth).owner() == newOwner,
+        //     "WRONG_NEW_OWNER"
+        // );
+
+        address link3Profile = 0x2723522702093601e6360CAe665518C4f63e9dA6;
+        address preOwner = 0x39e0c6E610A8D7F408dD688011591583cbc1c3ce;
         address newOwner = 0xf9E12df9428F1a15BC6CfD4092ADdD683738cE96;
 
-        require(RolesAuthority(roleAuth).owner() == preOwner, "WRONG_OWNER");
-        RolesAuthority(roleAuth).setOwner(newOwner);
         require(
-            RolesAuthority(roleAuth).owner() == newOwner,
+            ProfileNFT(link3Profile).getNamespaceOwner() == preOwner,
+            "WRONG_NS_OWNER"
+        );
+        ProfileNFT(link3Profile).setNamespaceOwner(newOwner);
+        require(
+            ProfileNFT(link3Profile).getNamespaceOwner() == newOwner,
             "WRONG_NEW_OWNER"
         );
 

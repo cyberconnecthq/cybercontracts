@@ -17,6 +17,10 @@ library Constants {
         keccak256(
             "createProfile(address to,string handle,string avatar,string metadata,address operator,uint256 nonce,uint256 deadline)"
         );
+    bytes32 internal constant _CREATE_PROFILE_ORACLE_TYPEHASH =
+        keccak256(
+            "createProfileOracle(address to,string handle,string avatar,string metadata,address operator,uint256 nonce,uint256 deadline,uint80 roundId)"
+        );
     bytes32 internal constant _SUBSCRIBE_TYPEHASH =
         keccak256(
             "subscribeWithSig(uint256[] profileIds,bytes[] preDatas,bytes[] postDatas,uint256 nonce,uint256 deadline)"
@@ -68,6 +72,10 @@ library Constants {
     bytes32 internal constant _CLAIM1155_TYPEHASH =
         keccak256(
             "claim(string profileId,address to,address currency,uint256 tokenId,uint256 amount,uint256 nonce,uint256 deadline)"
+        );
+    bytes32 internal constant _CLAIM_PROFILE_TYPEHASH =
+        keccak256(
+            "claimProfile(address to,string handle,string avatar,string metadata,address operator,uint256 nonce,uint256 deadline)"
         );
 
     // Parameters

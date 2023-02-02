@@ -9,13 +9,20 @@
 | Subscribe Factory                            | 0xeac6012efe2f7451e8b28139e8d23bb3b540fecb |
 | Link3 Profile                                | 0x2723522702093601e6360cae665518c4f63e9da6 |
 | CyberConnect Treasury                        | 0x90137f1234c137c4284dd317303f2717c871f70a |
-| Link3 Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
 | Link3 Descriptor (Impl)                      | 0x24f869169422f86ebf0c90b6785f9f3534ff08e5 |
 | Link3 Descriptor (Proxy)                     | 0x3b131d2d6694a60eb71dff607cc64e6296daa71e |
-| Subscribe MW (SubscribePaidMw)               | 0x9b5678862e143c970f4a63f57dd8a677f5942c40 |
-| Essence MW (CollectPaidMw)                   | 0x9e5e171fadcc01f204bdff12a87f1573e40b0cd2 |
-| Essence MW (CollectPermissionMw)             | 0xaf53c3101c4b57a3d48100832ab8d1732b58c64c |
 | CyberVault                                   | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
-| Essence MW (CollectPermissionMw V2)          | 0x01fafdbfbb1a56d4a58bb1f7472fb866922ff6c4 |
 | CyberGrandNFT (Impl)                         | 0x0160876ad7302cfb5d2bcfbe664a436a69383a12 |
 | CyberGrandNFT (Proxy)                        | 0x110fe2bc9cf45d29e9764da4f6274abf13111efc |
+| Link3 Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
+| Subscribe MW (SubscribePaidMw)               | 0x9b5678862e143c970f4a63f57dd8a677f5942c40 |
+| Subscribe MW (SubscribeOnlyOnceMw)           | 0xc6968831ad8bd12ebb72108f6e4c51432580870d |
+| Subscribe MW (SubscribeDisallowedMw)         | 0x3d1c0dcff5ab0a8ede767f9c094b9e12940f6428 |
+| Subscribe MW (SubscribeOnlyOnceMw)           | 0xc6968831ad8bd12ebb72108f6e4c51432580870d |
+| Subscribe MW (SubscribeDisallowedMw)         | 0x3d1c0dcff5ab0a8ede767f9c094b9e12940f6428 |
+| Essence MW (CollectPaidMw)                   | 0xb09ae63a2fd28686a0f386d1ddfd4b53687bf298 |
+| Essence MW (CollectDisallowedMw)             | 0xcc1d623be97c37b19c64adbd35390260460b92e7 |
+| Essence MW (CollectOnlySubscribedMw)         | 0x26a39e0ecab95b76fbbf593331e25caaa13f83c7 |
+| Essence MW (CollectMerkleDropMw)             | 0x0642cfcba1e391e3affc2270fd2a20e468bceeaa |
+| Essence MW (CollectPermissionMw)             | 0xaf53c3101c4b57a3d48100832ab8d1732b58c64c |
+| Essence MW (CollectPermissionMw V2)          | 0x01fafdbfbb1a56d4a58bb1f7472fb866922ff6c4 |
