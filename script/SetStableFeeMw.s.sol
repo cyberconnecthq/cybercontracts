@@ -42,7 +42,7 @@ contract DeployScript is Script, DeploySetting {
                 LibDeploy.DeployParams(true, true, deployParams),
                 address(0xE8805326f9DA84e70c680429eD46B924b3F158F2), //engineProxyAddress,
                 address(0x8CC6517e45dB7a0803feF220D9b577326A12033f), //address link3Profile,
-                address(0xD10FB4701Be5050692da69a9B5BaA823e9864044) //address stableFeeMw
+                address(0x4C4bfA07bd28D1817D90E63a088643956f248159) //address stableFeeMw
             );
         }
 
