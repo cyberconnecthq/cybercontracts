@@ -720,19 +720,30 @@ library LibDeploy {
         // CyberEngine(engine).allowEssenceMw(mw, true);
 
         // StableFeeCreationMw
-        mw = dc.deploy(
-            abi.encodePacked(
-                type(StableFeeCreationMw).creationCode,
-                abi.encode(engine, usdOracle)
-            ),
-            SALT
-        );
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(StableFeeCreationMw).creationCode,
+        //         abi.encode(engine, usdOracle)
+        //     ),
+        //     SALT
+        // );
 
-        if (writeFile) {
-            _write(vm, "Profile MW (StableFeeCreationMw)", mw);
-        }
+        // if (writeFile) {
+        //     _write(vm, "Profile MW (StableFeeCreationMw)", mw);
+        // }
 
-        CyberEngine(engine).allowProfileMw(mw, true);
+        // OP set
+        // mw = address(0xE5B8C70427c25365A62648f8804C5eAeE57Fb006);
+        // bytes memory methodData = abi.encodeWithSignature("allowProfileMw(address,bool)", mw, true);
+        // console.logBytes(methodData);
+
+        // require(
+        //     CyberEngine(engine).isProfileMwAllowed(mw) ==
+        //         true,
+        //     "MW_NOT_ALLOWED"
+        // );
+
+        //CyberEngine(engine).allowProfileMw(mw, true);
     }
 
     function allowCurrency(
@@ -1013,28 +1024,40 @@ library LibDeploy {
         address link3Profile,
         address stableFeeMw
     ) internal returns (address token) {
-        CyberEngine(engineProxyAddress).setProfileMw(
-            link3Profile,
-            stableFeeMw,
-            abi.encode(
-                params.setting.link3Signer,
-                params.setting.link3Treasury,
-                _INITIAL_USD_FEE_TIER0,
-                _INITIAL_USD_FEE_TIER1,
-                _INITIAL_USD_FEE_TIER2,
-                _INITIAL_USD_FEE_TIER3,
-                _INITIAL_USD_FEE_TIER4,
-                _INITIAL_USD_FEE_TIER5,
-                _INITIAL_USD_FEE_TIER6,
-                _INITIAL_USD_FEE_TIER7
-            )
-        );
-        require(
-            StableFeeCreationMw(stableFeeMw).getSigner(link3Profile) ==
-                params.setting.link3Signer,
-            "LINK3_SIGNER_WRONG"
-        );
-
+        // CyberEngine(engineProxyAddress).setProfileMw(
+        //     link3Profile,
+        //     stableFeeMw,
+        //     abi.encode(
+        //         params.setting.link3Signer,
+        //         params.setting.link3Treasury,
+        //         _INITIAL_USD_FEE_TIER0,
+        //         _INITIAL_USD_FEE_TIER1,
+        //         _INITIAL_USD_FEE_TIER2,
+        //         _INITIAL_USD_FEE_TIER3,
+        //         _INITIAL_USD_FEE_TIER4,
+        //         _INITIAL_USD_FEE_TIER5,
+        //         _INITIAL_USD_FEE_TIER6,
+        //         _INITIAL_USD_FEE_TIER7
+        //     )
+        // );
+        // require(
+        //     StableFeeCreationMw(stableFeeMw).getSigner(link3Profile) ==
+        //         params.setting.link3Signer,
+        //     "LINK3_SIGNER_WRONG"
+        // );
+        // bytes memory methodData = abi.encodeWithSignature("setProfileMw(address,address,bytes)", link3Profile, stableFeeMw, abi.encode(
+        //         params.setting.link3Signer,
+        //         params.setting.link3Treasury,
+        //         _INITIAL_USD_FEE_TIER0,
+        //         _INITIAL_USD_FEE_TIER1,
+        //         _INITIAL_USD_FEE_TIER2,
+        //         _INITIAL_USD_FEE_TIER3,
+        //         _INITIAL_USD_FEE_TIER4,
+        //         _INITIAL_USD_FEE_TIER5,
+        //         _INITIAL_USD_FEE_TIER6,
+        //         _INITIAL_USD_FEE_TIER7
+        //     ));
+        // console.logBytes(methodData);
         // uint256 fee = StableFeeCreationMw(stableFeeMw).getPriceWei(
         //     link3Profile,
         //     "ABCDDDSASDSSSDD"
