@@ -26,7 +26,7 @@ contract DeployScript is Script, DeploySetting {
                 LibDeploy.DeployParams(true, true, deployParams),
                 address(0x1cA51941a616D14C42D3e3B9E6E687d7F5054c3A), //engineProxyAddress,
                 address(0x2723522702093601e6360CAe665518C4f63e9dA6), //address link3Profile,
-                address(0xE5B8C70427c25365A62648f8804C5eAeE57Fb006) //address stableFeeMw
+                address(0xAd246cc868A43c9dbE39Ca814860B88714E20822) //address stableFeeMw
             );
         } else if (block.chainid == DeploySetting.BNBT) {
             LibDeploy.setStableFeeMw(

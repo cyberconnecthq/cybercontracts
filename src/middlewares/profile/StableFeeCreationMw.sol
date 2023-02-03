@@ -124,7 +124,7 @@ contract StableFeeCreationMw is IProfileMiddleware, EIP712, PermissionedMw {
 
         uint256 feeWei = getPriceWeiAt(msg.sender, params.handle, roundId);
         require(msg.value >= feeWei, "INSUFFICIENT_FEE");
-        Address.sendValue(payable(mwData.recipient), feeWei);
+        Address.sendValue(payable(mwData.recipient), msg.value);
     }
 
     /// @inheritdoc IProfileMiddleware

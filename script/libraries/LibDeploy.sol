@@ -720,30 +720,29 @@ library LibDeploy {
         // CyberEngine(engine).allowEssenceMw(mw, true);
 
         // StableFeeCreationMw
-        // mw = dc.deploy(
-        //     abi.encodePacked(
-        //         type(StableFeeCreationMw).creationCode,
-        //         abi.encode(engine, usdOracle)
-        //     ),
-        //     SALT
-        // );
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(StableFeeCreationMw).creationCode,
+                abi.encode(engine, usdOracle)
+            ),
+            SALT
+        );
 
-        // if (writeFile) {
-        //     _write(vm, "Profile MW (StableFeeCreationMw)", mw);
-        // }
+        if (writeFile) {
+            _write(vm, "Profile MW (StableFeeCreationMw)", mw);
+        }
 
         // OP set
         // mw = address(0xE5B8C70427c25365A62648f8804C5eAeE57Fb006);
         // bytes memory methodData = abi.encodeWithSignature("allowProfileMw(address,bool)", mw, true);
         // console.logBytes(methodData);
 
+        // CyberEngine(engine).allowProfileMw(mw, true);
         // require(
         //     CyberEngine(engine).isProfileMwAllowed(mw) ==
         //         true,
         //     "MW_NOT_ALLOWED"
         // );
-
-        //CyberEngine(engine).allowProfileMw(mw, true);
     }
 
     function allowCurrency(
