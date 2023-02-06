@@ -18,3 +18,4 @@
 | Link3 Descriptor (Proxy)                     | 0x8173b44251b3107b4a9c771dee9e7beae8da10fa |
 | FrameNFT                                     | 0x3fdf5cd1f2fbd007b833ea06c5500d67b3d6cdec |
 | Subscribe MW (SubscribeOnlyOnceMw)           | 0x1c9dd108bcea22ccd4e268401e2e3fda65ab6ea3 |
+| Profile MW (StableFeeCreationMw)             | 0x45c3d3dc105ba805e610f7fc2f3b4ca5e29097a7 |

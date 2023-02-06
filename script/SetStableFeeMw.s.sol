@@ -44,6 +44,14 @@ contract DeployScript is Script, DeploySetting {
                 address(0x8CC6517e45dB7a0803feF220D9b577326A12033f), //address link3Profile,
                 address(0x4C4bfA07bd28D1817D90E63a088643956f248159) //address stableFeeMw
             );
+        } else if (block.chainid == DeploySetting.POLYGON) {
+            LibDeploy.setStableFeeMw(
+                vm,
+                LibDeploy.DeployParams(true, true, deployParams),
+                address(0x64E1503a2419966c51332d7f6018dE9544AD78a1), //engineProxyAddress,
+                address(0xbF029d040e3E6DA7b768b759dD9D67D84c73C06f), //address link3Profile,
+                address(0x45C3D3dC105Ba805E610f7fc2F3b4Ca5E29097a7) //address stableFeeMw
+            );
         }
 
         vm.stopBroadcast();

@@ -37,7 +37,7 @@ contract DeployScript is Script, DeploySetting {
                 LibDeploy.DeployParams(true, true, deployParams),
                 address(0x64E1503a2419966c51332d7f6018dE9544AD78a1), // engine proxy address
                 address(0x4ADe3Dd65aD8BAfcD2c79F12cE62080c8c6749eF), // cyber treasury address
-                address(0), // usd oracle address
+                address(0xAB594600376Ec9fD91F8e885dADF0CE036862dE0), // matic-usd oracle address
                 true
             );
         } else if (block.chainid == DeploySetting.MAINNET) {
