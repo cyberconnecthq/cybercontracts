@@ -8,6 +8,7 @@ import { ProfileNFT } from "../../src/core/ProfileNFT.sol";
 import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
+import { StableFeeCreationMw } from "../../src/middlewares/profile/StableFeeCreationMw.sol";
 import { CollectOnlySubscribedMw } from "../../src/middlewares/essence/CollectOnlySubscribedMw.sol";
 import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 
@@ -24,6 +25,7 @@ abstract contract TestIntegrationBase is Test, TestProxy {
     address internal constant carly = address(0xDEADCA11);
     address internal constant dixon = address(0xDEADD1);
     address internal constant link3Treasury = address(0xDEAD3333);
+    address internal constant usdOracle = address(0xDEAD3334);
 
     address internal constant engineTreasury = address(0xDEADEEEE);
 
@@ -33,6 +35,7 @@ abstract contract TestIntegrationBase is Test, TestProxy {
     ProfileNFT link3Profile;
     Link3ProfileDescriptor profileDescriptor;
     PermissionedFeeCreationMw profileMw;
+    StableFeeCreationMw stableFeeProfileMw;
     CollectOnlySubscribedMw collectMw;
     CyberEngine engine;
     Treasury treasury;
@@ -44,11 +47,13 @@ abstract contract TestIntegrationBase is Test, TestProxy {
             vm,
             link3Signer,
             link3Treasury,
-            engineTreasury
+            engineTreasury,
+            usdOracle
         );
         link3Profile = ProfileNFT(addrs.link3Profile);
         profileDescriptor = Link3ProfileDescriptor(addrs.link3DescriptorProxy);
         profileMw = PermissionedFeeCreationMw(addrs.link3ProfileMw);
+        stableFeeProfileMw = StableFeeCreationMw(addrs.stableFeeMw);
         engine = CyberEngine(addrs.engineProxyAddress);
         treasury = Treasury(addrs.cyberTreasury);
         link3EssBeacon = addrs.essBeacon;
