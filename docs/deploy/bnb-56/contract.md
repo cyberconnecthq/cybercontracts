@@ -11,6 +11,8 @@
 | CyberConnect Treasury                     | 0x90137f1234c137c4284dd317303f2717c871f70a |
 | CC Descriptor (Impl)                      | 0x24f869169422f86ebf0c90b6785f9f3534ff08e5 |
 | CC Descriptor (Proxy)                     | 0x3b131d2d6694a60eb71dff607cc64e6296daa71e |
+| CC DescriptorV2 (Impl)                    | 0xcd59a32562243b74e786d345084548f8cb64c031 |
+| CC DescriptorV2 (Proxy)                   | 0x3d73a6dfc4ffe6b0268c8dae25c6c6885b5f7c3c |
 | CyberVault                                | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
 | CyberGrandNFT (Impl)                      | 0x0160876ad7302cfb5d2bcfbe664a436a69383a12 |
 | CyberGrandNFT (Proxy)                     | 0x110fe2bc9cf45d29e9764da4f6274abf13111efc |
@@ -27,3 +29,4 @@
 | Essence MW (CollectPermissionMw V2)       | 0x01fafdbfbb1a56d4a58bb1f7472fb866922ff6c4 |
 | CC Profile MW (StableFeeCreationMw)       | 0xad246cc868a43c9dbe39ca814860b88714e20822 |
 | CC Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
+| CC Profile MW (FeeCreationMw)             | 0xe072666997b472a908e45b4b73b430dfba9f6d33 |
