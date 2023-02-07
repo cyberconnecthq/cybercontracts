@@ -22,7 +22,7 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
 
     string constant avatar = "avatar";
     string constant metadata = "metadata";
-    uint80 constant mockRoundId = 9;
+    uint80 constant mockRoundId = 36893488147423339035;
     int256 constant mockUsdPrice = 99;
     uint80 constant mockAnsweredInRound = 999;
 
