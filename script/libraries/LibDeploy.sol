@@ -728,7 +728,7 @@ library LibDeploy {
 
         // CyberEngine(engine).allowEssenceMw(mw, true);
 
-        // // StableFeeCreationMw
+        // StableFeeCreationMw
         // mw = dc.deploy(
         //     abi.encodePacked(
         //         type(StableFeeCreationMw).creationCode,
@@ -1037,27 +1037,27 @@ library LibDeploy {
         address link3Profile,
         address stableFeeMw
     ) internal returns (address token) {
-        CyberEngine(engineProxyAddress).setProfileMw(
-            link3Profile,
-            stableFeeMw,
-            abi.encode(
-                params.setting.link3Signer,
-                params.setting.link3Treasury,
-                _INITIAL_USD_FEE_TIER0,
-                _INITIAL_USD_FEE_TIER1,
-                _INITIAL_USD_FEE_TIER2,
-                _INITIAL_USD_FEE_TIER3,
-                _INITIAL_USD_FEE_TIER4,
-                _INITIAL_USD_FEE_TIER5,
-                _INITIAL_USD_FEE_TIER6,
-                _INITIAL_USD_FEE_TIER7
-            )
-        );
-        require(
-            StableFeeCreationMw(stableFeeMw).getSigner(link3Profile) ==
-                params.setting.link3Signer,
-            "LINK3_SIGNER_WRONG"
-        );
+        // CyberEngine(engineProxyAddress).setProfileMw(
+        //     link3Profile,
+        //     stableFeeMw,
+        //     abi.encode(
+        //         params.setting.link3Signer,
+        //         params.setting.link3Treasury,
+        //         _INITIAL_USD_FEE_TIER0,
+        //         _INITIAL_USD_FEE_TIER1,
+        //         _INITIAL_USD_FEE_TIER2,
+        //         _INITIAL_USD_FEE_TIER3,
+        //         _INITIAL_USD_FEE_TIER4,
+        //         _INITIAL_USD_FEE_TIER5,
+        //         _INITIAL_USD_FEE_TIER6,
+        //         _INITIAL_USD_FEE_TIER7
+        //     )
+        // );
+        // require(
+        //     StableFeeCreationMw(stableFeeMw).getSigner(link3Profile) ==
+        //         params.setting.link3Signer,
+        //     "LINK3_SIGNER_WRONG"
+        // );
         // bytes memory methodData = abi.encodeWithSignature("setProfileMw(address,address,bytes)", link3Profile, stableFeeMw, abi.encode(
         //         params.setting.link3Signer,
         //         params.setting.link3Treasury,
@@ -1070,25 +1070,25 @@ library LibDeploy {
         //         _INITIAL_USD_FEE_TIER6,
         //         _INITIAL_USD_FEE_TIER7
         //     ));
-        // bytes memory methodData = abi.encode(
-        //         params.setting.link3Signer,
-        //         params.setting.link3Treasury,
-        //         _INITIAL_USD_FEE_TIER0,
-        //         _INITIAL_USD_FEE_TIER1,
-        //         _INITIAL_USD_FEE_TIER2,
-        //         _INITIAL_USD_FEE_TIER3,
-        //         _INITIAL_USD_FEE_TIER4,
-        //         _INITIAL_USD_FEE_TIER5,
-        //         _INITIAL_USD_FEE_TIER6,
-        //         _INITIAL_USD_FEE_TIER7
-        //     );
-        // console.logBytes(methodData);
-        uint256 fee = StableFeeCreationMw(stableFeeMw).getPriceWeiAt(
-            link3Profile,
-            "A",
-            uint80(36893488147423339035)
+        bytes memory methodData = abi.encode(
+            params.setting.link3Signer,
+            params.setting.link3Treasury,
+            _INITIAL_USD_FEE_TIER0,
+            _INITIAL_USD_FEE_TIER1,
+            _INITIAL_USD_FEE_TIER2,
+            _INITIAL_USD_FEE_TIER3,
+            _INITIAL_USD_FEE_TIER4,
+            _INITIAL_USD_FEE_TIER5,
+            _INITIAL_USD_FEE_TIER6,
+            _INITIAL_USD_FEE_TIER7
         );
-        console.log(fee);
+        console.logBytes(methodData);
+        // uint256 fee = StableFeeCreationMw(stableFeeMw).getPriceWeiAt(
+        //     link3Profile,
+        //     "A",
+        //     uint80(36893488147423339035)
+        // );
+        // console.log(fee);
     }
 
     function setFeeCreationMw(
@@ -1098,20 +1098,20 @@ library LibDeploy {
         address link3Profile,
         address link3ProfileMw
     ) internal returns (address token) {
-        CyberEngine(engineProxyAddress).setProfileMw(
-            link3Profile,
-            link3ProfileMw,
-            abi.encode(
-                params.setting.link3Treasury,
-                _INITIAL_FEE_BNB_TIER0,
-                _INITIAL_FEE_BNB_TIER1,
-                _INITIAL_FEE_BNB_TIER2,
-                _INITIAL_FEE_BNB_TIER3,
-                _INITIAL_FEE_BNB_TIER4,
-                _INITIAL_FEE_BNB_TIER5,
-                _INITIAL_FEE_BNB_TIER6
-            )
-        );
+        // CyberEngine(engineProxyAddress).setProfileMw(
+        //     link3Profile,
+        //     link3ProfileMw,
+        //     abi.encode(
+        //         params.setting.link3Treasury,
+        //         _INITIAL_FEE_BNB_TIER0,
+        //         _INITIAL_FEE_BNB_TIER1,
+        //         _INITIAL_FEE_BNB_TIER2,
+        //         _INITIAL_FEE_BNB_TIER3,
+        //         _INITIAL_FEE_BNB_TIER4,
+        //         _INITIAL_FEE_BNB_TIER5,
+        //         _INITIAL_FEE_BNB_TIER6
+        //     )
+        // );
 
         bytes memory methodData = abi.encode(
             params.setting.link3Treasury,
