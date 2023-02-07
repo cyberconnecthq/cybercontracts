@@ -54,6 +54,7 @@ library LibDeploy {
         address cyberTreasury;
         address link3Profile;
         address link3ProfileMw;
+        address stableFeeMw;
         address calcEngineImpl;
         address calcEngineProxy;
         address essFac;
@@ -253,7 +254,8 @@ library LibDeploy {
         Vm vm,
         address link3Signer,
         address link3Treasury,
-        address engineTreasury
+        address engineTreasury,
+        address usdOracle
     ) internal returns (ContractAddresses memory addrs) {
         DeploySetting.DeployParameters memory setting = DeploySetting
             .DeployParameters(
@@ -284,6 +286,15 @@ library LibDeploy {
         );
 
         (, addrs.cyberBox) = deployBox(vm, address(dc), address(this), false);
+
+        addrs.stableFeeMw = deployAllMiddleware(
+            vm,
+            params,
+            addrs.engineProxyAddress,
+            addrs.cyberTreasury,
+            usdOracle,
+            params.writeFile
+        );
     }
 
     function deploy(
@@ -615,9 +626,16 @@ library LibDeploy {
         address cyberTreasury,
         address usdOracle,
         bool writeFile
-    ) internal returns (address token) {
-        Create2Deployer dc = Create2Deployer(params.setting.deployerContract); // for deployment
-        address mw;
+    ) internal returns (address stableFeeMw) {
+        Create2Deployer dc;
+        if (params.setting.deployerContract == address(0)) {
+            dc = new Create2Deployer(); // for running test
+            if (params.writeFile) {
+                _write(vm, "Create2Deployer", address(dc));
+            }
+        } else {
+            dc = Create2Deployer(params.setting.deployerContract); // for deployment
+        }
 
         // // CollectPermissionMw
         // mw = dc.deploy(
@@ -720,7 +738,7 @@ library LibDeploy {
         // CyberEngine(engine).allowEssenceMw(mw, true);
 
         // StableFeeCreationMw
-        mw = dc.deploy(
+        stableFeeMw = dc.deploy(
             abi.encodePacked(
                 type(StableFeeCreationMw).creationCode,
                 abi.encode(engine, usdOracle)
@@ -729,10 +747,10 @@ library LibDeploy {
         );
 
         if (writeFile) {
-            _write(vm, "Profile MW (StableFeeCreationMw)", mw);
+            _write(vm, "Profile MW (StableFeeCreationMw)", stableFeeMw);
         }
 
-        CyberEngine(engine).allowProfileMw(mw, true);
+        CyberEngine(engine).allowProfileMw(stableFeeMw, true);
 
         // OP set
         // mw = address(0xE5B8C70427c25365A62648f8804C5eAeE57Fb006);
