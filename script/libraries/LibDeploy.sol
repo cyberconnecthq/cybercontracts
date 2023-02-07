@@ -581,6 +581,8 @@ library LibDeploy {
         );
 
         // EngineAuthority owner role change to timelock
+        // bytes memory methodData = abi.encodeWithSignature("setOwner(address)", address(0xA7b6bEf855c1c57Df5b7C9c7a4e1eB757e544e7f));
+        // console.logBytes(methodData);
         RolesAuthority(engineAuthority).setOwner(timelock);
         require(
             RolesAuthority(engineAuthority).owner() == timelock,
@@ -731,6 +733,11 @@ library LibDeploy {
         }
 
         CyberEngine(engine).allowProfileMw(mw, true);
+
+        // OP set
+        // mw = address(0xE5B8C70427c25365A62648f8804C5eAeE57Fb006);
+        // bytes memory methodData = abi.encodeWithSignature("allowProfileMw(address,bool)", mw, true);
+        // console.logBytes(methodData);
     }
 
     function allowCurrency(
@@ -1032,12 +1039,37 @@ library LibDeploy {
                 params.setting.link3Signer,
             "LINK3_SIGNER_WRONG"
         );
-
-        // uint256 fee = StableFeeCreationMw(stableFeeMw).getPriceWei(
-        //     link3Profile,
-        //     "ABCDDDSASDSSSDD"
-        // );
-        // console.log(fee);
+        // bytes memory methodData = abi.encodeWithSignature("setProfileMw(address,address,bytes)", link3Profile, stableFeeMw, abi.encode(
+        //         params.setting.link3Signer,
+        //         params.setting.link3Treasury,
+        //         _INITIAL_USD_FEE_TIER0,
+        //         _INITIAL_USD_FEE_TIER1,
+        //         _INITIAL_USD_FEE_TIER2,
+        //         _INITIAL_USD_FEE_TIER3,
+        //         _INITIAL_USD_FEE_TIER4,
+        //         _INITIAL_USD_FEE_TIER5,
+        //         _INITIAL_USD_FEE_TIER6,
+        //         _INITIAL_USD_FEE_TIER7
+        //     ));
+        // bytes memory methodData = abi.encode(
+        //         params.setting.link3Signer,
+        //         params.setting.link3Treasury,
+        //         _INITIAL_USD_FEE_TIER0,
+        //         _INITIAL_USD_FEE_TIER1,
+        //         _INITIAL_USD_FEE_TIER2,
+        //         _INITIAL_USD_FEE_TIER3,
+        //         _INITIAL_USD_FEE_TIER4,
+        //         _INITIAL_USD_FEE_TIER5,
+        //         _INITIAL_USD_FEE_TIER6,
+        //         _INITIAL_USD_FEE_TIER7
+        //     );
+        // console.logBytes(methodData);
+        uint256 fee = StableFeeCreationMw(stableFeeMw).getPriceWeiAt(
+            link3Profile,
+            "A",
+            uint80(36893488147423339035)
+        );
+        console.log(fee);
     }
 
     function setAniURL(

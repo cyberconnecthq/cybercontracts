@@ -7,21 +7,27 @@ import { LibDeploy } from "./libraries/LibDeploy.sol";
 import { DeploySetting } from "./libraries/DeploySetting.sol";
 
 contract SetAnimationURLV2 is Script, DeploySetting {
-    address internal link3Profile = 0x8CC6517e45dB7a0803feF220D9b577326A12033f;
-
     function run() external {
         _setDeployParams();
-        // make sure only on anvil
-        require(block.chainid == 1, "ONLY_MAINNET");
         vm.startBroadcast();
 
-        LibDeploy.deployLink3DescriptorV2(
-            vm,
-            deployParams.deployerContract,
-            true,
-            link3Profile,
-            deployParams.link3Owner
-        );
+        if (block.chainid == DeploySetting.MAINNET) {
+            LibDeploy.deployLink3DescriptorV2(
+                vm,
+                deployParams.deployerContract,
+                true,
+                address(0x8CC6517e45dB7a0803feF220D9b577326A12033f), // link3Profile
+                deployParams.link3Owner
+            );
+        } else if (block.chainid == DeploySetting.BNBT) {
+            LibDeploy.deployLink3DescriptorV2(
+                vm,
+                deployParams.deployerContract,
+                true,
+                address(0x57e12b7a5F38A7F9c23eBD0400e6E53F2a45F271), // link3Profile
+                deployParams.link3Owner
+            );
+        }
 
         vm.stopBroadcast();
     }
