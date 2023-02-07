@@ -22,6 +22,7 @@
 | FrameNFT                                  | 0x58d8c07575339bf47392ad2bd0aeb9955f8495cf |
 | CC Profile MW (StableFeeCreationMw)       | 0x940d11e9105d7c0ffee91e5e6b2375e3a58ec18a |
 | CC Profile MW (PermissionedFeeCreationMw) | 0xd1587f68e9d9f9ee93c9aa6fc60c7da414e90818 |
+| CC Profile MW (FeeCreationMw)             | 0xf1d8512d08f3924768041d1063ef5517ca867f0d |
 | Essence MW (SignaturePermissionEssenceMw) | 0x733142f467904f9a2e8efa0119523d3cc7a99b0b |
 | Subscribe MW (SubscribePaidMw)            | 0xd5d66dc7180fa4f3ae05b66ee34793146db6e3e9 |
 | Essence MW (CollectPaidMw)                | 0x415648c28adb31629418498264f55d54e4c324db |

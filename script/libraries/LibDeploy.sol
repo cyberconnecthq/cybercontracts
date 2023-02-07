@@ -27,6 +27,7 @@ import { TestLib712 } from "../../test/utils/TestLib712.sol";
 import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
 import { StableFeeCreationMw } from "../../src/middlewares/profile/StableFeeCreationMw.sol";
+import { FeeCreationMw } from "../../src/middlewares/profile/FeeCreationMw.sol";
 import { CollectPermissionMw } from "../../src/middlewares/essence/CollectPermissionMw.sol";
 import { SubscribePaidMw } from "../../src/middlewares/subscribe/SubscribePaidMw.sol";
 import { SubscribeOnlyOnceMw } from "../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
@@ -99,6 +100,14 @@ library LibDeploy {
     uint256 internal constant _INITIAL_USD_FEE_TIER5 = 50;
     uint256 internal constant _INITIAL_USD_FEE_TIER6 = 10;
     uint256 internal constant _INITIAL_USD_FEE_TIER7 = 1;
+
+    uint256 internal constant _INITIAL_FEE_BNB_TIER0 = 33.3333 ether;
+    uint256 internal constant _INITIAL_FEE_BNB_TIER1 = 6.6667 ether;
+    uint256 internal constant _INITIAL_FEE_BNB_TIER2 = 3.3333 ether;
+    uint256 internal constant _INITIAL_FEE_BNB_TIER3 = 1.6667 ether;
+    uint256 internal constant _INITIAL_FEE_BNB_TIER4 = 0.3333 ether;
+    uint256 internal constant _INITIAL_FEE_BNB_TIER5 = 0.1667 ether;
+    uint256 internal constant _INITIAL_FEE_BNB_TIER6 = 0.0333 ether;
 
     string internal constant OUTPUT_FILE = "docs/deploy/";
 
@@ -719,25 +728,35 @@ library LibDeploy {
 
         // CyberEngine(engine).allowEssenceMw(mw, true);
 
-        // StableFeeCreationMw
+        // // StableFeeCreationMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(StableFeeCreationMw).creationCode,
+        //         abi.encode(engine, usdOracle)
+        //     ),
+        //     SALT
+        // );
+
+        // if (writeFile) {
+        //     _write(vm, "Profile MW (StableFeeCreationMw)", mw);
+        // }
+
+        // CyberEngine(engine).allowProfileMw(mw, true);
+
+        // FeeCreationMw
         mw = dc.deploy(
             abi.encodePacked(
-                type(StableFeeCreationMw).creationCode,
-                abi.encode(engine, usdOracle)
+                type(FeeCreationMw).creationCode,
+                abi.encode(engine)
             ),
             SALT
         );
 
         if (writeFile) {
-            _write(vm, "Profile MW (StableFeeCreationMw)", mw);
+            _write(vm, "CC Profile MW (FeeCreationMw)", mw);
         }
 
         CyberEngine(engine).allowProfileMw(mw, true);
-
-        // OP set
-        // mw = address(0xE5B8C70427c25365A62648f8804C5eAeE57Fb006);
-        // bytes memory methodData = abi.encodeWithSignature("allowProfileMw(address,bool)", mw, true);
-        // console.logBytes(methodData);
     }
 
     function allowCurrency(
@@ -1070,6 +1089,41 @@ library LibDeploy {
             uint80(36893488147423339035)
         );
         console.log(fee);
+    }
+
+    function setFeeCreationMw(
+        Vm vm,
+        DeployParams memory params,
+        address engineProxyAddress,
+        address link3Profile,
+        address link3ProfileMw
+    ) internal returns (address token) {
+        CyberEngine(engineProxyAddress).setProfileMw(
+            link3Profile,
+            link3ProfileMw,
+            abi.encode(
+                params.setting.link3Treasury,
+                _INITIAL_FEE_BNB_TIER0,
+                _INITIAL_FEE_BNB_TIER1,
+                _INITIAL_FEE_BNB_TIER2,
+                _INITIAL_FEE_BNB_TIER3,
+                _INITIAL_FEE_BNB_TIER4,
+                _INITIAL_FEE_BNB_TIER5,
+                _INITIAL_FEE_BNB_TIER6
+            )
+        );
+
+        bytes memory methodData = abi.encode(
+            params.setting.link3Treasury,
+            _INITIAL_FEE_BNB_TIER0,
+            _INITIAL_FEE_BNB_TIER1,
+            _INITIAL_FEE_BNB_TIER2,
+            _INITIAL_FEE_BNB_TIER3,
+            _INITIAL_FEE_BNB_TIER4,
+            _INITIAL_FEE_BNB_TIER5,
+            _INITIAL_FEE_BNB_TIER6
+        );
+        console.logBytes(methodData);
     }
 
     function setAniURL(
@@ -1444,11 +1498,11 @@ library LibDeploy {
         }
 
         // Need to have access to LINK3 OWNER
-        ProfileNFT(link3Profile).setNFTDescriptor(proxy);
+        // ProfileNFT(link3Profile).setNFTDescriptor(proxy);
 
-        require(
-            ProfileNFT(link3Profile).getNFTDescriptor() == proxy,
-            "NFT_DESCRIPTOR_NOT_SET"
-        );
+        // require(
+        //     ProfileNFT(link3Profile).getNFTDescriptor() == proxy,
+        //     "NFT_DESCRIPTOR_NOT_SET"
+        // );
     }
 }
