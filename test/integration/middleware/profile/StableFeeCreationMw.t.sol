@@ -15,18 +15,16 @@ import { StableFeeCreationMw } from "../../../../src/middlewares/profile/StableF
 import { TestIntegrationBase } from "../../../utils/TestIntegrationBase.sol";
 import { TestLib712 } from "../../../utils/TestLib712.sol";
 
-import "forge-std/console.sol"; // todo detlete
-
 contract StableFeeCreationMwTest is TestIntegrationBase {
     uint256 validDeadline;
-    uint256 startedAt;
-    uint256 updatedAt;
+    uint256 validStartedAt;
+    uint256 validUpdatedAt;
 
     string constant avatar = "avatar";
     string constant metadata = "metadata";
     uint80 constant mockRoundId = 9;
     int256 constant mockUsdPrice = 99;
-    uint80 constant answeredInRound = 0;
+    uint80 constant mockAnsweredInRound = 999;
 
     uint256 constant tier0Fee = 100;
     uint256 constant tier1Fee = 200;
@@ -38,10 +36,14 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
     uint256 constant tier7Fee = 800;
 
     function setUp() public {
-        validDeadline = block.timestamp + 60 * 60;
-        startedAt = validDeadline;
-        updatedAt = validDeadline;
         _setUp();
+
+        validDeadline = block.timestamp + 60 * 60;
+        validStartedAt = validDeadline + 60 * 60;
+        validUpdatedAt = validDeadline + 60 * 60;
+        // mock usd oracle
+        _mockOracleRoundData(mockRoundId, validStartedAt, validUpdatedAt);
+        _mockOracleLatestRoundData(mockRoundId, validStartedAt, validUpdatedAt);
         // set stable fee middleware
         DeploySetting.DeployParameters memory setting = DeploySetting
             .DeployParameters(
@@ -119,6 +121,9 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
     }
 
     function testCreateProfileFeeTier0() public {
+        uint256 balance = stableFeeProfileMw
+            .getRecipient(address(link3Profile))
+            .balance;
         _createProfile(
             "a",
             LibDeploy._INITIAL_USD_FEE_TIER0,
@@ -127,9 +132,17 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
             mockRoundId,
             ""
         );
+        assertEq(
+            stableFeeProfileMw.getRecipient(address(link3Profile)).balance -
+                balance,
+            _attoUSDToWei(LibDeploy._INITIAL_USD_FEE_TIER0)
+        );
     }
 
     function testCreateProfileFeeTier1() public {
+        uint256 balance = stableFeeProfileMw
+            .getRecipient(address(link3Profile))
+            .balance;
         _createProfile(
             "ab",
             LibDeploy._INITIAL_USD_FEE_TIER1,
@@ -138,9 +151,17 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
             mockRoundId,
             ""
         );
+        assertEq(
+            stableFeeProfileMw.getRecipient(address(link3Profile)).balance -
+                balance,
+            _attoUSDToWei(LibDeploy._INITIAL_USD_FEE_TIER1)
+        );
     }
 
     function testCreateProfileFeeTier2() public {
+        uint256 balance = stableFeeProfileMw
+            .getRecipient(address(link3Profile))
+            .balance;
         _createProfile(
             "abc",
             LibDeploy._INITIAL_USD_FEE_TIER2,
@@ -149,9 +170,17 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
             mockRoundId,
             ""
         );
+        assertEq(
+            stableFeeProfileMw.getRecipient(address(link3Profile)).balance -
+                balance,
+            _attoUSDToWei(LibDeploy._INITIAL_USD_FEE_TIER2)
+        );
     }
 
     function testCreateProfileFeeTier3() public {
+        uint256 balance = stableFeeProfileMw
+            .getRecipient(address(link3Profile))
+            .balance;
         _createProfile(
             "abcd",
             LibDeploy._INITIAL_USD_FEE_TIER3,
@@ -160,9 +189,17 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
             mockRoundId,
             ""
         );
+        assertEq(
+            stableFeeProfileMw.getRecipient(address(link3Profile)).balance -
+                balance,
+            _attoUSDToWei(LibDeploy._INITIAL_USD_FEE_TIER3)
+        );
     }
 
     function testCreateProfileFeeTier4() public {
+        uint256 balance = stableFeeProfileMw
+            .getRecipient(address(link3Profile))
+            .balance;
         _createProfile(
             "abcde",
             LibDeploy._INITIAL_USD_FEE_TIER4,
@@ -171,9 +208,17 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
             mockRoundId,
             ""
         );
+        assertEq(
+            stableFeeProfileMw.getRecipient(address(link3Profile)).balance -
+                balance,
+            _attoUSDToWei(LibDeploy._INITIAL_USD_FEE_TIER4)
+        );
     }
 
     function testCreateProfileFeeTier5() public {
+        uint256 balance = stableFeeProfileMw
+            .getRecipient(address(link3Profile))
+            .balance;
         _createProfile(
             "abcdef",
             LibDeploy._INITIAL_USD_FEE_TIER5,
@@ -182,9 +227,17 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
             mockRoundId,
             ""
         );
+        assertEq(
+            stableFeeProfileMw.getRecipient(address(link3Profile)).balance -
+                balance,
+            _attoUSDToWei(LibDeploy._INITIAL_USD_FEE_TIER5)
+        );
     }
 
     function testCreateProfileFeeTier6() public {
+        uint256 balance = stableFeeProfileMw
+            .getRecipient(address(link3Profile))
+            .balance;
         _createProfile(
             "abcdefg",
             LibDeploy._INITIAL_USD_FEE_TIER6,
@@ -193,9 +246,17 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
             mockRoundId,
             ""
         );
+        assertEq(
+            stableFeeProfileMw.getRecipient(address(link3Profile)).balance -
+                balance,
+            _attoUSDToWei(LibDeploy._INITIAL_USD_FEE_TIER6)
+        );
     }
 
     function testCreateProfileFeeTier7() public {
+        uint256 balance = stableFeeProfileMw
+            .getRecipient(address(link3Profile))
+            .balance;
         _createProfile(
             "abcdefgefghi",
             LibDeploy._INITIAL_USD_FEE_TIER7,
@@ -203,6 +264,11 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
             validDeadline,
             mockRoundId,
             ""
+        );
+        assertEq(
+            stableFeeProfileMw.getRecipient(address(link3Profile)).balance -
+                balance,
+            _attoUSDToWei(LibDeploy._INITIAL_USD_FEE_TIER7)
         );
     }
 
@@ -315,6 +381,25 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
             invalidDeadline,
             mockRoundId,
             "DEADLINE_EXCEEDED"
+        );
+    }
+
+    function testCannotCreateProfileInvalidRoundId() public {
+        uint80 invalidRoundId = 0;
+        uint256 invalidStartedAt = 0;
+        uint256 invalidUpdatedAt = 0;
+        _mockOracleRoundData(
+            invalidRoundId,
+            invalidStartedAt,
+            invalidUpdatedAt
+        );
+        _createProfile(
+            "abcdef",
+            LibDeploy._INITIAL_USD_FEE_TIER0,
+            link3SignerPk,
+            validDeadline,
+            invalidRoundId,
+            "NOT_RECENT_ROUND"
         );
     }
 
@@ -534,37 +619,6 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
             vm.expectRevert(byteReason);
         }
 
-        // mock AggregatorV3Interface.getRoundData
-        vm.mockCall(
-            address(usdOracle),
-            abi.encodeWithSelector(
-                AggregatorV3Interface.getRoundData.selector,
-                roundId
-            ),
-            abi.encode(
-                roundId,
-                mockUsdPrice,
-                startedAt,
-                updatedAt,
-                answeredInRound
-            )
-        );
-
-        // mock AggregatorV3Interface.latestRoundData
-        vm.mockCall(
-            address(usdOracle),
-            abi.encodeWithSelector(
-                AggregatorV3Interface.latestRoundData.selector
-            ),
-            abi.encode(
-                roundId,
-                mockUsdPrice,
-                startedAt,
-                updatedAt,
-                answeredInRound
-            )
-        );
-
         link3Profile.createProfile{ value: _attoUSDToWei(fee) }(
             params,
             abi.encode(v, r, s, deadline, roundId),
@@ -614,5 +668,46 @@ contract StableFeeCreationMwTest is TestIntegrationBase {
 
     function _attoUSDToWei(uint256 amount) internal pure returns (uint256) {
         return (amount * 1e8 * 1e18) / uint256(mockUsdPrice);
+    }
+
+    function _mockOracleRoundData(
+        uint80 roundId,
+        uint256 startedAt,
+        uint256 updatedAt
+    ) internal {
+        vm.mockCall(
+            address(usdOracle),
+            abi.encodeWithSelector(
+                AggregatorV3Interface.getRoundData.selector,
+                roundId
+            ),
+            abi.encode(
+                roundId,
+                mockUsdPrice,
+                startedAt,
+                updatedAt,
+                mockAnsweredInRound
+            )
+        );
+    }
+
+    function _mockOracleLatestRoundData(
+        uint80 roundId,
+        uint256 startedAt,
+        uint256 updatedAt
+    ) internal {
+        vm.mockCall(
+            address(usdOracle),
+            abi.encodeWithSelector(
+                AggregatorV3Interface.latestRoundData.selector
+            ),
+            abi.encode(
+                roundId,
+                mockUsdPrice,
+                startedAt,
+                updatedAt,
+                mockAnsweredInRound
+            )
+        );
     }
 }
