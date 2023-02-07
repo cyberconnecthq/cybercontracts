@@ -1,29 +1,29 @@
-| Contract                                     | Address                                    |
-| -------------------------------------------- | ------------------------------------------ |
-| Action Lib                                   | 0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a |
-| RolesAuthority                               | 0x9937fb8ebe4ebc7710ffaed246584603f390be3e |
-| EngineImpl                                   | 0x1c2c8e6634fc29f38d110233b5370a1b7ebbb6e5 |
-| EngineProxy                                  | 0x1ca51941a616d14c42d3e3b9e6e687d7f5054c3a |
-| Profile Factory                              | 0x730d6e17589f606dff2e6e36c7abd8a8c2b40f91 |
-| Essence Factory                              | 0xf7a31740969dce331615d189d355e5edf2b80b70 |
-| Subscribe Factory                            | 0xeac6012efe2f7451e8b28139e8d23bb3b540fecb |
-| Link3 Profile                                | 0x2723522702093601e6360cae665518c4f63e9da6 |
-| CyberConnect Treasury                        | 0x90137f1234c137c4284dd317303f2717c871f70a |
-| Link3 Descriptor (Impl)                      | 0x24f869169422f86ebf0c90b6785f9f3534ff08e5 |
-| Link3 Descriptor (Proxy)                     | 0x3b131d2d6694a60eb71dff607cc64e6296daa71e |
-| CyberVault                                   | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
-| CyberGrandNFT (Impl)                         | 0x0160876ad7302cfb5d2bcfbe664a436a69383a12 |
-| CyberGrandNFT (Proxy)                        | 0x110fe2bc9cf45d29e9764da4f6274abf13111efc |
-| Link3 Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
-| Subscribe MW (SubscribePaidMw)               | 0x9b5678862e143c970f4a63f57dd8a677f5942c40 |
-| Subscribe MW (SubscribeOnlyOnceMw)           | 0xc6968831ad8bd12ebb72108f6e4c51432580870d |
-| Subscribe MW (SubscribeDisallowedMw)         | 0x3d1c0dcff5ab0a8ede767f9c094b9e12940f6428 |
-| Subscribe MW (SubscribeOnlyOnceMw)           | 0xc6968831ad8bd12ebb72108f6e4c51432580870d |
-| Subscribe MW (SubscribeDisallowedMw)         | 0x3d1c0dcff5ab0a8ede767f9c094b9e12940f6428 |
-| Essence MW (CollectPaidMw)                   | 0xb09ae63a2fd28686a0f386d1ddfd4b53687bf298 |
-| Essence MW (CollectDisallowedMw)             | 0xcc1d623be97c37b19c64adbd35390260460b92e7 |
-| Essence MW (CollectOnlySubscribedMw)         | 0x26a39e0ecab95b76fbbf593331e25caaa13f83c7 |
-| Essence MW (CollectMerkleDropMw)             | 0x0642cfcba1e391e3affc2270fd2a20e468bceeaa |
-| Essence MW (CollectPermissionMw)             | 0xaf53c3101c4b57a3d48100832ab8d1732b58c64c |
-| Essence MW (CollectPermissionMw V2)          | 0x01fafdbfbb1a56d4a58bb1f7472fb866922ff6c4 |
-| Profile MW (StableFeeCreationMw)             | 0xad246cc868a43c9dbe39ca814860b88714e20822 |
+| Contract                                  | Address                                    |
+| ----------------------------------------- | ------------------------------------------ |
+| Action Lib                                | 0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a |
+| RolesAuthority                            | 0x9937fb8ebe4ebc7710ffaed246584603f390be3e |
+| EngineImpl                                | 0x1c2c8e6634fc29f38d110233b5370a1b7ebbb6e5 |
+| EngineProxy                               | 0x1ca51941a616d14c42d3e3b9e6e687d7f5054c3a |
+| Profile Factory                           | 0x730d6e17589f606dff2e6e36c7abd8a8c2b40f91 |
+| Essence Factory                           | 0xf7a31740969dce331615d189d355e5edf2b80b70 |
+| Subscribe Factory                         | 0xeac6012efe2f7451e8b28139e8d23bb3b540fecb |
+| CC Profile                                | 0x2723522702093601e6360cae665518c4f63e9da6 |
+| CyberConnect Treasury                     | 0x90137f1234c137c4284dd317303f2717c871f70a |
+| CC Descriptor (Impl)                      | 0x24f869169422f86ebf0c90b6785f9f3534ff08e5 |
+| CC Descriptor (Proxy)                     | 0x3b131d2d6694a60eb71dff607cc64e6296daa71e |
+| CyberVault                                | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
+| CyberGrandNFT (Impl)                      | 0x0160876ad7302cfb5d2bcfbe664a436a69383a12 |
+| CyberGrandNFT (Proxy)                     | 0x110fe2bc9cf45d29e9764da4f6274abf13111efc |
+| Subscribe MW (SubscribePaidMw)            | 0x9b5678862e143c970f4a63f57dd8a677f5942c40 |
+| Subscribe MW (SubscribeOnlyOnceMw)        | 0xc6968831ad8bd12ebb72108f6e4c51432580870d |
+| Subscribe MW (SubscribeDisallowedMw)      | 0x3d1c0dcff5ab0a8ede767f9c094b9e12940f6428 |
+| Subscribe MW (SubscribeOnlyOnceMw)        | 0xc6968831ad8bd12ebb72108f6e4c51432580870d |
+| Subscribe MW (SubscribeDisallowedMw)      | 0x3d1c0dcff5ab0a8ede767f9c094b9e12940f6428 |
+| Essence MW (CollectPaidMw)                | 0xb09ae63a2fd28686a0f386d1ddfd4b53687bf298 |
+| Essence MW (CollectDisallowedMw)          | 0xcc1d623be97c37b19c64adbd35390260460b92e7 |
+| Essence MW (CollectOnlySubscribedMw)      | 0x26a39e0ecab95b76fbbf593331e25caaa13f83c7 |
+| Essence MW (CollectMerkleDropMw)          | 0x0642cfcba1e391e3affc2270fd2a20e468bceeaa |
+| Essence MW (CollectPermissionMw)          | 0xaf53c3101c4b57a3d48100832ab8d1732b58c64c |
+| Essence MW (CollectPermissionMw V2)       | 0x01fafdbfbb1a56d4a58bb1f7472fb866922ff6c4 |
+| CC Profile MW (StableFeeCreationMw)       | 0xad246cc868a43c9dbe39ca814860b88714e20822 |
+| CC Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
