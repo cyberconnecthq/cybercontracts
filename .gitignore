@@ -3,6 +3,7 @@ cache_hardhat/
 out/
 node_modules
 .env*
+.constructor-args*
 broadcast/
 .DS_Store
 artifacts/
