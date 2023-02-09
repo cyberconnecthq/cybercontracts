@@ -103,7 +103,7 @@ contract DeploySetting {
                 0x2A2EA826102c067ECE82Bc6E2B7cf38D7EbB1B82
             );
             deployParams.link3Treasury = address(
-                0xe75Fe33b0fB1441a11C5c1296e5Ca83B72cfE00d
+                0xf9E12df9428F1a15BC6CfD4092ADdD683738cE96
             );
             deployParams.engineAuthOwner = address(
                 0xA7b6bEf855c1c57Df5b7C9c7a4e1eB757e544e7f
