@@ -13,6 +13,8 @@
 | CC Descriptor (Proxy)                     | 0x3b131d2d6694a60eb71dff607cc64e6296daa71e |
 | CC DescriptorV2 (Impl)                    | 0xcd59a32562243b74e786d345084548f8cb64c031 |
 | CC DescriptorV2 (Proxy)                   | 0x3d73a6dfc4ffe6b0268c8dae25c6c6885b5f7c3c |
+| CC DescriptorV3 (Impl)                    | 0x478e0b7635d8be657847b58198c652b4a091708b |
+| CC DescriptorV3 (Proxy)                   | 0xb981a245717da217934123026b531834aa80896d |
 | CyberVault                                | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
 | CyberGrandNFT (Impl)                      | 0x0160876ad7302cfb5d2bcfbe664a436a69383a12 |
 | CyberGrandNFT (Proxy)                     | 0x110fe2bc9cf45d29e9764da4f6274abf13111efc |

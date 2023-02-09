@@ -6,13 +6,13 @@ import "forge-std/Script.sol";
 import { LibDeploy } from "./libraries/LibDeploy.sol";
 import { DeploySetting } from "./libraries/DeploySetting.sol";
 
-contract SetAnimationURLV2 is Script, DeploySetting {
+contract SetAnimationURLV3 is Script, DeploySetting {
     function run() external {
         _setDeployParams();
         vm.startBroadcast();
 
         if (block.chainid == DeploySetting.MAINNET) {
-            LibDeploy.deployLink3DescriptorV2(
+            LibDeploy.deployLink3DescriptorV3(
                 vm,
                 deployParams.deployerContract,
                 true,
@@ -20,7 +20,7 @@ contract SetAnimationURLV2 is Script, DeploySetting {
                 deployParams.link3Owner
             );
         } else if (block.chainid == DeploySetting.BNBT) {
-            LibDeploy.deployLink3DescriptorV2(
+            LibDeploy.deployLink3DescriptorV3(
                 vm,
                 deployParams.deployerContract,
                 true,
@@ -28,7 +28,7 @@ contract SetAnimationURLV2 is Script, DeploySetting {
                 deployParams.link3Owner
             );
         } else if (block.chainid == DeploySetting.BNB) {
-            LibDeploy.deployLink3DescriptorV2(
+            LibDeploy.deployLink3DescriptorV3(
                 vm,
                 deployParams.deployerContract,
                 true,
