@@ -23,6 +23,7 @@ import { Constants } from "../../src/libraries/Constants.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { Link3ProfileDescriptor } from "../../src/periphery/Link3ProfileDescriptor.sol";
 import { Link3ProfileDescriptorV2 } from "../../src/periphery/Link3ProfileDescriptorV2.sol";
+import { Link3ProfileDescriptorV3 } from "../../src/periphery/Link3ProfileDescriptorV3.sol";
 import { TestLib712 } from "../../test/utils/TestLib712.sol";
 import { Treasury } from "../../src/middlewares/base/Treasury.sol";
 import { PermissionedFeeCreationMw } from "../../src/middlewares/profile/PermissionedFeeCreationMw.sol";
@@ -1464,7 +1465,7 @@ library LibDeploy {
         );
     }
 
-    function deployLink3DescriptorV2(
+    function deployLink3DescriptorV3(
         Vm vm,
         address _dc,
         bool writeFile,
@@ -1473,11 +1474,11 @@ library LibDeploy {
     ) internal returns (address impl, address proxy) {
         Create2Deployer dc = Create2Deployer(_dc);
         impl = dc.deploy(
-            abi.encodePacked(type(Link3ProfileDescriptorV2).creationCode),
+            abi.encodePacked(type(Link3ProfileDescriptorV3).creationCode),
             SALT
         );
         if (writeFile) {
-            _write(vm, "Link3 DescriptorV2 (Impl)", impl);
+            _write(vm, "Link3 DescriptorV3 (Impl)", impl);
         }
 
         proxy = dc.deploy(
@@ -1486,7 +1487,7 @@ library LibDeploy {
                 abi.encode(
                     impl,
                     abi.encodeWithSelector(
-                        Link3ProfileDescriptorV2.initialize.selector,
+                        Link3ProfileDescriptorV3.initialize.selector,
                         link3Owner
                     )
                 )
@@ -1494,7 +1495,7 @@ library LibDeploy {
             SALT
         );
         if (writeFile) {
-            _write(vm, "Link3 DescriptorV2 (Proxy)", proxy);
+            _write(vm, "Link3 DescriptorV3 (Proxy)", proxy);
         }
 
         // Need to have access to LINK3 OWNER
