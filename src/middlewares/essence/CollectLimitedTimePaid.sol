@@ -183,11 +183,23 @@ contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
 
         if (price > 0) {
             address currency = _data[namespace][profileId][essenceId].currency;
+            uint256 treasuryCollected = (price * _treasuryFee()) /
+                Constants._MAX_BPS;
+            uint256 actualPaid = price - treasuryCollected;
+
             IERC20(currency).safeTransferFrom(
                 collector,
                 _data[namespace][profileId][essenceId].recipient,
-                price
+                actualPaid
             );
+
+            if (treasuryCollected > 0) {
+                IERC20(currency).safeTransferFrom(
+                    collector,
+                    _treasuryAddress(),
+                    treasuryCollected
+                );
+            }
         }
 
         ++_data[namespace][profileId][essenceId].currentCollect;
