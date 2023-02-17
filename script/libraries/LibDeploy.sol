@@ -34,6 +34,7 @@ import { SubscribePaidMw } from "../../src/middlewares/subscribe/SubscribePaidMw
 import { SubscribeOnlyOnceMw } from "../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
 import { SubscribeDisallowedMw } from "../../src/middlewares/subscribe/SubscribeDisallowedMw.sol";
 import { CollectPaidMw } from "../../src/middlewares/essence/CollectPaidMw.sol";
+import { CollectLimitedTimePaidMw } from "../../src/middlewares/essence/CollectLimitedTimePaidMw.sol";
 import { CollectDisallowedMw } from "../../src/middlewares/essence/CollectDisallowedMw.sol";
 import { CollectOnlySubscribedMw } from "../../src/middlewares/essence/CollectOnlySubscribedMw.sol";
 import { CollectMerkleDropMw } from "../../src/middlewares/essence/CollectMerkleDropMw.sol";
@@ -745,19 +746,34 @@ library LibDeploy {
         // CyberEngine(engine).allowProfileMw(mw, true);
 
         // FeeCreationMw
-        mw = dc.deploy(
-            abi.encodePacked(
-                type(FeeCreationMw).creationCode,
-                abi.encode(engine)
-            ),
-            SALT
-        );
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(FeeCreationMw).creationCode,
+        //         abi.encode(engine)
+        //     ),
+        //     SALT
+        // );
 
-        if (writeFile) {
-            _write(vm, "CC Profile MW (FeeCreationMw)", mw);
-        }
+        // if (writeFile) {
+        //     _write(vm, "CC Profile MW (FeeCreationMw)", mw);
+        // }
 
-        CyberEngine(engine).allowProfileMw(mw, true);
+        // CyberEngine(engine).allowProfileMw(mw, true);
+
+        // CollectPaidMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(CollectLimitedTimePaidMw).creationCode,
+        //         abi.encode(cyberTreasury)
+        //     ),
+        //     SALT
+        // );
+
+        // if (writeFile) {
+        //     _write(vm, "Essence MW (CollectLimitedTimePaidMw)", mw);
+        // }
+
+        // CyberEngine(engine).allowEssenceMw(mw, true);
     }
 
     function allowCurrency(

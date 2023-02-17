@@ -28,3 +28,4 @@
 | Essence MW (CollectPaidMw)                | 0x415648c28adb31629418498264f55d54e4c324db |
 | Essence MW (CollectPermissionMw)          | 0x77ebd0aa021b39086e84b9d3afeb738cbbfe16fd |
 | Essence MW (CollectPermissionMw V2)       | 0xbbbab0257edba5823ddb5aa62c08f07bd0d302d9 |
+| Essence MW (CollectLimitedTimePaidMw)     | 0x3a6507d750c87b219920879f9e01fdd512580872 |
