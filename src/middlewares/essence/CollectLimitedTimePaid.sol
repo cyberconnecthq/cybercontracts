@@ -18,8 +18,8 @@ import { FeeMw } from "../base/FeeMw.sol";
  * @title  Collect LimitedTimePaid Middleware
  * @author CyberConnect
  * @notice This contract is a middleware to only allow users to collect when they pay a certain fee to the essence owner.
- * the essence creator can choose to set rules including whether collecting this essence require profile/subscribe holder and
- * has a total supply.
+ * the essence creator can choose to set rules including whether collecting this essence require profile/subscribe holder,
+ * start/end time and has a total supply.
  */
 contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
     using SafeERC20 for IERC20;
@@ -73,8 +73,8 @@ contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
 
     /**
      * @inheritdoc IEssenceMiddleware
-     * @notice Stores the parameters for setting up the paid essence middleware, checks if the amount, recipient, and
-     * currency is valid and approved
+     * @notice Stores the parameters for setting up the limited time paid essence middleware, checks if the recipient, total suppply
+     * start/end time is valid and currency is approved.
      */
     function setEssenceMwData(
         uint256 profileId,
@@ -104,7 +104,6 @@ contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
                 )
             );
 
-        require(price > 0, "INVALID_PRICE");
         require(recipient != address(0), "INVALID_RECIPENT");
         require(totalSupply > 0, "INVALID_TOTAL_SUPPLY");
         require(endTimestamp > startTimestamp, "INVALID_TIME_RANGE");
@@ -180,14 +179,16 @@ contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
             require(_checkProfile(namespace, collector), "NOT_PROFILE_OWNER");
         }
 
-        address currency = _data[namespace][profileId][essenceId].currency;
         uint256 price = _data[namespace][profileId][essenceId].price;
 
-        IERC20(currency).safeTransferFrom(
-            collector,
-            _data[namespace][profileId][essenceId].recipient,
-            price
-        );
+        if (price > 0) {
+            address currency = _data[namespace][profileId][essenceId].currency;
+            IERC20(currency).safeTransferFrom(
+                collector,
+                _data[namespace][profileId][essenceId].recipient,
+                price
+            );
+        }
 
         ++_data[namespace][profileId][essenceId].currentCollect;
     }
