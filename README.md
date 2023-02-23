@@ -8,9 +8,9 @@
 
 This hosts all contracts for CyberConnect's social graph protocol.
 
-Some opinionated design decisino:
+Some opinionated design decisions:
 
-1. Prefer `require` for semantic clearity.
+1. Prefer `require` for semantic clarity.
 2. No custom error until `require` supports custom error.
 3. Try to be gas efficient :)
 
