@@ -136,11 +136,7 @@ contract ProfileNFT is
         bytes[] calldata preDatas,
         bytes[] calldata postDatas
     ) external override nonReentrant returns (uint256[] memory) {
-        require(
-            msg.sender == params.subscriber || msg.sender == _namespaceOwner,
-            "NOT_AUTHORIZED"
-        );
-        return _subscribe(params.subscriber, params, preDatas, postDatas);
+        return _subscribe(msg.sender, params, preDatas, postDatas);
     }
 
     /// @inheritdoc IProfileNFT
@@ -696,7 +692,7 @@ contract ProfileNFT is
     function _authorizeUpgrade(address) internal override onlyEngine {}
 
     function _subscribe(
-        address subscriber,
+        address sender,
         DataTypes.SubscribeParams calldata params,
         bytes[] calldata preDatas,
         bytes[] calldata postDatas
@@ -708,7 +704,7 @@ contract ProfileNFT is
         return
             Actions.subscribe(
                 DataTypes.SubscribeData(
-                    subscriber,
+                    sender,
                     params.profileIds,
                     preDatas,
                     postDatas,

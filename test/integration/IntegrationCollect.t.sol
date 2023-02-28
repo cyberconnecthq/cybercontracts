@@ -417,7 +417,7 @@ contract IntegrationEssenceTest is
         emit Subscribe(carly, ids, data, data);
 
         uint256 nftid = link5Profile.subscribe(
-            DataTypes.SubscribeParams(carly, ids),
+            DataTypes.SubscribeParams(ids),
             data,
             data
         )[0];
