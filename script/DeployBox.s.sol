@@ -10,12 +10,32 @@ contract DeployScript is Script, DeploySetting {
     function run() external {
         _setDeployParams();
         vm.startBroadcast();
-        LibDeploy.deployBox(
-            vm,
-            deployParams.deployerContract,
-            deployParams.link3Owner,
-            true
-        );
+        if (block.chainid == DeploySetting.MAINNET) {
+            LibDeploy.deployBox(
+                vm,
+                deployParams.deployerContract,
+                deployParams.link3Owner,
+                deployParams.link3Owner, // owner address
+                true
+            );
+        } else if (block.chainid == DeploySetting.BNBT) {
+            LibDeploy.deployBox(
+                vm,
+                deployParams.deployerContract,
+                deployParams.link3Signer,
+                deployParams.link3Owner, // owner address
+                true
+            );
+        } else if (block.chainid == DeploySetting.BNB) {
+            LibDeploy.deployBox(
+                vm,
+                deployParams.deployerContract,
+                deployParams.link3Signer,
+                address(0xf9E12df9428F1a15BC6CfD4092ADdD683738cE96), // owner address - safe
+                true
+            );
+        }
+
         vm.stopBroadcast();
     }
 }

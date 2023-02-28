@@ -24,11 +24,12 @@ contract CyberBoxNFTTest is Test, ICyberBoxEvents {
         bytes memory data = abi.encodeWithSelector(
             CyberBoxNFT.initialize.selector,
             owner,
+            owner,
             "TestBox",
             "TB"
         );
-        vm.expectEmit(true, false, false, true);
-        emit Initialize(owner, "TestBox", "TB");
+        vm.expectEmit(true, true, false, true);
+        emit Initialize(owner, owner, "TestBox", "TB");
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), data);
         token = CyberBoxNFT(address(proxy));
     }
@@ -36,7 +37,7 @@ contract CyberBoxNFTTest is Test, ICyberBoxEvents {
     function testBasic() public {
         assertEq(token.name(), "TestBox");
         assertEq(token.symbol(), "TB");
-        assertEq(token.paused(), true);
+        assertEq(token.paused(), false);
     }
 
     function testCannotSetSignerNonOwner() public {
@@ -71,31 +72,31 @@ contract CyberBoxNFTTest is Test, ICyberBoxEvents {
     }
 
     function testCannotPauseWhenAlreadyPaused() public {
-        vm.prank(owner);
+        vm.startPrank(owner);
+        token.pause(true);
         vm.expectRevert("Pausable: paused");
         token.pause(true);
     }
 
     function testCannotUnpauseWhenAlreadyUnpaused() public {
         vm.startPrank(owner);
-        token.pause(false);
         vm.expectRevert("Pausable: not paused");
         token.pause(false);
     }
 
     function testPause() public {
         vm.startPrank(owner);
-        token.pause(false);
-        assertEq(token.paused(), false);
         token.pause(true);
         assertEq(token.paused(), true);
+        token.pause(false);
+        assertEq(token.paused(), false);
     }
 
     function testUnpause() public {
         vm.startPrank(owner);
-        assertEq(token.paused(), true);
-        token.pause(false);
         assertEq(token.paused(), false);
+        token.pause(true);
+        assertEq(token.paused(), true);
     }
 
     function testClaimBox() public {

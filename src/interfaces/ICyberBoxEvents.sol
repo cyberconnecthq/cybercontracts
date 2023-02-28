@@ -7,10 +7,16 @@ interface ICyberBoxEvents {
      * @notice Emiited when the CyberBox is initialized.
      *
      * @param owner The address of the CyberBox owner.
+     * @param signer The address of the CyberBox signer.
      * @param name The name for the CyberBox.
      * @param symbol The symbol for the CyberBox.
      */
-    event Initialize(address indexed owner, string name, string symbol);
+    event Initialize(
+        address indexed owner,
+        address indexed signer,
+        string name,
+        string symbol
+    );
 
     /**
      * @notice Emitted when a new signer has been set.
