@@ -294,7 +294,13 @@ library LibDeploy {
             address(this)
         );
 
-        (, addrs.cyberBox) = deployBox(vm, address(dc), address(this), false);
+        (, addrs.cyberBox) = deployBox(
+            vm,
+            address(dc),
+            address(this),
+            address(this),
+            false
+        );
     }
 
     function deploy(
@@ -349,6 +355,7 @@ library LibDeploy {
     function deployBox(
         Vm vm,
         address dc,
+        address signer,
         address link3Owner,
         bool writeFile
     ) internal returns (address boxImpl, address boxProxy) {
@@ -363,6 +370,7 @@ library LibDeploy {
         bytes memory _data = abi.encodeWithSelector(
             CyberBoxNFT.initialize.selector,
             link3Owner,
+            signer,
             "Link3 Mystery Box",
             "LINK3_MYSTERY_BOX"
         );
@@ -376,7 +384,7 @@ library LibDeploy {
         if (writeFile) {
             _write(vm, "CyberBoxNFT (Proxy)", boxProxy);
         }
-        require(CyberBoxNFT(boxProxy).paused(), "CYBERBOX_NOT_PAUSED");
+        require(CyberBoxNFT(boxProxy).paused() == false, "CYBERBOX_PAUSED");
     }
 
     function deployGrand(
@@ -428,6 +436,7 @@ library LibDeploy {
         address dc,
         address link3Owner,
         address boxAddr,
+        string memory tokenURI,
         bool writeFile
     ) internal {
         address MBImpl = Create2Deployer(dc).deploy(
@@ -445,7 +454,7 @@ library LibDeploy {
             boxAddr,
             "The Shards",
             "SHARDS",
-            "https://mbmetadata.cyberconnect.dev"
+            tokenURI
         );
 
         address MBProxy = Create2Deployer(dc).deploy(

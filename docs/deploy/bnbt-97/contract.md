@@ -30,3 +30,7 @@
 | CC Profile MW (StableFeeCreationMw)       | 0x4db6b3f3236adb0fb85a3957e740f07481c1dc99 |
 | CC Profile MW (PermissionedFeeCreationMw) | 0xd1587f68e9d9f9ee93c9aa6fc60c7da414e90818 |
 | RelationshipChecker                       | 0x0561d367868b2d8e405b1241ba568c40ab8fd2c8 |
+| CyberBoxNFT (Impl)                        | 0x7d1cb528a121384d44d4d48b434803499dc58477 |
+| CyberBoxNFT (Proxy)                       | 0x54346edd22ef49bdca1aae6114f8b1a1e598b674 |
+| MBNFT (Impl)                              | 0x416881784c3602dedd1567c33b92c0bb9d196618 |
+| MBNFT (Proxy)                             | 0x1c6ef115ab38abd27295b465321ca85f60763d06 |

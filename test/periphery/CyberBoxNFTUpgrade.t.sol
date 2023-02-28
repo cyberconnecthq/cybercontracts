@@ -21,6 +21,7 @@ contract CyberBoxNFTUpgradeTest is Test, ICyberBoxEvents {
         bytes memory data = abi.encodeWithSelector(
             CyberBoxNFT.initialize.selector,
             owner,
+            owner,
             "TestBox",
             "TB"
         );
