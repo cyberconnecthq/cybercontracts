@@ -206,11 +206,7 @@ contract SubscribePaidMwTest is
         vm.expectEmit(true, false, false, true, address(link3Profile));
         emit Subscribe(lila, ids, data, data);
 
-        link3Profile.subscribe(
-            DataTypes.SubscribeParams(lila, ids),
-            data,
-            data
-        )[0];
+        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data)[0];
 
         // check bob sub nft supply
         address bobSubNFT = link3Profile.getSubscribeNFT(bobbyProfileId);
@@ -293,11 +289,7 @@ contract SubscribePaidMwTest is
         token.approve(address(subscribePaidMw), 5000);
 
         vm.expectRevert("NO_REQUIRED_NFT");
-        link3Profile.subscribe(
-            DataTypes.SubscribeParams(lila, ids),
-            data,
-            data
-        );
+        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
 
         vm.stopPrank();
     }
@@ -387,7 +379,7 @@ contract SubscribePaidMwTest is
         emit Subscribe(lila, ids, data, data);
 
         uint256 bobbySubscribeNFTId = link3Profile.subscribe(
-            DataTypes.SubscribeParams(lila, ids),
+            DataTypes.SubscribeParams(ids),
             data,
             data
         )[0];
@@ -474,11 +466,7 @@ contract SubscribePaidMwTest is
         token.approve(address(subscribePaidMw), 999999);
 
         vm.expectRevert("ERC20: transfer amount exceeds balance");
-        link3Profile.subscribe(
-            DataTypes.SubscribeParams(lila, ids),
-            data,
-            data
-        );
+        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
 
         vm.stopPrank();
     }

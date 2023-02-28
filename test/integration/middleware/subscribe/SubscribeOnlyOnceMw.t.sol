@@ -74,21 +74,13 @@ contract SubscribeOnlyOnceMwTest is TestIntegrationBase, IProfileNFTEvents {
         emit Subscribe(alice, ids, data, data);
 
         vm.prank(alice);
-        link3Profile.subscribe(
-            DataTypes.SubscribeParams(alice, ids),
-            data,
-            data
-        );
+        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
 
         assertEq(link3Profile.getSubscribeNFT(bobProfileId), subscribeProxy);
 
         // Second subscribe will fail
         vm.expectRevert("Already subscribed");
         vm.prank(alice);
-        link3Profile.subscribe(
-            DataTypes.SubscribeParams(alice, ids),
-            data,
-            data
-        );
+        link3Profile.subscribe(DataTypes.SubscribeParams(ids), data, data);
     }
 }
