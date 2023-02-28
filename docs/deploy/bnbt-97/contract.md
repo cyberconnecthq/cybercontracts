@@ -29,3 +29,4 @@
 | Essence MW (CollectLimitedTimePaidMw)     | 0x3a6507d750c87b219920879f9e01fdd512580872 |
 | CC Profile MW (StableFeeCreationMw)       | 0x4db6b3f3236adb0fb85a3957e740f07481c1dc99 |
 | CC Profile MW (PermissionedFeeCreationMw) | 0xd1587f68e9d9f9ee93c9aa6fc60c7da414e90818 |
+| RelationshipChecker                       | 0x0561d367868b2d8e405b1241ba568c40ab8fd2c8 |

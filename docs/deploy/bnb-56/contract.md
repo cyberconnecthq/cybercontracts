@@ -27,3 +27,4 @@
 | CC Profile MW (StableFeeCreationMw)       | 0xad246cc868a43c9dbe39ca814860b88714e20822 |
 | CC Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
 | CC Profile MW (FeeCreationMw)             | 0xe072666997b472a908e45b4b73b430dfba9f6d33 |
+| RelationshipChecker                       | 0x14816716490676c905bd45c4006256acba8811d4 |
