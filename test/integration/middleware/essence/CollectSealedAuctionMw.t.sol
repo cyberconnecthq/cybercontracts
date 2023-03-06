@@ -92,9 +92,12 @@ contract CollectSealedAuctionMwTest is
 
         token = new MockERC20("Shit Coin", "SHIT");
 
+        // console.log(address(link3Profile));
+
         // Engine Treasury is the address of the treasury, but we put addrs.cyberTreasury here because its the proxy
         collectSealedAuctionMw = new CollectSealedAuctionMw(
-            addrs.cyberTreasury
+            addrs.cyberTreasury,
+            address(link3Profile)
         );
         vm.label(address(collectSealedAuctionMw), "CollectSealedAuctionMw");
         vm.label(address(lila), "lila");
@@ -215,7 +218,7 @@ contract CollectSealedAuctionMwTest is
 
         // dave trying to collect
         vm.prank(dave);
-        vm.expectRevert("Collector_No_Wins");
+        vm.expectRevert("COLLECTOR_NO_WINS");
         link3Profile.collect(
             DataTypes.CollectParams(dave, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
@@ -388,7 +391,7 @@ contract CollectSealedAuctionMwTest is
             new bytes(0),
             new bytes(0)
         );
-        vm.expectRevert("Collector_No_Wins");
+        vm.expectRevert("COLLECTOR_NO_WINS");
         link3Profile.collect(
             DataTypes.CollectParams(dave, bobbyProfileId, bobbyEssenceId),
             new bytes(0),

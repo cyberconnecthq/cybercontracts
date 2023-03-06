@@ -86,7 +86,10 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
                             CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address treasury) FeeMw(treasury) {}
+    constructor(address treasury, address _namespace) FeeMw(treasury) {
+        require(_namespace != address(0), "INVALID_NAMESPACE");
+        namespace = _namespace;
+    }
 
     /*//////////////////////////////////////////////////////////////
                               EXTERNAL
@@ -109,24 +112,22 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
                 data,
                 (uint256, address, address, uint256, uint256, bool, bool)
             );
+        require(msg.sender == namespace, "INVALID_NAMESPACE");
         require(recipient != address(0), "INVALID_RECIPENT");
         require(totalSupply > 0, "INVALID_TOTAL_SUPPLY");
         require(endTimestamp > startTimestamp, "INVALID_TIME_RANGE");
         require(_currencyAllowed(currency), "INVALID_CURRENCY");
-        if (namespace == address(0)) {
-            namespace = msg.sender;
-        }
 
-        _data[msg.sender][profileId][essenceId].totalSupply = totalSupply;
-        _data[msg.sender][profileId][essenceId].currency = currency;
-        _data[msg.sender][profileId][essenceId].recipient = recipient;
-        _data[msg.sender][profileId][essenceId].startTimestamp = startTimestamp;
-        _data[msg.sender][profileId][essenceId].endTimestamp = endTimestamp;
-        _data[msg.sender][profileId][essenceId]
+        _data[namespace][profileId][essenceId].totalSupply = totalSupply;
+        _data[namespace][profileId][essenceId].currency = currency;
+        _data[namespace][profileId][essenceId].recipient = recipient;
+        _data[namespace][profileId][essenceId].startTimestamp = startTimestamp;
+        _data[namespace][profileId][essenceId].endTimestamp = endTimestamp;
+        _data[namespace][profileId][essenceId]
             .profileRequired = profileRequired;
-        _data[msg.sender][profileId][essenceId]
+        _data[namespace][profileId][essenceId]
             .subscribeRequired = subscribeRequired;
-        // yet to set the emits
+
         emit CollectSealedAuctionMwSet(
             namespace,
             profileId,
@@ -183,19 +184,12 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
                 _allBids[topBids[i]].collected == false &&
                 _allBids[topBids[i]].bidder == collector
             ) {
-                // uint bidAmt=_allBids[topBids[i]].amount;
                 if (_allBids[topBids[i]].amount > 0) {
-                    // address currency = _data[namespace][profileId][essenceId].currency;
                     uint256 treasuryCollected = (_allBids[topBids[i]].amount *
                         _treasuryFee()) / Constants._MAX_BPS;
                     uint256 actualPaid = _allBids[topBids[i]].amount -
                         treasuryCollected;
 
-                    // IERC20(_data[namespace][profileId][essenceId].currency).safeTransferFrom(
-                    //     address(this),
-                    //     _data[namespace][profileId][essenceId].recipient,
-                    //     actualPaid
-                    // );
                     IERC20(_data[namespace][profileId][essenceId].currency)
                         .safeTransfer(
                             _data[namespace][profileId][essenceId].recipient,
@@ -215,7 +209,7 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
                 }
             }
         }
-        require(flag, "Collector_No_Wins");
+        require(flag, "COLLECTOR_NO_WINS");
 
         ++_data[namespace][profileId][essenceId].currentCollect;
     }
@@ -292,7 +286,7 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
     function withdraw(uint256 profileId, uint256 essenceId) public {
         require(
             0 < _data[namespace][profileId][essenceId].totalSupply,
-            "Invalid Profile/Essence"
+            "INVALID_PROFILE_ESSENCE"
         );
         require(
             block.timestamp >
@@ -304,18 +298,7 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
             profileId,
             essenceId
         );
-        // uint [] allUserBids;
 
-        // uint countMyBids;
-
-        // for(uint i=0;i<_bidders[namespace][profileId][essenceId].length;i++){
-        //     if(_bidders[namespace][profileId][essenceId][i].bidder==msg.sender){
-        //         countMyBids++;
-        //     }
-        // }
-
-        // uint[] memory myRefundableBids= new uint[](countMyBids);
-        // uint refundableBidsNumber;
         bool canWithdraw;
         for (
             uint256 i = 0;
@@ -327,7 +310,6 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
                 msg.sender &&
                 _bidders[namespace][profileId][essenceId][i].collected == false
             ) {
-                // _bidders[namespace][profileId][essenceId][i].id
                 bool flag;
                 for (uint256 j = 0; j < topBids.length; j++) {
                     if (
@@ -376,10 +358,7 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
         return (IERC721(_namespace).balanceOf(collector) > 0);
     }
 
-    // function findBidderNonCollectedBid(address _bidder,uint _profileId,uint _essenceId) internal view {
-
-    // }
-
+    // function to find top bidders
     function findTopXBidders(
         uint256 x,
         uint256 _profileId,
@@ -391,9 +370,8 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
             x = n;
         }
         uint256[] memory topX = new uint256[](x);
-        uint256 counter = 0;
         for (uint256 i = 0; i < x; i++) {
-            for (uint256 j = 0; j < n - 1; j++) {
+            for (uint256 j = 0; j < n - i - 1; j++) {
                 if (
                     _bidders[namespace][_profileId][_essenceId][j].amount >
                     _bidders[namespace][_profileId][_essenceId][j + 1].amount
@@ -407,10 +385,7 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
                     _bidders[namespace][_profileId][_essenceId][j] = copyBid;
                 }
             }
-            topX[counter] = _bidders[namespace][_profileId][_essenceId][
-                n - counter - 1
-            ].id;
-            counter++;
+            topX[i] = _bidders[namespace][_profileId][_essenceId][n - i - 1].id;
         }
         return topX;
     }
