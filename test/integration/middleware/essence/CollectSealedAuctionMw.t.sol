@@ -52,6 +52,16 @@ contract CollectSealedAuctionMwTest is
         address namespace
     );
 
+    event BidRefunded(
+        uint256 id,
+        address refundAddress,
+        uint256 amount,
+        uint256 profileId,
+        uint256 essenceId,
+        address namespace,
+        address currency
+    );
+
     address lila = address(0x1114);
     string lilaHandle = "lila";
     uint256 lilaProfileId;
@@ -143,13 +153,14 @@ contract CollectSealedAuctionMwTest is
 
     function testCollectWhenOnlyOneSupply() public {
         limit = 1;
-        uint256 bidAmount = 10;
+        uint256 bidAmount = 17;
         subscribeRequired = false;
 
         uint256 treasuryFee = ITreasury(addrs.cyberTreasury).getTreasuryFee();
         uint256 startingLila = IERC20(address(token)).balanceOf(lila);
         uint256 startingBobby = IERC20(address(token)).balanceOf(bobby);
         uint256 startingDave = IERC20(address(token)).balanceOf(dave);
+        uint256 startingShane = IERC20(address(token)).balanceOf(shane);
         uint256 startingEngine = IERC20(address(token)).balanceOf(
             engineTreasury
         );
@@ -199,20 +210,26 @@ contract CollectSealedAuctionMwTest is
 
         // lila placing a bid
         vm.startPrank(lila);
-
         token.approve(address(collectSealedAuctionMw), 5000);
         collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 10);
         assertEq(token.balanceOf(address(collectSealedAuctionMw)), 10);
         vm.stopPrank();
 
-        // dave placing a bid
+        // dave bids a non-highest bid
         vm.startPrank(dave);
-
         token.approve(address(collectSealedAuctionMw), 5000);
+        vm.expectRevert("NOT_TOPX_BID");
         collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 7);
-        assertEq(token.balanceOf(address(collectSealedAuctionMw)), 17);
+        assertEq(token.balanceOf(dave), startingDave);
         vm.stopPrank();
 
+        vm.startPrank(shane);
+        token.approve(address(collectSealedAuctionMw), 5000);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 17);
+        assertEq(token.balanceOf(shane), startingShane - 17);
+        assertEq(token.balanceOf(address(collectSealedAuctionMw)), 17);
+        assertEq(token.balanceOf(lila), startingLila);
+        vm.stopPrank();
         // time wrap
         vm.warp(100001);
 
@@ -227,8 +244,17 @@ contract CollectSealedAuctionMwTest is
 
         // lila tries to collect
         vm.prank(lila);
-        uint256 lilaCollectId = link3Profile.collect(
+        vm.expectRevert("COLLECTOR_NO_WINS");
+        link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        //shane tries to collect
+        vm.prank(shane);
+        uint256 shaneCollectId = link3Profile.collect(
+            DataTypes.CollectParams(shane, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
             new bytes(0)
         );
@@ -238,21 +264,16 @@ contract CollectSealedAuctionMwTest is
             bobbyEssenceId
         );
 
-        console.log(link3Profile.getEssenceNFT(bobbyProfileId, bobbyEssenceId));
+        assertEq(bobbyEssNFT, collectPaidEssenceProxy);
 
-        console.log(bobbyEssNFT, " and ", collectPaidEssenceProxy);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(shaneCollectId), shane);
 
-        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(lilaCollectId), lila);
-
-        vm.prank(dave);
-        collectSealedAuctionMw.withdraw(bobbyProfileId, bobbyEssenceId);
-
-        assertEq(IERC20(address(token)).balanceOf(dave), startingDave);
-
+        // checking treasury balances
         assertEq(
-            IERC20(address(token)).balanceOf(lila),
-            startingLila - bidAmount
+            IERC20(address(token)).balanceOf(shane),
+            startingShane - bidAmount
         );
+
         assertEq(
             IERC20(address(token)).balanceOf(bobby),
             startingBobby + bidAmount - cut
@@ -319,32 +340,24 @@ contract CollectSealedAuctionMwTest is
             BOBBY_ESSENCE_LABEL,
             false
         );
-
         vm.startPrank(lila);
-        token.approve(address(collectSealedAuctionMw), 5000);
-        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 10);
-        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 15);
+        token.approve(address(collectSealedAuctionMw), 80000);
         collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 20);
         vm.stopPrank();
 
         vm.startPrank(dave);
         token.approve(address(collectSealedAuctionMw), 5000);
-        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 5);
         collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 7);
         collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 8);
         vm.stopPrank();
 
         vm.startPrank(shane);
         token.approve(address(collectSealedAuctionMw), 5000);
-        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 1);
         collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 7);
-        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 6);
         vm.stopPrank();
 
         vm.startPrank(meera);
         token.approve(address(collectSealedAuctionMw), 5000);
-        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 2);
-        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 3);
         collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 4);
         vm.stopPrank();
 
@@ -360,45 +373,51 @@ contract CollectSealedAuctionMwTest is
         collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 22);
 
         // lila collecting
-
         vm.startPrank(lila);
         uint256 collectId1 = link3Profile.collect(
-            DataTypes.CollectParams(dave, bobbyProfileId, bobbyEssenceId),
+            DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
             new bytes(0)
         );
-        uint256 collectId2 = link3Profile.collect(
+
+        vm.expectRevert("COLLECTOR_NO_WINS");
+
+        link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        vm.stopPrank();
+
+        vm.startPrank(dave);
+        uint256 collectId2 = link3Profile.collect(
+            DataTypes.CollectParams(dave, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
             new bytes(0)
         );
         uint256 collectId3 = link3Profile.collect(
-            DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
-            new bytes(0),
-            new bytes(0)
-        );
-        // vm.expectRevert("Collector_No_Wins");
-        // link3Profile.collect(
-        //     DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
-        //     new bytes(0),
-        //     new bytes(0)
-        // );
-        vm.stopPrank();
-
-        vm.startPrank(dave);
-        uint256 collectId4 = link3Profile.collect(
-            DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
-            new bytes(0),
-            new bytes(0)
-        );
-        vm.expectRevert("COLLECTOR_NO_WINS");
-        link3Profile.collect(
             DataTypes.CollectParams(dave, bobbyProfileId, bobbyEssenceId),
             new bytes(0),
             new bytes(0)
         );
-
         vm.stopPrank();
+
+        vm.startPrank(shane);
+        uint256 collectId4 = link3Profile.collect(
+            DataTypes.CollectParams(shane, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+        vm.stopPrank();
+
+        vm.prank(meera);
+        vm.expectRevert("COLLECTOR_NO_WINS");
+        link3Profile.collect(
+            DataTypes.CollectParams(meera, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
 
         vm.startPrank(bunty);
         uint256 collectId5 = link3Profile.collect(
@@ -419,38 +438,200 @@ contract CollectSealedAuctionMwTest is
             bobbyEssenceId
         );
 
-        console.log(bobbyEssNFT, " and ", collectPaidEssenceProxy);
-
-        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId1), dave);
-        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId2), lila);
-        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId3), lila);
-        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId4), lila);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId1), lila);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId2), dave);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId3), dave);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId4), shane);
         assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId5), bunty);
-
-        // lila tries to withdraw her funds after collecting
-        vm.prank(lila);
-        vm.expectRevert("CANNOT_WITHDRAW");
-        collectSealedAuctionMw.withdraw(bobbyProfileId, bobbyEssenceId);
-
-        // shane and meera withdrawing
-        vm.prank(shane);
-        collectSealedAuctionMw.withdraw(bobbyProfileId, bobbyEssenceId);
-        vm.prank(meera);
-        collectSealedAuctionMw.withdraw(bobbyProfileId, bobbyEssenceId);
-
-        // dave withdrawing his other bids
-        vm.prank(dave);
-        collectSealedAuctionMw.withdraw(bobbyProfileId, bobbyEssenceId);
-
-        vm.prank(bunty);
-        vm.expectRevert("CANNOT_WITHDRAW");
-        collectSealedAuctionMw.withdraw(bobbyProfileId, bobbyEssenceId);
-
-        assertEq(IERC20(token).balanceOf(dave), startingDave - 8);
-        assertEq(IERC20(token).balanceOf(shane), startingShane);
-        assertEq(IERC20(token).balanceOf(meera), startingMeera);
+        assertEq(IERC20(address(token)).balanceOf(meera), startingMeera);
+        assertEq(IERC20(token).balanceOf(shane), startingShane - 7);
+        assertEq(IERC20(token).balanceOf(dave), startingDave - 15);
         assertEq(IERC20(token).balanceOf(bunty), startingBunty - 8);
-        // assertEq(IERC20(token).balanceOf(lila),startingLila-45);
-        assertEq(IERC20(token).balanceOf(bobby), startingBobby + 61);
+        // assertEq(IERC20(token).balanceOf(lila), startingLila-20);
+        assertEq(IERC20(address(token)).balanceOf(bobby), 50);
+        assertEq(
+            IERC20(address(token)).balanceOf(address(collectSealedAuctionMw)),
+            0
+        );
+    }
+
+    function testWhenSpammerAttacks() public {
+        limit = 5;
+        subscribeRequired = false;
+
+        uint256 treasuryFee = ITreasury(addrs.cyberTreasury).getTreasuryFee();
+        uint256 startingLila = IERC20(address(token)).balanceOf(lila);
+        uint256 startingBobby = IERC20(address(token)).balanceOf(bobby);
+        uint256 startingDave = IERC20(address(token)).balanceOf(dave);
+        uint256 startingMeera = IERC20(address(token)).balanceOf(meera);
+        uint256 startingBunty = IERC20(address(token)).balanceOf(bunty);
+        uint256 startingShane = IERC20(address(token)).balanceOf(shane);
+        uint256 startingEngine = IERC20(address(token)).balanceOf(
+            engineTreasury
+        );
+
+        // approve the currency that will be used in the transaction
+        vm.expectEmit(true, true, true, false);
+        emit AllowCurrency(address(token), false, true);
+        treasury.allowCurrency(address(token), true);
+
+        // registers for essence, passes in the paid collect middleware address
+        vm.expectEmit(false, false, false, true);
+        emit AllowEssenceMw(address(collectSealedAuctionMw), false, true);
+        engine.allowEssenceMw(address(collectSealedAuctionMw), true);
+
+        vm.prank(bobby);
+
+        uint256 bobbyEssenceId = link3Profile.registerEssence(
+            DataTypes.RegisterEssenceParams(
+                bobbyProfileId,
+                BOBBY_ESSENCE_NAME,
+                BOBBY_ESSENCE_LABEL,
+                BOBBY_URL,
+                address(collectSealedAuctionMw),
+                false,
+                false
+            ),
+            abi.encode(
+                limit,
+                address(token),
+                bobby,
+                0,
+                100000,
+                false,
+                subscribeRequired
+            )
+        );
+        address collectPaidEssenceProxy = getDeployedEssProxyAddress(
+            link3EssBeacon,
+            bobbyProfileId,
+            bobbyEssenceId,
+            address(link3Profile),
+            BOBBY_ESSENCE_NAME,
+            BOBBY_ESSENCE_LABEL,
+            false
+        );
+        vm.startPrank(lila);
+        token.approve(address(collectSealedAuctionMw), 80000);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 20);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 1);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 1);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 1);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 1);
+
+        for (uint256 i = 0; i < 30000; i++) {
+            vm.expectRevert("NOT_TOPX_BID");
+            collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 1);
+        }
+        vm.stopPrank();
+
+        vm.startPrank(dave);
+        token.approve(address(collectSealedAuctionMw), 5000);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 7);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 8);
+        vm.stopPrank();
+
+        vm.startPrank(shane);
+        token.approve(address(collectSealedAuctionMw), 5000);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 7);
+        vm.stopPrank();
+
+        vm.startPrank(meera);
+        token.approve(address(collectSealedAuctionMw), 5000);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 4);
+        vm.stopPrank();
+
+        vm.startPrank(bunty);
+        token.approve(address(collectSealedAuctionMw), 5000);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 8);
+        vm.stopPrank();
+
+        vm.warp(100001);
+
+        vm.expectRevert("ENDED");
+        vm.prank(lila);
+        collectSealedAuctionMw.placeBid(bobbyProfileId, bobbyEssenceId, 22);
+
+        // lila collecting
+        vm.startPrank(lila);
+        uint256 collectId1 = link3Profile.collect(
+            DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        vm.expectRevert("COLLECTOR_NO_WINS");
+
+        link3Profile.collect(
+            DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        vm.stopPrank();
+
+        vm.startPrank(dave);
+        uint256 collectId2 = link3Profile.collect(
+            DataTypes.CollectParams(dave, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+        uint256 collectId3 = link3Profile.collect(
+            DataTypes.CollectParams(dave, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+        vm.stopPrank();
+
+        vm.startPrank(shane);
+        uint256 collectId4 = link3Profile.collect(
+            DataTypes.CollectParams(shane, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+        vm.stopPrank();
+
+        vm.prank(meera);
+        vm.expectRevert("COLLECTOR_NO_WINS");
+        link3Profile.collect(
+            DataTypes.CollectParams(meera, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+
+        vm.startPrank(bunty);
+        uint256 collectId5 = link3Profile.collect(
+            DataTypes.CollectParams(bunty, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+        vm.expectRevert("COLLECT_LIMIT_EXCEEDED");
+        link3Profile.collect(
+            DataTypes.CollectParams(bunty, bobbyProfileId, bobbyEssenceId),
+            new bytes(0),
+            new bytes(0)
+        );
+        vm.stopPrank();
+
+        bobbyEssNFT = link3Profile.getEssenceNFT(
+            bobbyProfileId,
+            bobbyEssenceId
+        );
+
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId1), lila);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId2), dave);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId3), dave);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId4), shane);
+        assertEq(EssenceNFT(bobbyEssNFT).ownerOf(collectId5), bunty);
+        assertEq(IERC20(address(token)).balanceOf(meera), startingMeera);
+        assertEq(IERC20(token).balanceOf(shane), startingShane - 7);
+        assertEq(IERC20(token).balanceOf(dave), startingDave - 15);
+        assertEq(IERC20(token).balanceOf(bunty), startingBunty - 8);
+        // assertEq(IERC20(token).balanceOf(lila), startingLila-20);
+        assertEq(IERC20(address(token)).balanceOf(bobby), 50);
+        assertEq(
+            IERC20(address(token)).balanceOf(address(collectSealedAuctionMw)),
+            0
+        );
     }
 }

@@ -46,6 +46,16 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
         address namespace
     );
 
+    event BidRefunded(
+        uint256 id,
+        address refundAddress,
+        uint256 amount,
+        uint256 profileId,
+        uint256 essenceId,
+        address namespace,
+        address currency
+    );
+
     /*//////////////////////////////////////////////////////////////
                                STATES
     //////////////////////////////////////////////////////////////*/
@@ -75,8 +85,6 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
 
     mapping(address => mapping(uint256 => mapping(uint256 => Bid[])))
         internal _bidders;
-
-    mapping(uint256 => Bid) internal _allBids;
 
     address public namespace;
 
@@ -173,44 +181,37 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
             require(_checkProfile(namespace, collector), "NOT_PROFILE_OWNER");
         }
 
-        uint256[] memory topBids = findTopXBidders(
-            _data[namespace][profileId][essenceId].totalSupply,
-            profileId,
-            essenceId
-        );
+        uint256 X = _bidders[namespace][profileId][essenceId].length;
         bool flag;
-        for (uint256 i = 0; i < topBids.length; i++) {
+        for (uint256 i = 0; i < X; i++) {
             if (
-                _allBids[topBids[i]].collected == false &&
-                _allBids[topBids[i]].bidder == collector
+                _bidders[namespace][profileId][essenceId][i].collected ==
+                false &&
+                _bidders[namespace][profileId][essenceId][i].bidder == collector
             ) {
-                if (_allBids[topBids[i]].amount > 0) {
-                    uint256 treasuryCollected = (_allBids[topBids[i]].amount *
-                        _treasuryFee()) / Constants._MAX_BPS;
-                    uint256 actualPaid = _allBids[topBids[i]].amount -
-                        treasuryCollected;
+                uint256 treasuryCollected = (_bidders[namespace][profileId][
+                    essenceId
+                ][i].amount * _treasuryFee()) / Constants._MAX_BPS;
+                uint256 actualPaid = _bidders[namespace][profileId][essenceId][
+                    i
+                ].amount - treasuryCollected;
 
+                IERC20(_data[namespace][profileId][essenceId].currency)
+                    .safeTransfer(
+                        _data[namespace][profileId][essenceId].recipient,
+                        actualPaid
+                    );
+
+                if (treasuryCollected > 0) {
                     IERC20(_data[namespace][profileId][essenceId].currency)
-                        .safeTransfer(
-                            _data[namespace][profileId][essenceId].recipient,
-                            actualPaid
-                        );
-
-                    if (treasuryCollected > 0) {
-                        IERC20(_data[namespace][profileId][essenceId].currency)
-                            .safeTransfer(
-                                _treasuryAddress(),
-                                treasuryCollected
-                            );
-                    }
-                    flag = true;
-                    _allBids[topBids[i]].collected = true;
-                    break;
+                        .safeTransfer(_treasuryAddress(), treasuryCollected);
                 }
+                flag = true;
+                _bidders[namespace][profileId][essenceId][i].collected = true;
+                break;
             }
         }
         require(flag, "COLLECTOR_NO_WINS");
-
         ++_data[namespace][profileId][essenceId].currentCollect;
     }
 
@@ -270,68 +271,58 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
         newBid.essenceId = essenceId;
         newBid.profileId = profileId;
         newBid.amount = amount;
-        _allBids[bidCounter] = newBid;
-        _bidders[namespace][profileId][essenceId].push(newBid);
 
-        emit BidPlaced(
-            bidCounter,
-            collector,
-            amount,
-            profileId,
-            essenceId,
-            namespace
-        );
-    }
-
-    function withdraw(uint256 profileId, uint256 essenceId) public {
-        require(
-            0 < _data[namespace][profileId][essenceId].totalSupply,
-            "INVALID_PROFILE_ESSENCE"
-        );
-        require(
-            block.timestamp >
-                _data[namespace][profileId][essenceId].endTimestamp,
-            "NOT_ENDED"
-        );
-        uint256[] memory topBids = findTopXBidders(
-            _data[namespace][profileId][essenceId].totalSupply,
-            profileId,
-            essenceId
-        );
-
-        bool canWithdraw;
-        for (
-            uint256 i = 0;
-            i < _bidders[namespace][profileId][essenceId].length;
-            i++
-        ) {
-            if (
-                _bidders[namespace][profileId][essenceId][i].bidder ==
-                msg.sender &&
-                _bidders[namespace][profileId][essenceId][i].collected == false
-            ) {
-                bool flag;
-                for (uint256 j = 0; j < topBids.length; j++) {
-                    if (
-                        _bidders[namespace][profileId][essenceId][i].id ==
-                        topBids[j]
-                    ) {
-                        flag = true;
-                    }
-                }
-                if (!flag) {
-                    canWithdraw = true;
-                    IERC20(_data[namespace][profileId][essenceId].currency)
-                        .safeTransfer(
-                            msg.sender,
-                            _bidders[namespace][profileId][essenceId][i].amount
-                        );
-                    _bidders[namespace][profileId][essenceId][i]
-                        .collected = true;
+        Bid[] memory copy = _bidders[namespace][profileId][essenceId];
+        uint256 X = _data[namespace][profileId][essenceId].totalSupply;
+        if (copy.length < X) {
+            _bidders[namespace][profileId][essenceId].push(newBid);
+            emit BidPlaced(
+                bidCounter,
+                collector,
+                amount,
+                profileId,
+                essenceId,
+                namespace
+            );
+        } else {
+            uint256 min;
+            for (uint256 i = 1; i < copy.length; i++) {
+                if (
+                    _bidders[namespace][profileId][essenceId][i].amount <
+                    _bidders[namespace][profileId][essenceId][min].amount
+                ) {
+                    min = i;
                 }
             }
+            require(
+                newBid.amount >
+                    _bidders[namespace][profileId][essenceId][min].amount,
+                "NOT_TOPX_BID"
+            );
+            IERC20(_data[namespace][profileId][essenceId].currency)
+                .safeTransfer(
+                    _bidders[namespace][profileId][essenceId][min].bidder,
+                    _bidders[namespace][profileId][essenceId][min].amount
+                );
+            _bidders[namespace][profileId][essenceId][min] = newBid;
+            emit BidRefunded(
+                _bidders[namespace][profileId][essenceId][min].id,
+                _bidders[namespace][profileId][essenceId][min].bidder,
+                _bidders[namespace][profileId][essenceId][min].amount,
+                _bidders[namespace][profileId][essenceId][min].profileId,
+                _bidders[namespace][profileId][essenceId][min].essenceId,
+                namespace,
+                currency
+            );
+            emit BidPlaced(
+                bidCounter,
+                collector,
+                amount,
+                profileId,
+                essenceId,
+                namespace
+            );
         }
-        require(canWithdraw, "CANNOT_WITHDRAW");
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -356,37 +347,5 @@ contract CollectSealedAuctionMw is IEssenceMiddleware, FeeMw {
         returns (bool)
     {
         return (IERC721(_namespace).balanceOf(collector) > 0);
-    }
-
-    // function to find top bidders
-    function findTopXBidders(
-        uint256 x,
-        uint256 _profileId,
-        uint256 _essenceId
-    ) internal returns (uint256[] memory) {
-        uint256 n = _bidders[namespace][_profileId][_essenceId].length;
-        require(n > 0, "NO_BIDS");
-        if (n < x) {
-            x = n;
-        }
-        uint256[] memory topX = new uint256[](x);
-        for (uint256 i = 0; i < x; i++) {
-            for (uint256 j = 0; j < n - i - 1; j++) {
-                if (
-                    _bidders[namespace][_profileId][_essenceId][j].amount >
-                    _bidders[namespace][_profileId][_essenceId][j + 1].amount
-                ) {
-                    Bid memory copyBid = _bidders[namespace][_profileId][
-                        _essenceId
-                    ][j + 1];
-                    _bidders[namespace][_profileId][_essenceId][
-                        j + 1
-                    ] = _bidders[namespace][_profileId][_essenceId][j];
-                    _bidders[namespace][_profileId][_essenceId][j] = copyBid;
-                }
-            }
-            topX[i] = _bidders[namespace][_profileId][_essenceId][n - i - 1].id;
-        }
-        return topX;
     }
 }
