@@ -755,19 +755,19 @@ library LibDeploy {
         // CyberEngine(engine).allowProfileMw(mw, true);
 
         // FeeCreationMw
-        // mw = dc.deploy(
-        //     abi.encodePacked(
-        //         type(FeeCreationMw).creationCode,
-        //         abi.encode(engine)
-        //     ),
-        //     SALT
-        // );
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(FeeCreationMw).creationCode,
+                abi.encode(engine)
+            ),
+            SALT
+        );
 
-        // if (writeFile) {
-        //     _write(vm, "CC Profile MW (FeeCreationMw)", mw);
-        // }
+        if (writeFile) {
+            _write(vm, "CC Profile MW (FeeCreationMw)", mw);
+        }
 
-        // CyberEngine(engine).allowProfileMw(mw, true);
+        CyberEngine(engine).allowProfileMw(mw, true);
 
         // CollectPaidMw
         // mw = dc.deploy(
@@ -1139,17 +1139,32 @@ library LibDeploy {
         //     )
         // );
 
-        bytes memory methodData = abi.encode(
-            params.setting.link3Treasury,
-            _INITIAL_FEE_BNB_TIER0,
-            _INITIAL_FEE_BNB_TIER1,
-            _INITIAL_FEE_BNB_TIER2,
-            _INITIAL_FEE_BNB_TIER3,
-            _INITIAL_FEE_BNB_TIER4,
-            _INITIAL_FEE_BNB_TIER5,
-            _INITIAL_FEE_BNB_TIER6
+        CyberEngine(engineProxyAddress).setProfileMw(
+            link3Profile,
+            link3ProfileMw,
+            abi.encode(
+                params.setting.link3Treasury,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE,
+                _INITIAL_FEE_FREE
+            )
         );
-        console.logBytes(methodData);
+
+        // bytes memory methodData = abi.encode(
+        //     params.setting.link3Treasury,
+        //     _INITIAL_FEE_BNB_TIER0,
+        //     _INITIAL_FEE_BNB_TIER1,
+        //     _INITIAL_FEE_BNB_TIER2,
+        //     _INITIAL_FEE_BNB_TIER3,
+        //     _INITIAL_FEE_BNB_TIER4,
+        //     _INITIAL_FEE_BNB_TIER5,
+        //     _INITIAL_FEE_BNB_TIER6
+        // );
+        // console.logBytes(methodData);
     }
 
     function setAniURL(
