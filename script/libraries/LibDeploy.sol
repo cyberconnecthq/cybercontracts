@@ -34,6 +34,7 @@ import { SubscribePaidMw } from "../../src/middlewares/subscribe/SubscribePaidMw
 import { SubscribeOnlyOnceMw } from "../../src/middlewares/subscribe/SubscribeOnlyOnceMw.sol";
 import { SubscribeDisallowedMw } from "../../src/middlewares/subscribe/SubscribeDisallowedMw.sol";
 import { CollectPaidMw } from "../../src/middlewares/essence/CollectPaidMw.sol";
+import { CollectPermissionPaidMw } from "../../src/middlewares/essence/CollectPermissionPaidMw.sol";
 import { CollectLimitedTimePaidMw } from "../../src/middlewares/essence/CollectLimitedTimePaidMw.sol";
 import { CollectDisallowedMw } from "../../src/middlewares/essence/CollectDisallowedMw.sol";
 import { CollectOnlySubscribedMw } from "../../src/middlewares/essence/CollectOnlySubscribedMw.sol";
@@ -783,6 +784,21 @@ library LibDeploy {
         // }
 
         // CyberEngine(engine).allowEssenceMw(mw, true);
+
+        // CollectPermissionPaidMw
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(CollectPermissionPaidMw).creationCode,
+                abi.encode(cyberTreasury)
+            ),
+            SALT
+        );
+
+        if (writeFile) {
+            _write(vm, "Essence MW (CollectPermissionPaidMw)", mw);
+        }
+
+        CyberEngine(engine).allowEssenceMw(mw, true);
     }
 
     function allowCurrency(
