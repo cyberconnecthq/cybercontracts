@@ -83,7 +83,7 @@ contract CollectPermissionPaidMw is IEssenceMiddleware, EIP712, FeeMw {
             address signer
         ) = abi.decode(data, (uint256, uint256, address, address, address));
 
-        require(recipient != address(0), "INVALID_ADDRESS");
+        require(amount == 0 || recipient != address(0), "INVALID_ADDRESS");
         require(
             amount == 0 || _currencyAllowed(currency),
             "CURRENCY_NOT_ALLOWED"

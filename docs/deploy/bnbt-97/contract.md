@@ -34,4 +34,4 @@
 | CyberBoxNFT (Proxy)                       | 0x54346edd22ef49bdca1aae6114f8b1a1e598b674 |
 | MBNFT (Impl)                              | 0x416881784c3602dedd1567c33b92c0bb9d196618 |
 | MBNFT (Proxy)                             | 0x1c6ef115ab38abd27295b465321ca85f60763d06 |
-| Essence MW (CollectPermissionPaidMw)      | 0x150c66e18a50ad77a3b77c565236c17b952d9326 |
+| Essence MW (CollectPermissionPaidMw)      | 0x702bc9b95a8753e1faf2314d52b4c73e7765fef0 |
