@@ -64,7 +64,10 @@ contract SubscribePaidMwTest is
         token = new MockERC20("Shit Coin", "SHIT");
 
         // Engine Treasury is the address of the treasury, but we put addrs.cyberTreasury here because its the proxy
-        subscribePaidMw = new SubscribePaidMw(addrs.cyberTreasury);
+        subscribePaidMw = new SubscribePaidMw(
+            addrs.cyberTreasury,
+            addrs.link3Profile
+        );
         vm.label(address(subscribePaidMw), "subscribePaidMw");
 
         // msg.sender is this contract, then the token contract transfers 10000 to lila

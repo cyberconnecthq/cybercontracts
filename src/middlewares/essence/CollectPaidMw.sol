@@ -25,6 +25,15 @@ contract CollectPaidMw is IEssenceMiddleware, FeeMw {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
+                              MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
+    modifier onlyValidNamespace() {
+        require(_namespace == msg.sender, "ONLY_VALID_NAMESPACE");
+        _;
+    }
+
+    /*//////////////////////////////////////////////////////////////
                                 EVENT
     //////////////////////////////////////////////////////////////*/
 
@@ -52,14 +61,17 @@ contract CollectPaidMw is IEssenceMiddleware, FeeMw {
         bool subscribeRequired;
     }
 
-    mapping(address => mapping(uint256 => mapping(uint256 => CollectPaidData)))
+    mapping(uint256 => mapping(uint256 => CollectPaidData))
         internal _paidEssenceData;
+    address internal _namespace;
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address treasury) FeeMw(treasury) {}
+    constructor(address treasury, address namespace) FeeMw(treasury) {
+        _namespace = namespace;
+    }
 
     /*//////////////////////////////////////////////////////////////
                               EXTERNAL
@@ -74,7 +86,7 @@ contract CollectPaidMw is IEssenceMiddleware, FeeMw {
         uint256 profileId,
         uint256 essenceId,
         bytes calldata data
-    ) external override returns (bytes memory) {
+    ) external override onlyValidNamespace returns (bytes memory) {
         (
             uint256 totalSupply,
             uint256 amount,
@@ -87,13 +99,11 @@ contract CollectPaidMw is IEssenceMiddleware, FeeMw {
         require(recipient != address(0), "INVALID_ADDRESS");
         require(_currencyAllowed(currency), "CURRENCY_NOT_ALLOWED");
 
-        _paidEssenceData[msg.sender][profileId][essenceId]
-            .totalSupply = totalSupply;
-        _paidEssenceData[msg.sender][profileId][essenceId].amount = amount;
-        _paidEssenceData[msg.sender][profileId][essenceId]
-            .recipient = recipient;
-        _paidEssenceData[msg.sender][profileId][essenceId].currency = currency;
-        _paidEssenceData[msg.sender][profileId][essenceId]
+        _paidEssenceData[profileId][essenceId].totalSupply = totalSupply;
+        _paidEssenceData[profileId][essenceId].amount = amount;
+        _paidEssenceData[profileId][essenceId].recipient = recipient;
+        _paidEssenceData[profileId][essenceId].currency = currency;
+        _paidEssenceData[profileId][essenceId]
             .subscribeRequired = subscribeRequired;
 
         emit CollectPaidMwSet(
@@ -120,36 +130,31 @@ contract CollectPaidMw is IEssenceMiddleware, FeeMw {
         address collector,
         address,
         bytes calldata
-    ) external override {
+    ) external override onlyValidNamespace {
         require(
-            _paidEssenceData[msg.sender][profileId][essenceId].totalSupply -
-                _paidEssenceData[msg.sender][profileId][essenceId]
-                    .currentCollect >
-                0,
+            _paidEssenceData[profileId][essenceId].totalSupply >
+                _paidEssenceData[profileId][essenceId].currentCollect,
             "COLLECT_LIMIT_EXCEEDED"
         );
 
-        address currency = _paidEssenceData[msg.sender][profileId][essenceId]
-            .currency;
-        uint256 amount = _paidEssenceData[msg.sender][profileId][essenceId]
-            .amount;
+        require(tx.origin == collector, "NOT_FROM_COLLECTOR");
+
+        address currency = _paidEssenceData[profileId][essenceId].currency;
+        uint256 amount = _paidEssenceData[profileId][essenceId].amount;
         uint256 treasuryCollected = (amount * _treasuryFee()) /
             Constants._MAX_BPS;
         uint256 actualPaid = amount - treasuryCollected;
 
-        if (
-            _paidEssenceData[msg.sender][profileId][essenceId]
-                .subscribeRequired == true
-        ) {
+        if (_paidEssenceData[profileId][essenceId].subscribeRequired == true) {
             require(
-                _checkSubscribe(msg.sender, profileId, collector),
+                _checkSubscribe(_namespace, profileId, collector),
                 "NOT_SUBSCRIBED"
             );
         }
 
         IERC20(currency).safeTransferFrom(
             collector,
-            _paidEssenceData[msg.sender][profileId][essenceId].recipient,
+            _paidEssenceData[profileId][essenceId].recipient,
             actualPaid
         );
 
@@ -160,7 +165,7 @@ contract CollectPaidMw is IEssenceMiddleware, FeeMw {
                 treasuryCollected
             );
         }
-        _paidEssenceData[msg.sender][profileId][essenceId].currentCollect++;
+        _paidEssenceData[profileId][essenceId].currentCollect++;
     }
 
     /// @inheritdoc IEssenceMiddleware
