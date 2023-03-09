@@ -14,17 +14,17 @@
 | CyberVault                                | 0xdd2ec94890e2d92e131a89f73bfe124137e0c10e |
 | CyberGrandNFT (Impl)                      | 0x0160876ad7302cfb5d2bcfbe664a436a69383a12 |
 | CyberGrandNFT (Proxy)                     | 0x110fe2bc9cf45d29e9764da4f6274abf13111efc |
-| Subscribe MW (SubscribePaidMw)            | 0x9b5678862e143c970f4a63f57dd8a677f5942c40 |
+| Subscribe MW (SubscribePaidMw)            | 0xec9a9a9752fc0b46a457e161de39ba54aad5324b |
 | Subscribe MW (SubscribeOnlyOnceMw)        | 0xc6968831ad8bd12ebb72108f6e4c51432580870d |
 | Subscribe MW (SubscribeDisallowedMw)      | 0x3d1c0dcff5ab0a8ede767f9c094b9e12940f6428 |
-| Essence MW (CollectPaidMw)                | 0xb09ae63a2fd28686a0f386d1ddfd4b53687bf298 |
+| Essence MW (CollectPaidMw)                | 0xf89d252629080fb7ded7781a3b99feb3642315a8 |
 | Essence MW (CollectDisallowedMw)          | 0xcc1d623be97c37b19c64adbd35390260460b92e7 |
 | Essence MW (CollectOnlySubscribedMw)      | 0x26a39e0ecab95b76fbbf593331e25caaa13f83c7 |
 | Essence MW (CollectMerkleDropMw)          | 0x0642cfcba1e391e3affc2270fd2a20e468bceeaa |
 | Essence MW (CollectPermissionMw)          | 0xaf53c3101c4b57a3d48100832ab8d1732b58c64c |
 | Essence MW (CollectPermissionMw V2)       | 0x01fafdbfbb1a56d4a58bb1f7472fb866922ff6c4 |
-| Essence MW (CollectLimitedTimePaidMw)     | 0x9526bafcd4bc8048c9acb7ec2502e981e7c16fbe |
-| Essence MW (CollectPermissionPaidMw)      | 0x362f12e07f70500c498a9e2df37d11401079b24b |
+| Essence MW (CollectLimitedTimePaidMw)     | 0x1ca6e0515400b4ceb553b4525f8c8ae33a799f4b |
+| Essence MW (CollectPermissionPaidMw)      | 0xc6d124d489824f15593a5509fec1ddb4ef0ef659 |
 | CC Profile MW (StableFeeCreationMw)       | 0xad246cc868a43c9dbe39ca814860b88714e20822 |
 | CC Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
 | CC Profile MW (FeeCreationMw)             | 0xe072666997b472a908e45b4b73b430dfba9f6d33 |
