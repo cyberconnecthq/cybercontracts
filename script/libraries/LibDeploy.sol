@@ -9,6 +9,7 @@ import { CyberEngine } from "../../src/core/CyberEngine.sol";
 import { CyberBoxNFT } from "../../src/periphery/CyberBoxNFT.sol";
 import { CyberGrandNFT } from "../../src/periphery/CyberGrandNFT.sol";
 import { FrameNFT } from "../../src/periphery/FrameNFT.sol";
+import { MiniShardNFT } from "../../src/periphery/MiniShardNFT.sol";
 import { MBNFT } from "../../src/periphery/MBNFT.sol";
 import { CyberVault } from "../../src/periphery/CyberVault.sol";
 import { RelationshipChecker } from "../../src/periphery/RelationshipChecker.sol";
@@ -495,6 +496,26 @@ library LibDeploy {
         }
     }
 
+    function deployMiniShard(
+        Vm vm,
+        address dc,
+        address link3Signer,
+        string memory tokenURI,
+        bool writeFile
+    ) internal returns (address shard) {
+        Create2Deployer dc = Create2Deployer(dc);
+        shard = dc.deploy(
+            abi.encodePacked(
+                type(MiniShardNFT).creationCode,
+                abi.encode(tokenURI, link3Signer)
+            ),
+            SALT
+        );
+        if (writeFile) {
+            _write(vm, "MiniShardNFT", shard);
+        }
+    }
+
     function deployVault(
         Vm vm,
         DeployParams memory params,
@@ -756,19 +777,19 @@ library LibDeploy {
         // CyberEngine(engine).allowProfileMw(mw, true);
 
         // FeeCreationMw
-        mw = dc.deploy(
-            abi.encodePacked(
-                type(FeeCreationMw).creationCode,
-                abi.encode(engine)
-            ),
-            SALT
-        );
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(FeeCreationMw).creationCode,
+        //         abi.encode(engine)
+        //     ),
+        //     SALT
+        // );
 
-        if (writeFile) {
-            _write(vm, "CC Profile MW (FeeCreationMw)", mw);
-        }
+        // if (writeFile) {
+        //     _write(vm, "CC Profile MW (FeeCreationMw)", mw);
+        // }
 
-        CyberEngine(engine).allowProfileMw(mw, true);
+        // CyberEngine(engine).allowProfileMw(mw, true);
 
         // CollectPaidMw
         // mw = dc.deploy(

@@ -24,6 +24,7 @@
 | Essence MW (CollectPermissionMw)          | 0xaf53c3101c4b57a3d48100832ab8d1732b58c64c |
 | Essence MW (CollectPermissionMw V2)       | 0x01fafdbfbb1a56d4a58bb1f7472fb866922ff6c4 |
 | Essence MW (CollectLimitedTimePaidMw)     | 0x9526bafcd4bc8048c9acb7ec2502e981e7c16fbe |
+| Essence MW (CollectPermissionPaidMw)      | 0x362f12e07f70500c498a9e2df37d11401079b24b |
 | CC Profile MW (StableFeeCreationMw)       | 0xad246cc868a43c9dbe39ca814860b88714e20822 |
 | CC Profile MW (PermissionedFeeCreationMw) | 0xd37bbf27e39b2f8c4386bebccda0850eeffd2a82 |
 | CC Profile MW (FeeCreationMw)             | 0xe072666997b472a908e45b4b73b430dfba9f6d33 |
@@ -32,3 +33,4 @@
 | CyberBoxNFT (Proxy)                       | 0xcadc6c364e8fcad0f382fddfd6ff5b41d82eb3e4 |
 | MBNFT (Impl)                              | 0x96f0a1648cb8b189235184f091b4e02fc97969b8 |
 | MBNFT (Proxy)                             | 0xf1d9a02674a7a45dc4d5cdd5da330f6a989f77d5 |
+| MiniShardNFT                              | 0x56b9603e969c4939ad28b9fded24c22f34af9679 |
