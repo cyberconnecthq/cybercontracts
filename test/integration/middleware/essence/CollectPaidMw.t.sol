@@ -68,7 +68,10 @@ contract CollectPaidMwTest is
         token = new MockERC20("Shit Coin", "SHIT");
 
         // Engine Treasury is the address of the treasury, but we put addrs.cyberTreasury here because its the proxy
-        collectPaidMw = new CollectPaidMw(addrs.cyberTreasury);
+        collectPaidMw = new CollectPaidMw(
+            addrs.cyberTreasury,
+            addrs.link3Profile
+        );
         vm.label(address(collectPaidMw), "CollectPaidMw");
         vm.label(address(lila), "lila");
         vm.label(address(dave), "dave");
@@ -225,7 +228,7 @@ contract CollectPaidMwTest is
         );
 
         // lila wants to collect bob's essence
-        vm.startPrank(lila);
+        vm.startPrank(lila, lila);
         token.approve(address(collectPaidMw), 5000);
 
         vm.expectEmit(true, true, true, false);
@@ -367,7 +370,7 @@ contract CollectPaidMwTest is
         );
 
         // lila first follows bobby
-        vm.startPrank(lila);
+        vm.startPrank(lila, lila);
 
         address subscribeProxy = getDeployedSubProxyAddress(
             link3SubBeacon,
@@ -513,7 +516,7 @@ contract CollectPaidMwTest is
         );
 
         // lila wants to collect bob's essence, without subscribing prior
-        vm.startPrank(lila);
+        vm.startPrank(lila, lila);
         token.approve(address(collectPaidMw), 5000);
 
         vm.expectRevert("NOT_SUBSCRIBED");
@@ -592,7 +595,7 @@ contract CollectPaidMwTest is
             )
         );
 
-        vm.startPrank(lila);
+        vm.startPrank(lila, lila);
         // lila wants to collect bobby's essence
         token.approve(address(collectPaidMw), 999999);
 
@@ -692,7 +695,7 @@ contract CollectPaidMwTest is
         );
 
         // lila collects bobby's addictive essence
-        vm.startPrank(lila);
+        vm.startPrank(lila, lila);
         token.approve(address(collectPaidMw), 5000);
 
         vm.expectEmit(true, true, true, false);

@@ -23,6 +23,15 @@ contract CollectPermissionPaidMw is IEssenceMiddleware, EIP712, FeeMw {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
+                              MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
+    modifier onlyValidNamespace() {
+        require(_namespace == msg.sender, "ONLY_VALID_NAMESPACE");
+        _;
+    }
+
+    /*//////////////////////////////////////////////////////////////
                                 EVENT
     //////////////////////////////////////////////////////////////*/
 
@@ -56,14 +65,17 @@ contract CollectPermissionPaidMw is IEssenceMiddleware, EIP712, FeeMw {
             "mint(address to,uint256 profileId,uint256 essenceId,uint256 nonce,uint256 deadline)"
         );
 
-    mapping(address => mapping(uint256 => mapping(uint256 => MiddlewareData)))
+    mapping(uint256 => mapping(uint256 => MiddlewareData))
         internal _signerStorage;
+    address internal _namespace;
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address treasury) FeeMw(treasury) {}
+    constructor(address treasury, address namespace) FeeMw(treasury) {
+        _namespace = namespace;
+    }
 
     /*//////////////////////////////////////////////////////////////
                                 EXTERNAL
@@ -74,7 +86,7 @@ contract CollectPermissionPaidMw is IEssenceMiddleware, EIP712, FeeMw {
         uint256 profileId,
         uint256 essenceId,
         bytes calldata data
-    ) external override returns (bytes memory) {
+    ) external override onlyValidNamespace returns (bytes memory) {
         (
             uint256 totalSupply,
             uint256 amount,
@@ -89,15 +101,14 @@ contract CollectPermissionPaidMw is IEssenceMiddleware, EIP712, FeeMw {
             "CURRENCY_NOT_ALLOWED"
         );
 
-        _signerStorage[msg.sender][profileId][essenceId].signer = signer;
-        _signerStorage[msg.sender][profileId][essenceId]
-            .totalSupply = totalSupply;
-        _signerStorage[msg.sender][profileId][essenceId].amount = amount;
-        _signerStorage[msg.sender][profileId][essenceId].recipient = recipient;
-        _signerStorage[msg.sender][profileId][essenceId].currency = currency;
+        _signerStorage[profileId][essenceId].signer = signer;
+        _signerStorage[profileId][essenceId].totalSupply = totalSupply;
+        _signerStorage[profileId][essenceId].amount = amount;
+        _signerStorage[profileId][essenceId].recipient = recipient;
+        _signerStorage[profileId][essenceId].currency = currency;
 
         emit CollectPermissionPaidMwSet(
-            msg.sender,
+            _namespace,
             profileId,
             essenceId,
             signer,
@@ -120,12 +131,14 @@ contract CollectPermissionPaidMw is IEssenceMiddleware, EIP712, FeeMw {
         address collector,
         address,
         bytes calldata data
-    ) external override {
+    ) external override onlyValidNamespace {
         require(
-            _signerStorage[msg.sender][profileId][essenceId].totalSupply >
-                _signerStorage[msg.sender][profileId][essenceId].currentCollect,
+            _signerStorage[profileId][essenceId].totalSupply >
+                _signerStorage[profileId][essenceId].currentCollect,
             "COLLECT_LIMIT_EXCEEDED"
         );
+
+        require(tx.origin == collector, "NOT_FROM_COLLECTOR");
 
         DataTypes.EIP712Signature memory sig;
 
@@ -142,33 +155,31 @@ contract CollectPermissionPaidMw is IEssenceMiddleware, EIP712, FeeMw {
                         collector,
                         profileId,
                         essenceId,
-                        _signerStorage[msg.sender][profileId][essenceId].nonces[
-                                collector
-                            ]++,
+                        _signerStorage[profileId][essenceId].nonces[
+                            collector
+                        ]++,
                         sig.deadline
                     )
                 )
             ),
-            _signerStorage[msg.sender][profileId][essenceId].signer,
+            _signerStorage[profileId][essenceId].signer,
             sig.v,
             sig.r,
             sig.s,
             sig.deadline
         );
 
-        uint256 amount = _signerStorage[msg.sender][profileId][essenceId]
-            .amount;
+        uint256 amount = _signerStorage[profileId][essenceId].amount;
 
         if (amount > 0) {
-            address currency = _signerStorage[msg.sender][profileId][essenceId]
-                .currency;
+            address currency = _signerStorage[profileId][essenceId].currency;
             uint256 treasuryCollected = (amount * _treasuryFee()) /
                 Constants._MAX_BPS;
             uint256 actualPaid = amount - treasuryCollected;
 
             IERC20(currency).safeTransferFrom(
                 collector,
-                _signerStorage[msg.sender][profileId][essenceId].recipient,
+                _signerStorage[profileId][essenceId].recipient,
                 actualPaid
             );
 
@@ -181,7 +192,7 @@ contract CollectPermissionPaidMw is IEssenceMiddleware, EIP712, FeeMw {
             }
         }
 
-        _signerStorage[msg.sender][profileId][essenceId].currentCollect++;
+        _signerStorage[profileId][essenceId].currentCollect++;
     }
 
     /// @inheritdoc IEssenceMiddleware
@@ -207,13 +218,11 @@ contract CollectPermissionPaidMw is IEssenceMiddleware, EIP712, FeeMw {
      * @return uint256 The nonce.
      */
     function getNonce(
-        address namespace,
         uint256 profileId,
         address collector,
         uint256 essenceId
     ) external view returns (uint256) {
-        return
-            _signerStorage[namespace][profileId][essenceId].nonces[collector];
+        return _signerStorage[profileId][essenceId].nonces[collector];
     }
 
     /*//////////////////////////////////////////////////////////////

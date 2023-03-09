@@ -25,6 +25,15 @@ contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
+                              MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
+    modifier onlyValidNamespace() {
+        require(_namespace == msg.sender, "ONLY_VALID_NAMESPACE");
+        _;
+    }
+
+    /*//////////////////////////////////////////////////////////////
                                 EVENT
     //////////////////////////////////////////////////////////////*/
 
@@ -58,14 +67,17 @@ contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
         bool subscribeRequired;
     }
 
-    mapping(address => mapping(uint256 => mapping(uint256 => CollectLimitedTimePaidData)))
+    mapping(uint256 => mapping(uint256 => CollectLimitedTimePaidData))
         internal _data;
+    address internal _namespace;
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address treasury) FeeMw(treasury) {}
+    constructor(address treasury, address namespace) FeeMw(treasury) {
+        _namespace = namespace;
+    }
 
     /*//////////////////////////////////////////////////////////////
                               EXTERNAL
@@ -80,7 +92,7 @@ contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
         uint256 profileId,
         uint256 essenceId,
         bytes calldata data
-    ) external override returns (bytes memory) {
+    ) external override onlyValidNamespace returns (bytes memory) {
         (
             uint256 totalSupply,
             uint256 price,
@@ -109,19 +121,17 @@ contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
         require(endTimestamp > startTimestamp, "INVALID_TIME_RANGE");
         require(_currencyAllowed(currency), "CURRENCY_NOT_ALLOWED");
 
-        _data[msg.sender][profileId][essenceId].totalSupply = totalSupply;
-        _data[msg.sender][profileId][essenceId].price = price;
-        _data[msg.sender][profileId][essenceId].recipient = recipient;
-        _data[msg.sender][profileId][essenceId]
-            .subscribeRequired = subscribeRequired;
-        _data[msg.sender][profileId][essenceId]
-            .profileRequired = profileRequired;
-        _data[msg.sender][profileId][essenceId].startTimestamp = startTimestamp;
-        _data[msg.sender][profileId][essenceId].endTimestamp = endTimestamp;
-        _data[msg.sender][profileId][essenceId].currency = currency;
+        _data[profileId][essenceId].totalSupply = totalSupply;
+        _data[profileId][essenceId].price = price;
+        _data[profileId][essenceId].recipient = recipient;
+        _data[profileId][essenceId].subscribeRequired = subscribeRequired;
+        _data[profileId][essenceId].profileRequired = profileRequired;
+        _data[profileId][essenceId].startTimestamp = startTimestamp;
+        _data[profileId][essenceId].endTimestamp = endTimestamp;
+        _data[profileId][essenceId].currency = currency;
 
         emit CollectLimitedTimePaidMwSet(
-            msg.sender,
+            _namespace,
             profileId,
             essenceId,
             totalSupply,
@@ -148,48 +158,46 @@ contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
         address collector,
         address,
         bytes calldata
-    ) external override {
-        address namespace = msg.sender;
+    ) external override onlyValidNamespace {
+        require(tx.origin == collector, "NOT_FROM_COLLECTOR");
         require(
-            _data[namespace][profileId][essenceId].totalSupply >
-                _data[namespace][profileId][essenceId].currentCollect,
+            _data[profileId][essenceId].totalSupply >
+                _data[profileId][essenceId].currentCollect,
             "COLLECT_LIMIT_EXCEEDED"
         );
 
         require(
-            block.timestamp >=
-                _data[namespace][profileId][essenceId].startTimestamp,
+            block.timestamp >= _data[profileId][essenceId].startTimestamp,
             "NOT_STARTED"
         );
 
         require(
-            block.timestamp <=
-                _data[namespace][profileId][essenceId].endTimestamp,
+            block.timestamp <= _data[profileId][essenceId].endTimestamp,
             "ENDED"
         );
 
-        if (_data[namespace][profileId][essenceId].subscribeRequired == true) {
+        if (_data[profileId][essenceId].subscribeRequired == true) {
             require(
-                _checkSubscribe(namespace, profileId, collector),
+                _checkSubscribe(_namespace, profileId, collector),
                 "NOT_SUBSCRIBED"
             );
         }
 
-        if (_data[namespace][profileId][essenceId].profileRequired == true) {
-            require(_checkProfile(namespace, collector), "NOT_PROFILE_OWNER");
+        if (_data[profileId][essenceId].profileRequired == true) {
+            require(_checkProfile(_namespace, collector), "NOT_PROFILE_OWNER");
         }
 
-        uint256 price = _data[namespace][profileId][essenceId].price;
+        uint256 price = _data[profileId][essenceId].price;
 
         if (price > 0) {
-            address currency = _data[namespace][profileId][essenceId].currency;
+            address currency = _data[profileId][essenceId].currency;
             uint256 treasuryCollected = (price * _treasuryFee()) /
                 Constants._MAX_BPS;
             uint256 actualPaid = price - treasuryCollected;
 
             IERC20(currency).safeTransferFrom(
                 collector,
-                _data[namespace][profileId][essenceId].recipient,
+                _data[profileId][essenceId].recipient,
                 actualPaid
             );
 
@@ -202,7 +210,7 @@ contract CollectLimitedTimePaidMw is IEssenceMiddleware, FeeMw {
             }
         }
 
-        ++_data[namespace][profileId][essenceId].currentCollect;
+        ++_data[profileId][essenceId].currentCollect;
     }
 
     /// @inheritdoc IEssenceMiddleware

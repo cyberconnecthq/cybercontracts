@@ -22,6 +22,15 @@ contract SubscribePaidMw is ISubscribeMiddleware, FeeMw {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
+                              MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
+    modifier onlyValidNamespace() {
+        require(_namespace == msg.sender, "ONLY_VALID_NAMESPACE");
+        _;
+    }
+
+    /*//////////////////////////////////////////////////////////////
                                 EVENT
     //////////////////////////////////////////////////////////////*/
 
@@ -47,14 +56,16 @@ contract SubscribePaidMw is ISubscribeMiddleware, FeeMw {
         address nftAddress;
     }
 
-    mapping(address => mapping(uint256 => PaidSubscribeData))
-        internal _paidSubscribeData;
+    mapping(uint256 => PaidSubscribeData) internal _paidSubscribeData;
+    address internal _namespace;
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address treasury) FeeMw(treasury) {}
+    constructor(address treasury, address namespace) FeeMw(treasury) {
+        _namespace = namespace;
+    }
 
     /*//////////////////////////////////////////////////////////////
                               EXTERNAL
@@ -68,6 +79,7 @@ contract SubscribePaidMw is ISubscribeMiddleware, FeeMw {
     function setSubscribeMwData(uint256 profileId, bytes calldata data)
         external
         override
+        onlyValidNamespace
         returns (bytes memory)
     {
         (
@@ -82,14 +94,14 @@ contract SubscribePaidMw is ISubscribeMiddleware, FeeMw {
         require(recipient != address(0), "INVALID_ADDRESS");
         require(_currencyAllowed(currency), "CURRENCY_NOT_ALLOWED");
 
-        _paidSubscribeData[msg.sender][profileId].amount = amount;
-        _paidSubscribeData[msg.sender][profileId].recipient = recipient;
-        _paidSubscribeData[msg.sender][profileId].currency = currency;
-        _paidSubscribeData[msg.sender][profileId].nftRequired = nftRequired;
-        _paidSubscribeData[msg.sender][profileId].nftAddress = nftAddress;
+        _paidSubscribeData[profileId].amount = amount;
+        _paidSubscribeData[profileId].recipient = recipient;
+        _paidSubscribeData[profileId].currency = currency;
+        _paidSubscribeData[profileId].nftRequired = nftRequired;
+        _paidSubscribeData[profileId].nftAddress = nftAddress;
 
         emit SubscribePaidMwSet(
-            msg.sender,
+            _namespace,
             profileId,
             amount,
             recipient,
@@ -109,24 +121,25 @@ contract SubscribePaidMw is ISubscribeMiddleware, FeeMw {
         address subscriber,
         address,
         bytes calldata
-    ) external override {
-        address currency = _paidSubscribeData[msg.sender][profileId].currency;
-        uint256 amount = _paidSubscribeData[msg.sender][profileId].amount;
+    ) external override onlyValidNamespace {
+        address currency = _paidSubscribeData[profileId].currency;
+        uint256 amount = _paidSubscribeData[profileId].amount;
         uint256 treasuryCollected = (amount * _treasuryFee()) /
             Constants._MAX_BPS;
         uint256 actualPaid = amount - treasuryCollected;
 
-        if (_paidSubscribeData[msg.sender][profileId].nftRequired) {
+        if (_paidSubscribeData[profileId].nftRequired) {
             require(
-                ERC721(_paidSubscribeData[msg.sender][profileId].nftAddress)
-                    .balanceOf(subscriber) > 0,
+                ERC721(_paidSubscribeData[profileId].nftAddress).balanceOf(
+                    subscriber
+                ) > 0,
                 "NO_REQUIRED_NFT"
             );
         }
 
         IERC20(currency).safeTransferFrom(
             subscriber,
-            _paidSubscribeData[msg.sender][profileId].recipient,
+            _paidSubscribeData[profileId].recipient,
             actualPaid
         );
 

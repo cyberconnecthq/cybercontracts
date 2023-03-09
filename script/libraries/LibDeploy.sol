@@ -656,6 +656,7 @@ library LibDeploy {
         address engine,
         address cyberTreasury,
         address usdOracle,
+        address namespace,
         bool writeFile
     ) internal returns (address token) {
         Create2Deployer dc = Create2Deployer(params.setting.deployerContract); // for deployment
@@ -673,20 +674,20 @@ library LibDeploy {
 
         // CyberEngine(engine).allowEssenceMw(mw, true);
 
-        // // SubscribePaidMw
-        // mw = dc.deploy(
-        //     abi.encodePacked(
-        //         type(SubscribePaidMw).creationCode,
-        //         abi.encode(cyberTreasury)
-        //     ),
-        //     SALT
-        // );
+        // SubscribePaidMw
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(SubscribePaidMw).creationCode,
+                abi.encode(cyberTreasury, namespace)
+            ),
+            SALT
+        );
 
-        // if (writeFile) {
-        //     _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
-        // }
+        if (writeFile) {
+            _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
+        }
 
-        // CyberEngine(engine).allowSubscribeMw(mw, true);
+        CyberEngine(engine).allowSubscribeMw(mw, true);
 
         // // SubscribeOnlyOnceMw
         // mw = dc.deploy(
@@ -710,20 +711,20 @@ library LibDeploy {
 
         // CyberEngine(engine).allowSubscribeMw(mw, true);
 
-        // // CollectPaidMw
-        // mw = dc.deploy(
-        //     abi.encodePacked(
-        //         type(CollectPaidMw).creationCode,
-        //         abi.encode(cyberTreasury)
-        //     ),
-        //     SALT
-        // );
+        // CollectPaidMw
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(CollectPaidMw).creationCode,
+                abi.encode(cyberTreasury, namespace)
+            ),
+            SALT
+        );
 
-        // if (writeFile) {
-        //     _write(vm, "Essence MW (CollectPaidMw)", mw);
-        // }
+        if (writeFile) {
+            _write(vm, "Essence MW (CollectPaidMw)", mw);
+        }
 
-        // CyberEngine(engine).allowEssenceMw(mw, true);
+        CyberEngine(engine).allowEssenceMw(mw, true);
 
         // // CollectDisallowedMw
         // mw = dc.deploy(
@@ -791,26 +792,26 @@ library LibDeploy {
 
         // CyberEngine(engine).allowProfileMw(mw, true);
 
-        // CollectPaidMw
-        // mw = dc.deploy(
-        //     abi.encodePacked(
-        //         type(CollectLimitedTimePaidMw).creationCode,
-        //         abi.encode(cyberTreasury)
-        //     ),
-        //     SALT
-        // );
+        // CollectLimitedTimePaidMw
+        mw = dc.deploy(
+            abi.encodePacked(
+                type(CollectLimitedTimePaidMw).creationCode,
+                abi.encode(cyberTreasury, namespace)
+            ),
+            SALT
+        );
 
-        // if (writeFile) {
-        //     _write(vm, "Essence MW (CollectLimitedTimePaidMw)", mw);
-        // }
+        if (writeFile) {
+            _write(vm, "Essence MW (CollectLimitedTimePaidMw)", mw);
+        }
 
-        // CyberEngine(engine).allowEssenceMw(mw, true);
+        CyberEngine(engine).allowEssenceMw(mw, true);
 
         // CollectPermissionPaidMw
         mw = dc.deploy(
             abi.encodePacked(
                 type(CollectPermissionPaidMw).creationCode,
-                abi.encode(cyberTreasury)
+                abi.encode(cyberTreasury, namespace)
             ),
             SALT
         );
