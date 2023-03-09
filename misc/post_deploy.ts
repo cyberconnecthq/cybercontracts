@@ -14,6 +14,7 @@ const writeAbi = async () => {
     "CyberGrandNFT.sol/CyberGrandNFT.json",
     "MBNFT.sol/MBNFT.json",
     "FrameNFT.sol/FrameNFT.json",
+    "MiniShardNFT.sol/MiniShardNFT.json",
     "CyberVault.sol/CyberVault.json",
     "RelationshipChecker.sol/RelationshipChecker.json",
 
@@ -23,8 +24,9 @@ const writeAbi = async () => {
     "CollectMerkleDropMw.sol/CollectMerkleDropMw.json",
     "CollectOnlySubscribedMw.sol/CollectOnlySubscribedMw.json",
     "CollectPaidMw.sol/CollectPaidMw.json",
-
     "CollectPermissionMw.sol/CollectPermissionMw.json",
+    "CollectLimitedTimePaidMw.sol/CollectLimitedTimePaidMw.json",
+    "CollectPermissionPaidMw.sol/CollectPermissionPaidMw.json",
 
     "PermissionedFeeCreationMw.sol/PermissionedFeeCreationMw.json",
     "StableFeeCreationMw.sol/StableFeeCreationMw.json",
