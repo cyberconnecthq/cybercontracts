@@ -104,7 +104,7 @@ contract MiniShardNFT is
                     )
                 )
             ),
-            to,
+            _signer,
             sig
         );
 
@@ -148,7 +148,7 @@ contract MiniShardNFT is
                     )
                 )
             ),
-            to,
+            _signer,
             sig
         );
 
