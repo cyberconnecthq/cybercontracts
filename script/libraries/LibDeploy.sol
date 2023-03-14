@@ -851,51 +851,6 @@ library LibDeploy {
 
         mw = dc.deploy(
             abi.encodePacked(
-                type(CollectLimitedTimePaidMw).creationCode,
-                abi.encode(cyberTreasury, namespace)
-            ),
-            SALT
-        );
-        if (writeFile) {
-            _write(vm, "Essence MW (CollectLimitedTimePaidMw)", mw);
-        }
-        CyberEngine(engine).allowEssenceMw(mw, true);
-
-        // CollectPermissionPaidMw
-        mw = dc.deploy(
-            abi.encodePacked(
-                type(CollectPermissionPaidMw).creationCode,
-                abi.encode(cyberTreasury, namespace)
-            ),
-            SALT
-        );
-
-        if (writeFile) {
-            _write(vm, "Essence MW (CollectPermissionPaidMw)", mw);
-        }
-
-        CyberEngine(engine).allowEssenceMw(mw, true);
-    }
-
-    function deployFeeCreationMw(
-        Vm vm,
-        DeployParams memory params,
-        address engine,
-        address cyberTreasury,
-        bool writeFile
-    ) internal returns (address mw) {
-        Create2Deployer dc;
-        if (params.setting.deployerContract == address(0)) {
-            dc = new Create2Deployer(); // for running test
-            if (params.writeFile) {
-                _write(vm, "Create2Deployer", address(dc));
-            }
-        } else {
-            dc = Create2Deployer(params.setting.deployerContract); // for deployment
-        }
-
-        mw = dc.deploy(
-            abi.encodePacked(
                 type(FeeCreationMw).creationCode,
                 abi.encode(engine)
             ),
