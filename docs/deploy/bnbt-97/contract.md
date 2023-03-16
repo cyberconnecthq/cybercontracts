@@ -36,4 +36,4 @@
 | CyberBoxNFT (Proxy)                       | 0x54346edd22ef49bdca1aae6114f8b1a1e598b674 |
 | MBNFT (Impl)                              | 0x416881784c3602dedd1567c33b92c0bb9d196618 |
 | MBNFT (Proxy)                             | 0x1c6ef115ab38abd27295b465321ca85f60763d06 |
-| MiniShardNFT                              | 0x4f6fb8dab887c68c2bdb26d1043689f8475f8779 |
+| MiniShardNFT                              | 0xd36e7979e8fd63bfd438f808d611684030ae5699 |
