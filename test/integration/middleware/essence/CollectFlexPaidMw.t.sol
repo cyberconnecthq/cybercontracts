@@ -59,7 +59,7 @@ contract CollectFlexPaidMwTest is
     string constant BOBBY_ESSENCE_NAME = "Gaia";
     string constant BOBBY_ESSENCE_LABEL = "GA";
     string constant BOBBY_URL = "url";
-    string constant PAY_ID =
+    string constant METADATA_ID =
         "925b3c3ca193ab7e9800787734cf733092f6ee95bcca0795be3c12e6bf5fba53";
 
     uint256 amountRequired;
@@ -72,7 +72,7 @@ contract CollectFlexPaidMwTest is
     function setUp() public {
         _setUp();
 
-        token = new MockERC20("Shit Coin", "SHIT");
+        token = new MockERC20("Good Coin", "GOOD");
 
         // Engine Treasury is the address of the treasury, but we put addrs.cyberTreasury here because its the proxy
         collectFlexPaidMw = new CollectFlexPaidMw(
@@ -85,10 +85,10 @@ contract CollectFlexPaidMwTest is
         vm.label(address(bobby), "bobby");
         vm.label(address(engineTreasury), "engineTreasury");
 
-        // note: we first call the MockERC20 contract, in the contract, we mint x amount of shit coins to msg.sender
-        // which is this test contract, then we transfer 10000 shit coins from this test contract to lila
-        // then later lila first tells(approves) the token contract that the middleware can take x amount of shit coins out
-        // lastly, the middlware accesses the shit coin contract and asks to extract x amount
+        // note: we first call the MockERC20 contract, in the contract, we mint x amount of good coins to msg.sender
+        // which is this test contract, then we transfer 10000 good coins from this test contract to lila
+        // then later lila first tells(approves) the token contract that the middleware can take x amount of good coins out
+        // lastly, the middlware accesses the good coin contract and asks to extract x amount
         // it is successful because it is already extracted
 
         token.transfer(lila, 100000);
@@ -166,7 +166,7 @@ contract CollectFlexPaidMwTest is
         vm.expectRevert("ERC20: transfer amount exceeds balance");
         link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
-            abi.encode(uint256(999999), address(token), PAY_ID),
+            abi.encode(uint256(999999), address(token), METADATA_ID),
             new bytes(0)
         );
         vm.stopPrank();
@@ -256,7 +256,7 @@ contract CollectFlexPaidMwTest is
             bobbyProfileId,
             1,
             1,
-            abi.encode(amountRequired, address(token), PAY_ID),
+            abi.encode(amountRequired, address(token), METADATA_ID),
             new bytes(0)
         );
         vm.expectEmit(true, true, true, true);
@@ -267,13 +267,13 @@ contract CollectFlexPaidMwTest is
             bobby,
             address(token),
             amountRequired,
-            PAY_ID
+            METADATA_ID
         );
 
         // lila collects the first essence
         uint256 collectFlexPaidTokenIdOne = link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
-            abi.encode(amountRequired, address(token), PAY_ID),
+            abi.encode(amountRequired, address(token), METADATA_ID),
             new bytes(0)
         );
 
@@ -309,7 +309,7 @@ contract CollectFlexPaidMwTest is
         // lila collects the second essence
         uint256 collectFlexPaidTokenIdTwo = link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
-            abi.encode(amountRequired, address(token), PAY_ID),
+            abi.encode(amountRequired, address(token), METADATA_ID),
             new bytes(0)
         );
 
@@ -337,7 +337,7 @@ contract CollectFlexPaidMwTest is
         // lila collects the third essence
         uint256 collectFlexPaidTokenIdThree = link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
-            abi.encode(amountRequired, address(token), PAY_ID),
+            abi.encode(amountRequired, address(token), METADATA_ID),
             new bytes(0)
         );
 
@@ -366,7 +366,7 @@ contract CollectFlexPaidMwTest is
         vm.expectRevert("CURRENCY_NOT_ALLOWED");
         link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
-            abi.encode(amountRequired, address(0x123456), PAY_ID),
+            abi.encode(amountRequired, address(0x123456), METADATA_ID),
             new bytes(0)
         );
 
@@ -381,7 +381,7 @@ contract CollectFlexPaidMwTest is
         vm.expectRevert("INVALID_AMOUNT");
         link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
-            abi.encode(0, address(token), PAY_ID),
+            abi.encode(0, address(token), METADATA_ID),
             new bytes(0)
         );
         // balance should stay the same
@@ -397,7 +397,7 @@ contract CollectFlexPaidMwTest is
         vm.expectRevert("NOT_FROM_COLLECTOR");
         link3Profile.collect(
             DataTypes.CollectParams(lila, bobbyProfileId, bobbyEssenceId),
-            abi.encode(amountRequired, address(token), PAY_ID),
+            abi.encode(amountRequired, address(token), METADATA_ID),
             new bytes(0)
         );
         // balance should stay the same

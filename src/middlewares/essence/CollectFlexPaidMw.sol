@@ -47,7 +47,7 @@ contract CollectFlexPaidMw is IEssenceMiddleware, FeeMw {
         address recipient,
         address currency,
         uint256 amount,
-        string payId
+        string metadataId
     );
 
     /*//////////////////////////////////////////////////////////////
@@ -101,10 +101,8 @@ contract CollectFlexPaidMw is IEssenceMiddleware, FeeMw {
         address,
         bytes calldata data
     ) external override onlyValidNamespace {
-        (uint256 amount, address currency, string memory payId) = abi.decode(
-            data,
-            (uint256, address, string)
-        );
+        (uint256 amount, address currency, string memory metadataId) = abi
+            .decode(data, (uint256, address, string));
 
         require(amount > 0, "INVALID_AMOUNT");
         require(tx.origin == collector, "NOT_FROM_COLLECTOR");
@@ -134,7 +132,7 @@ contract CollectFlexPaidMw is IEssenceMiddleware, FeeMw {
             _mwStorage[profileId][essenceId].recipient,
             currency,
             amount,
-            payId
+            metadataId
         );
     }
 
