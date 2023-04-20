@@ -40,6 +40,7 @@ import { CollectLimitedTimePaidMw } from "../../src/middlewares/essence/CollectL
 import { CollectDisallowedMw } from "../../src/middlewares/essence/CollectDisallowedMw.sol";
 import { CollectOnlySubscribedMw } from "../../src/middlewares/essence/CollectOnlySubscribedMw.sol";
 import { CollectMerkleDropMw } from "../../src/middlewares/essence/CollectMerkleDropMw.sol";
+import { CollectFlexPaidMw } from "../../src/middlewares/essence/CollectFlexPaidMw.sol";
 import { Create2Deployer } from "../../src/deployer/Create2Deployer.sol";
 import { EssenceDeployer } from "../../src/deployer/EssenceDeployer.sol";
 import { SubscribeDeployer } from "../../src/deployer/SubscribeDeployer.sol";
@@ -675,19 +676,19 @@ library LibDeploy {
         // CyberEngine(engine).allowEssenceMw(mw, true);
 
         // SubscribePaidMw
-        mw = dc.deploy(
-            abi.encodePacked(
-                type(SubscribePaidMw).creationCode,
-                abi.encode(cyberTreasury, namespace)
-            ),
-            SALT
-        );
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(SubscribePaidMw).creationCode,
+        //         abi.encode(cyberTreasury, namespace)
+        //     ),
+        //     SALT
+        // );
 
-        if (writeFile) {
-            _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
-        }
+        // if (writeFile) {
+        //     _write(vm, "Subscribe MW (SubscribePaidMw)", mw);
+        // }
 
-        CyberEngine(engine).allowSubscribeMw(mw, true);
+        // CyberEngine(engine).allowSubscribeMw(mw, true);
 
         // // SubscribeOnlyOnceMw
         // mw = dc.deploy(
@@ -712,19 +713,19 @@ library LibDeploy {
         // CyberEngine(engine).allowSubscribeMw(mw, true);
 
         // CollectPaidMw
-        mw = dc.deploy(
-            abi.encodePacked(
-                type(CollectPaidMw).creationCode,
-                abi.encode(cyberTreasury, namespace)
-            ),
-            SALT
-        );
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(CollectPaidMw).creationCode,
+        //         abi.encode(cyberTreasury, namespace)
+        //     ),
+        //     SALT
+        // );
 
-        if (writeFile) {
-            _write(vm, "Essence MW (CollectPaidMw)", mw);
-        }
+        // if (writeFile) {
+        //     _write(vm, "Essence MW (CollectPaidMw)", mw);
+        // }
 
-        CyberEngine(engine).allowEssenceMw(mw, true);
+        // CyberEngine(engine).allowEssenceMw(mw, true);
 
         // // CollectDisallowedMw
         // mw = dc.deploy(
@@ -793,31 +794,44 @@ library LibDeploy {
         // CyberEngine(engine).allowProfileMw(mw, true);
 
         // CollectLimitedTimePaidMw
-        mw = dc.deploy(
-            abi.encodePacked(
-                type(CollectLimitedTimePaidMw).creationCode,
-                abi.encode(cyberTreasury, namespace)
-            ),
-            SALT
-        );
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(CollectLimitedTimePaidMw).creationCode,
+        //         abi.encode(cyberTreasury, namespace)
+        //     ),
+        //     SALT
+        // );
 
-        if (writeFile) {
-            _write(vm, "Essence MW (CollectLimitedTimePaidMw)", mw);
-        }
+        // if (writeFile) {
+        //     _write(vm, "Essence MW (CollectLimitedTimePaidMw)", mw);
+        // }
 
-        CyberEngine(engine).allowEssenceMw(mw, true);
+        // CyberEngine(engine).allowEssenceMw(mw, true);
 
         // CollectPermissionPaidMw
+        // mw = dc.deploy(
+        //     abi.encodePacked(
+        //         type(CollectPermissionPaidMw).creationCode,
+        //         abi.encode(cyberTreasury, namespace)
+        //     ),
+        //     SALT
+        // );
+
+        // if (writeFile) {
+        //     _write(vm, "Essence MW (CollectPermissionPaidMw)", mw);
+        // }
+
+        // CollectFlexPaidMw
         mw = dc.deploy(
             abi.encodePacked(
-                type(CollectPermissionPaidMw).creationCode,
+                type(CollectFlexPaidMw).creationCode,
                 abi.encode(cyberTreasury, namespace)
             ),
             SALT
         );
 
         if (writeFile) {
-            _write(vm, "Essence MW (CollectPermissionPaidMw)", mw);
+            _write(vm, "Essence MW (CollectFlexPaidMw)", mw);
         }
 
         CyberEngine(engine).allowEssenceMw(mw, true);
