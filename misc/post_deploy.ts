@@ -27,6 +27,7 @@ const writeAbi = async () => {
     "CollectPermissionMw.sol/CollectPermissionMw.json",
     "CollectLimitedTimePaidMw.sol/CollectLimitedTimePaidMw.json",
     "CollectPermissionPaidMw.sol/CollectPermissionPaidMw.json",
+    "CollectFlexPaidMw.sol/CollectFlexPaidMw.json",
 
     "PermissionedFeeCreationMw.sol/PermissionedFeeCreationMw.json",
     "StableFeeCreationMw.sol/StableFeeCreationMw.json",
