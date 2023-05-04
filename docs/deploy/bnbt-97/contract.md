@@ -28,6 +28,7 @@
 | Essence MW (CollectPermissionMw V2)       | 0xbbbab0257edba5823ddb5aa62c08f07bd0d302d9 |
 | Essence MW (CollectLimitedTimePaidMw)     | 0x1da8cbbaea21195af3802f0d200138fdc2f1de18 |
 | Essence MW (CollectPermissionPaidMw)      | 0x375aeadb98436f0b85441daba6c91c2a9049ab72 |
+| Essence MW (CollectFlexPaidMw)            | 0x5429d013d8cfcbe69031198d26b8f5a613329cb0 |
 | CC Profile MW (StableFeeCreationMw)       | 0x4db6b3f3236adb0fb85a3957e740f07481c1dc99 |
 | CC Profile MW (PermissionedFeeCreationMw) | 0xd1587f68e9d9f9ee93c9aa6fc60c7da414e90818 |
 | CC Profile MW (FeeCreationMw)             | 0x708e5a5ad95520fa8fddce8f8c86b095723e32cf |

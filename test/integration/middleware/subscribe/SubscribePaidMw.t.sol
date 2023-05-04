@@ -61,7 +61,7 @@ contract SubscribePaidMwTest is
         _setUp();
         nft = new MockERC721("CyberPunk", "CP");
         // when the contract is initialized, some tokens were minted into the address of this contract
-        token = new MockERC20("Shit Coin", "SHIT");
+        token = new MockERC20("Good Coin", "GOOD");
 
         // Engine Treasury is the address of the treasury, but we put addrs.cyberTreasury here because its the proxy
         subscribePaidMw = new SubscribePaidMw(
