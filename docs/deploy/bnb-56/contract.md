@@ -34,3 +34,4 @@
 | MBNFT (Impl)                              | 0x96f0a1648cb8b189235184f091b4e02fc97969b8 |
 | MBNFT (Proxy)                             | 0xf1d9a02674a7a45dc4d5cdd5da330f6a989f77d5 |
 | MiniShardNFT                              | 0x1bc274c3b3b24cef54d01aeeb9ffc73ac0b68936 |
+| Essence MW (CollectFlexPaidMw)            | 0x85eb5d0f84b504f2c140b56a0e6d977633531d3e |
