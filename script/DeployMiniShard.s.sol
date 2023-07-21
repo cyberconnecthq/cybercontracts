@@ -27,6 +27,14 @@ contract DeployScript is Script, DeploySetting {
                 "https://mbmetadata.cyberconnect.dev/minishards",
                 true
             );
+        } else if (block.chainid == POLYGON) {
+            LibDeploy.deployMiniShard(
+                vm,
+                deployParams.deployerContract,
+                deployParams.link3Signer,
+                "https://mbmetadata.cyberconnect.dev/minishards-polygon",
+                true
+            );
         }
         vm.stopBroadcast();
     }
