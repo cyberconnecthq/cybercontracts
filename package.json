@@ -115,15 +115,14 @@
     "verify_contract:example": "forge verify-contract --chain-id 5 --num-of-optimizations 200 --compiler-version v0.8.14+commit.80d49f37 --libraries src/libraries/Actions.sol:Actions:0x781d0a455020024da046f823d9ea076b76a873f3 0xeD2788C005C8715cFC7C2A29fF81B40b479Cc6fb src/core/ProfileNFT.sol:ProfileNFT $ETHERSCAN_KEY --watch",
     "verify_contract:constructor": "forge verify-contract --chain-id 56 --num-of-optimizations 200 --compiler-version v0.8.14+commit.80d49f37 --libraries src/libraries/Actions.sol:Actions:0x8ccbe07f1e12a61e4fbb3a1895d35dce001ff73a --constructor-args-path constructor-args.txt 0xb09ae63a2fd28686a0f386d1ddfd4b53687bf298 src/middlewares/essence/CollectPaidMw.sol:CollectPaidMw $ETHERSCAN_KEY --watch",
     "deploy_full:anvil": "yarn deploy:anvil && yarn upload_animation:anvil && yarn set_animation_url:anvil"
-    
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.1.1",
-    "axios": "^0.27.2",
+    "axios": "^1.7.9",
     "chai": "^4.3.6",
     "dotenv": "^16.0.1",
     "ethers": "^5.0.0",
-    "form-data": "^4.0.0",
+    "form-data": "^4.0.4",
     "hardhat": "^2.10.0",
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-preprocessor": "^0.1.4",
@@ -155,5 +154,41 @@
         }
       }
     ]
+  },
+  "resolutions": {
+    "minimatch": "^3.0.5",
+    "decode-uri-component": "^0.2.2",
+    "json5": "^2.2.3",
+    "http-cache-semantics": "^4.1.1",
+    "undici": "^5.29.0",
+    "yaml": "^2.3.4",
+    "semver": "^7.5.4",
+    "get-func-name": "^2.0.2",
+    "browserify-sign": "^4.2.3",
+    "ws": "^8.17.1",
+    "braces": "^3.0.3",
+    "body-parser": "^1.20.3",
+    "path-to-regexp": "^0.1.12",
+    "secp256k1": "^4.0.4",
+    "cross-spawn": "^7.0.5",
+    "tar-fs": "^2.1.3",
+    "base-x": "^3.0.11",
+    "got": "^11.8.5",
+    "cookiejar": "^2.1.4",
+    "request": "^2.88.2",
+    "tough-cookie": "^4.1.4",
+    "word-wrap": "^1.2.5",
+    "follow-redirects": "^1.15.6",
+    "axios": "^1.7.9",
+    "express": "^4.21.2",
+    "tar": "^6.2.1",
+    "micromatch": "^4.0.8",
+    "nanoid": "^3.3.8",
+    "serialize-javascript": "^6.0.2",
+    "es5-ext": "^0.10.64",
+    "elliptic": "^6.6.1",
+    "serve-static": "^1.16.2",
+    "send": "^0.19.0",
+    "cookie": "^0.7.2"
   }
 }
