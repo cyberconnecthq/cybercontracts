@@ -118,7 +118,7 @@
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.1.1",
-    "axios": "^1.13.5",
+    "axios": "^1.15.2",
     "chai": "^4.3.6",
     "dotenv": "^16.0.1",
     "ethers": "^5.0.0",
@@ -179,7 +179,7 @@
     "tough-cookie": "^4.1.4",
     "word-wrap": "^1.2.5",
     "follow-redirects": "^1.15.6",
-    "axios": "^1.13.5",
+    "axios": "^1.15.2",
     "express": "^4.21.2",
     "tar": ">=7.5.8",
     "micromatch": "^4.0.8",
